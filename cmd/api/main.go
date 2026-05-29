@@ -2,12 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
+	"sync"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v3"
 )
 
@@ -17,7 +15,10 @@ type config struct {
 }
 
 type application struct {
-	config config
+	config    config
+	logger    *slog.Logger
+	logFormat *httplog.Schema
+	wg        sync.WaitGroup
 }
 
 func main() {
@@ -26,27 +27,17 @@ func main() {
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.Parse()
 
-	isLocalhost := os.Getenv("ENV") == "localhost"
-	logFormat := httplog.SchemaECS.Concise(isLocalhost)
+	logFormat := httplog.SchemaECS.Concise(cfg.env == "development")
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		ReplaceAttr: logFormat.ReplaceAttr,
-	}))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	app := &application{
-		config: cfg,
+		config:    cfg,
+		logger:    logger,
+		logFormat: logFormat,
 	}
 
-	r := chi.NewRouter()
-	r.Use(httplog.RequestLogger(logger, &httplog.Options{
-		Level:         slog.LevelInfo,
-		Schema:        logFormat,
-		RecoverPanics: true,
-	}))
-
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, World!"))
-	})
-
-	http.ListenAndServe(fmt.Sprintf(":%d", app.config.port), r)
+	if err := app.serve(); err != nil {
+		logger.Error("Serve failed", "error", err)
+	}
 }
