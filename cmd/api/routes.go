@@ -19,10 +19,10 @@ func (app *application) routes() http.Handler {
 	}))
 	r.Use(middleware.Recoverer)
 
-	r.Get("/healthcheck", app.getMoviesHandler)
+	r.Get("/v1/healthcheck", app.handlers.HealthcheckHandler)
 
 	// User routes
-	r.Post("/v1/users/register", app.createUserHandler)
+	r.Post("/v1/users/register", app.handlers.CreateUserHandler)
 
 	return r
 }
