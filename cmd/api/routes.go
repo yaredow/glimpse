@@ -21,5 +21,8 @@ func (app *application) routes() http.Handler {
 
 	r.Get("/healthcheck", app.getMoviesHandler)
 
+	// User routes
+	r.Post("/v1/users/register", app.createUserHandler)
+
 	return r
 }
