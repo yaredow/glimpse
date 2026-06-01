@@ -1,40 +1,46 @@
 package main
 
 import (
+	"context"
 	"errors"
+	"flag"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/go-chi/httplog/v3"
-
-	appconfig "github.com/yaredow/glimpse-api/internal/config"
-	data "github.com/yaredow/glimpse-api/internal/data"
-	queries "github.com/yaredow/glimpse-api/internal/data/queries"
-	"github.com/yaredow/glimpse-api/internal/handlers"
+	"github.com/joho/godotenv"
+	"github.com/yaredow/glimpse-api/internal/app"
+	"github.com/yaredow/glimpse-api/internal/data/queries"
+	db "github.com/yaredow/glimpse-api/internal/db"
 )
 
-type application struct {
-	config    appconfig.Config
-	logger    *slog.Logger
-	logFormat *httplog.Schema
-	handlers  *handlers.Handlers
+type config struct {
+	port  int
+	env   string
+	dbDSN string
 }
 
 func main() {
-	cfg := appconfig.Load()
+	_ = godotenv.Load()
+	var cfg config
 
-	logFormat := httplog.SchemaECS.Concise(cfg.Env == "development")
+	flag.IntVar(&cfg.port, "port", 4000, "the port to listen on")
+	flag.StringVar(&cfg.env, "env", "development", "the environment to run in")
+	flag.StringVar(&cfg.dbDSN, "db-dsn", os.Getenv("DB_DSN"), "PostgreSQL connection string")
+	flag.Parse()
+
+	logFormat := httplog.SchemaECS.Concise(cfg.env == "development")
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	migrateDSN := strings.Replace(cfg.DB.DSN, "postgres://", "pgx5://", 1)
-	if err := data.RunMigrations(migrateDSN); err != nil {
+	migrateDSN := strings.Replace(cfg.dbDSN, "postgres://", "pgx5://", 1)
+	if err := db.RunMigrations(migrateDSN); err != nil {
 		logger.Error("migration failed", "error", err)
 		os.Exit(1)
 	}
 
-	pool, err := openDB(cfg)
+	pool, err := db.OpenDB(context.Background(), cfg.dbDSN)
 	if err != nil {
 		logger.Error("failed to connect to database", "error", err)
 		os.Exit(1)
@@ -43,16 +49,15 @@ func main() {
 	logger.Info("database connection pool established")
 
 	q := queries.New(pool)
-	h := handlers.New(logger, q, cfg.Env)
 
-	app := &application{
-		config:    cfg,
-		logger:    logger,
-		logFormat: logFormat,
-		handlers:  h,
+	appCfg := app.Config{
+		Port: cfg.port,
+		Env:  cfg.env,
 	}
 
-	if err := app.serve(); !errors.Is(err, http.ErrServerClosed) {
+	application := app.New(appCfg, logger, logFormat, q)
+
+	if err := application.Serve(); !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("server error", "error", err)
 		os.Exit(1)
 	}

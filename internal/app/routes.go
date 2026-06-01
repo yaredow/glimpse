@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"log/slog"
@@ -17,12 +17,15 @@ func (app *application) routes() http.Handler {
 		Schema:        app.logFormat,
 		RecoverPanics: true,
 	}))
+
 	r.Use(middleware.Recoverer)
 
-	r.Get("/v1/healthcheck", app.handlers.HealthcheckHandler)
+	r.NotFound(app.notFoundResponse)
+	r.MethodNotAllowed(app.methodNotAllowedResponse)
 
-	// User routes
-	r.Post("/v1/users/register", app.handlers.CreateUserHandler)
+	r.Get("/v1/healthcheck", app.Healthcheck)
+
+	r.Post("/v1/users/register", app.CreateUser)
 
 	return r
 }

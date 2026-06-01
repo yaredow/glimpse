@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (app *application) serve() error {
+func (app *application) Serve() error {
 	srv := http.Server{
 		Addr:         fmt.Sprintf(":%d", app.config.Port),
 		Handler:      app.routes(),
@@ -17,9 +17,5 @@ func (app *application) serve() error {
 
 	app.logger.Info("server starting", "addr", srv.Addr, "env", app.config.Env)
 
-	if err := srv.ListenAndServe(); err != nil {
-		return err
-	}
-
-	return nil
+	return srv.ListenAndServe()
 }
