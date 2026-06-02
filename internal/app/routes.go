@@ -28,5 +28,8 @@ func (app *application) routes() http.Handler {
 	// Users routes
 	r.Post("/v1/users/register", app.userRegistrationHandler)
 
+	// Auth routes
+	r.Post("/v1/tokens/login", app.createAuthenticationTokenHandler)
+
 	return r
 }

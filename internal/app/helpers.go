@@ -61,7 +61,7 @@ func (app *application) ReadJSON(w http.ResponseWriter, r *http.Request, dst any
 	return nil
 }
 
-func (app *application) WriteJSON(w http.ResponseWriter, status int, data Envelope, headers http.Header) error {
+func (app *application) writeJSON(w http.ResponseWriter, status int, data Envelope, headers http.Header) error {
 	js, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
 		return err

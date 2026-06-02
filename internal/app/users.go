@@ -49,8 +49,21 @@ func (app *application) userRegistrationHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = app.WriteJSON(w, http.StatusCreated, Envelope{"user": result}, nil)
+	err = app.writeJSON(w, http.StatusCreated, Envelope{"user": result}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) userLoginHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	err := app.ReadJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
 	}
 }

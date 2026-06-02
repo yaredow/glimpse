@@ -1,14 +1,23 @@
 package data
 
 import (
+	"errors"
+	"time"
+
 	"github.com/yaredow/glimpse-api/internal/validator"
 	"golang.org/x/crypto/bcrypt"
 )
 
+var ErrDuplicateEmail = errors.New("duplicate email")
+
 type User struct {
-	Username string   `json:"username"`
-	Email    string   `json:"email"`
-	Password password `json:"-"`
+	ID                int64     `json:"id"`
+	CreatedAt         time.Time `json:"created_at"`
+	Username          string    `json:"username"`
+	Email             string    `json:"email"`
+	Password          password  `json:"-"`
+	Activated         bool      `json:"activated"`
+	ShufflesRemaining int32     `json:"shuffles_remaining"`
 }
 
 type password struct {
@@ -25,6 +34,20 @@ func (p *password) Set(plaintextPassword string) error {
 	p.plainText = &plaintextPassword
 	p.Hash = hash
 	return nil
+}
+
+func (p *password) Matches(plaintextPassword string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword(p.Hash, []byte(plaintextPassword))
+	if err != nil {
+		switch {
+		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
+			return false, nil
+		default:
+			return false, err
+		}
+	}
+
+	return true, nil
 }
 
 func ValidateEmail(v *validator.Validator, email string) {
@@ -46,5 +69,9 @@ func ValidateUser(v *validator.Validator, user *User) {
 
 	if user.Password.plainText != nil {
 		ValidatePasswordPlainText(v, *user.Password.plainText)
+	}
+
+	if user.Password.Hash == nil {
+		panic("missing password hash for user")
 	}
 }
