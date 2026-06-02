@@ -22,7 +22,15 @@ func (v *Validator) Valid() bool {
 }
 
 func (v *Validator) AddError(key, message string) {
-	v.Errors[key] = message
+	if _, exists := v.Errors[key]; !exists {
+		v.Errors[key] = message
+	}
+}
+
+func (v *Validator) Check(ok bool, key, message string) {
+	if !ok {
+		v.AddError(key, message)
+	}
 }
 
 func PermittedValue[T comparable](value T, permittedValues ...T) bool {

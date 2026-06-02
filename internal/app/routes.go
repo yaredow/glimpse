@@ -25,7 +25,8 @@ func (app *application) routes() http.Handler {
 
 	r.Get("/v1/healthcheck", app.Healthcheck)
 
-	r.Post("/v1/users/register", app.CreateUser)
+	// Users routes
+	r.Post("/v1/users/register", app.userRegistrationHandler)
 
 	return r
 }
