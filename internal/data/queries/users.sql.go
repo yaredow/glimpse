@@ -58,9 +58,19 @@ WHERE
     email = $1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+type GetUserByEmailRow struct {
+	ID                int64              `json:"id"`
+	Username          string             `json:"username"`
+	Email             string             `json:"email"`
+	PasswordHash      []byte             `json:"password_hash"`
+	ShufflesRemaining int32              `json:"shuffles_remaining"`
+	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
-	var i User
+	var i GetUserByEmailRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -88,9 +98,19 @@ WHERE
     id = $1
 `
 
-func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
+type GetUserByIdRow struct {
+	ID                int64              `json:"id"`
+	Username          string             `json:"username"`
+	Email             string             `json:"email"`
+	PasswordHash      []byte             `json:"password_hash"`
+	ShufflesRemaining int32              `json:"shuffles_remaining"`
+	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) GetUserById(ctx context.Context, id int64) (GetUserByIdRow, error) {
 	row := q.db.QueryRow(ctx, getUserById, id)
-	var i User
+	var i GetUserByIdRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,

@@ -31,5 +31,8 @@ func (app *application) routes() http.Handler {
 	// Auth routes
 	r.Post("/v1/tokens/login", app.createAuthenticationTokenHandler)
 
+	// Movies routes
+	r.Get("/v1/movies", app.GetPopularMovies)
+
 	return r
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/yaredow/glimpse-api/internal/app"
 	"github.com/yaredow/glimpse-api/internal/data/queries"
+	"github.com/yaredow/glimpse-api/internal/data/tmdb"
 	db "github.com/yaredow/glimpse-api/internal/db"
 )
 
@@ -20,6 +21,10 @@ type config struct {
 	port  int
 	env   string
 	dbDSN string
+	tmdb  struct {
+		apiKey  string
+		baseURL string
+	}
 }
 
 func main() {
@@ -29,7 +34,10 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "the port to listen on")
 	flag.StringVar(&cfg.env, "env", "development", "the environment to run in")
 	flag.StringVar(&cfg.dbDSN, "db-dsn", os.Getenv("DB_DSN"), "PostgreSQL connection string")
-	flag.Parse()
+
+	// TMDB API
+	flag.StringVar(&cfg.tmdb.apiKey, "tmdb-api-key", os.Getenv("TMDB_API_KEY"), "TMDB API key")
+	flag.StringVar(&cfg.tmdb.baseURL, "tmdb-base-url", os.Getenv("TMDB_BASE_URL"), "TMDB base URL")
 
 	logFormat := httplog.SchemaECS.Concise(cfg.env == "development")
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -49,13 +57,14 @@ func main() {
 	logger.Info("database connection pool established")
 
 	q := queries.New(pool)
+	tmdbClient := tmdb.NewClient(cfg.tmdb.apiKey, cfg.tmdb.baseURL)
 
 	appCfg := app.Config{
 		Port: cfg.port,
 		Env:  cfg.env,
 	}
 
-	application := app.New(appCfg, logger, logFormat, q)
+	application := app.New(appCfg, logger, logFormat, q, tmdbClient)
 
 	if err := application.Serve(); !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("server error", "error", err)

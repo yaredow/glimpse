@@ -37,6 +37,23 @@ type Movie struct {
 	CreatedAt        pgtype.Timestamptz `json:"created_at"`
 }
 
+type RefreshToken struct {
+	Hash           []byte             `json:"hash"`
+	UserID         int64              `json:"user_id"`
+	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	RevokedAt      pgtype.Timestamptz `json:"revoked_at"`
+	FamilyID       pgtype.UUID        `json:"family_id"`
+	ReplacedByHash []byte             `json:"replaced_by_hash"`
+}
+
+type Token struct {
+	Hash   []byte             `json:"hash"`
+	UserID int64              `json:"user_id"`
+	Expiry pgtype.Timestamptz `json:"expiry"`
+	Scope  string             `json:"scope"`
+}
+
 type User struct {
 	ID                int64              `json:"id"`
 	Username          string             `json:"username"`
@@ -45,6 +62,7 @@ type User struct {
 	ShufflesRemaining int32              `json:"shuffles_remaining"`
 	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	Activated         bool               `json:"activated"`
 }
 
 type UserMovie struct {

@@ -9,9 +9,15 @@ import (
 )
 
 type Querier interface {
+	CreateToken(ctx context.Context, arg CreateTokenParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
-	GetUserByEmail(ctx context.Context, email string) (User, error)
-	GetUserById(ctx context.Context, id int64) (User, error)
+	GetMovieByID(ctx context.Context, id int64) (Movie, error)
+	GetMovieByTMDBID(ctx context.Context, tmdbID int32) (Movie, error)
+	GetMoviesByGenre(ctx context.Context, arg GetMoviesByGenreParams) ([]Movie, error)
+	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
+	GetUserById(ctx context.Context, id int64) (GetUserByIdRow, error)
+	InsertMovie(ctx context.Context, arg InsertMovieParams) error
+	UpdateMoviePopularity(ctx context.Context, arg UpdateMoviePopularityParams) (Movie, error)
 	UpdateUserShuffleReset(ctx context.Context, id int64) error
 }
 
