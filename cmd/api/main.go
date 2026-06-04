@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/httplog/v3"
 	"github.com/joho/godotenv"
 	"github.com/yaredow/glimpse-api/internal/app"
+	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/data"
 	"github.com/yaredow/glimpse-api/internal/data/tmdb"
 	db "github.com/yaredow/glimpse-api/internal/db"
@@ -21,7 +22,11 @@ type config struct {
 	port  int
 	env   string
 	dbDSN string
-	tmdb  struct {
+	jwt   struct {
+		secret string
+		issuer string
+	}
+	tmdb struct {
 		apiKey  string
 		baseURL string
 	}
@@ -34,6 +39,10 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "the port to listen on")
 	flag.StringVar(&cfg.env, "env", "development", "the environment to run in")
 	flag.StringVar(&cfg.dbDSN, "db-dsn", os.Getenv("DB_DSN"), "PostgreSQL connection string")
+
+	// JWT
+	flag.StringVar(&cfg.jwt.secret, "jwt-secret", os.Getenv("JWT_SECRET"), "JWT secret")
+	flag.StringVar(&cfg.jwt.issuer, "jwt-issuer", "glimpse.net", "JWT issuer")
 
 	// TMDB API
 	flag.StringVar(&cfg.tmdb.apiKey, "tmdb-api-key", os.Getenv("TMDB_API_KEY"), "TMDB API key")
@@ -57,6 +66,7 @@ func main() {
 	logger.Info("database connection pool established")
 
 	store := data.NewStore(pool)
+	jwtManager := auth.NewManager([]byte(cfg.jwt.secret), cfg.jwt.issuer)
 	tmdbClient := tmdb.NewClient(cfg.tmdb.apiKey, cfg.tmdb.baseURL)
 
 	appCfg := app.Config{
@@ -64,7 +74,7 @@ func main() {
 		Env:  cfg.env,
 	}
 
-	application := app.New(appCfg, logger, logFormat, store, tmdbClient)
+	application := app.New(appCfg, logger, logFormat, store, tmdbClient, jwtManager)
 
 	if err := application.Serve(); !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("server error", "error", err)

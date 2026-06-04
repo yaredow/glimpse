@@ -57,16 +57,3 @@ func (app *application) userRegistrationHandler(w http.ResponseWriter, r *http.R
 		app.serverErrorResponse(w, r, err)
 	}
 }
-
-func (app *application) userLoginHandler(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
-
-	err := app.ReadJSON(w, r, &input)
-	if err != nil {
-		app.badRequestResponse(w, r, err)
-		return
-	}
-}

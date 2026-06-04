@@ -30,14 +30,12 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		return
 	}
 
-	// 1. Fetch User (queries is now embedded in store)
 	user, err := app.store.GetUserByEmail(r.Context(), input.Email)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	// 2. Check Password (user.PasswordHash is now data.Password)
 	match, err := user.PasswordHash.Matches(input.Password)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
