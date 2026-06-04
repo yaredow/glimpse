@@ -8,6 +8,11 @@ sql:
         package: "queries"
         out: "internal/data/queries"
         sql_package: "pgx/v5"
+        overrides:
+          - column: "users.password_hash"
+            go_type:
+              import: "github.com/yaredow/glimpse-api/internal/types"
+              type: "Password"
         emit_json_tags: true
         emit_interface: true
         emit_empty_slices: true

@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/yaredow/glimpse-api/internal/types"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -19,9 +20,9 @@ RETURNING
 `
 
 type CreateUserParams struct {
-	Username     string `json:"username"`
-	Email        string `json:"email"`
-	PasswordHash []byte `json:"password_hash"`
+	Username     string         `json:"username"`
+	Email        string         `json:"email"`
+	PasswordHash types.Password `json:"password_hash"`
 }
 
 type CreateUserRow struct {
@@ -62,7 +63,7 @@ type GetUserByEmailRow struct {
 	ID                int64              `json:"id"`
 	Username          string             `json:"username"`
 	Email             string             `json:"email"`
-	PasswordHash      []byte             `json:"password_hash"`
+	PasswordHash      types.Password     `json:"password_hash"`
 	ShufflesRemaining int32              `json:"shuffles_remaining"`
 	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
@@ -102,7 +103,7 @@ type GetUserByIdRow struct {
 	ID                int64              `json:"id"`
 	Username          string             `json:"username"`
 	Email             string             `json:"email"`
-	PasswordHash      []byte             `json:"password_hash"`
+	PasswordHash      types.Password     `json:"password_hash"`
 	ShufflesRemaining int32              `json:"shuffles_remaining"`
 	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`

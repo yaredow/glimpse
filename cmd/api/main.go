@@ -12,7 +12,7 @@ import (
 	"github.com/go-chi/httplog/v3"
 	"github.com/joho/godotenv"
 	"github.com/yaredow/glimpse-api/internal/app"
-	"github.com/yaredow/glimpse-api/internal/data/queries"
+	"github.com/yaredow/glimpse-api/internal/data"
 	"github.com/yaredow/glimpse-api/internal/data/tmdb"
 	db "github.com/yaredow/glimpse-api/internal/db"
 )
@@ -56,7 +56,7 @@ func main() {
 	defer pool.Close()
 	logger.Info("database connection pool established")
 
-	q := queries.New(pool)
+	store := data.NewStore(pool)
 	tmdbClient := tmdb.NewClient(cfg.tmdb.apiKey, cfg.tmdb.baseURL)
 
 	appCfg := app.Config{
@@ -64,7 +64,7 @@ func main() {
 		Env:  cfg.env,
 	}
 
-	application := app.New(appCfg, logger, logFormat, q, tmdbClient)
+	application := app.New(appCfg, logger, logFormat, store, tmdbClient)
 
 	if err := application.Serve(); !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("server error", "error", err)

@@ -2,6 +2,7 @@ package app
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/yaredow/glimpse-api/internal/data"
 	"github.com/yaredow/glimpse-api/internal/validator"
@@ -29,16 +30,15 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		return
 	}
 
-	user, err := app.queries.GetUserByEmail(r.Context(), input.Email)
+	// 1. Fetch User (queries is now embedded in store)
+	user, err := app.store.GetUserByEmail(r.Context(), input.Email)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	u := data.User{}
-	u.Password.Hash = user.PasswordHash
-
-	match, err := u.Password.Matches(input.Password)
+	// 2. Check Password (user.PasswordHash is now data.Password)
+	match, err := user.PasswordHash.Matches(input.Password)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -49,7 +49,14 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusOK, Envelope{"message": "success"}, nil)
+	// 3. Create Token (using the high-level Store method)
+	token, err := app.store.NewToken(r.Context(), user.ID, 24*time.Hour, data.ScopeAuthentication)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusCreated, Envelope{"authentication_token": token}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
