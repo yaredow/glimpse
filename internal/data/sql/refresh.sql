@@ -16,7 +16,7 @@ FROM
 WHERE
     hash = $1;
 
--- name: RevokeRefreshToken :exec
+-- name: RevokeRefreshToken :execrows
 UPDATE
     refresh_tokens
 SET
@@ -40,9 +40,4 @@ SET
     replaced_by_hash = $2
 WHERE
     hash = $1;
-
--- name: DeleteExpiredRefreshTokens :exec
-DELETE FROM refresh_tokens
-WHERE expires_at < NOW()
-    OR revoked_at IS NOT NULL;
 

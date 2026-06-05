@@ -23,7 +23,7 @@ type Token struct {
 	Scope     string    `json:"-"`
 }
 
-func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error) {
+func GenerateAccessToken(userID int64, ttl time.Duration, scope string) (*Token, error) {
 	token := &Token{
 		UserID: userID,
 		Expiry: time.Now().Add(ttl),
@@ -52,7 +52,7 @@ func ValidateToken(v *validator.Validator, tokenPlainText string) {
 
 // NewToken creates a new token for a specific user and scope, and persists it to the database.
 func (s *Store) NewToken(ctx context.Context, userID int64, ttl time.Duration, scope string) (*Token, error) {
-	token, err := generateToken(userID, ttl, scope)
+	token, err := GenerateAccessToken(userID, ttl, scope)
 	if err != nil {
 		return nil, err
 	}

@@ -2,17 +2,13 @@ package app
 
 import (
 	"log/slog"
+	"sync"
 
 	"github.com/go-chi/httplog/v3"
 	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/data"
-	"github.com/yaredow/glimpse-api/internal/data/tmdb"
+	"github.com/yaredow/glimpse-api/internal/tmdb"
 )
-
-type Config struct {
-	Port int
-	Env  string
-}
 
 type application struct {
 	config    Config
@@ -21,6 +17,7 @@ type application struct {
 	store     *data.Store
 	tmdb      *tmdb.Client
 	jwt       *auth.JWTManager
+	wg        sync.WaitGroup
 }
 
 var version = "1.0.0"

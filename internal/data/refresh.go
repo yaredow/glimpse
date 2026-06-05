@@ -9,15 +9,22 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/data/queries"
 	"github.com/yaredow/glimpse-api/internal/types"
+	"github.com/yaredow/glimpse-api/internal/validator"
 )
 
 var ErrTokenReuse = errors.New("refresh token reuse detected")
 
-func generateRandomToken() (string, []byte, error) {
+func ValidateRefreshToken(v *validator.Validator, refreshTokenPlainText string) {
+	v.Check(refreshTokenPlainText != "", "refresh_token", "must be provided")
+	v.Check(len(refreshTokenPlainText) == 52, "refresh_token", "must be 52 bytes long")
+}
+
+func generateRefreshToken() (string, []byte, error) {
 	randomBytes := make([]byte, 32)
 	if _, err := rand.Read(randomBytes); err != nil {
 		return "", nil, err
@@ -29,15 +36,14 @@ func generateRandomToken() (string, []byte, error) {
 	return plaintext, hash[:], nil
 }
 
-// Create new refresh token
-func (s *Store) NewRefreshToken(ctx context.Context, userID int64, ttl time.Duration) (*types.RefreshToken, error) {
-	plaintext, hash, err := generateRandomToken()
+func (s *Store) NewRefreshToken(ctx context.Context, userID int64) (*types.RefreshToken, error) {
+	plaintext, hash, err := generateRefreshToken()
 	if err != nil {
 		return nil, err
 	}
 
 	familyID := uuid.New()
-	expiresAt := time.Now().Add(ttl)
+	expiresAt := time.Now().Add(10 * time.Minute)
 
 	err = s.Queries.CreateRefreshToken(ctx, queries.CreateRefreshTokenParams{
 		Hash:      hash,
@@ -52,7 +58,6 @@ func (s *Store) NewRefreshToken(ctx context.Context, userID int64, ttl time.Dura
 	}, err
 }
 
-// RotateRefreshToken replaces an old token with a new one. Revokes family on reuse.
 func (s *Store) RotateRefreshToken(ctx context.Context, oldPlaintext string, ttl time.Duration) (*types.RefreshToken, int64, error) {
 	hash := sha256.Sum256([]byte(oldPlaintext))
 
@@ -60,7 +65,6 @@ func (s *Store) RotateRefreshToken(ctx context.Context, oldPlaintext string, ttl
 	var userID int64
 
 	err := s.ExecTx(ctx, func(q *queries.Queries) error {
-		// 1. Get old token
 		oldToken, err := q.GetRefreshToken(ctx, hash[:])
 		if err != nil {
 			return err
@@ -68,25 +72,21 @@ func (s *Store) RotateRefreshToken(ctx context.Context, oldPlaintext string, ttl
 
 		userID = oldToken.UserID
 
-		// 2. Detect reuse
 		if oldToken.RevokedAt.Valid || oldToken.ReplacedByHash != nil {
 			_ = q.RevokeTokenFamily(ctx, oldToken.FamilyID)
 			return ErrTokenReuse
 		}
 
-		// 3. Check expiry
 		if oldToken.ExpiresAt.Time.Before(time.Now()) {
 			return auth.ErrExpiredToken
 		}
 
-		// 4. Generate new pair
-		newPlain, newHash, err := generateRandomToken()
+		newPlain, newHash, err := generateRefreshToken()
 		if err != nil {
 			return err
 		}
 		newPlaintext = newPlain
 
-		// 5. Persist new token
 		err = q.CreateRefreshToken(ctx, queries.CreateRefreshTokenParams{
 			Hash:      newHash,
 			UserID:    oldToken.UserID,
@@ -97,7 +97,6 @@ func (s *Store) RotateRefreshToken(ctx context.Context, oldPlaintext string, ttl
 			return err
 		}
 
-		// 6. Link tokens
 		err = q.SetTokenReplacement(ctx, queries.SetTokenReplacementParams{
 			Hash:           oldToken.Hash,
 			ReplacedByHash: newHash,
@@ -106,12 +105,44 @@ func (s *Store) RotateRefreshToken(ctx context.Context, oldPlaintext string, ttl
 			return err
 		}
 
-		// 7. Revoke old
-		return q.RevokeRefreshToken(ctx, oldToken.Hash)
+		_, err = q.RevokeRefreshToken(ctx, oldToken.Hash)
+		return err
 	})
 
 	return &types.RefreshToken{
 		PlainText: newPlaintext,
 		ExpiresAt: time.Now().Add(ttl),
 	}, userID, err
+}
+
+func (s *Store) GetRefreshTokenByPlainText(ctx context.Context, refreshTokenPlainText string) (queries.RefreshToken, error) {
+	hash := sha256.Sum256([]byte(refreshTokenPlainText))
+
+	result, err := s.Queries.GetRefreshToken(ctx, hash[:])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return queries.RefreshToken{}, ErrRecordNotFound
+		}
+
+		return queries.RefreshToken{}, err
+	}
+
+	return result, nil
+}
+
+func (s *Store) RevokeRefreshTokenByHash(ctx context.Context, refreshTokenPlainText string) error {
+	hash := sha256.Sum256([]byte(refreshTokenPlainText))
+
+	rowsAffected, err := s.Queries.RevokeRefreshToken(ctx, hash[:])
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+	return nil
+}
+
+func (s *Store) RevokeFamily(ctx context.Context, familyID pgtype.UUID) error {
+	return s.Queries.RevokeTokenFamily(ctx, familyID)
 }

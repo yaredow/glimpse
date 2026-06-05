@@ -18,6 +18,8 @@ func (app *application) routes() http.Handler {
 		RecoverPanics: true,
 	}))
 
+	r.Use(middleware.RequestID)
+
 	r.Use(middleware.Recoverer)
 
 	r.NotFound(app.notFoundResponse)
@@ -30,6 +32,8 @@ func (app *application) routes() http.Handler {
 
 	// Auth routes
 	r.Post("/v1/tokens/login", app.createAuthenticationTokenHandler)
+	r.Post("/v1/tokens/refresh", app.refreshTokenHandler)
+	r.Post("/v1/tokens/revoke", app.revokeTokenHandler)
 
 	// Movies routes
 	r.Get("/v1/movies", app.GetPopularMovies)

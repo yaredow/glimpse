@@ -2,7 +2,6 @@ package app
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/yaredow/glimpse-api/internal/data"
 	"github.com/yaredow/glimpse-api/internal/validator"
@@ -47,14 +46,19 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		return
 	}
 
-	// 3. Create Token (using the high-level Store method)
-	token, err := app.store.NewToken(r.Context(), user.ID, 24*time.Hour, data.ScopeAuthentication)
+	accessToken, err := app.jwt.GenerateJWTToken(user.ID)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusCreated, Envelope{"authentication_token": token}, nil)
+	refreshToken, err := app.store.NewRefreshToken(r.Context(), user.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusCreated, Envelope{"accessToken": accessToken, "refresh_token": refreshToken}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
