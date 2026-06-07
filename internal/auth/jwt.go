@@ -44,8 +44,8 @@ func (m *JWTManager) GenerateJWTToken(userID int64) (types.JWT, error) {
 	signed, err := token.SignedString(m.secret)
 
 	return types.JWT{
-		AccessToken: signed,
-		ExpiresAt:   expiry,
+		Token:  signed,
+		Expiry: expiry,
 	}, err
 }
 

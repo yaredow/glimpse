@@ -79,7 +79,7 @@ func (app *application) refreshTokenHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	v := validator.New()
-	store.ValidateRefreshToken(v, input.RefreshTokenPlainText)
+	store.ValidateToken(v, input.RefreshTokenPlainText, "refresh_token")
 	if !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
@@ -123,7 +123,7 @@ func (app *application) revokeTokenHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	v := validator.New()
-	store.ValidateRefreshToken(v, input.RefreshTokenPlainText)
+	store.ValidateToken(v, input.RefreshTokenPlainText, "refresh_token")
 	if !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return

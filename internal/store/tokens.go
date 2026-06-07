@@ -1,3 +1,4 @@
+// Package store provides a database-backed implementation of the auth package.
 package store
 
 import (
@@ -28,7 +29,7 @@ type Token struct {
 	PlainText string    `json:"token"`
 	Hash      []byte    `json:"-"`
 	UserID    int64     `json:"-"`
-	Expiry    time.Time `json:"expiry"`
+	Expiry    time.Time `json:"-"`
 	Scope     string    `json:"-"`
 }
 
@@ -53,18 +54,11 @@ func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error
 	return token, nil
 }
 
-func ValidateRefreshToken(v *validator.Validator, refreshTokenPlainText string) {
-	v.Check(refreshTokenPlainText != "", "refresh_token", "must be provided")
-	v.Check(len(refreshTokenPlainText) == 52, "refresh_token", "must be 52 bytes long")
+func ValidateToken(v *validator.Validator, tokenPlainText, field string) {
+	v.Check(tokenPlainText != "", field, "must be provided")
+	v.Check(len(tokenPlainText) == 26, field, "must be 26 bytes long")
 }
 
-// ValidateToken ensures a provided token plaintext is well-formed.
-func ValidateToken(v *validator.Validator, tokenPlainText string) {
-	v.Check(tokenPlainText != "", "token", "must be provided")
-	v.Check(len(tokenPlainText) == 26, "token", "must be 26 bytes long")
-}
-
-// NewToken creates a new token for a specific user and scope, and persists it to the database.
 func (s *Store) CreateNewToken(ctx context.Context, userID int64, ttl time.Duration, scope string) (*Token, error) {
 	token, err := generateToken(userID, ttl, scope)
 	if err != nil {
