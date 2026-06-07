@@ -1,14 +1,15 @@
-package data
+package store
 
 import (
 	"context"
 	"errors"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/yaredow/glimpse-api/internal/data/queries"
+	"github.com/yaredow/glimpse-api/internal/store/queries"
 )
 
 var (
+	ErrTokenReuse     = errors.New("token reuse")
 	ErrRecordNotFound = errors.New("record not found")
 	ErrEditConflict   = errors.New("edit conflict")
 )

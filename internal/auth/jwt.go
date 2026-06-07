@@ -7,12 +7,15 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/yaredow/glimpse-api/internal/types"
 )
 
 var (
 	ErrInvalidJWTToken = errors.New("invalid token")
 	ErrExpiredToken    = errors.New("expired token")
 )
+
+const JWTTTL = 10 * time.Minute
 
 type JWTManager struct {
 	secret []byte
@@ -26,8 +29,8 @@ func NewManager(secret []byte, issuer string) *JWTManager {
 	}
 }
 
-func (m *JWTManager) GenerateJWTToken(userID int64) (string, error) {
-	expiry := time.Now().Add(10 * time.Minute)
+func (m *JWTManager) GenerateJWTToken(userID int64) (types.JWT, error) {
+	expiry := time.Now().Add(JWTTTL)
 
 	claims := jwt.RegisteredClaims{
 		Subject:   strconv.FormatInt(userID, 10),
@@ -38,7 +41,12 @@ func (m *JWTManager) GenerateJWTToken(userID int64) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(m.secret)
+	signed, err := token.SignedString(m.secret)
+
+	return types.JWT{
+		AccessToken: signed,
+		ExpiresAt:   expiry,
+	}, err
 }
 
 func (m *JWTManager) ValidateJWTToken(tokenStr string) (int64, error) {

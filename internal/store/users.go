@@ -1,4 +1,4 @@
-package data
+package store
 
 import (
 	"github.com/yaredow/glimpse-api/internal/validator"

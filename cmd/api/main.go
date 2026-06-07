@@ -12,8 +12,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/yaredow/glimpse-api/internal/app"
 	"github.com/yaredow/glimpse-api/internal/auth"
-	"github.com/yaredow/glimpse-api/internal/data"
 	db "github.com/yaredow/glimpse-api/internal/db"
+	"github.com/yaredow/glimpse-api/internal/store"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
 )
 
@@ -30,7 +30,7 @@ func main() {
 	logFormat := httplog.SchemaECS.Concise(cfg.Env == "development")
 
 	migrateDSN := strings.Replace(cfg.DatabaseURL, "postgres://", "pgx5://", 1)
-	if err := db.RunMigrations(migrateDSN); err != nil {
+	if err = db.RunMigrations(migrateDSN); err != nil {
 		logger.Error("migration failed", "error", err)
 		os.Exit(1)
 	}
@@ -43,7 +43,7 @@ func main() {
 	defer pool.Close()
 	logger.Info("database connection pool established")
 
-	store := data.NewStore(pool)
+	store := store.NewStore(pool)
 	jwtManager := auth.NewManager([]byte(cfg.JWTSecret), cfg.JWTIssuer)
 	tmdbClient := tmdb.NewClient(cfg.TMDBAPIKey, cfg.TMDBBaseURL)
 

@@ -3,8 +3,8 @@ package app
 import (
 	"net/http"
 
-	"github.com/yaredow/glimpse-api/internal/data"
-	"github.com/yaredow/glimpse-api/internal/data/queries"
+	"github.com/yaredow/glimpse-api/internal/store"
+	"github.com/yaredow/glimpse-api/internal/store/queries"
 	"github.com/yaredow/glimpse-api/internal/types"
 	"github.com/yaredow/glimpse-api/internal/validator"
 )
@@ -24,8 +24,8 @@ func (app *application) userRegistrationHandler(w http.ResponseWriter, r *http.R
 
 	// 1. Validate Input
 	v := validator.New()
-	data.ValidateUser(v, input.Username, input.Email)
-	data.ValidatePasswordPlainText(v, input.Password)
+	store.ValidateUser(v, input.Username, input.Email)
+	store.ValidatePasswordPlainText(v, input.Password)
 
 	if !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
