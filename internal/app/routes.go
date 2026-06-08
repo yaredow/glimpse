@@ -41,8 +41,11 @@ func (app *application) routes() http.Handler {
 	r.Post("/v1/tokens/activate", app.createActivationTokenHandler)
 	r.Post("/v1/tokens/password-reset", app.createPasswordResetTokenHandler)
 
-	// Movies routes
-	r.Get("/v1/movies", app.GetPopularMovies)
+	// Movies routes (require authentication)
+	r.Group(func(r chi.Router) {
+		r.Use(app.requireAuthenticatedUser)
+		r.Get("/v1/movies", app.GetPopularMovies)
+	})
 
 	return r
 }

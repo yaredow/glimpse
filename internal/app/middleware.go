@@ -9,6 +9,19 @@ import (
 	"github.com/yaredow/glimpse-api/internal/store"
 )
 
+func (app *application) requireAuthenticatedUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := app.contextGetUser(r)
+
+		if user.ID == 0 {
+			app.authenticationRequiredResponse(w, r)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (app *application) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +29,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 			authorizationHeader := r.Header.Get("Authorization")
 			if authorizationHeader == "" {
-				app.contextSetUser(r, store.AnonymousUser)
+				r = app.contextSetUser(r, store.AnonymousUser)
 				next.ServeHTTP(w, r)
 				return
 			}
