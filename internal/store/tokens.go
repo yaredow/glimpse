@@ -23,7 +23,10 @@ const (
 	ScopeRefreshToken = "refresh_token"
 )
 
-const RefreshTokenTTL = 7 * 24 * time.Hour
+const (
+	RefreshTokenTTL    = 7 * 24 * time.Hour
+	ActivationTokenTTL = 3 * 24 * time.Hour
+)
 
 // Token represents a single-use token for authentication or other scoped actions.
 type Token struct {

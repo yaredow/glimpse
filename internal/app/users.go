@@ -34,9 +34,35 @@ func (app *application) userRegistrationHandler(w http.ResponseWriter, r *http.R
 	// 2. Create User
 	result, err := app.store.CreateUser(r.Context(), input.Username, input.Email, input.Password)
 	if err != nil {
+		switch {
+		case errors.Is(err, store.ErrDuplicateEmail):
+			v.AddError("email", "a user with this email address already exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		case errors.Is(err, store.ErrDuplicateUsername):
+			v.AddError("username", "a user with this username already exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	token, err := app.store.CreateNewToken(r.Context(), result.ID, store.ActivationTokenTTL, store.ScopeActivation)
+	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+
+	app.background(func() {
+		data := map[string]any{
+			"activationToken": token.PlainText,
+		}
+
+		err = app.mailer.Send(result.Email, "user_welcome.html", data)
+		if err != nil {
+			app.logger.Error(err.Error())
+		}
+	})
 
 	err = app.writeJSON(w, http.StatusCreated, Envelope{"user": result}, nil)
 	if err != nil {

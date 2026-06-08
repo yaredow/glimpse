@@ -90,3 +90,15 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 
 	return id, nil
 }
+
+func (app *application) background(fn func()) {
+	app.wg.Go(func() {
+		defer func() {
+			if err := recover(); err != nil {
+				app.logger.Error(fmt.Sprintf("%v", err))
+			}
+		}()
+
+		fn()
+	})
+}

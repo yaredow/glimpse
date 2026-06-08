@@ -9,9 +9,11 @@ import (
 )
 
 var (
-	ErrTokenReuse     = errors.New("token reuse")
-	ErrRecordNotFound = errors.New("record not found")
-	ErrEditConflict   = errors.New("edit conflict")
+	ErrTokenReuse      = errors.New("token reuse")
+	ErrRecordNotFound  = errors.New("record not found")
+	ErrEditConflict    = errors.New("edit conflict")
+	ErrDuplicateEmail  = errors.New("duplicate email")
+	ErrDuplicateUsername = errors.New("duplicate username")
 )
 
 type Store struct {

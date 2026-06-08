@@ -3,8 +3,10 @@ package store
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/yaredow/glimpse-api/internal/store/queries"
 	"github.com/yaredow/glimpse-api/internal/types"
 	"github.com/yaredow/glimpse-api/internal/validator"
@@ -23,6 +25,15 @@ func (s *Store) CreateUser(ctx context.Context, username, email, password string
 		PasswordHash: pw,
 	})
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			switch {
+			case strings.Contains(pgErr.Message, "users_email_key"):
+				return queries.CreateUserRow{}, ErrDuplicateEmail
+			case strings.Contains(pgErr.Message, "users_username_key"):
+				return queries.CreateUserRow{}, ErrDuplicateUsername
+			}
+		}
 		return queries.CreateUserRow{}, err
 	}
 

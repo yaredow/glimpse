@@ -47,7 +47,7 @@ func main() {
 	store := store.NewStore(pool)
 	jwtManager := auth.NewManager([]byte(cfg.JWTSecret), cfg.JWTIssuer)
 	tmdbClient := tmdb.NewClient(cfg.TMDBAPIKey, cfg.TMDBBaseURL)
-	mailer := mailer.New(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword)
+	mailer := mailer.New(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword, cfg.SMTPSender)
 
 	application := app.New(cfg, logger, logFormat, store, tmdbClient, mailer, jwtManager)
 
