@@ -12,6 +12,8 @@ import (
 	"github.com/yaredow/glimpse-api/internal/validator"
 )
 
+var AnonymousUser = queries.User{}
+
 func (s *Store) CreateUser(ctx context.Context, username, email, password string) (queries.CreateUserRow, error) {
 	var pw types.Password
 	err := pw.Set(password)
