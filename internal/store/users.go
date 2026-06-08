@@ -60,6 +60,18 @@ func (s *Store) UpdateUser(ctx context.Context, user *queries.User) error {
 	return nil
 }
 
+func (s *Store) GetUserByEmail(ctx context.Context, email string) (queries.User, error) {
+	result, err := s.Queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return queries.User{}, ErrRecordNotFound
+		}
+		return queries.User{}, err
+	}
+
+	return result, nil
+}
+
 func ValidateEmail(v *validator.Validator, email string) {
 	v.Check(email != "", "email", "must be provided")
 	v.Check(validator.Matches(email, validator.EmailRX), "email", "must be a valid email address")

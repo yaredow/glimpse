@@ -19,13 +19,15 @@ import (
 )
 
 const (
-	ScopeActivation   = "activation"
-	ScopeRefreshToken = "refresh_token"
+	ScopeActivation    = "activation"
+	ScopeRefreshToken  = "refresh_token"
+	ScopePasswordReset = "password_reset"
 )
 
 const (
-	RefreshTokenTTL    = 7 * 24 * time.Hour
-	ActivationTokenTTL = 3 * 24 * time.Hour
+	RefreshTokenTTL       = 7 * 24 * time.Hour
+	ActivationTokenTTL    = 3 * 24 * time.Hour
+	PasswordResetTokenTTL = 24 * time.Hour
 )
 
 // Token represents a single-use token for authentication or other scoped actions.

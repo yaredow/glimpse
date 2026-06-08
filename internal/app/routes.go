@@ -30,11 +30,14 @@ func (app *application) routes() http.Handler {
 	// Users routes
 	r.Post("/v1/users/register", app.userRegistrationHandler)
 	r.Put("/v1/users/activate", app.activateUserHandler)
+	r.Put("/v1/users/password", app.updateUserPasswordHandler)
 
 	// Auth routes
 	r.Post("/v1/tokens/login", app.createAuthenticationTokenHandler)
 	r.Post("/v1/tokens/refresh", app.refreshTokenHandler)
 	r.Post("/v1/tokens/revoke", app.revokeTokenHandler)
+	r.Post("/v1/tokens/activate", app.createActivationTokenHandler)
+	r.Post("/v1/tokens/password-reset", app.createPasswordResetTokenHandler)
 
 	// Movies routes
 	r.Get("/v1/movies", app.GetPopularMovies)

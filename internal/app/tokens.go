@@ -34,7 +34,12 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 
 	user, err := app.store.GetUserByEmail(r.Context(), input.Email)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, store.ErrRecordNotFound):
+			app.invalidCredentialsResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 
@@ -108,6 +113,126 @@ func (app *application) refreshTokenHandler(w http.ResponseWriter, r *http.Reque
 	}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) createPasswordResetTokenHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Email string `json:"email"`
+	}
+
+	err := app.ReadJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+	if store.ValidateEmail(v, input.Email); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	user, err := app.store.GetUserByEmail(r.Context(), input.Email)
+	if err != nil {
+		switch {
+		case errors.Is(err, store.ErrRecordNotFound):
+			v.AddError("email", "no user with this email address exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	if !user.Activated {
+		v.AddError("email", "user account is not activated")
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	token, err := app.store.CreateNewToken(r.Context(), user.ID, store.PasswordResetTokenTTL, store.ScopePasswordReset)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.background(func() {
+		data := map[string]any{
+			"passwordResetToken": token.PlainText,
+		}
+
+		err = app.mailer.Send(user.Email, "token_password_reset.html", data)
+		if err != nil {
+			app.logger.Error(err.Error())
+		}
+	})
+
+	env := Envelope{"message": "an email will be sent to you containing a password reset instructions"}
+
+	err = app.writeJSON(w, http.StatusAccepted, env, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Email string `json:"email"`
+	}
+
+	err := app.ReadJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	v := validator.New()
+	if store.ValidateEmail(v, input.Email); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	user, err := app.store.GetUserByEmail(r.Context(), input.Email)
+	if err != nil {
+		switch {
+		case errors.Is(err, store.ErrRecordNotFound):
+			v.AddError("email", "no user with this email address exists")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	if user.Activated {
+		v.AddError("email", "user with this email address already activated")
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	token, err := app.store.CreateNewToken(r.Context(), user.ID, store.ActivationTokenTTL, store.ScopeActivation)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.background(func() {
+		data := map[string]any{
+			"activationToken": token.PlainText,
+		}
+
+		err = app.mailer.Send(user.Email, "token_activation.html", data)
+		if err != nil {
+			app.logger.Error(err.Error())
+		}
+	})
+
+	env := Envelope{"message": "an email will be sent to you containing an activation token"}
+	err = app.writeJSON(w, http.StatusOK, env, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
 	}
 }
 
