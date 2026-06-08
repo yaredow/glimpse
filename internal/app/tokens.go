@@ -55,13 +55,13 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		return
 	}
 
-	refreshToken, err := app.store.CreateNewToken(r.Context(), user.ID, 7*24*time.Hour, store.ScopeRefreshToken)
+	refreshToken, err := app.store.CreateNewRefreshToken(r.Context(), user.ID)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	err = app.writeJSON(w, http.StatusCreated, Envelope{"access_token": accessToken, "refresh_token": refreshToken}, nil)
+	err = app.writeJSON(w, http.StatusCreated, Envelope{"access_token": accessToken, "refresh_token": refreshToken.PlainText}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

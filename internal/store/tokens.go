@@ -9,6 +9,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/auth"
@@ -76,6 +77,30 @@ func (s *Store) CreateNewToken(ctx context.Context, userID int64, ttl time.Durat
 	}
 
 	return token, nil
+}
+
+func (s *Store) CreateNewRefreshToken(ctx context.Context, userID int64) (*types.Tokens, error) {
+	token, err := generateToken(userID, RefreshTokenTTL, ScopeRefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	familyID := uuid.New()
+
+	err = s.Queries.CreateRefreshToken(ctx, queries.CreateRefreshTokenParams{
+		Hash:      token.Hash,
+		UserID:    token.UserID,
+		ExpiresAt: pgtype.Timestamptz{Time: token.Expiry, Valid: true},
+		FamilyID:  pgtype.UUID{Bytes: familyID, Valid: true},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.Tokens{
+		PlainText: token.PlainText,
+		UserID:    token.UserID,
+	}, nil
 }
 
 func (s *Store) GetRefreshTokenByPlainText(ctx context.Context, refreshTokenPlainText string) (queries.RefreshToken, error) {
