@@ -64,6 +64,7 @@ type User struct {
 	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	Activated         bool               `json:"activated"`
+	Version           int32              `json:"version"`
 }
 
 type UserMovie struct {

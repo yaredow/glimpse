@@ -1,12 +1,12 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "internal/data/sql"
+    queries: "internal/store/sql"
     schema: "migrations/"
     gen:
       go:
         package: "queries"
-        out: "internal/data/queries"
+        out: "internal/store/queries"
         sql_package: "pgx/v5"
         overrides:
           - column: "users.password_hash"

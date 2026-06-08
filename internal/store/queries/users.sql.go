@@ -14,7 +14,7 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, email, password_hash)
-    VALUES ($1, $2, $3)
+VALUES ($1, $2, $3)
 RETURNING
     id, username, email, created_at
 `
@@ -52,26 +52,18 @@ SELECT
     password_hash,
     shuffles_remaining,
     last_shuffle_reset,
-    created_at
+    created_at,
+    activated,
+    version
 FROM
     users
 WHERE
     email = $1
 `
 
-type GetUserByEmailRow struct {
-	ID                int64              `json:"id"`
-	Username          string             `json:"username"`
-	Email             string             `json:"email"`
-	PasswordHash      types.Password     `json:"password_hash"`
-	ShufflesRemaining int32              `json:"shuffles_remaining"`
-	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-}
-
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
-	var i GetUserByEmailRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -80,6 +72,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 		&i.ShufflesRemaining,
 		&i.LastShuffleReset,
 		&i.CreatedAt,
+		&i.Activated,
+		&i.Version,
 	)
 	return i, err
 }
@@ -92,26 +86,18 @@ SELECT
     password_hash,
     shuffles_remaining,
     last_shuffle_reset,
-    created_at
+    created_at,
+    activated,
+    version
 FROM
     users
 WHERE
     id = $1
 `
 
-type GetUserByIdRow struct {
-	ID                int64              `json:"id"`
-	Username          string             `json:"username"`
-	Email             string             `json:"email"`
-	PasswordHash      types.Password     `json:"password_hash"`
-	ShufflesRemaining int32              `json:"shuffles_remaining"`
-	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-}
-
-func (q *Queries) GetUserById(ctx context.Context, id int64) (GetUserByIdRow, error) {
+func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
 	row := q.db.QueryRow(ctx, getUserById, id)
-	var i GetUserByIdRow
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -120,6 +106,56 @@ func (q *Queries) GetUserById(ctx context.Context, id int64) (GetUserByIdRow, er
 		&i.ShufflesRemaining,
 		&i.LastShuffleReset,
 		&i.CreatedAt,
+		&i.Activated,
+		&i.Version,
+	)
+	return i, err
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE
+    users
+SET
+    username = $2,
+    email = $3,
+    password_hash = $4,
+    activated = $5,
+    version = version + 1
+WHERE
+    id = $1 AND version = $6
+RETURNING
+    id, username, email, password_hash, shuffles_remaining, last_shuffle_reset, created_at, activated, version
+`
+
+type UpdateUserParams struct {
+	ID           int64          `json:"id"`
+	Username     string         `json:"username"`
+	Email        string         `json:"email"`
+	PasswordHash types.Password `json:"password_hash"`
+	Activated    bool           `json:"activated"`
+	Version      int32          `json:"version"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.ID,
+		arg.Username,
+		arg.Email,
+		arg.PasswordHash,
+		arg.Activated,
+		arg.Version,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.ShufflesRemaining,
+		&i.LastShuffleReset,
+		&i.CreatedAt,
+		&i.Activated,
+		&i.Version,
 	)
 	return i, err
 }

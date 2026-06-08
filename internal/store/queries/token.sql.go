@@ -13,7 +13,7 @@ import (
 
 const createToken = `-- name: CreateToken :exec
 INSERT INTO tokens (hash, user_id, expiry, scope)
-    VALUES ($1, $2, $3, $4)
+VALUES ($1, $2, $3, $4)
 `
 
 type CreateTokenParams struct {
@@ -31,4 +31,63 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) error 
 		arg.Scope,
 	)
 	return err
+}
+
+const deleteTokensForUser = `-- name: DeleteTokensForUser :exec
+DELETE FROM tokens
+WHERE
+    user_id = $1
+    AND scope = $2
+`
+
+type DeleteTokensForUserParams struct {
+	UserID int64  `json:"user_id"`
+	Scope  string `json:"scope"`
+}
+
+func (q *Queries) DeleteTokensForUser(ctx context.Context, arg DeleteTokensForUserParams) error {
+	_, err := q.db.Exec(ctx, deleteTokensForUser, arg.UserID, arg.Scope)
+	return err
+}
+
+const getUserByToken = `-- name: GetUserByToken :one
+SELECT
+    u.id,
+    u.username,
+    u.email,
+    u.password_hash,
+    u.shuffles_remaining,
+    u.last_shuffle_reset,
+    u.created_at,
+    u.activated,
+    u.version
+FROM
+    tokens AS t
+INNER JOIN users AS u ON t.user_id = u.id
+WHERE
+    t.hash = $1
+    AND t.scope = $2
+    AND t.expiry > NOW()
+`
+
+type GetUserByTokenParams struct {
+	Hash  []byte `json:"hash"`
+	Scope string `json:"scope"`
+}
+
+func (q *Queries) GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByToken, arg.Hash, arg.Scope)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.ShufflesRemaining,
+		&i.LastShuffleReset,
+		&i.CreatedAt,
+		&i.Activated,
+		&i.Version,
+	)
+	return i, err
 }

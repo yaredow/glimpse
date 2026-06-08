@@ -16,6 +16,10 @@ type Config struct {
 	JWTIssuer       string
 	TMDBAPIKey      string
 	TMDBBaseURL     string
+	SMTPHost        string
+	SMTPPort        int
+	SMTPUsername    string
+	SMTPPassword    string
 	ShutdownTimeout time.Duration
 }
 
@@ -29,6 +33,10 @@ func LoadConfig() (Config, error) {
 	flag.StringVar(&cfg.JWTIssuer, "jwt-issuer", getEnv("JWT_ISSUER", "glimpse.net"), "JWT issuer")
 	flag.StringVar(&cfg.TMDBAPIKey, "tmdb-api-key", os.Getenv("TMDB_API_KEY"), "TMDB API key")
 	flag.StringVar(&cfg.TMDBBaseURL, "tmdb-base-url", getEnv("TMDB_BASE_URL", "https://api.themoviedb.org/3"), "TMDB base URL")
+	flag.StringVar(&cfg.SMTPHost, "smtp-host", os.Getenv("SMTP_HOST"), "SMTP host")
+	flag.IntVar(&cfg.SMTPPort, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&cfg.SMTPUsername, "smtp-username", os.Getenv("SMTP_USERNAME"), "SMTP username")
+	flag.StringVar(&cfg.SMTPPassword, "smtp-password", os.Getenv("SMTP_PASSWORD"), "SMTP password")
 	flag.DurationVar(&cfg.ShutdownTimeout, "shutdown-timeout", 30*time.Second, "Graceful shutdown timeout")
 
 	flag.Parse()

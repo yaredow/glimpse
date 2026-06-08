@@ -14,17 +14,20 @@ type Querier interface {
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
 	CreateToken(ctx context.Context, arg CreateTokenParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	DeleteTokensForUser(ctx context.Context, arg DeleteTokensForUserParams) error
 	GetMovieByID(ctx context.Context, id int64) (Movie, error)
 	GetMovieByTMDBID(ctx context.Context, tmdbID int32) (Movie, error)
 	GetMoviesByGenre(ctx context.Context, arg GetMoviesByGenreParams) ([]Movie, error)
 	GetRefreshToken(ctx context.Context, hash []byte) (RefreshToken, error)
-	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
-	GetUserById(ctx context.Context, id int64) (GetUserByIdRow, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserById(ctx context.Context, id int64) (User, error)
+	GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (User, error)
 	InsertMovie(ctx context.Context, arg InsertMovieParams) error
 	RevokeRefreshToken(ctx context.Context, hash []byte) (int64, error)
 	RevokeTokenFamily(ctx context.Context, familyID pgtype.UUID) error
 	SetTokenReplacement(ctx context.Context, arg SetTokenReplacementParams) error
 	UpdateMoviePopularity(ctx context.Context, arg UpdateMoviePopularityParams) (Movie, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserShuffleReset(ctx context.Context, id int64) error
 }
 

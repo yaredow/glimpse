@@ -118,6 +118,26 @@ func (s *Store) GetRefreshTokenByPlainText(ctx context.Context, refreshTokenPlai
 	return result, nil
 }
 
+func (s *Store) GetUserByToken(ctx context.Context, tokenPlainText string, scope string) (queries.User, error) {
+	hash := sha256.Sum256([]byte(tokenPlainText))
+	args := queries.GetUserByTokenParams{
+		Hash:  hash[:],
+		Scope: scope,
+	}
+
+	result, err := s.Queries.GetUserByToken(ctx, args)
+	if err != nil {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
+			return queries.User{}, ErrRecordNotFound
+		default:
+			return queries.User{}, err
+		}
+	}
+
+	return result, nil
+}
+
 func (s *Store) RotateRefreshToken(ctx context.Context, oldPlaintext string, ttl time.Duration) (*types.Tokens, error) {
 	hash := sha256.Sum256([]byte(oldPlaintext))
 
@@ -186,6 +206,15 @@ func (s *Store) RevokeRefreshTokenByHash(ctx context.Context, refreshTokenPlainT
 		return ErrRecordNotFound
 	}
 	return nil
+}
+
+func (s *Store) DeleteTokensForUser(ctx context.Context, userID int64, scope string) error {
+	args := queries.DeleteTokensForUserParams{
+		UserID: userID,
+		Scope:  scope,
+	}
+
+	return s.Queries.DeleteTokensForUser(ctx, args)
 }
 
 func (s *Store) RevokeFamily(ctx context.Context, familyID pgtype.UUID) error {
