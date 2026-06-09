@@ -78,3 +78,16 @@ type UserMovie struct {
 	Status    string             `json:"status"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
+
+type UserPreference struct {
+	UserID         int64              `json:"user_id"`
+	FavoriteGenres []int32            `json:"favorite_genres"`
+	ExcludedGenres []int32            `json:"excluded_genres"`
+	Languages      []string           `json:"languages"`
+	MinRating      pgtype.Numeric     `json:"min_rating"`
+	Onboarded      bool               `json:"onboarded"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	MinYear        int32              `json:"min_year"`
+	MaxYear        int32              `json:"max_year"`
+}

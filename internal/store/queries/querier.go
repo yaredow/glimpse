@@ -22,15 +22,18 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserById(ctx context.Context, id int64) (User, error)
 	GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (User, error)
+	GetUserPreference(ctx context.Context, userID int64) (UserPreference, error)
 	InsertMovie(ctx context.Context, arg InsertMovieParams) error
 	ListGenres(ctx context.Context) ([]Genre, error)
 	RevokeRefreshToken(ctx context.Context, hash []byte) (int64, error)
 	RevokeTokenFamily(ctx context.Context, familyID pgtype.UUID) error
 	SetTokenReplacement(ctx context.Context, arg SetTokenReplacementParams) error
 	UpdateMoviePopularity(ctx context.Context, arg UpdateMoviePopularityParams) (Movie, error)
+	UpdateOnboardingStatus(ctx context.Context, arg UpdateOnboardingStatusParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserShuffleReset(ctx context.Context, id int64) error
 	UpsertGenre(ctx context.Context, arg UpsertGenreParams) error
+	UpsertPreference(ctx context.Context, arg UpsertPreferenceParams) (UserPreference, error)
 }
 
 var _ Querier = (*Queries)(nil)

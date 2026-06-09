@@ -32,6 +32,12 @@ type GenreListResponse struct {
 	Genres []Genre `json:"genres"`
 }
 
+type Language struct {
+	ISOCode     string `json:"iso_639_1"`
+	EnglishName string `json:"english_name"`
+	Name        string `json:"name"`
+}
+
 func (c *Client) GetMovies(ctx context.Context, page int) (*MovieListResponse, error) {
 	var result MovieListResponse
 	path := fmt.Sprintf("/movie/popular?page=%d", page)
@@ -51,4 +57,14 @@ func (c *Client) GetGenres(ctx context.Context) (*GenreListResponse, error) {
 	}
 
 	return &result, nil
+}
+
+func (c *Client) GetLanguages(ctx context.Context) ([]Language, error) {
+	var result []Language
+
+	if err := c.do(ctx, "/configuration/languages", &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

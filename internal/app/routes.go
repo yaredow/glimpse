@@ -46,6 +46,10 @@ func (app *application) routes() http.Handler {
 		r.Use(app.requireAuthenticatedUser)
 		r.Get("/v1/movies", app.GetPopularMovies)
 		r.Get("/v1/movies/genres", app.listGenresHandler)
+
+		// Onboarding and Preferences
+		r.Get("/v1/onboarding/start", app.startOnboardingHandler)
+		r.Post("/v1/users/preferences", app.updatePreferencesHandler)
 	})
 
 	return r
