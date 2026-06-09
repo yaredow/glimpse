@@ -18,6 +18,11 @@ type DailyPool struct {
 	AssignedAt pgtype.Timestamptz `json:"assigned_at"`
 }
 
+type Genre struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
 type Movie struct {
 	ID               int64              `json:"id"`
 	TmdbID           int32              `json:"tmdb_id"`

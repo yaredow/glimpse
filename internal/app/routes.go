@@ -45,6 +45,7 @@ func (app *application) routes() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(app.requireAuthenticatedUser)
 		r.Get("/v1/movies", app.GetPopularMovies)
+		r.Get("/v1/movies/genres", app.listGenresHandler)
 	})
 
 	return r

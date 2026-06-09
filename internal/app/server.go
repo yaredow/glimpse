@@ -48,6 +48,13 @@ func (app *application) Serve() error {
 
 	app.logger.Info("server starting", "addr", srv.Addr, "env", app.config.Env)
 
+	app.background(func() {
+		err := app.SyncGenres(context.Background())
+		if err != nil {
+			app.logger.Error("failed to sync genres on startup", "err", err)
+		}
+	})
+
 	err := srv.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
 		return err

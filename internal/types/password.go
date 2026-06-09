@@ -6,7 +6,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Password is a named type for []byte.
 type Password []byte
 
 // Set calculates the bcrypt hash of a plaintext password and stores it.

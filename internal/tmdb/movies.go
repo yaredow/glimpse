@@ -2,9 +2,7 @@ package tmdb
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
 )
 
 type Movie struct {
@@ -25,28 +23,30 @@ type MovieListResponse struct {
 	TotalResults int     `json:"total_results"`
 }
 
+type Genre struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type GenreListResponse struct {
+	Genres []Genre `json:"genres"`
+}
+
 func (c *Client) GetMovies(ctx context.Context, page int) (*MovieListResponse, error) {
-	url := fmt.Sprintf("%s/movie/popular?page=%d", c.baseURL, page)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("Authorization", "Bearer "+c.bearerToken)
-	req.Header.Set("Accept", "application/json")
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("tmdb: unexpected status code %d", resp.StatusCode)
-	}
-
 	var result MovieListResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	path := fmt.Sprintf("/movie/popular?page=%d", page)
+
+	if err := c.do(ctx, path, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (c *Client) GetGenres(ctx context.Context) (*GenreListResponse, error) {
+	var result GenreListResponse
+
+	if err := c.do(ctx, "/genre/movie/list", &result); err != nil {
 		return nil, err
 	}
 

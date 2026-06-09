@@ -43,9 +43,10 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			token := headerParts[1]
 			userID, err := app.jwt.ValidateJWTToken(token)
 			if err != nil {
-				if errors.Is(err, auth.ErrInvalidJWTToken) {
+				switch {
+				case errors.Is(err, auth.ErrInvalidJWTToken), errors.Is(err, auth.ErrExpiredToken):
 					app.invalidAuthenticationTokenResponse(w, r)
-				} else {
+				default:
 					app.serverErrorResponse(w, r, err)
 				}
 				return
