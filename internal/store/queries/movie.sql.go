@@ -11,6 +11,83 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getFilteredMovies = `-- name: GetFilteredMovies :many
+SELECT
+    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
+FROM
+    movies
+WHERE
+    genres && $1
+    AND ($2::text[] IS NULL OR NOT genres && $2)
+    AND original_language = ANY ($3)
+    AND vote_average >= $4
+    AND EXTRACT(YEAR FROM release_date) BETWEEN $5 AND $6
+    AND id NOT IN (
+        SELECT movie_id FROM user_movies WHERE user_id = $7
+    )
+ORDER BY
+    popularity DESC
+LIMIT $8
+`
+
+type GetFilteredMoviesParams struct {
+	Genres           []string       `json:"genres"`
+	Column2          []string       `json:"column_2"`
+	OriginalLanguage string         `json:"original_language"`
+	VoteAverage      pgtype.Numeric `json:"vote_average"`
+	ReleaseDate      pgtype.Date    `json:"release_date"`
+	ReleaseDate_2    pgtype.Date    `json:"release_date_2"`
+	UserID           int64          `json:"user_id"`
+	Limit            int32          `json:"limit"`
+}
+
+func (q *Queries) GetFilteredMovies(ctx context.Context, arg GetFilteredMoviesParams) ([]Movie, error) {
+	rows, err := q.db.Query(ctx, getFilteredMovies,
+		arg.Genres,
+		arg.Column2,
+		arg.OriginalLanguage,
+		arg.VoteAverage,
+		arg.ReleaseDate,
+		arg.ReleaseDate_2,
+		arg.UserID,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Movie{}
+	for rows.Next() {
+		var i Movie
+		if err := rows.Scan(
+			&i.ID,
+			&i.TmdbID,
+			&i.ImdbID,
+			&i.VagueDescription,
+			&i.Genres,
+			&i.Title,
+			&i.OriginalTitle,
+			&i.FullSynopsis,
+			&i.PosterPath,
+			&i.BackdropPath,
+			&i.ReleaseDate,
+			&i.Runtime,
+			&i.VoteAverage,
+			&i.VoteCount,
+			&i.OriginalLanguage,
+			&i.Popularity,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getMovieByID = `-- name: GetMovieByID :one
 SELECT
     id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
@@ -134,52 +211,6 @@ func (q *Queries) GetMoviesByGenre(ctx context.Context, arg GetMoviesByGenrePara
 	return items, nil
 }
 
-const insertMovie = `-- name: InsertMovie :exec
-INSERT INTO movies (tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-RETURNING
-    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
-`
-
-type InsertMovieParams struct {
-	TmdbID           int32          `json:"tmdb_id"`
-	ImdbID           pgtype.Text    `json:"imdb_id"`
-	VagueDescription string         `json:"vague_description"`
-	Genres           []string       `json:"genres"`
-	Title            string         `json:"title"`
-	OriginalTitle    string         `json:"original_title"`
-	FullSynopsis     string         `json:"full_synopsis"`
-	PosterPath       pgtype.Text    `json:"poster_path"`
-	BackdropPath     pgtype.Text    `json:"backdrop_path"`
-	ReleaseDate      pgtype.Date    `json:"release_date"`
-	Runtime          int32          `json:"runtime"`
-	VoteAverage      pgtype.Numeric `json:"vote_average"`
-	VoteCount        int32          `json:"vote_count"`
-	OriginalLanguage string         `json:"original_language"`
-	Popularity       pgtype.Numeric `json:"popularity"`
-}
-
-func (q *Queries) InsertMovie(ctx context.Context, arg InsertMovieParams) error {
-	_, err := q.db.Exec(ctx, insertMovie,
-		arg.TmdbID,
-		arg.ImdbID,
-		arg.VagueDescription,
-		arg.Genres,
-		arg.Title,
-		arg.OriginalTitle,
-		arg.FullSynopsis,
-		arg.PosterPath,
-		arg.BackdropPath,
-		arg.ReleaseDate,
-		arg.Runtime,
-		arg.VoteAverage,
-		arg.VoteCount,
-		arg.OriginalLanguage,
-		arg.Popularity,
-	)
-	return err
-}
-
 const updateMoviePopularity = `-- name: UpdateMoviePopularity :one
 UPDATE
     movies
@@ -198,6 +229,77 @@ type UpdateMoviePopularityParams struct {
 
 func (q *Queries) UpdateMoviePopularity(ctx context.Context, arg UpdateMoviePopularityParams) (Movie, error) {
 	row := q.db.QueryRow(ctx, updateMoviePopularity, arg.TmdbID, arg.Popularity)
+	var i Movie
+	err := row.Scan(
+		&i.ID,
+		&i.TmdbID,
+		&i.ImdbID,
+		&i.VagueDescription,
+		&i.Genres,
+		&i.Title,
+		&i.OriginalTitle,
+		&i.FullSynopsis,
+		&i.PosterPath,
+		&i.BackdropPath,
+		&i.ReleaseDate,
+		&i.Runtime,
+		&i.VoteAverage,
+		&i.VoteCount,
+		&i.OriginalLanguage,
+		&i.Popularity,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const upsertMovie = `-- name: UpsertMovie :one
+INSERT INTO movies (tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+ON CONFLICT (tmdb_id) DO UPDATE SET
+    popularity    = EXCLUDED.popularity,
+    vote_average  = EXCLUDED.vote_average,
+    vote_count    = EXCLUDED.vote_count,
+    poster_path   = EXCLUDED.poster_path,
+    backdrop_path = EXCLUDED.backdrop_path
+RETURNING id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
+`
+
+type UpsertMovieParams struct {
+	TmdbID           int32          `json:"tmdb_id"`
+	ImdbID           pgtype.Text    `json:"imdb_id"`
+	VagueDescription string         `json:"vague_description"`
+	Genres           []string       `json:"genres"`
+	Title            string         `json:"title"`
+	OriginalTitle    string         `json:"original_title"`
+	FullSynopsis     string         `json:"full_synopsis"`
+	PosterPath       pgtype.Text    `json:"poster_path"`
+	BackdropPath     pgtype.Text    `json:"backdrop_path"`
+	ReleaseDate      pgtype.Date    `json:"release_date"`
+	Runtime          int32          `json:"runtime"`
+	VoteAverage      pgtype.Numeric `json:"vote_average"`
+	VoteCount        int32          `json:"vote_count"`
+	OriginalLanguage string         `json:"original_language"`
+	Popularity       pgtype.Numeric `json:"popularity"`
+}
+
+func (q *Queries) UpsertMovie(ctx context.Context, arg UpsertMovieParams) (Movie, error) {
+	row := q.db.QueryRow(ctx, upsertMovie,
+		arg.TmdbID,
+		arg.ImdbID,
+		arg.VagueDescription,
+		arg.Genres,
+		arg.Title,
+		arg.OriginalTitle,
+		arg.FullSynopsis,
+		arg.PosterPath,
+		arg.BackdropPath,
+		arg.ReleaseDate,
+		arg.Runtime,
+		arg.VoteAverage,
+		arg.VoteCount,
+		arg.OriginalLanguage,
+		arg.Popularity,
+	)
 	var i Movie
 	err := row.Scan(
 		&i.ID,

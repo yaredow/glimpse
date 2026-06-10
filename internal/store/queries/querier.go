@@ -15,6 +15,7 @@ type Querier interface {
 	CreateToken(ctx context.Context, arg CreateTokenParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
 	DeleteTokensForUser(ctx context.Context, arg DeleteTokensForUserParams) error
+	GetFilteredMovies(ctx context.Context, arg GetFilteredMoviesParams) ([]Movie, error)
 	GetMovieByID(ctx context.Context, id int64) (Movie, error)
 	GetMovieByTMDBID(ctx context.Context, tmdbID int32) (Movie, error)
 	GetMoviesByGenre(ctx context.Context, arg GetMoviesByGenreParams) ([]Movie, error)
@@ -23,7 +24,6 @@ type Querier interface {
 	GetUserById(ctx context.Context, id int64) (User, error)
 	GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (User, error)
 	GetUserPreference(ctx context.Context, userID int64) (UserPreference, error)
-	InsertMovie(ctx context.Context, arg InsertMovieParams) error
 	ListGenres(ctx context.Context) ([]Genre, error)
 	RevokeRefreshToken(ctx context.Context, hash []byte) (int64, error)
 	RevokeTokenFamily(ctx context.Context, familyID pgtype.UUID) error
@@ -33,6 +33,7 @@ type Querier interface {
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserShuffleReset(ctx context.Context, id int64) error
 	UpsertGenre(ctx context.Context, arg UpsertGenreParams) error
+	UpsertMovie(ctx context.Context, arg UpsertMovieParams) (Movie, error)
 	UpsertPreference(ctx context.Context, arg UpsertPreferenceParams) (UserPreference, error)
 }
 

@@ -16,6 +16,7 @@ import (
 	"github.com/yaredow/glimpse-api/internal/mailer"
 	"github.com/yaredow/glimpse-api/internal/store"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
+	"github.com/yaredow/glimpse-api/internal/worker"
 )
 
 func main() {
@@ -48,6 +49,10 @@ func main() {
 	jwtManager := auth.NewManager([]byte(cfg.JWTSecret), cfg.JWTIssuer)
 	tmdbClient := tmdb.NewClient(cfg.TMDBAPIKey, cfg.TMDBBaseURL)
 	mailer := mailer.New(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword, cfg.SMTPSender)
+
+	w := worker.New(store, tmdbClient, logger)
+	w.Start()
+	defer w.Stop()
 
 	application := app.New(cfg, logger, logFormat, store, tmdbClient, mailer, jwtManager)
 
