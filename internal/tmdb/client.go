@@ -1,3 +1,4 @@
+// Package tmdb provides a client for the TMDb API.
 package tmdb
 
 import (

@@ -41,15 +41,20 @@ func (app *application) routes() http.Handler {
 	r.Post("/v1/tokens/activate", app.createActivationTokenHandler)
 	r.Post("/v1/tokens/password-reset", app.createPasswordResetTokenHandler)
 
-	// Movies routes (require authentication)
 	r.Group(func(r chi.Router) {
 		r.Use(app.requireAuthenticatedUser)
+
+		// Movies
 		r.Get("/v1/movies", app.GetPopularMovies)
 		r.Get("/v1/movies/genres", app.listGenresHandler)
 
-		// Onboarding and Preferences
+		// Onboarding
 		r.Get("/v1/onboarding/start", app.startOnboardingHandler)
-		r.Post("/v1/users/preferences", app.updatePreferencesHandler)
+		r.Post("/v1/onboarding/finish", app.finishOnboardingHandler)
+
+		// User Preferences
+		r.Get("/v1/users/preferences", app.getPreferencesHandler)
+		r.Put("/v1/users/preferences", app.updatePreferencesHandler)
 	})
 
 	return r
