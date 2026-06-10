@@ -45,6 +45,7 @@ func (app *application) routes() http.Handler {
 		r.Use(app.requireAuthenticatedUser)
 
 		// Movies
+		r.Get("/v1/grid/today", app.getTodayGridHandler)
 		r.Get("/v1/movies", app.GetPopularMovies)
 		r.Get("/v1/movies/genres", app.listGenresHandler)
 

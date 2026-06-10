@@ -17,11 +17,11 @@ SELECT
 FROM
     movies
 WHERE
-    genres && $1
-    AND ($2::text[] IS NULL OR NOT genres && $2)
-    AND original_language = ANY ($3)
+    genres && $1::text[]
+    AND NOT genres && $2::text[]
+    AND original_language = ANY ($3::text[])
     AND vote_average >= $4
-    AND EXTRACT(YEAR FROM release_date) BETWEEN $5 AND $6
+    AND EXTRACT(YEAR FROM release_date) BETWEEN $5::int AND $6::int
     AND id NOT IN (
         SELECT movie_id FROM user_movies WHERE user_id = $7
     )
@@ -31,24 +31,24 @@ LIMIT $8
 `
 
 type GetFilteredMoviesParams struct {
-	Genres           []string       `json:"genres"`
-	Column2          []string       `json:"column_2"`
-	OriginalLanguage string         `json:"original_language"`
-	VoteAverage      pgtype.Numeric `json:"vote_average"`
-	ReleaseDate      pgtype.Date    `json:"release_date"`
-	ReleaseDate_2    pgtype.Date    `json:"release_date_2"`
-	UserID           int64          `json:"user_id"`
-	Limit            int32          `json:"limit"`
+	FavoriteGenres []string       `json:"favorite_genres"`
+	ExcludedGenres []string       `json:"excluded_genres"`
+	Languages      []string       `json:"languages"`
+	MinRating      pgtype.Numeric `json:"min_rating"`
+	MinYear        int32          `json:"min_year"`
+	MaxYear        int32          `json:"max_year"`
+	UserID         int64          `json:"user_id"`
+	Limit          int32          `json:"limit"`
 }
 
 func (q *Queries) GetFilteredMovies(ctx context.Context, arg GetFilteredMoviesParams) ([]Movie, error) {
 	rows, err := q.db.Query(ctx, getFilteredMovies,
-		arg.Genres,
-		arg.Column2,
-		arg.OriginalLanguage,
-		arg.VoteAverage,
-		arg.ReleaseDate,
-		arg.ReleaseDate_2,
+		arg.FavoriteGenres,
+		arg.ExcludedGenres,
+		arg.Languages,
+		arg.MinRating,
+		arg.MinYear,
+		arg.MaxYear,
 		arg.UserID,
 		arg.Limit,
 	)

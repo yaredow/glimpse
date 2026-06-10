@@ -46,3 +46,21 @@ WHERE
 RETURNING
     *;
 
+-- name: GetFilteredMovies :many
+SELECT
+    *
+FROM
+    movies
+WHERE
+    genres && sqlc.arg('favorite_genres')::text[]
+    AND NOT genres && sqlc.arg('excluded_genres')::text[]
+    AND original_language = ANY (sqlc.arg('languages')::text[])
+    AND vote_average >= sqlc.arg('min_rating')
+    AND EXTRACT(YEAR FROM release_date) BETWEEN sqlc.arg('min_year')::int AND sqlc.arg('max_year')::int
+    AND id NOT IN (
+        SELECT movie_id FROM user_movies WHERE user_id = sqlc.arg('user_id')
+    )
+ORDER BY
+    popularity DESC
+LIMIT sqlc.arg('limit');
+

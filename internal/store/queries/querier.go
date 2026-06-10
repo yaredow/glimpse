@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	ClearUserGrid(ctx context.Context, userID pgtype.Int8) error
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
 	CreateToken(ctx context.Context, arg CreateTokenParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
@@ -23,7 +24,9 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserById(ctx context.Context, id int64) (User, error)
 	GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (User, error)
+	GetUserGrid(ctx context.Context, userID pgtype.Int8) ([]GetUserGridRow, error)
 	GetUserPreference(ctx context.Context, userID int64) (UserPreference, error)
+	InsertGridSlot(ctx context.Context, arg InsertGridSlotParams) error
 	ListGenres(ctx context.Context) ([]Genre, error)
 	RevokeRefreshToken(ctx context.Context, hash []byte) (int64, error)
 	RevokeTokenFamily(ctx context.Context, familyID pgtype.UUID) error

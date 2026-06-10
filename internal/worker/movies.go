@@ -10,24 +10,6 @@ import (
 	"github.com/yaredow/glimpse-api/internal/tmdb"
 )
 
-var genreIDToName = map[int]string{
-	28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
-	80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
-	14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
-	9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
-	10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western",
-}
-
-func genreNames(ids []int) []string {
-	names := make([]string, 0, len(ids))
-	for _, id := range ids {
-		if name, ok := genreIDToName[id]; ok {
-			names = append(names, name)
-		}
-	}
-	return names
-}
-
 func parseDate(s string) pgtype.Date {
 	var d pgtype.Date
 	if s == "" {
@@ -59,7 +41,7 @@ func toUpsertParams(tm tmdb.Movie) queries.UpsertMovieParams {
 	return queries.UpsertMovieParams{
 		TmdbID:           int32(tm.ID),
 		VagueDescription: tm.Overview,
-		Genres:           genreNames(tm.GenreIDs),
+		Genres:           tmdb.GenreNames(tm.GenreIDs),
 		Title:            tm.Title,
 		OriginalTitle:    tm.OriginalTitle,
 		FullSynopsis:     tm.Overview,
