@@ -53,7 +53,10 @@ func (app *application) getPreferencesHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		switch {
 		case err == store.ErrRecordNotFound:
-			app.notFoundResponse(w, r)
+			err = app.writeJSON(w, http.StatusOK, Envelope{"preferences": nil}, nil)
+			if err != nil {
+				app.serverErrorResponse(w, r, err)
+			}
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
