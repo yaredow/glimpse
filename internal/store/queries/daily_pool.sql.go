@@ -13,8 +13,9 @@ import (
 
 const clearUserGrid = `-- name: ClearUserGrid :exec
 DELETE FROM daily_pools
-WHERE user_id = $1
-  AND assigned_at::date = CURRENT_DATE
+WHERE
+    user_id = $1
+    AND assigned_at::date = CURRENT_DATE
 `
 
 func (q *Queries) ClearUserGrid(ctx context.Context, userID pgtype.Int8) error {
@@ -30,10 +31,11 @@ SELECT
     m.tmdb_id,
     m.vague_description,
     m.genres
-FROM daily_pools dp
-JOIN movies m ON m.id = dp.movie_id
-WHERE dp.user_id = $1
-  AND dp.assigned_at::date = CURRENT_DATE
+FROM daily_pools AS dp
+INNER JOIN movies AS m ON dp.movie_id = m.id
+WHERE
+    dp.user_id = $1
+    AND dp.assigned_at::date = CURRENT_DATE
 ORDER BY dp.slot_number
 `
 

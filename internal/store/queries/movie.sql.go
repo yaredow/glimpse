@@ -17,9 +17,9 @@ SELECT
 FROM
     movies
 WHERE
-    genres && $1::text[]
+    (cardinality($1::text[]) = 0 OR genres && $1::text[])
     AND NOT genres && $2::text[]
-    AND original_language = ANY ($3::text[])
+    AND (cardinality($3::text[]) = 0 OR original_language = ANY ($3::text[]))
     AND vote_average >= $4
     AND EXTRACT(YEAR FROM release_date) BETWEEN $5::int AND $6::int
     AND id NOT IN (
