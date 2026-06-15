@@ -15,7 +15,6 @@ const clearUserGrid = `-- name: ClearUserGrid :exec
 DELETE FROM daily_pools
 WHERE
     user_id = $1
-    AND assigned_at::date = CURRENT_DATE
 `
 
 func (q *Queries) ClearUserGrid(ctx context.Context, userID pgtype.Int8) error {
