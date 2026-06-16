@@ -61,9 +61,21 @@ WHERE
     email = $1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+type GetUserByEmailRow struct {
+	ID                int64              `json:"id"`
+	Username          string             `json:"username"`
+	Email             string             `json:"email"`
+	PasswordHash      types.Password     `json:"password_hash"`
+	ShufflesRemaining int32              `json:"shuffles_remaining"`
+	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	Activated         bool               `json:"activated"`
+	Version           int32              `json:"version"`
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
-	var i User
+	var i GetUserByEmailRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -95,9 +107,21 @@ WHERE
     id = $1
 `
 
-func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
+type GetUserByIdRow struct {
+	ID                int64              `json:"id"`
+	Username          string             `json:"username"`
+	Email             string             `json:"email"`
+	PasswordHash      types.Password     `json:"password_hash"`
+	ShufflesRemaining int32              `json:"shuffles_remaining"`
+	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	Activated         bool               `json:"activated"`
+	Version           int32              `json:"version"`
+}
+
+func (q *Queries) GetUserById(ctx context.Context, id int64) (GetUserByIdRow, error) {
 	row := q.db.QueryRow(ctx, getUserById, id)
-	var i User
+	var i GetUserByIdRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -136,7 +160,19 @@ type UpdateUserParams struct {
 	Version      int32          `json:"version"`
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+type UpdateUserRow struct {
+	ID                int64              `json:"id"`
+	Username          string             `json:"username"`
+	Email             string             `json:"email"`
+	PasswordHash      types.Password     `json:"password_hash"`
+	ShufflesRemaining int32              `json:"shuffles_remaining"`
+	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	Activated         bool               `json:"activated"`
+	Version           int32              `json:"version"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
 	row := q.db.QueryRow(ctx, updateUser,
 		arg.ID,
 		arg.Username,
@@ -145,7 +181,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Activated,
 		arg.Version,
 	)
-	var i User
+	var i UpdateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,

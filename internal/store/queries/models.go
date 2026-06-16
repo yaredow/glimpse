@@ -5,9 +5,56 @@
 package queries
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/types"
 )
+
+type ActionType string
+
+const (
+	ActionTypeRevealed     ActionType = "revealed"
+	ActionTypeWatched      ActionType = "watched"
+	ActionTypeSkipped      ActionType = "skipped"
+	ActionTypeWatchlistAdd ActionType = "watchlist_add"
+)
+
+func (e *ActionType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ActionType(s)
+	case string:
+		*e = ActionType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ActionType: %T", src)
+	}
+	return nil
+}
+
+type NullActionType struct {
+	ActionType ActionType `json:"action_type"`
+	Valid      bool       `json:"valid"` // Valid is true if ActionType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullActionType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ActionType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ActionType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullActionType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ActionType), nil
+}
 
 type DailyPool struct {
 	ID         int64              `json:"id"`
@@ -41,6 +88,9 @@ type Movie struct {
 	OriginalLanguage string             `json:"original_language"`
 	Popularity       pgtype.Numeric     `json:"popularity"`
 	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	ShownCount       int32              `json:"shown_count"`
+	WatchedCount     int32              `json:"watched_count"`
+	GlobalWatchRate  pgtype.Float8      `json:"global_watch_rate"`
 }
 
 type RefreshToken struct {
@@ -70,6 +120,35 @@ type User struct {
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	Activated         bool               `json:"activated"`
 	Version           int32              `json:"version"`
+	ExplorationRate   float64            `json:"exploration_rate"`
+	TotalInteractions int32              `json:"total_interactions"`
+}
+
+type UserAffinity struct {
+	UserID      int64              `json:"user_id"`
+	Dimension   string             `json:"dimension"`
+	Value       string             `json:"value"`
+	Score       float64            `json:"score"`
+	Confidence  float64            `json:"confidence"`
+	LastUpdated pgtype.Timestamptz `json:"last_updated"`
+}
+
+type UserGridHistory struct {
+	ID      int64              `json:"id"`
+	UserID  int64              `json:"user_id"`
+	MovieID int64              `json:"movie_id"`
+	ShownAt pgtype.Timestamptz `json:"shown_at"`
+}
+
+type UserInteraction struct {
+	ID               int64              `json:"id"`
+	UserID           int64              `json:"user_id"`
+	MovieID          int64              `json:"movie_id"`
+	Action           ActionType         `json:"action"`
+	GridSessionID    pgtype.UUID        `json:"grid_session_id"`
+	GridPosition     pgtype.Int4        `json:"grid_position"`
+	RevealToActionMs pgtype.Int4        `json:"reveal_to_action_ms"`
+	ActedAt          pgtype.Timestamptz `json:"acted_at"`
 }
 
 type UserMovie struct {

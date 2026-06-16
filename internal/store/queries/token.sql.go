@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/yaredow/glimpse-api/internal/types"
 )
 
 const createToken = `-- name: CreateToken :exec
@@ -75,9 +76,21 @@ type GetUserByTokenParams struct {
 	Scope string `json:"scope"`
 }
 
-func (q *Queries) GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (User, error) {
+type GetUserByTokenRow struct {
+	ID                int64              `json:"id"`
+	Username          string             `json:"username"`
+	Email             string             `json:"email"`
+	PasswordHash      types.Password     `json:"password_hash"`
+	ShufflesRemaining int32              `json:"shuffles_remaining"`
+	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	Activated         bool               `json:"activated"`
+	Version           int32              `json:"version"`
+}
+
+func (q *Queries) GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (GetUserByTokenRow, error) {
 	row := q.db.QueryRow(ctx, getUserByToken, arg.Hash, arg.Scope)
-	var i User
+	var i GetUserByTokenRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,

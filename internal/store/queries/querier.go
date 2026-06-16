@@ -11,33 +11,43 @@ import (
 )
 
 type Querier interface {
+	CleanupOldGridHistory(ctx context.Context) error
 	ClearUserGrid(ctx context.Context, userID pgtype.Int8) error
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
 	CreateToken(ctx context.Context, arg CreateTokenParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	DecayAffinies(ctx context.Context) error
 	DeleteTokensForUser(ctx context.Context, arg DeleteTokensForUserParams) error
+	GetCandidateMovies(ctx context.Context, arg GetCandidateMoviesParams) ([]Movie, error)
 	GetFilteredMovies(ctx context.Context, arg GetFilteredMoviesParams) ([]Movie, error)
+	GetInteractionsForUser(ctx context.Context, arg GetInteractionsForUserParams) ([]UserInteraction, error)
 	GetMovieByID(ctx context.Context, id int64) (Movie, error)
 	GetMovieByTMDBID(ctx context.Context, tmdbID int32) (Movie, error)
 	GetMoviesByGenre(ctx context.Context, arg GetMoviesByGenreParams) ([]Movie, error)
+	GetRecentlyShownMovies(ctx context.Context, arg GetRecentlyShownMoviesParams) ([]GetRecentlyShownMoviesRow, error)
 	GetRefreshToken(ctx context.Context, hash []byte) (RefreshToken, error)
-	GetUserByEmail(ctx context.Context, email string) (User, error)
-	GetUserById(ctx context.Context, id int64) (User, error)
-	GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (User, error)
+	GetUserActionedMovieIDs(ctx context.Context, userID int64) ([]int64, error)
+	GetUserAffinities(ctx context.Context, userID int64) ([]UserAffinity, error)
+	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
+	GetUserById(ctx context.Context, id int64) (GetUserByIdRow, error)
+	GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (GetUserByTokenRow, error)
 	GetUserGrid(ctx context.Context, userID pgtype.Int8) ([]GetUserGridRow, error)
 	GetUserPreference(ctx context.Context, userID int64) (UserPreference, error)
+	InsertGridHistory(ctx context.Context, arg InsertGridHistoryParams) error
 	InsertGridSlot(ctx context.Context, arg InsertGridSlotParams) error
+	InsertInteraction(ctx context.Context, arg InsertInteractionParams) error
 	ListGenres(ctx context.Context) ([]Genre, error)
 	RevokeRefreshToken(ctx context.Context, hash []byte) (int64, error)
 	RevokeTokenFamily(ctx context.Context, familyID pgtype.UUID) error
 	SetTokenReplacement(ctx context.Context, arg SetTokenReplacementParams) error
 	UpdateMoviePopularity(ctx context.Context, arg UpdateMoviePopularityParams) (Movie, error)
 	UpdateOnboardingStatus(ctx context.Context, arg UpdateOnboardingStatusParams) error
-	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
 	UpdateUserShuffleReset(ctx context.Context, id int64) error
 	UpsertGenre(ctx context.Context, arg UpsertGenreParams) error
 	UpsertMovie(ctx context.Context, arg UpsertMovieParams) (Movie, error)
 	UpsertPreference(ctx context.Context, arg UpsertPreferenceParams) (UserPreference, error)
+	UpsertUserAffinity(ctx context.Context, arg UpsertUserAffinityParams) error
 }
 
 var _ Querier = (*Queries)(nil)

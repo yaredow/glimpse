@@ -13,7 +13,7 @@ import (
 
 const getFilteredMovies = `-- name: GetFilteredMovies :many
 SELECT
-    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
+    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at, shown_count, watched_count, global_watch_rate
 FROM
     movies
 WHERE
@@ -77,6 +77,9 @@ func (q *Queries) GetFilteredMovies(ctx context.Context, arg GetFilteredMoviesPa
 			&i.OriginalLanguage,
 			&i.Popularity,
 			&i.CreatedAt,
+			&i.ShownCount,
+			&i.WatchedCount,
+			&i.GlobalWatchRate,
 		); err != nil {
 			return nil, err
 		}
@@ -90,7 +93,7 @@ func (q *Queries) GetFilteredMovies(ctx context.Context, arg GetFilteredMoviesPa
 
 const getMovieByID = `-- name: GetMovieByID :one
 SELECT
-    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
+    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at, shown_count, watched_count, global_watch_rate
 FROM
     movies
 WHERE
@@ -118,13 +121,16 @@ func (q *Queries) GetMovieByID(ctx context.Context, id int64) (Movie, error) {
 		&i.OriginalLanguage,
 		&i.Popularity,
 		&i.CreatedAt,
+		&i.ShownCount,
+		&i.WatchedCount,
+		&i.GlobalWatchRate,
 	)
 	return i, err
 }
 
 const getMovieByTMDBID = `-- name: GetMovieByTMDBID :one
 SELECT
-    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
+    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at, shown_count, watched_count, global_watch_rate
 FROM
     movies
 WHERE
@@ -152,13 +158,16 @@ func (q *Queries) GetMovieByTMDBID(ctx context.Context, tmdbID int32) (Movie, er
 		&i.OriginalLanguage,
 		&i.Popularity,
 		&i.CreatedAt,
+		&i.ShownCount,
+		&i.WatchedCount,
+		&i.GlobalWatchRate,
 	)
 	return i, err
 }
 
 const getMoviesByGenre = `-- name: GetMoviesByGenre :many
 SELECT
-    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
+    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at, shown_count, watched_count, global_watch_rate
 FROM
     movies
 WHERE
@@ -200,6 +209,9 @@ func (q *Queries) GetMoviesByGenre(ctx context.Context, arg GetMoviesByGenrePara
 			&i.OriginalLanguage,
 			&i.Popularity,
 			&i.CreatedAt,
+			&i.ShownCount,
+			&i.WatchedCount,
+			&i.GlobalWatchRate,
 		); err != nil {
 			return nil, err
 		}
@@ -219,7 +231,7 @@ SET
 WHERE
     tmdb_id = $1
 RETURNING
-    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
+    id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at, shown_count, watched_count, global_watch_rate
 `
 
 type UpdateMoviePopularityParams struct {
@@ -248,6 +260,9 @@ func (q *Queries) UpdateMoviePopularity(ctx context.Context, arg UpdateMoviePopu
 		&i.OriginalLanguage,
 		&i.Popularity,
 		&i.CreatedAt,
+		&i.ShownCount,
+		&i.WatchedCount,
+		&i.GlobalWatchRate,
 	)
 	return i, err
 }
@@ -262,7 +277,7 @@ ON CONFLICT (tmdb_id) DO UPDATE SET
     poster_path     = EXCLUDED.poster_path,
     backdrop_path   = EXCLUDED.backdrop_path,
     vague_description = EXCLUDED.vague_description
-RETURNING id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at
+RETURNING id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity, created_at, shown_count, watched_count, global_watch_rate
 `
 
 type UpsertMovieParams struct {
@@ -320,6 +335,9 @@ func (q *Queries) UpsertMovie(ctx context.Context, arg UpsertMovieParams) (Movie
 		&i.OriginalLanguage,
 		&i.Popularity,
 		&i.CreatedAt,
+		&i.ShownCount,
+		&i.WatchedCount,
+		&i.GlobalWatchRate,
 	)
 	return i, err
 }
