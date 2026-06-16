@@ -2,11 +2,12 @@
 INSERT INTO movies (tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 ON CONFLICT (tmdb_id) DO UPDATE SET
-    popularity    = EXCLUDED.popularity,
-    vote_average  = EXCLUDED.vote_average,
-    vote_count    = EXCLUDED.vote_count,
-    poster_path   = EXCLUDED.poster_path,
-    backdrop_path = EXCLUDED.backdrop_path
+    popularity      = EXCLUDED.popularity,
+    vote_average    = EXCLUDED.vote_average,
+    vote_count      = EXCLUDED.vote_count,
+    poster_path     = EXCLUDED.poster_path,
+    backdrop_path   = EXCLUDED.backdrop_path,
+    vague_description = EXCLUDED.vague_description
 RETURNING *;
 
 -- name: GetMovieByID :one

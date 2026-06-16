@@ -3,7 +3,43 @@ package app
 import (
 	"math/rand"
 	"net/http"
+	"sort"
+
+	"github.com/yaredow/glimpse-api/internal/store/queries"
 )
+
+func popularityFloat64(m queries.Movie) float64 {
+	if !m.Popularity.Valid {
+		return 0
+	}
+	v, _ := m.Popularity.Float64Value()
+	return v.Float64
+}
+
+func pickStratified(movies []queries.Movie, n int) []queries.Movie {
+	if len(movies) <= n {
+		return movies
+	}
+
+	sort.Slice(movies, func(i, j int) bool {
+		return popularityFloat64(movies[i]) > popularityFloat64(movies[j])
+	})
+
+	picked := make([]queries.Movie, 0, n)
+	bucketSize := len(movies) / n
+
+	for i := 0; i < n; i++ {
+		start := i * bucketSize
+		end := start + bucketSize
+		if i == n-1 {
+			end = len(movies)
+		}
+		idx := rand.Intn(end - start)
+		picked = append(picked, movies[start+idx])
+	}
+
+	return picked
+}
 
 func (app *application) getTodayGridHandler(w http.ResponseWriter, r *http.Request) {
 	user := app.contextGetUser(r)
@@ -28,7 +64,7 @@ func (app *application) getTodayGridHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	movies, err := app.store.GetFilteredMoviesFromPrefs(r.Context(), user.ID, prefs, 50)
+	movies, err := app.store.GetFilteredMoviesFromPrefs(r.Context(), user.ID, prefs, 200)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
@@ -39,12 +75,8 @@ func (app *application) getTodayGridHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	rand.Shuffle(len(movies), func(i, j int) {
-		movies[i], movies[j] = movies[j], movies[i]
-	})
-
-	picked := movies[:5]
-	movieIDs := make([]int64, 5)
+	picked := pickStratified(movies, 5)
+	movieIDs := make([]int64, len(picked))
 	for i, m := range picked {
 		movieIDs[i] = m.ID
 	}

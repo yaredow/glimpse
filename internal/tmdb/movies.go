@@ -42,9 +42,20 @@ type Language struct {
 	Name        string `json:"name"`
 }
 
-func (c *Client) GetMovies(ctx context.Context, page int) (*MovieListResponse, error) {
+func (c *Client) GetPopularMovies(ctx context.Context, page int) (*MovieListResponse, error) {
 	var result MovieListResponse
 	path := fmt.Sprintf("/movie/popular?page=%d", page)
+
+	if err := c.do(ctx, path, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (c *Client) GetTopRatedMovies(ctx context.Context, page int) (*MovieListResponse, error) {
+	var result MovieListResponse
+	path := fmt.Sprintf("/movie/top_rated?page=%d", page)
 
 	if err := c.do(ctx, path, &result); err != nil {
 		return nil, err

@@ -5,6 +5,7 @@ import (
 	"context"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/yaredow/glimpse-api/internal/store"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
@@ -30,15 +31,29 @@ func (w *Worker) Start() {
 	ctx, cancel := context.WithCancel(context.Background())
 	w.cancel = cancel
 
-	w.wg.Add(2)
+	w.wg.Add(1)
 	go func() {
 		defer w.wg.Done()
-		w.syncGenres(ctx)
+		w.runSyncloop(ctx)
 	}()
-	go func() {
-		defer w.wg.Done()
-		w.syncMovies(ctx)
-	}()
+}
+
+func (w *Worker) runSyncloop(ctx context.Context) {
+	w.syncGenres(ctx)
+	w.syncMovies(ctx)
+
+	ticker := time.NewTicker(6 * time.Hour)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			w.syncGenres(ctx)
+			w.syncMovies(ctx)
+		case <-ctx.Done():
+			return
+		}
+	}
 }
 
 func (w *Worker) Stop() {
