@@ -41,8 +41,10 @@ type Querier interface {
 	RevokeTokenFamily(ctx context.Context, familyID pgtype.UUID) error
 	SetTokenReplacement(ctx context.Context, arg SetTokenReplacementParams) error
 	UpdateMoviePopularity(ctx context.Context, arg UpdateMoviePopularityParams) (Movie, error)
+	UpdateMovieWatchCounts(ctx context.Context, arg UpdateMovieWatchCountsParams) error
 	UpdateOnboardingStatus(ctx context.Context, arg UpdateOnboardingStatusParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
+	UpdateUserInteractionStats(ctx context.Context, id int64) error
 	UpdateUserShuffleReset(ctx context.Context, id int64) error
 	UpsertGenre(ctx context.Context, arg UpsertGenreParams) error
 	UpsertMovie(ctx context.Context, arg UpsertMovieParams) (Movie, error)

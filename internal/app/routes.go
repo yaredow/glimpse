@@ -46,6 +46,7 @@ func (app *application) routes() http.Handler {
 
 		// Movies
 		r.Get("/v1/grid/today", app.getTodayGridHandler)
+		r.Post("/v1/interactions", app.recordInteractionHandler)
 		r.Get("/v1/movies/genres", app.listGenresHandler)
 
 		// Onboarding
@@ -55,6 +56,9 @@ func (app *application) routes() http.Handler {
 		// User Preferences
 		r.Get("/v1/users/preferences", app.getPreferencesHandler)
 		r.Put("/v1/users/preferences", app.updatePreferencesHandler)
+
+		// User Interactions
+		r.Post("/v1/interactions", app.recordInteractionHandler)
 	})
 
 	return r

@@ -208,6 +208,18 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateU
 	return i, err
 }
 
+const updateUserInteractionStats = `-- name: UpdateUserInteractionStats :exec
+UPDATE users
+SET total_interactions = total_interactions + 1,
+    exploration_rate = GREATEST(0.05, 0.4 * EXP(-CAST(total_interactions + 1 AS FLOAT) / 50.0))
+WHERE id = $1
+`
+
+func (q *Queries) UpdateUserInteractionStats(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, updateUserInteractionStats, id)
+	return err
+}
+
 const updateUserShuffleReset = `-- name: UpdateUserShuffleReset :exec
 UPDATE
     users

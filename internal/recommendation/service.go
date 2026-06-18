@@ -88,7 +88,7 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 
 	pgUserID := pgtype.Int8{Int64: userID, Valid: true}
 	err = s.store.ExecTx(ctx, func(q *queries.Queries) error {
-		if err := q.ClearUserGrid(ctx, pgUserID); err != nil {
+		if err = q.ClearUserGrid(ctx, pgUserID); err != nil {
 			return err
 		}
 
@@ -98,7 +98,7 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 				MovieID:    pgtype.Int8{Int64: movieID, Valid: true},
 				SlotNumber: int32(i + 1),
 			}
-			if err := q.InsertGridSlot(ctx, params); err != nil {
+			if err = q.InsertGridSlot(ctx, params); err != nil {
 				return err
 			}
 		}
@@ -108,7 +108,7 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 				UserID:  userID,
 				MovieID: movieID,
 			}
-			if err := q.InsertGridHistory(ctx, params); err != nil {
+			if err = q.InsertGridHistory(ctx, params); err != nil {
 				return err
 			}
 		}
@@ -125,4 +125,71 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 	}
 
 	return grid, sessionID, nil
+}
+
+func (s *Service) RecordInteraction(ctx context.Context, userID int64, movieID int64, action string, sessionID uuid.UUID, gridPosition *int, revealActionMs *int) error {
+	movie, err := s.store.GetMovieByID(ctx, movieID)
+	if err != nil {
+		return err
+	}
+
+	weight, ok := getActionWeight(action)
+
+	if !ok {
+		return fmt.Errorf("unknown action: %s", action)
+	}
+
+	year := int32(0)
+	if movie.ReleaseDate.Valid {
+		year = int32(movie.ReleaseDate.Time.Year())
+	}
+
+	dims := MovieDimensions(movie.Genres, movie.OriginalLanguage, year, numericToFloat64(movie.VoteAverage))
+
+	pgSessionID := pgtype.UUID{Bytes: sessionID, Valid: true}
+	var pgGridPos pgtype.Int4
+	if gridPosition != nil {
+		pgGridPos = pgtype.Int4{Int32: int32(*gridPosition), Valid: true}
+	}
+
+	var pgRevealMs pgtype.Int4
+	if revealActionMs != nil {
+		pgRevealMs = pgtype.Int4{Int32: int32(*revealActionMs), Valid: true}
+	}
+
+	return s.store.ExecTx(ctx, func(q *queries.Queries) error {
+		for _, dim := range dims {
+			if err := q.UpsertUserAffinity(ctx, queries.UpsertUserAffinityParams{
+				UserID:    userID,
+				Dimension: dim.Name,
+				Value:     dim.Value,
+				Score:     weight.Delta,
+			}); err != nil {
+				return err
+			}
+		}
+
+		if err := q.InsertInteraction(ctx, queries.InsertInteractionParams{
+			UserID:           userID,
+			MovieID:          movieID,
+			Action:           queries.ActionType(action),
+			GridSessionID:    pgSessionID,
+			GridPosition:     pgGridPos,
+			RevealToActionMs: pgRevealMs,
+		}); err != nil {
+			return err
+		}
+
+		if weight.AffectExploration {
+			if err := q.UpdateUserInteractionStats(ctx, userID); err != nil {
+				return err
+			}
+		}
+
+		return q.UpdateMovieWatchCounts(ctx, queries.UpdateMovieWatchCountsParams{
+			ID:      movieID,
+			Shown:   action == "revealed" || action == "watched",
+			Watched: action == "watched",
+		})
+	})
 }

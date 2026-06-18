@@ -37,6 +37,12 @@ ORDER BY
     popularity DESC
 LIMIT $2;
 
+-- name: UpdateMovieWatchCounts :exec
+UPDATE movies SET
+    shown_count   = shown_count + CASE WHEN sqlc.arg('shown')::boolean THEN 1 ELSE 0 END,
+    watched_count = watched_count + CASE WHEN sqlc.arg('watched')::boolean THEN 1 ELSE 0 END
+WHERE id = sqlc.arg('id');
+
 -- name: UpdateMoviePopularity :one
 UPDATE
     movies

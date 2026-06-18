@@ -62,3 +62,9 @@ SET
     last_shuffle_reset = NOW()
 WHERE
     id = $1;
+
+-- name: UpdateUserInteractionStats :exec
+UPDATE users
+SET total_interactions = total_interactions + 1,
+    exploration_rate = GREATEST(0.05, 0.4 * EXP(-CAST(total_interactions + 1 AS FLOAT) / 50.0))
+WHERE id = $1;

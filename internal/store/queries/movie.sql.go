@@ -42,7 +42,8 @@ type GetFilteredMoviesParams struct {
 }
 
 func (q *Queries) GetFilteredMovies(ctx context.Context, arg GetFilteredMoviesParams) ([]Movie, error) {
-	rows, err := q.db.Query(ctx, getFilteredMovies,
+	rows, err := q.db.Query(
+		ctx, getFilteredMovies,
 		arg.FavoriteGenres,
 		arg.ExcludedGenres,
 		arg.Languages,
@@ -267,6 +268,24 @@ func (q *Queries) UpdateMoviePopularity(ctx context.Context, arg UpdateMoviePopu
 	return i, err
 }
 
+const updateMovieWatchCounts = `-- name: UpdateMovieWatchCounts :exec
+UPDATE movies SET
+    shown_count   = shown_count + CASE WHEN $1::boolean THEN 1 ELSE 0 END,
+    watched_count = watched_count + CASE WHEN $2::boolean THEN 1 ELSE 0 END
+WHERE id = $3
+`
+
+type UpdateMovieWatchCountsParams struct {
+	Shown   bool  `json:"shown"`
+	Watched bool  `json:"watched"`
+	ID      int64 `json:"id"`
+}
+
+func (q *Queries) UpdateMovieWatchCounts(ctx context.Context, arg UpdateMovieWatchCountsParams) error {
+	_, err := q.db.Exec(ctx, updateMovieWatchCounts, arg.Shown, arg.Watched, arg.ID)
+	return err
+}
+
 const upsertMovie = `-- name: UpsertMovie :one
 INSERT INTO movies (tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, release_date, runtime, vote_average, vote_count, original_language, popularity)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
@@ -299,7 +318,8 @@ type UpsertMovieParams struct {
 }
 
 func (q *Queries) UpsertMovie(ctx context.Context, arg UpsertMovieParams) (Movie, error) {
-	row := q.db.QueryRow(ctx, upsertMovie,
+	row := q.db.QueryRow(
+		ctx, upsertMovie,
 		arg.TmdbID,
 		arg.ImdbID,
 		arg.VagueDescription,
