@@ -59,6 +59,8 @@ SELECT
     u.password_hash,
     u.shuffles_remaining,
     u.last_shuffle_reset,
+    u.exploration_rate,
+    u.total_interactions,
     u.created_at,
     u.activated,
     u.version
@@ -83,6 +85,8 @@ type GetUserByTokenRow struct {
 	PasswordHash      types.Password     `json:"password_hash"`
 	ShufflesRemaining int32              `json:"shuffles_remaining"`
 	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
+	ExplorationRate   float64            `json:"exploration_rate"`
+	TotalInteractions int32              `json:"total_interactions"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	Activated         bool               `json:"activated"`
 	Version           int32              `json:"version"`
@@ -98,6 +102,8 @@ func (q *Queries) GetUserByToken(ctx context.Context, arg GetUserByTokenParams) 
 		&i.PasswordHash,
 		&i.ShufflesRemaining,
 		&i.LastShuffleReset,
+		&i.ExplorationRate,
+		&i.TotalInteractions,
 		&i.CreatedAt,
 		&i.Activated,
 		&i.Version,

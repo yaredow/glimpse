@@ -14,6 +14,7 @@ import (
 	"github.com/yaredow/glimpse-api/internal/auth"
 	db "github.com/yaredow/glimpse-api/internal/db"
 	"github.com/yaredow/glimpse-api/internal/mailer"
+	"github.com/yaredow/glimpse-api/internal/recommendation"
 	"github.com/yaredow/glimpse-api/internal/store"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
 	"github.com/yaredow/glimpse-api/internal/worker"
@@ -49,12 +50,13 @@ func main() {
 	jwtManager := auth.NewManager([]byte(cfg.JWTSecret), cfg.JWTIssuer)
 	tmdbClient := tmdb.NewClient(cfg.TMDBAPIKey, cfg.TMDBBaseURL)
 	mailer := mailer.New(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword, cfg.SMTPSender)
+	recService := recommendation.NewService(store, tmdb.GenreNames)
 
 	w := worker.New(store, tmdbClient, logger)
 	w.Start()
 	defer w.Stop()
 
-	application := app.New(cfg, logger, logFormat, store, tmdbClient, mailer, jwtManager)
+	application := app.New(cfg, logger, logFormat, store, tmdbClient, mailer, jwtManager, recService)
 
 	if err := application.Serve(); !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("server error", "error", err)

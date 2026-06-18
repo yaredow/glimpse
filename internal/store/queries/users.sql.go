@@ -52,6 +52,8 @@ SELECT
     password_hash,
     shuffles_remaining,
     last_shuffle_reset,
+    exploration_rate,
+    total_interactions,
     created_at,
     activated,
     version
@@ -68,6 +70,8 @@ type GetUserByEmailRow struct {
 	PasswordHash      types.Password     `json:"password_hash"`
 	ShufflesRemaining int32              `json:"shuffles_remaining"`
 	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
+	ExplorationRate   float64            `json:"exploration_rate"`
+	TotalInteractions int32              `json:"total_interactions"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	Activated         bool               `json:"activated"`
 	Version           int32              `json:"version"`
@@ -83,6 +87,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 		&i.PasswordHash,
 		&i.ShufflesRemaining,
 		&i.LastShuffleReset,
+		&i.ExplorationRate,
+		&i.TotalInteractions,
 		&i.CreatedAt,
 		&i.Activated,
 		&i.Version,
@@ -98,6 +104,8 @@ SELECT
     password_hash,
     shuffles_remaining,
     last_shuffle_reset,
+    exploration_rate,
+    total_interactions,
     created_at,
     activated,
     version
@@ -114,6 +122,8 @@ type GetUserByIdRow struct {
 	PasswordHash      types.Password     `json:"password_hash"`
 	ShufflesRemaining int32              `json:"shuffles_remaining"`
 	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
+	ExplorationRate   float64            `json:"exploration_rate"`
+	TotalInteractions int32              `json:"total_interactions"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 	Activated         bool               `json:"activated"`
 	Version           int32              `json:"version"`
@@ -129,6 +139,8 @@ func (q *Queries) GetUserById(ctx context.Context, id int64) (GetUserByIdRow, er
 		&i.PasswordHash,
 		&i.ShufflesRemaining,
 		&i.LastShuffleReset,
+		&i.ExplorationRate,
+		&i.TotalInteractions,
 		&i.CreatedAt,
 		&i.Activated,
 		&i.Version,

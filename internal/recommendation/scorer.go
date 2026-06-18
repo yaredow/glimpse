@@ -63,6 +63,50 @@ func movieScore(m queries.Movie, affinities map[string]float64, recentlyShown ma
 	return genreAffinity + langAffinity + decadeAff + ratingAff + popularity + freshness + noise
 }
 
+func enforceDiversity(scored []ScoredMovie) []ScoredMovie {
+	if len(scored) < 5 {
+		return scored
+	}
+
+	picked := make([]ScoredMovie, 5)
+	copy(picked, scored[:5])
+
+	firstGenres := picked[0].Movie.Genres
+	if len(firstGenres) == 0 {
+		return picked
+	}
+
+	allSameGenre := true
+	for _, sm := range picked[1:] {
+		if !hasCommonGenre(firstGenres, sm.Movie.Genres) {
+			allSameGenre = false
+			break
+		}
+	}
+
+	if allSameGenre && len(scored) > 5 {
+		for _, candidate := range scored[5:] {
+			if !hasCommonGenre(firstGenres, candidate.Movie.Genres) {
+				picked[4] = candidate
+				break
+			}
+		}
+	}
+
+	return picked
+}
+
+func hasCommonGenre(a, b []string) bool {
+	for _, ga := range a {
+		for _, gb := range b {
+			if ga == gb {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func affinityFor(dimension, value string, affinities map[string]float64) float64 {
 	return affinities[dimension+":"+value]
 }

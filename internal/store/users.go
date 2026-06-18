@@ -71,7 +71,19 @@ func (s *Store) GetUserByEmail(ctx context.Context, email string) (queries.User,
 		return queries.User{}, err
 	}
 
-	return result, nil
+	return queries.User{
+		ID:                result.ID,
+		Username:          result.Username,
+		Email:             result.Email,
+		PasswordHash:      result.PasswordHash,
+		ShufflesRemaining: result.ShufflesRemaining,
+		LastShuffleReset:  result.LastShuffleReset,
+		ExplorationRate:   result.ExplorationRate,
+		TotalInteractions: result.TotalInteractions,
+		CreatedAt:         result.CreatedAt,
+		Activated:         result.Activated,
+		Version:           result.Version,
+	}, nil
 }
 
 func ValidateEmail(v *validator.Validator, email string) {

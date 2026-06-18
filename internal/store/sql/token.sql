@@ -10,6 +10,8 @@ SELECT
     u.password_hash,
     u.shuffles_remaining,
     u.last_shuffle_reset,
+    u.exploration_rate,
+    u.total_interactions,
     u.created_at,
     u.activated,
     u.version

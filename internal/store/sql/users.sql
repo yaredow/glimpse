@@ -12,6 +12,8 @@ SELECT
     password_hash,
     shuffles_remaining,
     last_shuffle_reset,
+    exploration_rate,
+    total_interactions,
     created_at,
     activated,
     version
@@ -28,6 +30,8 @@ SELECT
     password_hash,
     shuffles_remaining,
     last_shuffle_reset,
+    exploration_rate,
+    total_interactions,
     created_at,
     activated,
     version

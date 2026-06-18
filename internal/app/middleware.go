@@ -7,6 +7,7 @@ import (
 
 	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/store"
+	"github.com/yaredow/glimpse-api/internal/store/queries"
 )
 
 func (app *application) requireAuthenticatedUser(next http.Handler) http.Handler {
@@ -52,7 +53,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 				return
 			}
 
-			user, err := app.store.GetUserById(r.Context(), userID)
+			row, err := app.store.GetUserById(r.Context(), userID)
 			if err != nil {
 				switch {
 				case errors.Is(err, store.ErrRecordNotFound):
@@ -61,6 +62,20 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 					app.serverErrorResponse(w, r, err)
 				}
 				return
+			}
+
+			user := queries.User{
+				ID:                row.ID,
+				Username:          row.Username,
+				Email:             row.Email,
+				PasswordHash:      row.PasswordHash,
+				ShufflesRemaining: row.ShufflesRemaining,
+				LastShuffleReset:  row.LastShuffleReset,
+				ExplorationRate:   row.ExplorationRate,
+				TotalInteractions: row.TotalInteractions,
+				CreatedAt:         row.CreatedAt,
+				Activated:         row.Activated,
+				Version:           row.Version,
 			}
 
 			r = app.contextSetUser(r, user)

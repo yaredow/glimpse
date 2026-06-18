@@ -140,7 +140,19 @@ func (s *Store) GetUserByToken(ctx context.Context, tokenPlainText string, scope
 		}
 	}
 
-	return result, nil
+	return queries.User{
+		ID:                result.ID,
+		Username:          result.Username,
+		Email:             result.Email,
+		PasswordHash:      result.PasswordHash,
+		ShufflesRemaining: result.ShufflesRemaining,
+		LastShuffleReset:  result.LastShuffleReset,
+		ExplorationRate:   result.ExplorationRate,
+		TotalInteractions: result.TotalInteractions,
+		CreatedAt:         result.CreatedAt,
+		Activated:         result.Activated,
+		Version:           result.Version,
+	}, nil
 }
 
 func (s *Store) RotateRefreshToken(ctx context.Context, oldPlaintext string, ttl time.Duration) (*types.Tokens, error) {
