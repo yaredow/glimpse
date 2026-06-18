@@ -111,6 +111,17 @@ func (app *application) finishOnboardingHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	genreIDs := make([]int, len(input.FavoriteGenres))
+	for i, id := range input.FavoriteGenres {
+		genreIDs[i] = int(id)
+	}
+
+	err = app.recService.SeedFromOnboarding(r.Context(), user.ID, genreIDs)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
 	app.writeJSON(w, http.StatusOK, Envelope{"preferences": prefs}, nil)
 }
 

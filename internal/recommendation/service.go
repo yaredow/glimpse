@@ -193,3 +193,21 @@ func (s *Service) RecordInteraction(ctx context.Context, userID int64, movieID i
 		})
 	})
 }
+
+func (s *Service) SeedFromOnboarding(ctx context.Context, userID int64, genreIDs []int) error {
+	names := s.genreNames(genreIDs)
+
+	for _, name := range names {
+		err := s.store.UpsertUserAffinity(ctx, queries.UpsertUserAffinityParams{
+			UserID:    userID,
+			Dimension: "genre",
+			Value:     name,
+			Score:     1,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
