@@ -31,11 +31,8 @@ func (w *Worker) Start() {
 	ctx, cancel := context.WithCancel(context.Background())
 	w.cancel = cancel
 
-	w.wg.Add(1)
-	go func() {
-		defer w.wg.Done()
-		w.runSyncloop(ctx)
-	}()
+	w.wg.Go(func() { w.runSyncloop(ctx) })
+	w.wg.Go(func() { w.runDecayLoop(ctx) })
 }
 
 func (w *Worker) runSyncloop(ctx context.Context) {
@@ -54,6 +51,36 @@ func (w *Worker) runSyncloop(ctx context.Context) {
 			return
 		}
 	}
+}
+
+func (w *Worker) runDecayLoop(ctx context.Context) {
+	w.decay(ctx)
+
+	ticker := time.NewTicker(24 * time.Hour)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			w.decay(ctx)
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (w *Worker) decay(ctx context.Context) {
+	if err := w.store.DecayAffinies(ctx); err != nil {
+		w.logger.Error("decay affinities failed", "error", err)
+		return
+	}
+
+	if err := w.store.CleanupOldGridHistory(ctx); err != nil {
+		w.logger.Error("clean up grid history failed", "error", err)
+		return
+	}
+
+	w.logger.Info("nightly decay complete")
 }
 
 func (w *Worker) Stop() {
