@@ -23,7 +23,7 @@ WHERE
     AND vote_average >= $4
     AND EXTRACT(YEAR FROM release_date) BETWEEN $5::int AND $6::int
     AND id NOT IN (
-        SELECT movie_id FROM user_movies WHERE user_id = $7
+        SELECT movie_id FROM user_interactions WHERE user_id = $7
     )
 ORDER BY
     popularity DESC
@@ -42,8 +42,7 @@ type GetFilteredMoviesParams struct {
 }
 
 func (q *Queries) GetFilteredMovies(ctx context.Context, arg GetFilteredMoviesParams) ([]Movie, error) {
-	rows, err := q.db.Query(
-		ctx, getFilteredMovies,
+	rows, err := q.db.Query(ctx, getFilteredMovies,
 		arg.FavoriteGenres,
 		arg.ExcludedGenres,
 		arg.Languages,
@@ -318,8 +317,7 @@ type UpsertMovieParams struct {
 }
 
 func (q *Queries) UpsertMovie(ctx context.Context, arg UpsertMovieParams) (Movie, error) {
-	row := q.db.QueryRow(
-		ctx, upsertMovie,
+	row := q.db.QueryRow(ctx, upsertMovie,
 		arg.TmdbID,
 		arg.ImdbID,
 		arg.VagueDescription,

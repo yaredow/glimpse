@@ -65,7 +65,7 @@ WHERE
     AND vote_average >= sqlc.arg('min_rating')
     AND EXTRACT(YEAR FROM release_date) BETWEEN sqlc.arg('min_year')::int AND sqlc.arg('max_year')::int
     AND id NOT IN (
-        SELECT movie_id FROM user_movies WHERE user_id = sqlc.arg('user_id')
+        SELECT movie_id FROM user_interactions WHERE user_id = sqlc.arg('user_id')
     )
 ORDER BY
     popularity DESC

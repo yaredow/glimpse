@@ -151,13 +151,6 @@ type UserInteraction struct {
 	ActedAt          pgtype.Timestamptz `json:"acted_at"`
 }
 
-type UserMovie struct {
-	UserID    int64              `json:"user_id"`
-	MovieID   int64              `json:"movie_id"`
-	Status    string             `json:"status"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-}
-
 type UserPreference struct {
 	UserID         int64              `json:"user_id"`
 	FavoriteGenres []int32            `json:"favorite_genres"`
