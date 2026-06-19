@@ -13,8 +13,7 @@ import (
 
 const clearUserGrid = `-- name: ClearUserGrid :exec
 DELETE FROM daily_pools
-WHERE
-    user_id = $1
+WHERE user_id = $1
 `
 
 func (q *Queries) ClearUserGrid(ctx context.Context, userID pgtype.Int8) error {
@@ -29,22 +28,26 @@ SELECT
     m.id AS movie_id,
     m.tmdb_id,
     m.vague_description,
-    m.genres
-FROM daily_pools AS dp
-INNER JOIN movies AS m ON dp.movie_id = m.id
+    m.genres,
+    dp.grid_session_id
+FROM
+    daily_pools AS dp
+    INNER JOIN movies AS m ON dp.movie_id = m.id
 WHERE
     dp.user_id = $1
     AND dp.assigned_at::date = CURRENT_DATE
-ORDER BY dp.slot_number
+ORDER BY
+    dp.slot_number
 `
 
 type GetUserGridRow struct {
-	SlotNumber       int32    `json:"slot_number"`
-	IsRevealed       bool     `json:"is_revealed"`
-	MovieID          int64    `json:"movie_id"`
-	TmdbID           int32    `json:"tmdb_id"`
-	VagueDescription string   `json:"vague_description"`
-	Genres           []string `json:"genres"`
+	SlotNumber       int32       `json:"slot_number"`
+	IsRevealed       bool        `json:"is_revealed"`
+	MovieID          int64       `json:"movie_id"`
+	TmdbID           int32       `json:"tmdb_id"`
+	VagueDescription string      `json:"vague_description"`
+	Genres           []string    `json:"genres"`
+	GridSessionID    pgtype.UUID `json:"grid_session_id"`
 }
 
 func (q *Queries) GetUserGrid(ctx context.Context, userID pgtype.Int8) ([]GetUserGridRow, error) {
@@ -63,6 +66,7 @@ func (q *Queries) GetUserGrid(ctx context.Context, userID pgtype.Int8) ([]GetUse
 			&i.TmdbID,
 			&i.VagueDescription,
 			&i.Genres,
+			&i.GridSessionID,
 		); err != nil {
 			return nil, err
 		}
@@ -75,17 +79,23 @@ func (q *Queries) GetUserGrid(ctx context.Context, userID pgtype.Int8) ([]GetUse
 }
 
 const insertGridSlot = `-- name: InsertGridSlot :exec
-INSERT INTO daily_pools (user_id, movie_id, slot_number)
-VALUES ($1, $2, $3)
+INSERT INTO daily_pools (user_id, movie_id, slot_number, grid_session_id)
+    VALUES ($1, $2, $3, $4)
 `
 
 type InsertGridSlotParams struct {
-	UserID     pgtype.Int8 `json:"user_id"`
-	MovieID    pgtype.Int8 `json:"movie_id"`
-	SlotNumber int32       `json:"slot_number"`
+	UserID        pgtype.Int8 `json:"user_id"`
+	MovieID       pgtype.Int8 `json:"movie_id"`
+	SlotNumber    int32       `json:"slot_number"`
+	GridSessionID pgtype.UUID `json:"grid_session_id"`
 }
 
 func (q *Queries) InsertGridSlot(ctx context.Context, arg InsertGridSlotParams) error {
-	_, err := q.db.Exec(ctx, insertGridSlot, arg.UserID, arg.MovieID, arg.SlotNumber)
+	_, err := q.db.Exec(ctx, insertGridSlot,
+		arg.UserID,
+		arg.MovieID,
+		arg.SlotNumber,
+		arg.GridSessionID,
+	)
 	return err
 }

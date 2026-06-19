@@ -31,7 +31,11 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 	}
 
 	if len(existing) > 0 {
-		return existing, uuid.Nil, nil
+		if !existing[0].GridSessionID.Valid {
+			return nil, uuid.Nil, fmt.Errorf("existing grid is missing grid_session_id")
+		}
+
+		return existing, uuid.UUID(existing[0].GridSessionID.Bytes), nil
 	}
 
 	// fetch data for scoring
@@ -80,6 +84,7 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 	picked := enforceDiversity(scored)
 
 	sessionID := uuid.New()
+	pgGridSessionID := pgtype.UUID{Bytes: sessionID, Valid: true}
 
 	movieIDs := make([]int64, len(picked))
 	for i, sm := range picked {
@@ -94,9 +99,10 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 
 		for i, movieID := range movieIDs {
 			params := queries.InsertGridSlotParams{
-				UserID:     pgUserID,
-				MovieID:    pgtype.Int8{Int64: movieID, Valid: true},
-				SlotNumber: int32(i + 1),
+				UserID:        pgUserID,
+				MovieID:       pgtype.Int8{Int64: movieID, Valid: true},
+				SlotNumber:    int32(i + 1),
+				GridSessionID: pgGridSessionID,
 			}
 			if err = q.InsertGridSlot(ctx, params); err != nil {
 				return err

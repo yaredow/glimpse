@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/store/queries"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
@@ -55,13 +56,19 @@ func (s *Store) GetUserGrid(ctx context.Context, userID int64) ([]queries.GetUse
 
 func (s *Store) CreateUserGrid(ctx context.Context, userID int64, movieIDs []int64) error {
 	return s.ExecTx(ctx, func(q *queries.Queries) error {
-		_ = q.ClearUserGrid(ctx, pgtype.Int8{Int64: userID, Valid: true})
+		if err := q.ClearUserGrid(ctx, pgtype.Int8{Int64: userID, Valid: true}); err != nil {
+			return err
+		}
+
+		gridSessionID := uuid.New()
+		pgGridSessionID := pgtype.UUID{Bytes: gridSessionID, Valid: true}
 
 		for i, movieID := range movieIDs {
 			err := q.InsertGridSlot(ctx, queries.InsertGridSlotParams{
-				UserID:     pgtype.Int8{Int64: userID, Valid: true},
-				MovieID:    pgtype.Int8{Int64: movieID, Valid: true},
-				SlotNumber: int32(i + 1),
+				UserID:        pgtype.Int8{Int64: userID, Valid: true},
+				MovieID:       pgtype.Int8{Int64: movieID, Valid: true},
+				SlotNumber:    int32(i + 1),
+				GridSessionID: pgGridSessionID,
 			})
 			if err != nil {
 				return fmt.Errorf("insert slot %d: %w", i+1, err)

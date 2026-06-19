@@ -14,7 +14,7 @@ func MovieDimensions(genre []string, language string, releaseYear int32, voteAvg
 	dims := []Dimension{
 		{Name: "language", Value: language},
 		{Name: "decade", Value: decadeOf(releaseYear)},
-		{Name: "popularity", Value: ratingBand(voteAvg)},
+		{Name: "rating_band", Value: ratingBand(voteAvg)},
 	}
 
 	for _, genre := range genre {
@@ -34,5 +34,5 @@ func ratingBand(rating float64) string {
 	}
 
 	floor := math.Floor(rating)
-	return fmt.Sprintf("%.1f-%.1f", floor, floor+0.1)
+	return fmt.Sprintf("%.1f-%.1f", floor, floor+1)
 }

@@ -57,12 +57,13 @@ func (ns NullActionType) Value() (driver.Value, error) {
 }
 
 type DailyPool struct {
-	ID         int64              `json:"id"`
-	UserID     pgtype.Int8        `json:"user_id"`
-	MovieID    pgtype.Int8        `json:"movie_id"`
-	SlotNumber int32              `json:"slot_number"`
-	IsRevealed bool               `json:"is_revealed"`
-	AssignedAt pgtype.Timestamptz `json:"assigned_at"`
+	ID            int64              `json:"id"`
+	UserID        pgtype.Int8        `json:"user_id"`
+	MovieID       pgtype.Int8        `json:"movie_id"`
+	SlotNumber    int32              `json:"slot_number"`
+	IsRevealed    bool               `json:"is_revealed"`
+	AssignedAt    pgtype.Timestamptz `json:"assigned_at"`
+	GridSessionID pgtype.UUID        `json:"grid_session_id"`
 }
 
 type Genre struct {
