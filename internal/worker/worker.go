@@ -54,8 +54,6 @@ func (w *Worker) runSyncloop(ctx context.Context) {
 }
 
 func (w *Worker) runDecayLoop(ctx context.Context) {
-	w.decay(ctx)
-
 	ticker := time.NewTicker(24 * time.Hour)
 	defer ticker.Stop()
 
