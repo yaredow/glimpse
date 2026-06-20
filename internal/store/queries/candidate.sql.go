@@ -10,7 +10,7 @@ import (
 )
 
 const getCandidateMovies = `-- name: GetCandidateMovies :many
-SELECT m.id, m.tmdb_id, m.imdb_id, m.vague_description, m.genres, m.title, m.original_title, m.full_synopsis, m.poster_path, m.backdrop_path, m.release_date, m.runtime, m.vote_average, m.vote_count, m.original_language, m.popularity, m.created_at, m.shown_count, m.watched_count, m.global_watch_rate FROM movies m
+SELECT m.id, m.tmdb_id, m.imdb_id, m.vague_description, m.genres, m.title, m.original_title, m.full_synopsis, m.poster_path, m.backdrop_path, m.release_date, m.runtime, m.vote_average, m.vote_count, m.original_language, m.popularity, m.created_at, m.shown_count, m.watched_count, m.global_watch_rate, m.tagline, m.director, m.cast_members, m.trailer_key, m.spoken_languages, m.production_countries, m.detail_synced_at FROM movies m
 WHERE m.id NOT IN (
 	SELECT movie_id FROM user_interactions
 	WHERE user_interactions.user_id = $1 AND action IN ('watched', 'skipped')
@@ -61,6 +61,13 @@ func (q *Queries) GetCandidateMovies(ctx context.Context, arg GetCandidateMovies
 			&i.ShownCount,
 			&i.WatchedCount,
 			&i.GlobalWatchRate,
+			&i.Tagline,
+			&i.Director,
+			&i.CastMembers,
+			&i.TrailerKey,
+			&i.SpokenLanguages,
+			&i.ProductionCountries,
+			&i.DetailSyncedAt,
 		); err != nil {
 			return nil, err
 		}

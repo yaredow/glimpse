@@ -7,7 +7,9 @@ package queries
 import (
 	"database/sql/driver"
 	"fmt"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/types"
 )
@@ -57,13 +59,13 @@ func (ns NullActionType) Value() (driver.Value, error) {
 }
 
 type DailyPool struct {
-	ID            int64              `json:"id"`
-	UserID        pgtype.Int8        `json:"user_id"`
-	MovieID       pgtype.Int8        `json:"movie_id"`
-	SlotNumber    int32              `json:"slot_number"`
-	IsRevealed    bool               `json:"is_revealed"`
-	AssignedAt    pgtype.Timestamptz `json:"assigned_at"`
-	GridSessionID pgtype.UUID        `json:"grid_session_id"`
+	ID            int64       `json:"id"`
+	UserID        pgtype.Int8 `json:"user_id"`
+	MovieID       pgtype.Int8 `json:"movie_id"`
+	SlotNumber    int32       `json:"slot_number"`
+	IsRevealed    bool        `json:"is_revealed"`
+	AssignedAt    time.Time   `json:"assigned_at"`
+	GridSessionID uuid.UUID   `json:"grid_session_id"`
 }
 
 type Genre struct {
@@ -72,57 +74,64 @@ type Genre struct {
 }
 
 type Movie struct {
-	ID               int64              `json:"id"`
-	TmdbID           int32              `json:"tmdb_id"`
-	ImdbID           pgtype.Text        `json:"imdb_id"`
-	VagueDescription string             `json:"vague_description"`
-	Genres           []string           `json:"genres"`
-	Title            string             `json:"title"`
-	OriginalTitle    string             `json:"original_title"`
-	FullSynopsis     string             `json:"full_synopsis"`
-	PosterPath       pgtype.Text        `json:"poster_path"`
-	BackdropPath     pgtype.Text        `json:"backdrop_path"`
-	ReleaseDate      pgtype.Date        `json:"release_date"`
-	Runtime          int32              `json:"runtime"`
-	VoteAverage      pgtype.Numeric     `json:"vote_average"`
-	VoteCount        int32              `json:"vote_count"`
-	OriginalLanguage string             `json:"original_language"`
-	Popularity       pgtype.Numeric     `json:"popularity"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	ShownCount       int32              `json:"shown_count"`
-	WatchedCount     int32              `json:"watched_count"`
-	GlobalWatchRate  pgtype.Float8      `json:"global_watch_rate"`
+	ID                  int64              `json:"id"`
+	TmdbID              int32              `json:"tmdb_id"`
+	ImdbID              pgtype.Text        `json:"imdb_id"`
+	VagueDescription    string             `json:"vague_description"`
+	Genres              []string           `json:"genres"`
+	Title               string             `json:"title"`
+	OriginalTitle       pgtype.Text        `json:"original_title"`
+	FullSynopsis        pgtype.Text        `json:"full_synopsis"`
+	PosterPath          pgtype.Text        `json:"poster_path"`
+	BackdropPath        pgtype.Text        `json:"backdrop_path"`
+	ReleaseDate         time.Time          `json:"release_date"`
+	Runtime             pgtype.Int4        `json:"runtime"`
+	VoteAverage         float64            `json:"vote_average"`
+	VoteCount           pgtype.Int4        `json:"vote_count"`
+	OriginalLanguage    string             `json:"original_language"`
+	Popularity          float64            `json:"popularity"`
+	CreatedAt           time.Time          `json:"created_at"`
+	ShownCount          int32              `json:"shown_count"`
+	WatchedCount        int32              `json:"watched_count"`
+	GlobalWatchRate     pgtype.Float8      `json:"global_watch_rate"`
+	Tagline             pgtype.Text        `json:"tagline"`
+	Director            pgtype.Text        `json:"director"`
+	CastMembers         []byte             `json:"cast_members"`
+	TrailerKey          pgtype.Text        `json:"trailer_key"`
+	SpokenLanguages     []string           `json:"spoken_languages"`
+	ProductionCountries []string           `json:"production_countries"`
+	DetailSyncedAt      pgtype.Timestamptz `json:"detail_synced_at"`
 }
 
 type RefreshToken struct {
 	Hash           []byte             `json:"hash"`
 	UserID         int64              `json:"user_id"`
-	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt      time.Time          `json:"expires_at"`
+	CreatedAt      time.Time          `json:"created_at"`
 	RevokedAt      pgtype.Timestamptz `json:"revoked_at"`
-	FamilyID       pgtype.UUID        `json:"family_id"`
+	FamilyID       uuid.UUID          `json:"family_id"`
 	ReplacedByHash []byte             `json:"replaced_by_hash"`
 }
 
 type Token struct {
-	Hash   []byte             `json:"hash"`
-	UserID int64              `json:"user_id"`
-	Expiry pgtype.Timestamptz `json:"expiry"`
-	Scope  string             `json:"scope"`
+	Hash   []byte    `json:"hash"`
+	UserID int64     `json:"user_id"`
+	Expiry time.Time `json:"expiry"`
+	Scope  string    `json:"scope"`
 }
 
 type User struct {
-	ID                int64              `json:"id"`
-	Username          string             `json:"username"`
-	Email             string             `json:"email"`
-	PasswordHash      types.Password     `json:"password_hash"`
-	ShufflesRemaining int32              `json:"shuffles_remaining"`
-	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	Activated         bool               `json:"activated"`
-	Version           int32              `json:"version"`
-	ExplorationRate   float64            `json:"exploration_rate"`
-	TotalInteractions int32              `json:"total_interactions"`
+	ID                int64          `json:"id"`
+	Username          string         `json:"username"`
+	Email             string         `json:"email"`
+	PasswordHash      types.Password `json:"password_hash"`
+	ShufflesRemaining int32          `json:"shuffles_remaining"`
+	LastShuffleReset  time.Time      `json:"last_shuffle_reset"`
+	CreatedAt         time.Time      `json:"created_at"`
+	Activated         bool           `json:"activated"`
+	Version           int32          `json:"version"`
+	ExplorationRate   float64        `json:"exploration_rate"`
+	TotalInteractions int32          `json:"total_interactions"`
 }
 
 type UserAffinity struct {
@@ -146,21 +155,21 @@ type UserInteraction struct {
 	UserID           int64              `json:"user_id"`
 	MovieID          int64              `json:"movie_id"`
 	Action           ActionType         `json:"action"`
-	GridSessionID    pgtype.UUID        `json:"grid_session_id"`
+	GridSessionID    uuid.UUID          `json:"grid_session_id"`
 	GridPosition     pgtype.Int4        `json:"grid_position"`
 	RevealToActionMs pgtype.Int4        `json:"reveal_to_action_ms"`
 	ActedAt          pgtype.Timestamptz `json:"acted_at"`
 }
 
 type UserPreference struct {
-	UserID         int64              `json:"user_id"`
-	FavoriteGenres []int32            `json:"favorite_genres"`
-	ExcludedGenres []int32            `json:"excluded_genres"`
-	Languages      []string           `json:"languages"`
-	MinRating      pgtype.Numeric     `json:"min_rating"`
-	Onboarded      bool               `json:"onboarded"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
-	MinYear        int32              `json:"min_year"`
-	MaxYear        int32              `json:"max_year"`
+	UserID         int64     `json:"user_id"`
+	FavoriteGenres []int32   `json:"favorite_genres"`
+	ExcludedGenres []int32   `json:"excluded_genres"`
+	Languages      []string  `json:"languages"`
+	MinRating      float64   `json:"min_rating"`
+	Onboarded      bool      `json:"onboarded"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	MinYear        int32     `json:"min_year"`
+	MaxYear        int32     `json:"max_year"`
 }

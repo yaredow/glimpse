@@ -8,6 +8,7 @@ package queries
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -41,13 +42,13 @@ ORDER BY
 `
 
 type GetUserGridRow struct {
-	SlotNumber       int32       `json:"slot_number"`
-	IsRevealed       bool        `json:"is_revealed"`
-	MovieID          int64       `json:"movie_id"`
-	TmdbID           int32       `json:"tmdb_id"`
-	VagueDescription string      `json:"vague_description"`
-	Genres           []string    `json:"genres"`
-	GridSessionID    pgtype.UUID `json:"grid_session_id"`
+	SlotNumber       int32     `json:"slot_number"`
+	IsRevealed       bool      `json:"is_revealed"`
+	MovieID          int64     `json:"movie_id"`
+	TmdbID           int32     `json:"tmdb_id"`
+	VagueDescription string    `json:"vague_description"`
+	Genres           []string  `json:"genres"`
+	GridSessionID    uuid.UUID `json:"grid_session_id"`
 }
 
 func (q *Queries) GetUserGrid(ctx context.Context, userID pgtype.Int8) ([]GetUserGridRow, error) {
@@ -87,7 +88,7 @@ type InsertGridSlotParams struct {
 	UserID        pgtype.Int8 `json:"user_id"`
 	MovieID       pgtype.Int8 `json:"movie_id"`
 	SlotNumber    int32       `json:"slot_number"`
-	GridSessionID pgtype.UUID `json:"grid_session_id"`
+	GridSessionID uuid.UUID   `json:"grid_session_id"`
 }
 
 func (q *Queries) InsertGridSlot(ctx context.Context, arg InsertGridSlotParams) error {

@@ -7,8 +7,8 @@ package queries
 
 import (
 	"context"
+	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/types"
 )
 
@@ -26,10 +26,10 @@ type CreateUserParams struct {
 }
 
 type CreateUserRow struct {
-	ID        int64              `json:"id"`
-	Username  string             `json:"username"`
-	Email     string             `json:"email"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID        int64     `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
@@ -64,17 +64,17 @@ WHERE
 `
 
 type GetUserByEmailRow struct {
-	ID                int64              `json:"id"`
-	Username          string             `json:"username"`
-	Email             string             `json:"email"`
-	PasswordHash      types.Password     `json:"password_hash"`
-	ShufflesRemaining int32              `json:"shuffles_remaining"`
-	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
-	ExplorationRate   float64            `json:"exploration_rate"`
-	TotalInteractions int32              `json:"total_interactions"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	Activated         bool               `json:"activated"`
-	Version           int32              `json:"version"`
+	ID                int64          `json:"id"`
+	Username          string         `json:"username"`
+	Email             string         `json:"email"`
+	PasswordHash      types.Password `json:"password_hash"`
+	ShufflesRemaining int32          `json:"shuffles_remaining"`
+	LastShuffleReset  time.Time      `json:"last_shuffle_reset"`
+	ExplorationRate   float64        `json:"exploration_rate"`
+	TotalInteractions int32          `json:"total_interactions"`
+	CreatedAt         time.Time      `json:"created_at"`
+	Activated         bool           `json:"activated"`
+	Version           int32          `json:"version"`
 }
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
@@ -116,17 +116,17 @@ WHERE
 `
 
 type GetUserByIdRow struct {
-	ID                int64              `json:"id"`
-	Username          string             `json:"username"`
-	Email             string             `json:"email"`
-	PasswordHash      types.Password     `json:"password_hash"`
-	ShufflesRemaining int32              `json:"shuffles_remaining"`
-	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
-	ExplorationRate   float64            `json:"exploration_rate"`
-	TotalInteractions int32              `json:"total_interactions"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	Activated         bool               `json:"activated"`
-	Version           int32              `json:"version"`
+	ID                int64          `json:"id"`
+	Username          string         `json:"username"`
+	Email             string         `json:"email"`
+	PasswordHash      types.Password `json:"password_hash"`
+	ShufflesRemaining int32          `json:"shuffles_remaining"`
+	LastShuffleReset  time.Time      `json:"last_shuffle_reset"`
+	ExplorationRate   float64        `json:"exploration_rate"`
+	TotalInteractions int32          `json:"total_interactions"`
+	CreatedAt         time.Time      `json:"created_at"`
+	Activated         bool           `json:"activated"`
+	Version           int32          `json:"version"`
 }
 
 func (q *Queries) GetUserById(ctx context.Context, id int64) (GetUserByIdRow, error) {
@@ -173,15 +173,15 @@ type UpdateUserParams struct {
 }
 
 type UpdateUserRow struct {
-	ID                int64              `json:"id"`
-	Username          string             `json:"username"`
-	Email             string             `json:"email"`
-	PasswordHash      types.Password     `json:"password_hash"`
-	ShufflesRemaining int32              `json:"shuffles_remaining"`
-	LastShuffleReset  pgtype.Timestamptz `json:"last_shuffle_reset"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	Activated         bool               `json:"activated"`
-	Version           int32              `json:"version"`
+	ID                int64          `json:"id"`
+	Username          string         `json:"username"`
+	Email             string         `json:"email"`
+	PasswordHash      types.Password `json:"password_hash"`
+	ShufflesRemaining int32          `json:"shuffles_remaining"`
+	LastShuffleReset  time.Time      `json:"last_shuffle_reset"`
+	CreatedAt         time.Time      `json:"created_at"`
+	Activated         bool           `json:"activated"`
+	Version           int32          `json:"version"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {

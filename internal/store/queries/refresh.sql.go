@@ -7,8 +7,9 @@ package queries
 
 import (
 	"context"
+	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createRefreshToken = `-- name: CreateRefreshToken :exec
@@ -17,10 +18,10 @@ INSERT INTO refresh_tokens (hash, user_id, expires_at, family_id)
 `
 
 type CreateRefreshTokenParams struct {
-	Hash      []byte             `json:"hash"`
-	UserID    int64              `json:"user_id"`
-	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
-	FamilyID  pgtype.UUID        `json:"family_id"`
+	Hash      []byte    `json:"hash"`
+	UserID    int64     `json:"user_id"`
+	ExpiresAt time.Time `json:"expires_at"`
+	FamilyID  uuid.UUID `json:"family_id"`
 }
 
 func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error {
@@ -90,7 +91,7 @@ WHERE
     AND revoked_at IS NULL
 `
 
-func (q *Queries) RevokeTokenFamily(ctx context.Context, familyID pgtype.UUID) error {
+func (q *Queries) RevokeTokenFamily(ctx context.Context, familyID uuid.UUID) error {
 	_, err := q.db.Exec(ctx, revokeTokenFamily, familyID)
 	return err
 }

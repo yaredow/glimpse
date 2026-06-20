@@ -7,6 +7,7 @@ package queries
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -38,7 +39,7 @@ type Querier interface {
 	InsertInteraction(ctx context.Context, arg InsertInteractionParams) error
 	ListGenres(ctx context.Context) ([]Genre, error)
 	RevokeRefreshToken(ctx context.Context, hash []byte) (int64, error)
-	RevokeTokenFamily(ctx context.Context, familyID pgtype.UUID) error
+	RevokeTokenFamily(ctx context.Context, familyID uuid.UUID) error
 	SetTokenReplacement(ctx context.Context, arg SetTokenReplacementParams) error
 	UpdateMoviePopularity(ctx context.Context, arg UpdateMoviePopularityParams) (Movie, error)
 	UpdateMovieWatchCounts(ctx context.Context, arg UpdateMovieWatchCountsParams) error

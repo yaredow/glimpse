@@ -8,6 +8,7 @@ package queries
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -94,7 +95,7 @@ type InsertInteractionParams struct {
 	UserID           int64       `json:"user_id"`
 	MovieID          int64       `json:"movie_id"`
 	Action           ActionType  `json:"action"`
-	GridSessionID    pgtype.UUID `json:"grid_session_id"`
+	GridSessionID    uuid.UUID   `json:"grid_session_id"`
 	GridPosition     pgtype.Int4 `json:"grid_position"`
 	RevealToActionMs pgtype.Int4 `json:"reveal_to_action_ms"`
 }

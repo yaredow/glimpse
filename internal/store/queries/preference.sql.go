@@ -7,8 +7,6 @@ package queries
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getUserPreference = `-- name: GetUserPreference :one
@@ -64,14 +62,14 @@ RETURNING user_id, favorite_genres, excluded_genres, languages, min_rating, onbo
 `
 
 type UpsertPreferenceParams struct {
-	UserID         int64          `json:"user_id"`
-	FavoriteGenres []int32        `json:"favorite_genres"`
-	ExcludedGenres []int32        `json:"excluded_genres"`
-	Languages      []string       `json:"languages"`
-	MinRating      pgtype.Numeric `json:"min_rating"`
-	Onboarded      bool           `json:"onboarded"`
-	MinYear        int32          `json:"min_year"`
-	MaxYear        int32          `json:"max_year"`
+	UserID         int64    `json:"user_id"`
+	FavoriteGenres []int32  `json:"favorite_genres"`
+	ExcludedGenres []int32  `json:"excluded_genres"`
+	Languages      []string `json:"languages"`
+	MinRating      float64  `json:"min_rating"`
+	Onboarded      bool     `json:"onboarded"`
+	MinYear        int32    `json:"min_year"`
+	MaxYear        int32    `json:"max_year"`
 }
 
 func (q *Queries) UpsertPreference(ctx context.Context, arg UpsertPreferenceParams) (UserPreference, error) {
