@@ -11,7 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/store/queries"
 	"github.com/yaredow/glimpse-api/internal/types"
@@ -74,7 +73,7 @@ func (s *Store) CreateNewToken(ctx context.Context, userID int64, ttl time.Durat
 	err = s.Queries.CreateToken(ctx, queries.CreateTokenParams{
 		Hash:   token.Hash,
 		UserID: token.UserID,
-		Expiry: pgtype.Timestamptz{Time: token.Expiry, Valid: true},
+		Expiry: token.Expiry,
 		Scope:  token.Scope,
 	})
 	if err != nil {
@@ -95,8 +94,8 @@ func (s *Store) CreateNewRefreshToken(ctx context.Context, userID int64) (*types
 	err = s.Queries.CreateRefreshToken(ctx, queries.CreateRefreshTokenParams{
 		Hash:      token.Hash,
 		UserID:    token.UserID,
-		ExpiresAt: pgtype.Timestamptz{Time: token.Expiry, Valid: true},
-		FamilyID:  pgtype.UUID{Bytes: familyID, Valid: true},
+		ExpiresAt: token.Expiry,
+		FamilyID:  familyID,
 	})
 	if err != nil {
 		return nil, err
@@ -174,7 +173,7 @@ func (s *Store) RotateRefreshToken(ctx context.Context, oldPlaintext string, ttl
 			return ErrTokenReuse
 		}
 
-		if oldToken.ExpiresAt.Time.Before(time.Now()) {
+		if oldToken.ExpiresAt.Before(time.Now()) {
 			return auth.ErrExpiredToken
 		}
 
@@ -187,7 +186,7 @@ func (s *Store) RotateRefreshToken(ctx context.Context, oldPlaintext string, ttl
 		err = q.CreateRefreshToken(ctx, queries.CreateRefreshTokenParams{
 			Hash:      token.Hash,
 			UserID:    oldToken.UserID,
-			ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(ttl), Valid: true},
+			ExpiresAt: time.Now().Add(ttl),
 			FamilyID:  oldToken.FamilyID,
 		})
 		if err != nil {
@@ -234,6 +233,6 @@ func (s *Store) DeleteTokensForUser(ctx context.Context, userID int64, scope str
 	return s.Queries.DeleteTokensForUser(ctx, args)
 }
 
-func (s *Store) RevokeFamily(ctx context.Context, familyID pgtype.UUID) error {
+func (s *Store) RevokeFamily(ctx context.Context, familyID uuid.UUID) error {
 	return s.Queries.RevokeTokenFamily(ctx, familyID)
 }

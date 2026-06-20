@@ -2,7 +2,6 @@ package worker
 
 import (
 	"context"
-	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -13,28 +12,17 @@ import (
 	"github.com/yaredow/glimpse-api/internal/tmdb"
 )
 
-func parseDate(s string) pgtype.Date {
-	var d pgtype.Date
+func parseDate(s string) time.Time {
 	if s == "" {
-		return d
+		return time.Time{}
 	}
 
 	t, err := time.Parse("2006-01-02", s)
 	if err != nil {
-		return d
+		return time.Time{}
 	}
 
-	d.Time = t
-	d.Valid = true
-	return d
-}
-
-func floatToNumeric(f float64) pgtype.Numeric {
-	var n pgtype.Numeric
-	if err := n.Scan(strconv.FormatFloat(f, 'f', -1, 64)); err != nil {
-		return n
-	}
-	return n
+	return t
 }
 
 func vagueDescription(overview string) string {
@@ -81,21 +69,24 @@ func vagueDescription(overview string) string {
 func toUpsertParams(tm tmdb.Movie) queries.UpsertMovieParams {
 	posterPath := pgtype.Text{String: tm.PosterPath, Valid: tm.PosterPath != ""}
 	backdropPath := pgtype.Text{String: tm.BackdropPath, Valid: tm.BackdropPath != ""}
+	originalTitle := pgtype.Text{String: tm.OriginalTitle, Valid: tm.OriginalTitle != ""}
+	fullSynopsis := pgtype.Text{String: tm.Overview, Valid: tm.Overview != ""}
+	voteCount := pgtype.Int4{Int32: int32(tm.VoteCount), Valid: true}
 
 	return queries.UpsertMovieParams{
 		TmdbID:           int32(tm.ID),
 		VagueDescription: vagueDescription(tm.Overview),
 		Genres:           tmdb.GenreNames(tm.GenreIDs),
 		Title:            tm.Title,
-		OriginalTitle:    tm.OriginalTitle,
-		FullSynopsis:     tm.Overview,
+		OriginalTitle:    originalTitle,
+		FullSynopsis:     fullSynopsis,
 		PosterPath:       posterPath,
 		BackdropPath:     backdropPath,
 		ReleaseDate:      parseDate(tm.ReleaseDate),
-		VoteAverage:      floatToNumeric(tm.VoteAverage),
-		VoteCount:        int32(tm.VoteCount),
+		VoteAverage:      tm.VoteAverage,
+		VoteCount:        voteCount,
 		OriginalLanguage: tm.OriginalLanguage,
-		Popularity:       floatToNumeric(tm.Popularity),
+		Popularity:       tm.Popularity,
 	}
 }
 

@@ -31,11 +31,11 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 	}
 
 	if len(existing) > 0 {
-		if !existing[0].GridSessionID.Valid {
+		if existing[0].GridSessionID == uuid.Nil {
 			return nil, uuid.Nil, fmt.Errorf("existing grid is missing grid_session_id")
 		}
 
-		return existing, uuid.UUID(existing[0].GridSessionID.Bytes), nil
+		return existing, existing[0].GridSessionID, nil
 	}
 
 	// fetch data for scoring
@@ -65,7 +65,7 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 	// build freshness map
 	fresh := make(map[int64]time.Time, len(recentlyShown))
 	for _, rs := range recentlyShown {
-		fresh[rs.MovieID] = rs.ShownAt.Time
+		fresh[rs.MovieID] = rs.ShownAt
 	}
 
 	// get users total_interactions
@@ -84,25 +84,23 @@ func (s *Service) GenerateGrid(ctx context.Context, userID int64) ([]queries.Get
 	picked := enforceDiversity(scored)
 
 	sessionID := uuid.New()
-	pgGridSessionID := pgtype.UUID{Bytes: sessionID, Valid: true}
 
 	movieIDs := make([]int64, len(picked))
 	for i, sm := range picked {
 		movieIDs[i] = sm.Movie.ID
 	}
 
-	pgUserID := pgtype.Int8{Int64: userID, Valid: true}
 	err = s.store.ExecTx(ctx, func(q *queries.Queries) error {
-		if err = q.ClearUserGrid(ctx, pgUserID); err != nil {
+		if err = q.ClearUserGrid(ctx, userID); err != nil {
 			return err
 		}
 
 		for i, movieID := range movieIDs {
 			params := queries.InsertGridSlotParams{
-				UserID:        pgUserID,
-				MovieID:       pgtype.Int8{Int64: movieID, Valid: true},
+				UserID:        userID,
+				MovieID:       movieID,
 				SlotNumber:    int32(i + 1),
-				GridSessionID: pgGridSessionID,
+				GridSessionID: sessionID,
 			}
 			if err = q.InsertGridSlot(ctx, params); err != nil {
 				return err
@@ -146,13 +144,12 @@ func (s *Service) RecordInteraction(ctx context.Context, userID int64, movieID i
 	}
 
 	year := int32(0)
-	if movie.ReleaseDate.Valid {
-		year = int32(movie.ReleaseDate.Time.Year())
+	if !movie.ReleaseDate.IsZero() {
+		year = int32(movie.ReleaseDate.Year())
 	}
 
-	dims := MovieDimensions(movie.Genres, movie.OriginalLanguage, year, numericToFloat64(movie.VoteAverage))
+	dims := MovieDimensions(movie.Genres, movie.OriginalLanguage, year, movie.VoteAverage)
 
-	pgSessionID := pgtype.UUID{Bytes: sessionID, Valid: true}
 	var pgGridPos pgtype.Int4
 	if gridPosition != nil {
 		pgGridPos = pgtype.Int4{Int32: int32(*gridPosition), Valid: true}
@@ -179,7 +176,7 @@ func (s *Service) RecordInteraction(ctx context.Context, userID int64, movieID i
 			UserID:           userID,
 			MovieID:          movieID,
 			Action:           queries.ActionType(action),
-			GridSessionID:    pgSessionID,
+			GridSessionID:    sessionID,
 			GridPosition:     pgGridPos,
 			RevealToActionMs: pgRevealMs,
 		}); err != nil {

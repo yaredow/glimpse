@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const clearUserGrid = `-- name: ClearUserGrid :exec
@@ -17,7 +16,7 @@ DELETE FROM daily_pools
 WHERE user_id = $1
 `
 
-func (q *Queries) ClearUserGrid(ctx context.Context, userID pgtype.Int8) error {
+func (q *Queries) ClearUserGrid(ctx context.Context, userID int64) error {
 	_, err := q.db.Exec(ctx, clearUserGrid, userID)
 	return err
 }
@@ -51,7 +50,7 @@ type GetUserGridRow struct {
 	GridSessionID    uuid.UUID `json:"grid_session_id"`
 }
 
-func (q *Queries) GetUserGrid(ctx context.Context, userID pgtype.Int8) ([]GetUserGridRow, error) {
+func (q *Queries) GetUserGrid(ctx context.Context, userID int64) ([]GetUserGridRow, error) {
 	rows, err := q.db.Query(ctx, getUserGrid, userID)
 	if err != nil {
 		return nil, err
@@ -85,10 +84,10 @@ INSERT INTO daily_pools (user_id, movie_id, slot_number, grid_session_id)
 `
 
 type InsertGridSlotParams struct {
-	UserID        pgtype.Int8 `json:"user_id"`
-	MovieID       pgtype.Int8 `json:"movie_id"`
-	SlotNumber    int32       `json:"slot_number"`
-	GridSessionID uuid.UUID   `json:"grid_session_id"`
+	UserID        int64     `json:"user_id"`
+	MovieID       int64     `json:"movie_id"`
+	SlotNumber    int32     `json:"slot_number"`
+	GridSessionID uuid.UUID `json:"grid_session_id"`
 }
 
 func (q *Queries) InsertGridSlot(ctx context.Context, arg InsertGridSlotParams) error {

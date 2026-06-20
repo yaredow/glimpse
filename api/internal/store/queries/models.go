@@ -59,13 +59,13 @@ func (ns NullActionType) Value() (driver.Value, error) {
 }
 
 type DailyPool struct {
-	ID            int64       `json:"id"`
-	UserID        pgtype.Int8 `json:"user_id"`
-	MovieID       pgtype.Int8 `json:"movie_id"`
-	SlotNumber    int32       `json:"slot_number"`
-	IsRevealed    bool        `json:"is_revealed"`
-	AssignedAt    time.Time   `json:"assigned_at"`
-	GridSessionID uuid.UUID   `json:"grid_session_id"`
+	ID            int64     `json:"id"`
+	UserID        int64     `json:"user_id"`
+	MovieID       int64     `json:"movie_id"`
+	SlotNumber    int32     `json:"slot_number"`
+	IsRevealed    bool      `json:"is_revealed"`
+	AssignedAt    time.Time `json:"assigned_at"`
+	GridSessionID uuid.UUID `json:"grid_session_id"`
 }
 
 type Genre struct {
@@ -135,30 +135,30 @@ type User struct {
 }
 
 type UserAffinity struct {
-	UserID      int64              `json:"user_id"`
-	Dimension   string             `json:"dimension"`
-	Value       string             `json:"value"`
-	Score       float64            `json:"score"`
-	Confidence  float64            `json:"confidence"`
-	LastUpdated pgtype.Timestamptz `json:"last_updated"`
+	UserID      int64     `json:"user_id"`
+	Dimension   string    `json:"dimension"`
+	Value       string    `json:"value"`
+	Score       float64   `json:"score"`
+	Confidence  float64   `json:"confidence"`
+	LastUpdated time.Time `json:"last_updated"`
 }
 
 type UserGridHistory struct {
-	ID      int64              `json:"id"`
-	UserID  int64              `json:"user_id"`
-	MovieID int64              `json:"movie_id"`
-	ShownAt pgtype.Timestamptz `json:"shown_at"`
+	ID      int64     `json:"id"`
+	UserID  int64     `json:"user_id"`
+	MovieID int64     `json:"movie_id"`
+	ShownAt time.Time `json:"shown_at"`
 }
 
 type UserInteraction struct {
-	ID               int64              `json:"id"`
-	UserID           int64              `json:"user_id"`
-	MovieID          int64              `json:"movie_id"`
-	Action           ActionType         `json:"action"`
-	GridSessionID    uuid.UUID          `json:"grid_session_id"`
-	GridPosition     pgtype.Int4        `json:"grid_position"`
-	RevealToActionMs pgtype.Int4        `json:"reveal_to_action_ms"`
-	ActedAt          pgtype.Timestamptz `json:"acted_at"`
+	ID               int64       `json:"id"`
+	UserID           int64       `json:"user_id"`
+	MovieID          int64       `json:"movie_id"`
+	Action           ActionType  `json:"action"`
+	GridSessionID    uuid.UUID   `json:"grid_session_id"`
+	GridPosition     pgtype.Int4 `json:"grid_position"`
+	RevealToActionMs pgtype.Int4 `json:"reveal_to_action_ms"`
+	ActedAt          time.Time   `json:"acted_at"`
 }
 
 type UserPreference struct {

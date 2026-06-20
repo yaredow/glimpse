@@ -7,8 +7,7 @@ package queries
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 const cleanupOldGridHistory = `-- name: CleanupOldGridHistory :exec
@@ -37,8 +36,8 @@ type GetRecentlyShownMoviesParams struct {
 }
 
 type GetRecentlyShownMoviesRow struct {
-	MovieID int64              `json:"movie_id"`
-	ShownAt pgtype.Timestamptz `json:"shown_at"`
+	MovieID int64     `json:"movie_id"`
+	ShownAt time.Time `json:"shown_at"`
 }
 
 func (q *Queries) GetRecentlyShownMovies(ctx context.Context, arg GetRecentlyShownMoviesParams) ([]GetRecentlyShownMoviesRow, error) {

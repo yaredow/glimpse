@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/store/queries"
 	"github.com/yaredow/glimpse-api/internal/validator"
 )
@@ -29,17 +27,12 @@ func ValidatePreferenceInput(v *validator.Validator, input UpsertPreferenceInput
 }
 
 func (s *Store) UpsertPreference(ctx context.Context, userID int64, input UpsertPreferenceInput, onboarded bool) (queries.UserPreference, error) {
-	var minRating pgtype.Numeric
-	if err := minRating.Scan(strconv.FormatFloat(input.MinRating, 'f', 1, 64)); err != nil {
-		return queries.UserPreference{}, fmt.Errorf("parse min_rating: %w", err)
-	}
-
 	prefs, err := s.Queries.UpsertPreference(ctx, queries.UpsertPreferenceParams{
 		UserID:         userID,
 		FavoriteGenres: input.FavoriteGenres,
 		ExcludedGenres: input.ExcludedGenres,
 		Languages:      input.Languages,
-		MinRating:      minRating,
+		MinRating:      input.MinRating,
 		Onboarded:      onboarded,
 		MinYear:        input.MinYear,
 		MaxYear:        input.MaxYear,

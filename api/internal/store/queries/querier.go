@@ -8,12 +8,11 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
 	CleanupOldGridHistory(ctx context.Context) error
-	ClearUserGrid(ctx context.Context, userID pgtype.Int8) error
+	ClearUserGrid(ctx context.Context, userID int64) error
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) error
 	CreateToken(ctx context.Context, arg CreateTokenParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
@@ -32,7 +31,7 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
 	GetUserById(ctx context.Context, id int64) (GetUserByIdRow, error)
 	GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (GetUserByTokenRow, error)
-	GetUserGrid(ctx context.Context, userID pgtype.Int8) ([]GetUserGridRow, error)
+	GetUserGrid(ctx context.Context, userID int64) ([]GetUserGridRow, error)
 	GetUserPreference(ctx context.Context, userID int64) (UserPreference, error)
 	InsertGridHistory(ctx context.Context, arg InsertGridHistoryParams) error
 	InsertGridSlot(ctx context.Context, arg InsertGridSlotParams) error

@@ -4,10 +4,8 @@ import (
 	"math"
 	"math/rand/v2"
 	"sort"
-	"strconv"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/store/queries"
 )
 
@@ -40,15 +38,15 @@ func movieScore(m queries.Movie, affinities map[string]float64, recentlyShown ma
 	langAffinity := affinityFor("language", m.OriginalLanguage, affinities)
 
 	year := int32(0)
-	if m.ReleaseDate.Valid {
-		year = int32(m.ReleaseDate.Time.Year())
+	if !m.ReleaseDate.IsZero() {
+		year = int32(m.ReleaseDate.Year())
 	}
 
 	decadeAff := affinityFor("decade", decadeOf(year), affinities)
 
-	ratingAff := affinityFor("rating_band", ratingBand(numericToFloat64(m.VoteAverage)), affinities)
+	ratingAff := affinityFor("rating_band", ratingBand(m.VoteAverage), affinities)
 
-	popularity := 0.10 * math.Log1p(numericToFloat64(m.Popularity))
+	popularity := 0.10 * math.Log1p(m.Popularity)
 
 	freshness := 0.0
 	if shownAt, ok := recentlyShown[m.ID]; ok {
@@ -133,13 +131,4 @@ func explorationRateFor(totalInteractions int) float64 {
 	return math.Max(0.05, 0.4*math.Exp(-float64(totalInteractions)/50))
 }
 
-func numericToFloat64(n pgtype.Numeric) float64 {
-	if !n.Valid {
-		return 0
-	}
-	f, err := strconv.ParseFloat(n.Int.String()+"e"+strconv.Itoa(int(n.Exp)), 64)
-	if err != nil {
-		return 0
-	}
-	return f
-}
+
