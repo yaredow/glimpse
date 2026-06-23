@@ -1,10 +1,10 @@
-// Package userusecase provides the user usecase.
 package userusecase
 
 import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/yaredow/glimpse-api/internal/entity"
 )
 
@@ -19,6 +19,14 @@ type TokenRepository interface {
 	CreateNew(ctx context.Context, userID int64, ttl time.Duration, scope string) (string, error)
 	GetUserByToken(ctx context.Context, plainText, scope string) (*entity.User, error)
 	DeleteForUser(ctx context.Context, userID int64, scope string) error
+
+	CreateRefreshToken(ctx context.Context, userID int64, familyID uuid.UUID, ttl time.Duration) (string, error)
+	RotateRefreshToken(ctx context.Context, oldPlainText string, ttl time.Duration) (newPlainText string, userID int64, err error)
+	RevokeRefreshToken(ctx context.Context, plainText string) error
+}
+
+type JWTService interface {
+	GenerateToken(userID int64) (string, time.Time, error)
 }
 
 type Mailer interface {

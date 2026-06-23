@@ -25,7 +25,7 @@ sql:
             go_type: "time.Time"
           - column: "users.password_hash"
             go_type:
-              import: "github.com/yaredow/glimpse-api/internal/types"
+              import: "github.com/yaredow/glimpse-api/internal/entity"
               type: "Password"
         emit_json_tags: true
         emit_interface: true

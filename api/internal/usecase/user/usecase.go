@@ -1,3 +1,4 @@
+// Package userusecase is the user usecase package.
 package userusecase
 
 import (
@@ -5,19 +6,28 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/yaredow/glimpse-api/internal/entity"
+)
+
+const (
+	refreshTokenTTL       = 7 * 24 * time.Hour
+	activationTokenTTL    = 3 * 24 * time.Hour
+	passwordResetTokenTTL = 24 * time.Hour
 )
 
 type UserUsecase struct {
 	userRepo  UserRespository
 	tokenRepo TokenRepository
+	jwt       JWTService
 	mailer    Mailer
 }
 
-func NewUserUsecase(ur UserRespository, tr TokenRepository, m Mailer) *UserUsecase {
+func NewUserUsecase(ur UserRespository, tr TokenRepository, j JWTService, m Mailer) *UserUsecase {
 	return &UserUsecase{
 		userRepo:  ur,
 		tokenRepo: tr,
+		jwt:       j,
 		mailer:    m,
 	}
 }
@@ -33,7 +43,7 @@ func (uc *UserUsecase) Register(ctx context.Context, input RegisterInput) (*Regi
 		return nil, err
 	}
 
-	token, err := uc.tokenRepo.CreateNew(ctx, user.ID, 3*24*time.Hour, "activation")
+	token, err := uc.tokenRepo.CreateNew(ctx, user.ID, activationTokenTTL, "activation")
 	if err != nil {
 		return nil, err
 	}
@@ -88,4 +98,103 @@ func (uc *UserUsecase) ResetPassword(ctx context.Context, tokenPlainText, newPas
 	}
 
 	return uc.tokenRepo.DeleteForUser(ctx, user.ID, "password_reset")
+}
+
+func (uc *UserUsecase) Login(ctx context.Context, email, password string) (accessToken string, refreshToken string, err error) {
+	user, err := uc.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, ErrRecordNotFound) {
+			return "", "", ErrInvalidCredentials
+		}
+		return "", "", err
+	}
+
+	match, err := user.PasswordHash.Matches(password)
+	if err != nil {
+		return "", "", err
+	}
+
+	if !match {
+		return "", "", ErrInvalidCredentials
+	}
+
+	accessToken, _, err = uc.jwt.GenerateToken(user.ID)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err = uc.tokenRepo.CreateRefreshToken(ctx, user.ID, uuid.New(), refreshTokenTTL)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+func (uc *UserUsecase) RefreshToken(ctx context.Context, refreshTokenPlainText string) (accessToken string, newRefreshToken string, err error) {
+	newRefreshToken, userID, err := uc.tokenRepo.RotateRefreshToken(ctx, refreshTokenPlainText, refreshTokenTTL)
+	if err != nil {
+		return "", "", err
+	}
+
+	accessToken, _, err = uc.jwt.GenerateToken(userID)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, newRefreshToken, nil
+}
+
+func (uc *UserUsecase) RevokeToken(ctx context.Context, refreshTokenPlainText string) error {
+	return uc.tokenRepo.RevokeRefreshToken(ctx, refreshTokenPlainText)
+}
+
+func (uc *UserUsecase) CreateActivationToken(ctx context.Context, email string) error {
+	user, err := uc.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, ErrRecordNotFound) {
+			return entity.ValidationError{Field: "email", Message: "no user with this email address exists"}
+		}
+		return err
+	}
+
+	if user.Activated {
+		return entity.ValidationError{Field: "email", Message: "user with this email address already activated"}
+	}
+
+	token, err := uc.tokenRepo.CreateNew(ctx, user.ID, activationTokenTTL, "activation")
+	if err != nil {
+		return err
+	}
+
+	go uc.mailer.Send(user.Email, "token_activation.html", map[string]any{
+		"activationToken": token,
+	})
+
+	return nil
+}
+
+func (uc *UserUsecase) CreatePasswordResetToken(ctx context.Context, email string) error {
+	user, err := uc.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, ErrRecordNotFound) {
+			return entity.ValidationError{Field: "email", Message: "no user with this email address exists"}
+		}
+		return err
+	}
+
+	if !user.Activated {
+		return entity.ValidationError{Field: "email", Message: "user account is not activated"}
+	}
+
+	token, err := uc.tokenRepo.CreateNew(ctx, user.ID, passwordResetTokenTTL, "password_reset")
+	if err != nil {
+		return err
+	}
+
+	go uc.mailer.Send(user.Email, "token_password_reset.html", map[string]any{
+		"passwordResetToken": token,
+	})
+
+	return nil
 }

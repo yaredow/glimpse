@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/yaredow/glimpse-api/internal/types"
+	"github.com/yaredow/glimpse-api/internal/entity"
 )
 
 type ActionType string
@@ -121,17 +121,17 @@ type Token struct {
 }
 
 type User struct {
-	ID                int64          `json:"id"`
-	Username          string         `json:"username"`
-	Email             string         `json:"email"`
-	PasswordHash      types.Password `json:"password_hash"`
-	ShufflesRemaining int32          `json:"shuffles_remaining"`
-	LastShuffleReset  time.Time      `json:"last_shuffle_reset"`
-	CreatedAt         time.Time      `json:"created_at"`
-	Activated         bool           `json:"activated"`
-	Version           int32          `json:"version"`
-	ExplorationRate   float64        `json:"exploration_rate"`
-	TotalInteractions int32          `json:"total_interactions"`
+	ID                int64           `json:"id"`
+	Username          string          `json:"username"`
+	Email             string          `json:"email"`
+	PasswordHash      entity.Password `json:"password_hash"`
+	ShufflesRemaining int32           `json:"shuffles_remaining"`
+	LastShuffleReset  time.Time       `json:"last_shuffle_reset"`
+	CreatedAt         time.Time       `json:"created_at"`
+	Activated         bool            `json:"activated"`
+	Version           int32           `json:"version"`
+	ExplorationRate   float64         `json:"exploration_rate"`
+	TotalInteractions int32           `json:"total_interactions"`
 }
 
 type UserAffinity struct {

@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/yaredow/glimpse-api/internal/types"
 )
 
 var (
@@ -30,7 +29,7 @@ func NewManager(secret []byte, issuer string) *JWTManager {
 	}
 }
 
-func (m *JWTManager) GenerateJWTToken(userID int64) (types.JWT, error) {
+func (m *JWTManager) GenerateToken(userID int64) (string, time.Time, error) {
 	expiry := time.Now().Add(JWTTTL)
 
 	claims := jwt.RegisteredClaims{
@@ -44,10 +43,7 @@ func (m *JWTManager) GenerateJWTToken(userID int64) (types.JWT, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := token.SignedString(m.secret)
 
-	return types.JWT{
-		Token:  signed,
-		Expiry: expiry,
-	}, err
+	return signed, expiry, err
 }
 
 func (m *JWTManager) ValidateJWTToken(tokenStr string) (int64, error) {

@@ -6,7 +6,6 @@ import (
 
 	"github.com/yaredow/glimpse-api/internal/entity"
 	"github.com/yaredow/glimpse-api/internal/store/queries"
-	"github.com/yaredow/glimpse-api/internal/types"
 )
 
 type UserRepo struct {
@@ -21,7 +20,7 @@ func (ur *UserRepo) Create(ctx context.Context, user *entity.User) error {
 	result, err := ur.db.q.CreateUser(ctx, queries.CreateUserParams{
 		Username:     user.Username,
 		Email:        user.Email,
-		PasswordHash: types.Password(user.PasswordHash),
+		PasswordHash: user.PasswordHash,
 	})
 	if err != nil {
 		return mapDuplicateError(err)
@@ -56,12 +55,16 @@ func (ur *UserRepo) GetByEmail(ctx context.Context, email string) (*entity.User,
 		row.CreatedAt, row.Activated, row.Version), nil
 }
 
+func (ur *UserRepo) UpdateInteractionStats(ctx context.Context, userID int64) error {
+	return ur.db.q.UpdateUserInteractionStats(ctx, userID)
+}
+
 func (ur *UserRepo) Update(ctx context.Context, user *entity.User) error {
 	result, err := ur.db.q.UpdateUser(ctx, queries.UpdateUserParams{
 		ID:           user.ID,
 		Username:     user.Username,
 		Email:        user.Email,
-		PasswordHash: types.Password(user.PasswordHash),
+		PasswordHash: user.PasswordHash,
 		Activated:    user.Activated,
 		Version:      user.Version,
 	})
@@ -73,7 +76,7 @@ func (ur *UserRepo) Update(ctx context.Context, user *entity.User) error {
 	return nil
 }
 
-func mapUser(id int64, username, email string, pw types.Password,
+func mapUser(id int64, username, email string, pw entity.Password,
 	shuffles int32, lastReset time.Time, exploration float64,
 	totalInteractions int32, createdAt time.Time, activated bool, version int32,
 ) *entity.User {
@@ -81,7 +84,7 @@ func mapUser(id int64, username, email string, pw types.Password,
 		ID:                id,
 		Username:          username,
 		Email:             email,
-		PasswordHash:      entity.Password(pw),
+		PasswordHash:      pw,
 		ShufflesRemaining: shuffles,
 		LastShuffleReset:  lastReset,
 		ExplorationRate:   exploration,

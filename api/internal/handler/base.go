@@ -209,6 +209,14 @@ func (b *Base) InactiveAccount(w http.ResponseWriter, r *http.Request) {
 	b.inactiveAccountResponse(w, r)
 }
 
+func (b *Base) InvalidAuthenticationToken(w http.ResponseWriter, r *http.Request) {
+	b.invalidAuthenticationTokenResponse(w, r)
+}
+
+func (b *Base) AuthenticationRequired(w http.ResponseWriter, r *http.Request) {
+	b.authenticationRequiredResponse(w, r)
+}
+
 func (b *Base) WriteJSON(w http.ResponseWriter, status int, data Envelope, headers http.Header) error {
 	return b.writeJSON(w, status, data, headers)
 }

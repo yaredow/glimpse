@@ -7,9 +7,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/yaredow/glimpse-api/internal/store/queries"
-	"github.com/yaredow/glimpse-api/internal/tmdb"
+	"github.com/yaredow/glimpse-api/internal/entity"
+	"github.com/yaredow/glimpse-api/internal/repository/tmdb"
 )
 
 func parseDate(s string) time.Time {
@@ -66,34 +65,38 @@ func vagueDescription(overview string) string {
 	return result
 }
 
-func toUpsertParams(tm tmdb.Movie) queries.UpsertMovieParams {
-	posterPath := pgtype.Text{String: tm.PosterPath, Valid: tm.PosterPath != ""}
-	backdropPath := pgtype.Text{String: tm.BackdropPath, Valid: tm.BackdropPath != ""}
-	originalTitle := pgtype.Text{String: tm.OriginalTitle, Valid: tm.OriginalTitle != ""}
-	fullSynopsis := pgtype.Text{String: tm.Overview, Valid: tm.Overview != ""}
-	voteCount := pgtype.Int4{Int32: int32(tm.VoteCount), Valid: true}
-
-	return queries.UpsertMovieParams{
+func toMovieEntity(tm tmdb.Movie) *entity.Movie {
+	m := &entity.Movie{
 		TmdbID:           int32(tm.ID),
 		VagueDescription: vagueDescription(tm.Overview),
 		Genres:           tmdb.GenreNames(tm.GenreIDs),
 		Title:            tm.Title,
-		OriginalTitle:    originalTitle,
-		FullSynopsis:     fullSynopsis,
-		PosterPath:       posterPath,
-		BackdropPath:     backdropPath,
 		ReleaseDate:      parseDate(tm.ReleaseDate),
 		VoteAverage:      tm.VoteAverage,
-		VoteCount:        voteCount,
+		VoteCount:        int32(tm.VoteCount),
 		OriginalLanguage: tm.OriginalLanguage,
 		Popularity:       tm.Popularity,
 	}
+
+	if tm.OriginalTitle != "" {
+		m.OriginalTitle = &tm.OriginalTitle
+	}
+	if tm.Overview != "" {
+		m.FullSynopsis = &tm.Overview
+	}
+	if tm.PosterPath != "" {
+		m.PosterPath = &tm.PosterPath
+	}
+	if tm.BackdropPath != "" {
+		m.BackdropPath = &tm.BackdropPath
+	}
+
+	return m
 }
 
 func (w *Worker) syncMovies(ctx context.Context) {
 	seen := make(map[int]tmdb.Movie)
 
-	// popular movies
 	for page := 1; page <= 5; page++ {
 		resp, err := w.tmdb.GetPopularMovies(ctx, page)
 		if err != nil {
@@ -106,7 +109,6 @@ func (w *Worker) syncMovies(ctx context.Context) {
 		}
 	}
 
-	// top rated movies
 	for page := 1; page <= 5; page++ {
 		resp, err := w.tmdb.GetTopRatedMovies(ctx, page)
 		if err != nil {
@@ -121,22 +123,15 @@ func (w *Worker) syncMovies(ctx context.Context) {
 
 	w.logger.Info("syncing movies", "count", len(seen))
 
-	params := make([]queries.UpsertMovieParams, 0, len(seen))
+	movies := make([]*entity.Movie, 0, len(seen))
 	for _, m := range seen {
-		params = append(params, toUpsertParams(m))
+		movies = append(movies, toMovieEntity(m))
 	}
 
-	if err := w.store.ExecTx(ctx, func(q *queries.Queries) error {
-		for _, p := range params {
-			if _, err := q.UpsertMovie(ctx, p); err != nil {
-				return err
-			}
-		}
-		return nil
-	}); err != nil {
+	if err := w.movieRepo.UpsertBatch(ctx, movies); err != nil {
 		w.logger.Error("failed to sync movies", "error", err)
 		return
 	}
 
-	w.logger.Info("successfully synced movies", "count", len(params))
+	w.logger.Info("successfully synced movies", "count", len(movies))
 }

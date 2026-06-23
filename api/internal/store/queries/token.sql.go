@@ -9,7 +9,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/yaredow/glimpse-api/internal/types"
+	"github.com/yaredow/glimpse-api/internal/entity"
 )
 
 const createToken = `-- name: CreateToken :exec
@@ -79,17 +79,17 @@ type GetUserByTokenParams struct {
 }
 
 type GetUserByTokenRow struct {
-	ID                int64          `json:"id"`
-	Username          string         `json:"username"`
-	Email             string         `json:"email"`
-	PasswordHash      types.Password `json:"password_hash"`
-	ShufflesRemaining int32          `json:"shuffles_remaining"`
-	LastShuffleReset  time.Time      `json:"last_shuffle_reset"`
-	ExplorationRate   float64        `json:"exploration_rate"`
-	TotalInteractions int32          `json:"total_interactions"`
-	CreatedAt         time.Time      `json:"created_at"`
-	Activated         bool           `json:"activated"`
-	Version           int32          `json:"version"`
+	ID                int64           `json:"id"`
+	Username          string          `json:"username"`
+	Email             string          `json:"email"`
+	PasswordHash      entity.Password `json:"password_hash"`
+	ShufflesRemaining int32           `json:"shuffles_remaining"`
+	LastShuffleReset  time.Time       `json:"last_shuffle_reset"`
+	ExplorationRate   float64         `json:"exploration_rate"`
+	TotalInteractions int32           `json:"total_interactions"`
+	CreatedAt         time.Time       `json:"created_at"`
+	Activated         bool            `json:"activated"`
+	Version           int32           `json:"version"`
 }
 
 func (q *Queries) GetUserByToken(ctx context.Context, arg GetUserByTokenParams) (GetUserByTokenRow, error) {

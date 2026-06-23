@@ -3,7 +3,7 @@ package worker
 import (
 	"context"
 
-	"github.com/yaredow/glimpse-api/internal/store/queries"
+	"github.com/yaredow/glimpse-api/internal/entity"
 )
 
 func (w *Worker) syncGenres(ctx context.Context) {
@@ -15,15 +15,15 @@ func (w *Worker) syncGenres(ctx context.Context) {
 		return
 	}
 
-	params := make([]queries.UpsertGenreParams, len(resp.Genres))
+	genres := make([]*entity.Genre, len(resp.Genres))
 	for i, g := range resp.Genres {
-		params[i] = queries.UpsertGenreParams{
+		genres[i] = &entity.Genre{
 			ID:   int32(g.ID),
 			Name: g.Name,
 		}
 	}
 
-	if err := w.store.SyncGenres(ctx, params); err != nil {
+	if err := w.genreRepo.UpsertBatch(ctx, genres); err != nil {
 		w.logger.Error("failed to sync genres to database", "error", err)
 		return
 	}

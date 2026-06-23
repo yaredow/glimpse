@@ -7,23 +7,36 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yaredow/glimpse-api/internal/store"
-	"github.com/yaredow/glimpse-api/internal/tmdb"
+	"github.com/yaredow/glimpse-api/internal/repository/postgres"
+	"github.com/yaredow/glimpse-api/internal/repository/tmdb"
 )
 
 type Worker struct {
-	store  *store.Store
-	tmdb   *tmdb.Client
-	logger *slog.Logger
-	wg     sync.WaitGroup
-	cancel context.CancelFunc
+	genreRepo    *postgres.GenreRepo
+	movieRepo    *postgres.MovieRepo
+	affinityRepo *postgres.AffinityRepo
+	gridHistRepo *postgres.GridHistoryRepo
+	tmdb         *tmdb.Client
+	logger       *slog.Logger
+	wg           sync.WaitGroup
+	cancel       context.CancelFunc
 }
 
-func New(store *store.Store, tmdb *tmdb.Client, logger *slog.Logger) *Worker {
+func New(
+	genreRepo *postgres.GenreRepo,
+	movieRepo *postgres.MovieRepo,
+	affinityRepo *postgres.AffinityRepo,
+	gridHistRepo *postgres.GridHistoryRepo,
+	tmdb *tmdb.Client,
+	logger *slog.Logger,
+) *Worker {
 	return &Worker{
-		store:  store,
-		tmdb:   tmdb,
-		logger: logger,
+		genreRepo:    genreRepo,
+		movieRepo:    movieRepo,
+		affinityRepo: affinityRepo,
+		gridHistRepo: gridHistRepo,
+		tmdb:         tmdb,
+		logger:       logger,
 	}
 }
 
@@ -68,12 +81,12 @@ func (w *Worker) runDecayLoop(ctx context.Context) {
 }
 
 func (w *Worker) decay(ctx context.Context) {
-	if err := w.store.DecayAffinies(ctx); err != nil {
+	if err := w.affinityRepo.Decay(ctx); err != nil {
 		w.logger.Error("decay affinities failed", "error", err)
 		return
 	}
 
-	if err := w.store.CleanupOldGridHistory(ctx); err != nil {
+	if err := w.gridHistRepo.CleanupOld(ctx); err != nil {
 		w.logger.Error("clean up grid history failed", "error", err)
 		return
 	}
