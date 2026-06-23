@@ -26,7 +26,7 @@ func mapDuplicateError(err error) error {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 		switch {
-		case strings.Contains(pgErr.Message, "user_email_key"):
+		case strings.Contains(pgErr.Message, "users_email_key"):
 			return userusecase.ErrDuplicateEmail
 		case strings.Contains(pgErr.Message, "users_username_key"):
 			return userusecase.ErrDuplicateUsername

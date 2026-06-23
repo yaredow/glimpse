@@ -1,12 +1,17 @@
+// Package userhandler is the user handler package.
 package userhandler
 
 import (
 	"errors"
 	"net/http"
 
-	"github.com/yaredow/glimpse-api/internal/entity"
 	"github.com/yaredow/glimpse-api/internal/handler"
 	userusecase "github.com/yaredow/glimpse-api/internal/usecase/user"
+)
+
+var (
+	errInvalidToken  = errors.New("invalid or expired token")
+	errPasswordReset = errors.New("invalid or expired password reset token")
 )
 
 type registerRequest struct {
@@ -17,6 +22,11 @@ type registerRequest struct {
 
 type activateRequest struct {
 	Token string `json:"token"`
+}
+
+type passwordResetRequest struct {
+	Password string `json:"password"`
+	Token    string `json:"token"`
 }
 
 type Handler struct {
@@ -44,14 +54,14 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		Password: req.Password,
 	})
 	if err != nil {
-		h.mapRegisterError(w, r, err)
+		if h.HandleError(w, r, err) {
+			return
+		}
+		h.ServerError(w, r, err)
 		return
 	}
 
-	err = h.WriteJSON(w, http.StatusCreated, handler.Envelope{"user": user}, nil)
-	if err != nil {
-		h.ServerError(w, r, err)
-	}
+	h.WriteJSON(w, http.StatusCreated, handler.Envelope{"user": user}, nil)
 }
 
 func (h *Handler) Activate(w http.ResponseWriter, r *http.Request) {
@@ -78,23 +88,30 @@ func (h *Handler) Activate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) mapRegisterError(w http.ResponseWriter, r *http.Request, err error) {
-	switch {
-	case errors.Is(err, entity.ErrUsernameRequired),
-		errors.Is(err, entity.ErrUsernameTooLong):
-		h.ValidationFailed(w, r, map[string]string{"username": err.Error()})
-	case errors.Is(err, entity.ErrEmailRequired),
-		errors.Is(err, entity.ErrInvalidEmail):
-		h.ValidationFailed(w, r, map[string]string{"email": err.Error()})
-	case errors.Is(err, entity.ErrPasswordRequired),
-		errors.Is(err, entity.ErrPasswordTooShort),
-		errors.Is(err, entity.ErrPasswordTooLong):
-		h.ValidationFailed(w, r, map[string]string{"password": err.Error()})
-	case errors.Is(err, userusecase.ErrDuplicateEmail):
-		h.ValidationFailed(w, r, map[string]string{"email": "a user with this email address already exists"})
-	case errors.Is(err, userusecase.ErrDuplicateUsername):
-		h.ValidationFailed(w, r, map[string]string{"username": "a user with this username already exists"})
-	default:
+func (h *Handler) UpdateUserPassword(w http.ResponseWriter, r *http.Request) {
+	var req passwordResetRequest
+	if err := h.ReadJSON(w, r, &req); err != nil {
+		h.BadRequest(w, r, err)
+		return
+	}
+
+	err := h.uc.ResetPassword(r.Context(), req.Token, req.Password)
+	if err != nil {
+		if h.HandleError(w, r, err) {
+			return
+		}
+		switch {
+		case errors.Is(err, userusecase.ErrRecordNotFound):
+			h.ValidationFailed(w, r, map[string]string{"token": errPasswordReset.Error()})
+		default:
+			h.ServerError(w, r, err)
+		}
+		return
+	}
+
+	err = h.WriteJSON(w, http.StatusOK, handler.Envelope{"message": "password update successfully"}, nil)
+	if err != nil {
 		h.ServerError(w, r, err)
+		return
 	}
 }

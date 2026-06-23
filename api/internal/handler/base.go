@@ -1,4 +1,4 @@
-// Package handler
+// Package handler is the user handler package.
 package handler
 
 import (
@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/yaredow/glimpse-api/internal/entity"
 )
 
 type Envelope map[string]any
@@ -210,4 +211,20 @@ func (b *Base) InactiveAccount(w http.ResponseWriter, r *http.Request) {
 
 func (b *Base) WriteJSON(w http.ResponseWriter, status int, data Envelope, headers http.Header) error {
 	return b.writeJSON(w, status, data, headers)
+}
+
+func (b *Base) HandleError(w http.ResponseWriter, r *http.Request, err error) bool {
+	var valErr entity.ValidationError
+	if errors.As(err, &valErr) {
+		b.ValidationFailed(w, r, map[string]string{valErr.Field: valErr.Message})
+		return true
+	}
+
+	var bizErr entity.BusinessError
+	if errors.As(err, &bizErr) {
+		b.ValidationFailed(w, r, map[string]string{bizErr.Field: bizErr.Message})
+		return true
+	}
+
+	return false
 }

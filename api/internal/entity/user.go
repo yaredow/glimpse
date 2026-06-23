@@ -49,13 +49,13 @@ type User struct {
 }
 
 var (
-	ErrUsernameRequired = errors.New("username is required")
-	ErrUsernameTooLong  = errors.New("username is too long")
-	ErrEmailRequired    = errors.New("email is required")
-	ErrInvalidEmail     = errors.New("email is not valid")
-	ErrPasswordRequired = errors.New("password is required")
-	ErrPasswordTooShort = errors.New("password must be at least 8 characters")
-	ErrPasswordTooLong  = errors.New("password must be at most 72 characters")
+	ErrUsernameRequired = ValidationError{Field: "username", Message: "username is required"}
+	ErrUsernameTooLong  = ValidationError{Field: "username", Message: "username must not exceed 100 characters"}
+	ErrEmailRequired    = ValidationError{Field: "email", Message: "email is required"}
+	ErrInvalidEmail     = ValidationError{Field: "email", Message: "email is not valid"}
+	ErrPasswordRequired = ValidationError{Field: "password", Message: "password is required"}
+	ErrPasswordTooShort = ValidationError{Field: "password", Message: "password must be at least 8 characters"}
+	ErrPasswordTooLong  = ValidationError{Field: "password", Message: "password must be at most 72 characters"}
 )
 
 func NewUser(username, email, plainTextPassword string) (*User, error) {

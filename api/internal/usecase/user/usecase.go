@@ -69,3 +69,23 @@ func (uc *UserUsecase) Activate(ctx context.Context, tokenPlainText string) erro
 
 	return uc.tokenRepo.DeleteForUser(ctx, user.ID, "activation")
 }
+
+func (uc *UserUsecase) ResetPassword(ctx context.Context, tokenPlainText, newPassword string) error {
+	user, err := uc.tokenRepo.GetUserByToken(ctx, tokenPlainText, "password_reset")
+	if err != nil {
+		if errors.Is(err, ErrRecordNotFound) {
+			return ErrRecordNotFound
+		}
+		return err
+	}
+
+	if err = user.PasswordHash.Set(newPassword); err != nil {
+		return err
+	}
+
+	if err := uc.userRepo.Update(ctx, user); err != nil {
+		return err
+	}
+
+	return uc.tokenRepo.DeleteForUser(ctx, user.ID, "password_reset")
+}

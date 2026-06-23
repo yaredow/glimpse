@@ -32,7 +32,7 @@ func (app *application) routes() http.Handler {
 	// Users routes
 	r.Post("/v1/users/register", app.userHandler.Register)
 	r.Put("/v1/users/activate", app.userHandler.Activate)
-	r.Put("/v1/users/password", app.updateUserPasswordHandler)
+	r.Put("/v1/users/password", app.userHandler.UpdateUserPassword)
 
 	// Auth routes
 	r.Post("/v1/tokens/login", app.createAuthenticationTokenHandler)
