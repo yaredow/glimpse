@@ -1,0 +1,2 @@
+ALTER TABLE daily_pools ALTER COLUMN user_id SET NOT NULL;
+ALTER TABLE daily_pools ALTER COLUMN movie_id SET NOT NULL;

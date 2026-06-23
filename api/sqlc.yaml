@@ -1,12 +1,12 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "internal/store/sql"
+    queries: "internal/sqlc/sql"
     schema: "migrations/"
     gen:
       go:
         package: "queries"
-        out: "internal/store/queries"
+        out: "internal/sqlc/queries"
         sql_package: "pgx/v5"
         overrides:
           - db_type: "pg_catalog.numeric"
@@ -17,11 +17,15 @@ sql:
               type: "UUID"
           - db_type: "pg_catalog.timestamptz"
             go_type: "time.Time"
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "timestamp with time zone"
+            go_type: "time.Time"
           - db_type: "date"
             go_type: "time.Time"
           - column: "users.password_hash"
             go_type:
-              import: "github.com/yaredow/glimpse-api/internal/types"
+              import: "github.com/yaredow/glimpse-api/internal/entity"
               type: "Password"
         emit_json_tags: true
         emit_interface: true
