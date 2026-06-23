@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/entity"
-	"github.com/yaredow/glimpse-api/internal/store/queries"
+	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
 )
 
 type InteractionRepo struct {

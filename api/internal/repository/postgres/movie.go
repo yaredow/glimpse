@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yaredow/glimpse-api/internal/entity"
-	"github.com/yaredow/glimpse-api/internal/store/queries"
+	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
 	movieusecase "github.com/yaredow/glimpse-api/internal/usecase/movie"
 )
 

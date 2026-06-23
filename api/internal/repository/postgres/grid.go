@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/yaredow/glimpse-api/internal/store/queries"
+	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
 	recusecase "github.com/yaredow/glimpse-api/internal/usecase/recommendation"
 )
 

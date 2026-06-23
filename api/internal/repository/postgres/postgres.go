@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/yaredow/glimpse-api/internal/store/queries"
+	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
 	recusecase "github.com/yaredow/glimpse-api/internal/usecase/recommendation"
 	userusecase "github.com/yaredow/glimpse-api/internal/usecase/user"
 )

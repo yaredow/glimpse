@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/yaredow/glimpse-api/internal/entity"
-	"github.com/yaredow/glimpse-api/internal/store/queries"
+	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
 )
 
 type UserRepo struct {
