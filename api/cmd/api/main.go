@@ -13,10 +13,14 @@ import (
 	"github.com/yaredow/glimpse-api/internal/app"
 	"github.com/yaredow/glimpse-api/internal/auth"
 	db "github.com/yaredow/glimpse-api/internal/db"
+	"github.com/yaredow/glimpse-api/internal/handler"
+	userhandler "github.com/yaredow/glimpse-api/internal/handler/user"
 	"github.com/yaredow/glimpse-api/internal/mailer"
 	"github.com/yaredow/glimpse-api/internal/recommendation"
+	"github.com/yaredow/glimpse-api/internal/repository/postgres"
 	"github.com/yaredow/glimpse-api/internal/store"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
+	userusecase "github.com/yaredow/glimpse-api/internal/usecase/user"
 	"github.com/yaredow/glimpse-api/internal/worker"
 )
 
@@ -52,11 +56,18 @@ func main() {
 	mailer := mailer.New(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword, cfg.SMTPSender)
 	recService := recommendation.NewService(store, tmdb.GenreNames)
 
+	db := postgres.NewDB(pool)
+	userRepo := postgres.NewUserRepo(db)
+	tokenRepo := postgres.NewTokenRepo(db)
+	baseHandler := handler.NewBase(logger)
+	userUC := userusecase.NewUserUsecase(userRepo, tokenRepo, mailer)
+	userHandler := userhandler.New(baseHandler, userUC)
+
 	w := worker.New(store, tmdbClient, logger)
 	w.Start()
 	defer w.Stop()
 
-	application := app.New(cfg, logger, logFormat, store, tmdbClient, mailer, jwtManager, recService)
+	application := app.New(cfg, logger, logFormat, store, tmdbClient, mailer, jwtManager, recService, userHandler)
 
 	if err := application.Serve(); !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("server error", "error", err)

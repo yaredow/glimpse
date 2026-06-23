@@ -30,8 +30,8 @@ func (app *application) routes() http.Handler {
 	r.Get("/v1/healthcheck", app.Healthcheck)
 
 	// Users routes
-	r.Post("/v1/users/register", app.userRegistrationHandler)
-	r.Put("/v1/users/activate", app.activateUserHandler)
+	r.Post("/v1/users/register", app.userHandler.Register)
+	r.Put("/v1/users/activate", app.userHandler.Activate)
 	r.Put("/v1/users/password", app.updateUserPasswordHandler)
 
 	// Auth routes

@@ -48,11 +48,15 @@ func (uc *UserUsecase) Register(ctx context.Context, input RegisterInput) (*Regi
 	}, nil
 }
 
+func (uc *UserUsecase) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
+	return uc.userRepo.GetByEmail(ctx, email)
+}
+
 func (uc *UserUsecase) Activate(ctx context.Context, tokenPlainText string) error {
-	user, err := uc.userRepo.GetByToken(ctx, tokenPlainText, "activation")
+	user, err := uc.tokenRepo.GetUserByToken(ctx, tokenPlainText, "activation")
 	if err != nil {
 		if errors.Is(err, ErrRecordNotFound) {
-			return err
+			return ErrRecordNotFound
 		}
 		return err
 	}
@@ -64,12 +68,4 @@ func (uc *UserUsecase) Activate(ctx context.Context, tokenPlainText string) erro
 	}
 
 	return uc.tokenRepo.DeleteForUser(ctx, user.ID, "activation")
-}
-
-func (uc *UserUsecase) GetByEmail(ctx context.Context, email string) (*entity.User, error) {
-	return uc.userRepo.GetByEmail(ctx, email)
-}
-
-func mapRepoError(err error) error {
-	return err
 }

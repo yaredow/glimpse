@@ -130,5 +130,3 @@ func buildAffinityMap(affinities []queries.UserAffinity) map[string]float64 {
 func explorationRateFor(totalInteractions int) float64 {
 	return math.Max(0.05, 0.4*math.Exp(-float64(totalInteractions)/50))
 }
-
-
