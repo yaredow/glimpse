@@ -1,0 +1,12 @@
+quiet: false
+disable-version-string: false
+with-expecter: true
+dir: "{{.InterfaceDir}}/mocks"
+outpkg: mocks
+packages:
+  github.com/yaredow/glimpse-api/internal/handler:
+    config:
+      all: true
+  github.com/yaredow/glimpse-api/internal/service:
+    config:
+      all: true
