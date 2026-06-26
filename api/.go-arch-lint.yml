@@ -1,0 +1,46 @@
+version: 3
+workdir: internal
+
+allow:
+  depOnAnyVendor: false
+  deepScan: true
+
+excludeFiles:
+  - "^.*_test\\.go$"
+  - "^.*\\/mocks\\/.*$"
+
+vendors:
+  echo:
+    in:
+      - github.com/labstack/echo/v5
+      - github.com/labstack/echo/v5/**
+  pgx:
+    in:
+      - github.com/jackc/pgx/v5
+      - github.com/jackc/pgx/v5/**
+
+components:
+  handler:     { in: handler/** }
+  service:     { in: service/** }
+  repository:  { in: repository/** }
+  model:       { in: model }
+
+commonComponents:
+  - model
+
+deps:
+  handler:
+    mayDependOn:
+      - service
+    canUse:
+      - echo
+
+  service:
+    mayDependOn:
+      - repository
+
+  repository:
+    mayDependOn:
+      - repository
+    canUse:
+      - pgx
