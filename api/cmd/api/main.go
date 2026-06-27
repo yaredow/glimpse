@@ -9,6 +9,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	"github.com/yaredow/glimpse-api/internal/handler"
+	"github.com/yaredow/glimpse-api/internal/repository/postgres"
+	"github.com/yaredow/glimpse-api/internal/service"
 )
 
 func main() {
@@ -23,6 +26,15 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
+
+	// Repositories
+	userRepo := postgres.NewUserRepository(pool)
+
+	// Services
+	userService := service.NewUserService(userRepo)
+
+	// Handlers
+	handler.NewUserHandler(e, userService)
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})

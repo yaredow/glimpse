@@ -1,0 +1,361 @@
+package pgxmock
+
+import (
+	"encoding/csv"
+	"errors"
+	"fmt"
+	"reflect"
+	"strings"
+	"sync"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+// CSVColumnParser is a function which converts trimmed csv
+// column string to a []byte representation. Currently
+// transforms NULL to nil
+var CSVColumnParser = func(s string) any {
+	switch {
+	case strings.ToLower(s) == "null":
+		return nil
+	}
+	return s
+}
+
+// connRow implements the Row interface for Conn.QueryRow.
+type connRow rowSets
+
+func (r *connRow) Scan(dest ...any) (err error) {
+	rows := (*rowSets)(r)
+
+	if rows.Err() != nil {
+		return rows.Err()
+	}
+
+	for _, d := range dest {
+		if _, ok := d.(*pgtype.DriverBytes); ok {
+			rows.Close()
+			return fmt.Errorf("cannot scan into *pgtype.DriverBytes from QueryRow")
+		}
+	}
+
+	if !rows.Next() {
+		if rows.Err() == nil {
+			return pgx.ErrNoRows
+		}
+		return rows.Err()
+	}
+	defer rows.Close()
+	return errors.Join(rows.Scan(dest...), rows.Err())
+}
+
+type rowSets struct {
+	sets     []*Rows
+	RowSetNo int
+	ex       *ExpectedQuery
+}
+
+func (rs *rowSets) Conn() *pgx.Conn {
+	return nil
+}
+
+func (rs *rowSets) Err() error {
+	r := rs.sets[rs.RowSetNo]
+	return r.nextErr[r.recNo-1]
+}
+
+func (rs *rowSets) CommandTag() pgconn.CommandTag {
+	return rs.sets[rs.RowSetNo].commandTag
+}
+
+func (rs *rowSets) FieldDescriptions() []pgconn.FieldDescription {
+	return rs.sets[rs.RowSetNo].defs
+}
+
+// func (rs *rowSets) Columns() []string {
+// 	return rs.sets[rs.pos].cols
+// }
+
+func (rs *rowSets) Close() {
+	if rs.ex != nil {
+		rs.ex.rowsWereClosed = true
+	}
+	rs.close()
+}
+
+// close marks the current rows closed, jumps to the last row, and sets the
+// close error.
+func (rs *rowSets) close() {
+	r := rs.sets[rs.RowSetNo]
+	r.recNo = len(r.rows)
+	r.nextErr[r.recNo-1] = r.closeErr
+	r.closed = true
+}
+
+// advances to next row
+func (rs *rowSets) Next() bool {
+	r := rs.sets[rs.RowSetNo]
+	if r.recNo == len(r.rows) && r.nextErr[r.recNo] == nil {
+		rs.close()
+		return false
+	}
+	r.recNo++
+	return r.recNo <= len(r.rows)
+}
+
+// Values returns the decoded row values. As with Scan(), it is an error to
+// call Values without first calling Next() and checking that it returned
+// true.
+func (rs *rowSets) Values() ([]any, error) {
+	r := rs.sets[rs.RowSetNo]
+	return r.rows[r.recNo-1], r.nextErr[r.recNo-1]
+}
+
+func (rs *rowSets) Scan(dest ...any) error {
+	r := rs.sets[rs.RowSetNo]
+	if r.closed {
+		// If there is no error, we should return one anyway. Weirdly, pgx returns
+		// `number of field descriptions must equal number of values, got %d and %d`.
+		return r.nextErr[r.recNo-1]
+	}
+	if len(dest) == 1 {
+		if rc, ok := dest[0].(pgx.RowScanner); ok {
+			return rc.ScanRow(rs)
+		}
+	}
+	if len(dest) != len(r.defs) {
+		return fmt.Errorf("incorrect argument number %d for columns %d", len(dest), len(r.defs))
+	}
+	if len(r.rows) == 0 {
+		return pgx.ErrNoRows
+	}
+	for i, col := range r.rows[r.recNo-1] {
+		if dest[i] == nil {
+			//behave compatible with pgx
+			continue
+		}
+		destVal := reflect.ValueOf(dest[i])
+		if destVal.Kind() != reflect.Pointer {
+			return fmt.Errorf("destination argument must be a pointer for column %s", r.defs[i].Name)
+		}
+		if col == nil {
+			dest[i] = nil
+			continue
+		}
+		val := reflect.ValueOf(col)
+		if _, ok := dest[i].(*any); ok || val.Type().AssignableTo(destVal.Elem().Type()) {
+			if destElem := destVal.Elem(); destElem.CanSet() {
+				destElem.Set(val)
+			} else {
+				return fmt.Errorf("cannot set destination value for column %s", r.defs[i].Name)
+			}
+		} else if scanner, ok := destVal.Interface().(interface{ Scan(any) error }); ok {
+			// Try to use Scanner interface
+			if err := scanner.Scan(val.Interface()); err != nil {
+				return fmt.Errorf("scanning value error for column '%s': %w", string(r.defs[i].Name), err)
+			}
+		} else if val.CanConvert(destVal.Elem().Type()) {
+			if destElem := destVal.Elem(); destElem.CanSet() {
+				destElem.Set(val.Convert(destElem.Type()))
+			} else {
+				return fmt.Errorf("cannot set destination value for column %s", r.defs[i].Name)
+			}
+		} else {
+			return fmt.Errorf("destination kind '%v' not supported for value kind '%v' of column '%s'",
+				destVal.Elem().Kind(), val.Kind(), string(r.defs[i].Name))
+		}
+	}
+	return r.nextErr[r.recNo-1]
+}
+
+var pgtypeMapMutex sync.Mutex
+
+// pgtypeMap is not safe to use concurrently, be sure to use pgtypeMapMutex when
+// accessing it
+var pgtypeMap *pgtype.Map
+
+// getTypeMap returns an existing pgtype.Map or creates a new one if it doesn't
+// exist. pgtypeMapMutex must be locked to call this function.
+func getTypeMap() *pgtype.Map {
+	if pgtypeMap == nil {
+		pgtypeMap = pgtype.NewMap()
+	}
+	return pgtypeMap
+}
+
+// RawValues attempts to return the binary representation of the row values as
+// if postgres had returned them. RawValues will consolidate the column OIDs and
+// FormatCode.
+//
+// It is expected that if you are testing with RawValues, you know what you're
+// doing in terms of how postgres will marshal certain data types into binary
+// format, such as numarics, dates, and timestamps, etc.
+//
+// See https://github.com/jackc/pgx/tree/ac0b46f2f9538baa74aeac931d97884e5b9c924d/pgtype
+func (rs *rowSets) RawValues() [][]byte {
+	r := rs.sets[rs.RowSetNo]
+	dest := make([][]byte, len(r.defs))
+	fd := rs.FieldDescriptions()
+
+	pgtypeMapMutex.Lock()
+	defer pgtypeMapMutex.Unlock()
+
+	for i, col := range r.rows[r.recNo-1] {
+
+		encoded, err := getTypeMap().Encode(fd[i].DataTypeOID, fd[i].Format, col, nil)
+
+		if err != nil {
+			// fallback to a %v conversion.
+			dest[i] = fmt.Appendf(nil, "%v", col)
+			continue
+		}
+
+		dest[i] = encoded
+	}
+
+	return dest
+}
+
+// transforms to debuggable printable string
+func (rs *rowSets) String() string {
+	if rs.empty() {
+		return "\t- returns no data"
+	}
+
+	msg := "\t- returns data:\n"
+	if len(rs.sets) == 1 {
+		for n, row := range rs.sets[0].rows {
+			msg += fmt.Sprintf("\t\trow %d - %+v\n", n, row)
+		}
+		return msg
+	}
+	for i, set := range rs.sets {
+		msg += fmt.Sprintf("\t\tresult set: %d\n", i)
+		for n, row := range set.rows {
+			msg += fmt.Sprintf("\t\t\trow %d: %+v\n", n, row)
+		}
+	}
+	return msg
+}
+
+func (rs *rowSets) empty() bool {
+	for _, set := range rs.sets {
+		if len(set.rows) > 0 {
+			return false
+		}
+	}
+	return true
+}
+
+// Rows is a mocked collection of rows to
+// return for Query result
+type Rows struct {
+	commandTag pgconn.CommandTag
+	defs       []pgconn.FieldDescription
+	rows       [][]any
+	recNo      int
+	nextErr    map[int]error
+	closeErr   error
+	closed     bool
+}
+
+// NewRows allows Rows to be created from a
+// sql interface{} slice or from the CSV string and
+// to be used as sql driver.Rows.
+// Use pgxmock.NewRows instead if using a custom converter
+func NewRows(columns []string) *Rows {
+	var coldefs []pgconn.FieldDescription
+	for _, column := range columns {
+		coldefs = append(coldefs, pgconn.FieldDescription{Name: column})
+	}
+	return &Rows{
+		defs:    coldefs,
+		nextErr: make(map[int]error),
+	}
+}
+
+// CloseError sets an error which will be returned by [Rows.Err] after
+// [Rows.Close] has been called or [Rows.Next] returns false.
+func (r *Rows) CloseError(err error) *Rows {
+	r.closeErr = err
+	return r
+}
+
+// RowError allows to set an error
+// which will be returned when a given
+// row number is read
+func (r *Rows) RowError(row int, err error) *Rows {
+	r.nextErr[row] = err
+	return r
+}
+
+// AddRow composed from database interface{} slice
+// return the same instance to perform subsequent actions.
+// Note that the number of values must match the number
+// of columns
+func (r *Rows) AddRow(values ...any) *Rows {
+	if len(values) != len(r.defs) {
+		panic("Expected number of values to match number of columns")
+	}
+
+	row := make([]any, len(r.defs))
+	copy(row, values)
+	r.rows = append(r.rows, row)
+	return r
+}
+
+// AddRows adds multiple rows composed from any slice and
+// returns the same instance to perform subsequent actions.
+func (r *Rows) AddRows(values ...[]any) *Rows {
+	for _, value := range values {
+		r.AddRow(value...)
+	}
+	return r
+}
+
+// AddCommandTag will add a command tag to the result set
+func (r *Rows) AddCommandTag(tag pgconn.CommandTag) *Rows {
+	r.commandTag = tag
+	return r
+}
+
+// FromCSVString build rows from csv string.
+// return the same instance to perform subsequent actions.
+// Note that the number of values must match the number
+// of columns
+func (r *Rows) FromCSVString(s string) *Rows {
+	res := strings.NewReader(strings.TrimSpace(s))
+	csvReader := csv.NewReader(res)
+
+	for {
+		res, err := csvReader.Read()
+		if err != nil || res == nil {
+			break
+		}
+
+		row := make([]any, len(r.defs))
+		for i, v := range res {
+			row[i] = CSVColumnParser(strings.TrimSpace(v))
+		}
+		r.rows = append(r.rows, row)
+	}
+	return r
+}
+
+// Kind returns rows corresponding to the interface pgx.Rows
+// useful for testing entities that implement an interface pgx.RowScanner
+func (r *Rows) Kind() pgx.Rows {
+	return &rowSets{
+		sets: []*Rows{r},
+	}
+}
+
+// NewRowsWithColumnDefinition return rows with columns metadata
+func NewRowsWithColumnDefinition(columns ...pgconn.FieldDescription) *Rows {
+	return &Rows{
+		defs:    columns,
+		nextErr: make(map[int]error),
+	}
+}

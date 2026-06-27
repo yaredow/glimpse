@@ -1,5 +1,7 @@
 quiet: false
-disable-version-string: false
+disable-version-string: true
+resolve-type-alias: false
+issue-845-fix: true
 with-expecter: true
 dir: "{{.InterfaceDir}}/mocks"
 outpkg: mocks

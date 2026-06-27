@@ -18,15 +18,17 @@ vendors:
     in:
       - github.com/jackc/pgx/v5
       - github.com/jackc/pgx/v5/**
+  crypto:
+    in: golang.org/x/crypto/**
 
 components:
   handler:     { in: handler/** }
   service:     { in: service/** }
   repository:  { in: repository/** }
-  model:       { in: model }
+  domain:      { in: domain }
 
 commonComponents:
-  - model
+  - domain
 
 deps:
   handler:
@@ -38,6 +40,8 @@ deps:
   service:
     mayDependOn:
       - repository
+    canUse:
+      - crypto
 
   repository:
     mayDependOn:
