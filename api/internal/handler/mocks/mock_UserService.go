@@ -70,65 +70,6 @@ func (_c *MockUserService_Create_Call) RunAndReturn(run func(context.Context, *d
 	return _c
 }
 
-// GetByEmail provides a mock function with given fields: ctx, email
-func (_m *MockUserService) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
-	ret := _m.Called(ctx, email)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetByEmail")
-	}
-
-	var r0 *domain.User
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*domain.User, error)); ok {
-		return rf(ctx, email)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *domain.User); ok {
-		r0 = rf(ctx, email)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*domain.User)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, email)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockUserService_GetByEmail_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByEmail'
-type MockUserService_GetByEmail_Call struct {
-	*mock.Call
-}
-
-// GetByEmail is a helper method to define mock.On call
-//   - ctx context.Context
-//   - email string
-func (_e *MockUserService_Expecter) GetByEmail(ctx interface{}, email interface{}) *MockUserService_GetByEmail_Call {
-	return &MockUserService_GetByEmail_Call{Call: _e.mock.On("GetByEmail", ctx, email)}
-}
-
-func (_c *MockUserService_GetByEmail_Call) Run(run func(ctx context.Context, email string)) *MockUserService_GetByEmail_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
-	})
-	return _c
-}
-
-func (_c *MockUserService_GetByEmail_Call) Return(_a0 *domain.User, _a1 error) *MockUserService_GetByEmail_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *MockUserService_GetByEmail_Call) RunAndReturn(run func(context.Context, string) (*domain.User, error)) *MockUserService_GetByEmail_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // NewMockUserService creates a new instance of MockUserService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockUserService(t interface {

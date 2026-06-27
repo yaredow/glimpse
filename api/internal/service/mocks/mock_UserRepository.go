@@ -128,6 +128,66 @@ func (_c *MockUserRepository_GetByEmail_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// GetByToken provides a mock function with given fields: ctx, tokenPlainText, scope
+func (_m *MockUserRepository) GetByToken(ctx context.Context, tokenPlainText string, scope string) (*domain.User, error) {
+	ret := _m.Called(ctx, tokenPlainText, scope)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByToken")
+	}
+
+	var r0 *domain.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*domain.User, error)); ok {
+		return rf(ctx, tokenPlainText, scope)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *domain.User); ok {
+		r0 = rf(ctx, tokenPlainText, scope)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, tokenPlainText, scope)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockUserRepository_GetByToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByToken'
+type MockUserRepository_GetByToken_Call struct {
+	*mock.Call
+}
+
+// GetByToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - tokenPlainText string
+//   - scope string
+func (_e *MockUserRepository_Expecter) GetByToken(ctx interface{}, tokenPlainText interface{}, scope interface{}) *MockUserRepository_GetByToken_Call {
+	return &MockUserRepository_GetByToken_Call{Call: _e.mock.On("GetByToken", ctx, tokenPlainText, scope)}
+}
+
+func (_c *MockUserRepository_GetByToken_Call) Run(run func(ctx context.Context, tokenPlainText string, scope string)) *MockUserRepository_GetByToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockUserRepository_GetByToken_Call) Return(_a0 *domain.User, _a1 error) *MockUserRepository_GetByToken_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockUserRepository_GetByToken_Call) RunAndReturn(run func(context.Context, string, string) (*domain.User, error)) *MockUserRepository_GetByToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockUserRepository creates a new instance of MockUserRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockUserRepository(t interface {

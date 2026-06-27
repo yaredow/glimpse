@@ -13,6 +13,7 @@ import (
 type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
 	GetByEmail(ctx context.Context, email string) (*domain.User, error)
+	GetByToken(ctx context.Context, tokenPlainText string, scope string) (*domain.User, error)
 }
 
 type UserService struct {
@@ -67,4 +68,13 @@ func isValidEmail(email string) bool {
 	_, err := mail.ParseAddress(email)
 
 	return err == nil
+}
+
+func (us *UserService) GetByToken(ctx context.Context, tokenPlainText string, scope string) (*domain.User, error) {
+	user, err := us.repo.GetByToken(ctx, tokenPlainText, scope)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

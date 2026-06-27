@@ -16,7 +16,6 @@ type ResponseError struct {
 //go:generate mockery --name UserService --dir . --output mocks --outpkg mocks
 type UserService interface {
 	Create(ctx context.Context, user *domain.User) error
-	GetByEmail(ctx context.Context, email string) (*domain.User, error)
 }
 
 type UserHandler struct {
