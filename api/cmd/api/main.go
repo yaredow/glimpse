@@ -28,7 +28,6 @@ func main() {
 	// Environment variables
 	jwtSecret := os.Getenv("JWT_SECRET")
 	smtpHost := os.Getenv("SMTP_HOST")
-	smtpPort := os.Getenv("SMTP_PORT")
 	smtpUsername := os.Getenv("SMTP_USERNAME")
 	smtpPassword := os.Getenv("SMTP_PASSWORD")
 	smtpSender := os.Getenv("SMTP_SENDER")
@@ -59,11 +58,8 @@ func main() {
 	jwtMgr := auth.NewManager([]byte(jwtSecret))
 
 	// Mailer
-	smtpPortInt, err := strconv.Atoi(smtpPort)
-	if err != nil {
-		log.Fatal("invalid SMTP_PORT", err)
-	}
-	m := mailer.New(smtpHost, smtpPortInt, smtpUsername, smtpPassword, smtpSender)
+
+	m := mailer.New(smtpHost, 25, smtpUsername, smtpPassword, smtpSender)
 
 	// Worker pool
 	wp := worker.New()

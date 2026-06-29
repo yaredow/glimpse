@@ -211,21 +211,33 @@ func (_c *MockUserService_Create_Call) RunAndReturn(run func(context.Context, *d
 }
 
 // RequestPasswordReset provides a mock function with given fields: ctx, email
-func (_m *MockUserService) RequestPasswordReset(ctx context.Context, email string) error {
+func (_m *MockUserService) RequestPasswordReset(ctx context.Context, email string) (*domain.Token, error) {
 	ret := _m.Called(ctx, email)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RequestPasswordReset")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+	var r0 *domain.Token
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*domain.Token, error)); ok {
+		return rf(ctx, email)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *domain.Token); ok {
 		r0 = rf(ctx, email)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.Token)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockUserService_RequestPasswordReset_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RequestPasswordReset'
@@ -247,12 +259,12 @@ func (_c *MockUserService_RequestPasswordReset_Call) Run(run func(ctx context.Co
 	return _c
 }
 
-func (_c *MockUserService_RequestPasswordReset_Call) Return(_a0 error) *MockUserService_RequestPasswordReset_Call {
-	_c.Call.Return(_a0)
+func (_c *MockUserService_RequestPasswordReset_Call) Return(_a0 *domain.Token, _a1 error) *MockUserService_RequestPasswordReset_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockUserService_RequestPasswordReset_Call) RunAndReturn(run func(context.Context, string) error) *MockUserService_RequestPasswordReset_Call {
+func (_c *MockUserService_RequestPasswordReset_Call) RunAndReturn(run func(context.Context, string) (*domain.Token, error)) *MockUserService_RequestPasswordReset_Call {
 	_c.Call.Return(run)
 	return _c
 }

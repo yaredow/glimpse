@@ -25,7 +25,7 @@ type UserService interface {
 	Create(ctx context.Context, user *domain.User) (*domain.Token, error)
 	Authenticate(ctx context.Context, email, password string) (*domain.User, *domain.RefreshToken, error)
 	Activate(ctx context.Context, tokenPlainText string) (*domain.User, error)
-	RequestPasswordReset(ctx context.Context, email string) error
+	RequestPasswordReset(ctx context.Context, email string) (*domain.Token, error)
 	ResetPassword(ctx context.Context, tokenPlainText, newPassword string) error
 	RotateRefreshToken(ctx context.Context, refreshTokenPlainText string) (*domain.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, refreshTokenPlainText string) error
@@ -48,6 +48,7 @@ func NewUserHandler(e *echo.Echo, svc UserService, jwtMgr *auth.JWTManager, mail
 	e.PUT("/v1/users/password", h.ResetPassword)
 	e.POST("/v1/tokens/refresh", h.RefreshToken)
 	e.POST("/v1/tokens/logout", h.Logout)
+
 	return h
 }
 
@@ -128,7 +129,7 @@ func (uh *UserHandler) Authenticate(c *echo.Context) error {
 
 func (uh *UserHandler) Activate(c *echo.Context) error {
 	var input struct {
-		TokenPlainText string `json:"tokenPlainText" validate:"required"`
+		TokenPlainText string `json:"token" validate:"required"`
 	}
 
 	if err := c.Bind(&input); err != nil {
@@ -162,9 +163,20 @@ func (uh *UserHandler) RequestPasswordReset(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	err := uh.svc.RequestPasswordReset(c.Request().Context(), input.Email)
+	token, err := uh.svc.RequestPasswordReset(c.Request().Context(), input.Email)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	if token != nil {
+		uh.workers.Background(func() {
+			err := uh.mailer.Send(input.Email, "token_password_reset.html", envelope{
+				"passwordResetToken": token.Plaintext,
+			})
+			if err != nil {
+				fmt.Printf("failed to send password reset email: %v\n", err)
+			}
+		})
 	}
 
 	return c.JSON(http.StatusAccepted, envelope{"message": "if the email exists, a reset link has been sent"})

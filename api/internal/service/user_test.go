@@ -791,7 +791,7 @@ func TestUserService_RequestPasswordReset(t *testing.T) {
 			})).
 			Return(nil)
 
-		err := svc.RequestPasswordReset(context.Background(), "john@test.com")
+		_, err := svc.RequestPasswordReset(context.Background(), "john@test.com")
 		require.NoError(t, err)
 	})
 
@@ -800,7 +800,7 @@ func TestUserService_RequestPasswordReset(t *testing.T) {
 
 		_, _, _, svc := newUserService(t)
 
-		err := svc.RequestPasswordReset(context.Background(), "not-an-email")
+		_, err := svc.RequestPasswordReset(context.Background(), "not-an-email")
 		require.NoError(t, err)
 	})
 
@@ -813,7 +813,7 @@ func TestUserService_RequestPasswordReset(t *testing.T) {
 			GetByEmail(mock.Anything, "missing@test.com").
 			Return(nil, domain.ErrNotFound)
 
-		err := svc.RequestPasswordReset(context.Background(), "missing@test.com")
+		_, err := svc.RequestPasswordReset(context.Background(), "missing@test.com")
 		require.NoError(t, err)
 	})
 
@@ -836,7 +836,7 @@ func TestUserService_RequestPasswordReset(t *testing.T) {
 			Insert(mock.Anything, mock.Anything).
 			Return(nil)
 
-		err := svc.RequestPasswordReset(context.Background(), "  John@Test.com  ")
+		_, err := svc.RequestPasswordReset(context.Background(), "  John@Test.com  ")
 		require.NoError(t, err)
 	})
 
@@ -850,7 +850,7 @@ func TestUserService_RequestPasswordReset(t *testing.T) {
 			GetByEmail(mock.Anything, "john@test.com").
 			Return(nil, repoErr)
 
-		err := svc.RequestPasswordReset(context.Background(), "john@test.com")
+		_, err := svc.RequestPasswordReset(context.Background(), "john@test.com")
 		require.ErrorIs(t, err, repoErr)
 	})
 }

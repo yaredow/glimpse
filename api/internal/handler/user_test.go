@@ -508,7 +508,7 @@ func TestUserHandler_RequestPasswordReset(t *testing.T) {
 
 		mockSvc.EXPECT().
 			RequestPasswordReset(mock.Anything, "john@test.com").
-			Return(nil)
+			Return(&domain.Token{Plaintext: "reset-token"}, nil)
 
 		body := `{"email":"john@test.com"}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/password-reset", strings.NewReader(body))
@@ -566,7 +566,7 @@ func TestUserHandler_RequestPasswordReset(t *testing.T) {
 
 		mockSvc.EXPECT().
 			RequestPasswordReset(mock.Anything, "john@test.com").
-			Return(domain.ErrInternalServerError)
+			Return(nil, domain.ErrInternalServerError)
 
 		body := `{"email":"john@test.com"}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/password-reset", strings.NewReader(body))

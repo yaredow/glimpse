@@ -190,37 +190,37 @@ func (us *UserService) Activate(ctx context.Context, tokenPlainText string) (*do
 	return user, nil
 }
 
-func (us *UserService) RequestPasswordReset(ctx context.Context, email string) error {
+func (us *UserService) RequestPasswordReset(ctx context.Context, email string) (*domain.Token, error) {
 	email = strings.TrimSpace(strings.ToLower(email))
 
 	if !isValidEmail(email) {
-		return nil
+		return nil, nil
 	}
 
 	user, err := us.repo.GetByEmail(ctx, email)
 	if err != nil {
 		if err == domain.ErrNotFound {
-			return nil
+			return nil, nil
 		}
-		return err
+		return nil, err
 	}
 
 	token, err := domain.GenerateToken(user.ID, 30*time.Minute, "password_reset")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = us.tokenRepo.DeleteAllForUser(ctx, "password_reset", user.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = us.tokenRepo.Insert(ctx, token)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return token, nil
 }
 
 func (us *UserService) ResetPassword(ctx context.Context, tokenPlainText, newPassword string) error {
