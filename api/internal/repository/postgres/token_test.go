@@ -2,7 +2,6 @@ package postgres_test
 
 import (
 	"context"
-	"crypto/sha256"
 	"testing"
 	"time"
 
@@ -18,48 +17,20 @@ func TestTokenRepository_Insert(t *testing.T) {
 	defer mock.Close()
 
 	repo := postgres.NewTokenRepository(mock)
-	now := time.Now()
 
 	token := &domain.Token{
 		Hash:   []byte("test-hash"),
 		UserID: 1,
-		Expiry: now.Add(time.Hour),
+		Expiry: time.Now().Add(time.Hour),
 		Scope:  "activation",
 	}
 
-	ock.ExpectExec("INSERT INTO tokens").
+	mock.ExpectExec("INSERT INTO tokens").
 		WithArgs([]byte("test-hash"), int64(1), pgxmock.AnyArg(), "activation").
 		WillReturnResult(pgxmock.NewResult("INSERT", 1))
 
 	err = repo.Insert(context.Background(), token)
 	require.NoError(t, err)
-	require.NoError(t, mock.ExpectationsWereMet())
-}
-
-func TestTokenRepository_New(t *testing.T) {
-	mock, err := pgxmock.NewPool()
-	require.NoError(t, err)
-	defer mock.Close()
-
-	repo := postgres.NewTokenRepository(mock)
-
-	mock.ExpectExec("INSERT INTO tokens").
-		WithArgs(pgxmock.AnyArg(), int64(42), pgxmock.AnyArg(), "activation").
-		WillReturnResult(pgxmock.NewResult("INSERT", 1))
-
-	token, err := repo.New(context.Background(), 42, time.Hour, "activation")
-	require.NoError(t, err)
-	require.NotNil(t, token)
-	require.Equal(t, int64(42), token.UserID)
-	require.Equal(t, "activation", token.Scope)
-	require.True(t, token.Expiry.After(time.Now()))
-	require.NotEmpty(t, token.Plaintext)
-	require.Len(t, token.Plaintext, 26)
-	require.Len(t, token.Hash, 32)
-
-	expectedHash := sha256.Sum256([]byte(token.Plaintext))
-	require.Equal(t, expectedHash[:], token.Hash)
-
 	require.NoError(t, mock.ExpectationsWereMet())
 }
 

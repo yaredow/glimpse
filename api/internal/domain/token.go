@@ -1,6 +1,13 @@
 package domain
 
-import "time"
+import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base32"
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Token struct {
 	Plaintext string     `json:"token"`
@@ -13,11 +20,57 @@ type Token struct {
 }
 
 type RefreshToken struct {
+	Plaintext  string     `json:"token"`
 	Hash       []byte     `json:"-"`
 	UserID     int64      `json:"-"`
-	ExpiresAt  time.Time  `json:"expires_at"`
-	CreatedAt  time.Time  `json:"created_at"`
+	ExpiresAt  time.Time  `json:"-"`
+	CreatedAt  time.Time  `json:"-"`
 	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
 	FamilyID   string     `json:"-"`
 	ReplacedBy []byte     `json:"-"`
+}
+
+func GenerateRefreshToken(userID int64, ttl time.Duration) (*RefreshToken, error) {
+	randomBytes := make([]byte, 16)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	plaintext := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
+	hash := sha256.Sum256([]byte(plaintext))
+
+	now := time.Now()
+
+	token := &RefreshToken{
+		Hash:      hash[:],
+		Plaintext: plaintext,
+		UserID:    userID,
+		ExpiresAt: now.Add(ttl),
+		CreatedAt: now,
+		FamilyID:  uuid.NewString(),
+	}
+
+	return token, nil
+}
+
+func GenerateToken(userID int64, ttl time.Duration, scope string) (*Token, error) {
+	randomBytes := make([]byte, 16)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	plaintext := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
+	hash := sha256.Sum256([]byte(plaintext))
+
+	token := &Token{
+		Plaintext: plaintext,
+		Hash:      hash[:],
+		UserID:    userID,
+		Expiry:    time.Now().Add(ttl),
+		Scope:     scope,
+	}
+
+	return token, nil
 }

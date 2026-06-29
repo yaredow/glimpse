@@ -9,12 +9,16 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
+	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/handler"
 	"github.com/yaredow/glimpse-api/internal/repository/postgres"
 	"github.com/yaredow/glimpse-api/internal/service"
 )
 
 func main() {
+	// Environment variables
+	jwtSecret := os.Getenv("JWT_SECRET")
+
 	// Server
 	pool, err := pgxpool.New(context.Background(), os.Getenv("DB_DSN"))
 	if err != nil {
@@ -29,12 +33,15 @@ func main() {
 
 	// Repositories
 	userRepo := postgres.NewUserRepository(pool)
+	tokenRepo := postgres.NewTokenRepository(pool)
+	refreshTokenRepo := postgres.NewRefreshTokenRepository(pool)
+	jwtMgr := auth.NewManager([]byte(jwtSecret))
 
 	// Services
-	userService := service.NewUserService(userRepo)
+	userService := service.NewUserService(userRepo, tokenRepo, refreshTokenRepo)
 
 	// Handlers
-	handler.NewUserHandler(e, userService)
+	handler.NewUserHandler(e, userService, jwtMgr)
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})

@@ -9,6 +9,7 @@ var (
 	ErrConflict            = errors.New("your item already exists")
 	ErrEditConflict        = errors.New("edit conflict")
 	ErrBadParamInput       = errors.New("given param is not valid")
+	ErrInvalidCredentials  = errors.New("invalid email or password")
 )
 
 // Validation errors
