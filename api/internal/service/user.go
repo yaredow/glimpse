@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"net/mail"
 	"strings"
@@ -46,27 +47,42 @@ func NewUserService(r UserRepository, tr TokenRepository, rtr RefreshTokenReposi
 	}
 }
 
-func (us *UserService) Create(ctx context.Context, u *domain.User) error {
+func (us *UserService) Create(ctx context.Context, u *domain.User) (*domain.Token, error) {
 	if u.Name == "" {
-		return domain.ErrNameRequired
+		return nil, domain.ErrNameRequired
 	}
 
 	u.Email = strings.TrimSpace(strings.ToLower(u.Email))
 
 	if !isValidEmail(u.Email) {
-		return domain.ErrInvalidEmail
+		return nil, domain.ErrInvalidEmail
 	}
 
 	if len(u.Password.PlainText) < 8 {
-		return domain.ErrPasswordTooShort
+		return nil, domain.ErrPasswordTooShort
 	}
 
 	err := u.Password.Set(u.Password.PlainText)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return us.repo.Create(ctx, u)
+	err = us.repo.Create(ctx, u)
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := domain.GenerateToken(u.ID, 3*24*time.Hour, "activation")
+	if err != nil {
+		return nil, err
+	}
+
+	err = us.tokenRepo.Insert(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	return token, nil
 }
 
 func (us *UserService) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
@@ -263,6 +279,11 @@ func (us *UserService) RotateRefreshToken(ctx context.Context, oldPlainText stri
 	}
 
 	return result, nil
+}
+
+func (us *UserService) RevokeRefreshToken(ctx context.Context, plainText string) error {
+	hash := sha256.Sum256([]byte(plainText))
+	return us.refreshTokenRepo.RevokeByHash(ctx, hash[:])
 }
 
 func isValidEmail(email string) bool {

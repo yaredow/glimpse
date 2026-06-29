@@ -152,21 +152,33 @@ func (_c *MockUserService_Authenticate_Call) RunAndReturn(run func(context.Conte
 }
 
 // Create provides a mock function with given fields: ctx, user
-func (_m *MockUserService) Create(ctx context.Context, user *domain.User) error {
+func (_m *MockUserService) Create(ctx context.Context, user *domain.User) (*domain.Token, error) {
 	ret := _m.Called(ctx, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Create")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *domain.User) error); ok {
+	var r0 *domain.Token
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.User) (*domain.Token, error)); ok {
+		return rf(ctx, user)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.User) *domain.Token); ok {
 		r0 = rf(ctx, user)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.Token)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, *domain.User) error); ok {
+		r1 = rf(ctx, user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockUserService_Create_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Create'
@@ -188,12 +200,12 @@ func (_c *MockUserService_Create_Call) Run(run func(ctx context.Context, user *d
 	return _c
 }
 
-func (_c *MockUserService_Create_Call) Return(_a0 error) *MockUserService_Create_Call {
-	_c.Call.Return(_a0)
+func (_c *MockUserService_Create_Call) Return(_a0 *domain.Token, _a1 error) *MockUserService_Create_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockUserService_Create_Call) RunAndReturn(run func(context.Context, *domain.User) error) *MockUserService_Create_Call {
+func (_c *MockUserService_Create_Call) RunAndReturn(run func(context.Context, *domain.User) (*domain.Token, error)) *MockUserService_Create_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -289,6 +301,53 @@ func (_c *MockUserService_ResetPassword_Call) Return(_a0 error) *MockUserService
 }
 
 func (_c *MockUserService_ResetPassword_Call) RunAndReturn(run func(context.Context, string, string) error) *MockUserService_ResetPassword_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RevokeRefreshToken provides a mock function with given fields: ctx, refreshTokenPlainText
+func (_m *MockUserService) RevokeRefreshToken(ctx context.Context, refreshTokenPlainText string) error {
+	ret := _m.Called(ctx, refreshTokenPlainText)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RevokeRefreshToken")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, refreshTokenPlainText)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockUserService_RevokeRefreshToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RevokeRefreshToken'
+type MockUserService_RevokeRefreshToken_Call struct {
+	*mock.Call
+}
+
+// RevokeRefreshToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - refreshTokenPlainText string
+func (_e *MockUserService_Expecter) RevokeRefreshToken(ctx interface{}, refreshTokenPlainText interface{}) *MockUserService_RevokeRefreshToken_Call {
+	return &MockUserService_RevokeRefreshToken_Call{Call: _e.mock.On("RevokeRefreshToken", ctx, refreshTokenPlainText)}
+}
+
+func (_c *MockUserService_RevokeRefreshToken_Call) Run(run func(ctx context.Context, refreshTokenPlainText string)) *MockUserService_RevokeRefreshToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockUserService_RevokeRefreshToken_Call) Return(_a0 error) *MockUserService_RevokeRefreshToken_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockUserService_RevokeRefreshToken_Call) RunAndReturn(run func(context.Context, string) error) *MockUserService_RevokeRefreshToken_Call {
 	_c.Call.Return(run)
 	return _c
 }

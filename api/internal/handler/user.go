@@ -2,12 +2,15 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/labstack/echo/v5"
 	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/domain"
+	"github.com/yaredow/glimpse-api/internal/mailer"
+	"github.com/yaredow/glimpse-api/internal/worker"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -19,21 +22,24 @@ type envelope map[string]any
 
 //go:generate mockery --name UserService --dir . --output mocks --outpkg mocks
 type UserService interface {
-	Create(ctx context.Context, user *domain.User) error
+	Create(ctx context.Context, user *domain.User) (*domain.Token, error)
 	Authenticate(ctx context.Context, email, password string) (*domain.User, *domain.RefreshToken, error)
 	Activate(ctx context.Context, tokenPlainText string) (*domain.User, error)
 	RequestPasswordReset(ctx context.Context, email string) error
 	ResetPassword(ctx context.Context, tokenPlainText, newPassword string) error
 	RotateRefreshToken(ctx context.Context, refreshTokenPlainText string) (*domain.RefreshToken, error)
+	RevokeRefreshToken(ctx context.Context, refreshTokenPlainText string) error
 }
 
 type UserHandler struct {
-	svc    UserService
-	jwtMgr *auth.JWTManager
+	svc     UserService
+	jwtMgr  *auth.JWTManager
+	mailer  mailer.Mailer
+	workers *worker.Pool
 }
 
-func NewUserHandler(e *echo.Echo, svc UserService, jwtMgr *auth.JWTManager) *UserHandler {
-	h := &UserHandler{svc: svc, jwtMgr: jwtMgr}
+func NewUserHandler(e *echo.Echo, svc UserService, jwtMgr *auth.JWTManager, mailer mailer.Mailer, workers *worker.Pool) *UserHandler {
+	h := &UserHandler{svc: svc, jwtMgr: jwtMgr, mailer: mailer, workers: workers}
 
 	e.POST("/v1/users", h.Create)
 	e.POST("/v1/login", h.Authenticate)
@@ -41,6 +47,7 @@ func NewUserHandler(e *echo.Echo, svc UserService, jwtMgr *auth.JWTManager) *Use
 	e.POST("/v1/tokens/password-reset", h.RequestPasswordReset)
 	e.PUT("/v1/users/password", h.ResetPassword)
 	e.POST("/v1/tokens/refresh", h.RefreshToken)
+	e.POST("/v1/tokens/logout", h.Logout)
 	return h
 }
 
@@ -67,9 +74,20 @@ func (uh *UserHandler) Create(c *echo.Context) error {
 
 	user.Password.Set(input.Password)
 
-	if err := uh.svc.Create(c.Request().Context(), user); err != nil {
+	token, err := uh.svc.Create(c.Request().Context(), user)
+	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
+
+	uh.workers.Background(func() {
+		err := uh.mailer.Send(user.Email, "user_welcome.html", envelope{
+			"userID":          user.ID,
+			"activationToken": token.Plaintext,
+		})
+		if err != nil {
+			fmt.Printf("failed to send welcome email: %v\n", err)
+		}
+	})
 
 	return c.JSON(http.StatusCreated, user)
 }
@@ -206,4 +224,26 @@ func (uh *UserHandler) RefreshToken(c *echo.Context) error {
 		},
 		"refresh_token": refreshToken,
 	})
+}
+
+func (uh *UserHandler) Logout(c *echo.Context) error {
+	var input struct {
+		RefreshToken string `json:"refresh_token" validate:"required"`
+	}
+
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	v := validator.New()
+	if err := v.Struct(input); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	err := uh.svc.RevokeRefreshToken(c.Request().Context(), input.RefreshToken)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }

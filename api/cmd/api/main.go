@@ -13,8 +13,10 @@ import (
 	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/handler"
 	"github.com/yaredow/glimpse-api/internal/handler/middleware"
+	"github.com/yaredow/glimpse-api/internal/mailer"
 	"github.com/yaredow/glimpse-api/internal/repository/postgres"
 	"github.com/yaredow/glimpse-api/internal/service"
+	"github.com/yaredow/glimpse-api/internal/worker"
 )
 
 const (
@@ -25,6 +27,11 @@ const (
 func main() {
 	// Environment variables
 	jwtSecret := os.Getenv("JWT_SECRET")
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+	smtpUsername := os.Getenv("SMTP_USERNAME")
+	smtpPassword := os.Getenv("SMTP_PASSWORD")
+	smtpSender := os.Getenv("SMTP_SENDER")
 
 	// Server
 	pool, err := pgxpool.New(context.Background(), os.Getenv("DB_DSN"))
@@ -51,11 +58,21 @@ func main() {
 	refreshTokenRepo := postgres.NewRefreshTokenRepository(pool)
 	jwtMgr := auth.NewManager([]byte(jwtSecret))
 
+	// Mailer
+	smtpPortInt, err := strconv.Atoi(smtpPort)
+	if err != nil {
+		log.Fatal("invalid SMTP_PORT", err)
+	}
+	m := mailer.New(smtpHost, smtpPortInt, smtpUsername, smtpPassword, smtpSender)
+
+	// Worker pool
+	wp := worker.New()
+
 	// Services
 	userService := service.NewUserService(userRepo, tokenRepo, refreshTokenRepo)
 
 	// Handlers
-	handler.NewUserHandler(e, userService, jwtMgr)
+	handler.NewUserHandler(e, userService, jwtMgr, m, wp)
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})

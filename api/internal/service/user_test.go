@@ -29,7 +29,7 @@ func TestUserService_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		mockRepo, _, _, svc := newUserService(t)
+		mockRepo, mockTokenRepo, _, svc := newUserService(t)
 
 		user := &domain.User{
 			Name:     "John",
@@ -43,7 +43,13 @@ func TestUserService_Create(t *testing.T) {
 			})).
 			Return(nil)
 
-		err := svc.Create(context.Background(), user)
+		mockTokenRepo.EXPECT().
+			Insert(mock.Anything, mock.MatchedBy(func(t *domain.Token) bool {
+				return t.UserID == 0 && t.Scope == "activation"
+			})).
+			Return(nil)
+
+		_ , err := svc.Create(context.Background(), user)
 		require.NoError(t, err)
 		require.True(t, strings.HasPrefix(string(user.Password.Hash), "$2a$"), "password should be bcrypt hashed")
 	})
@@ -59,7 +65,7 @@ func TestUserService_Create(t *testing.T) {
 			Password: domain.Password{PlainText: "password123"},
 		}
 
-		err := svc.Create(context.Background(), user)
+		_ , err := svc.Create(context.Background(), user)
 		require.ErrorIs(t, err, domain.ErrNameRequired)
 	})
 
@@ -74,7 +80,7 @@ func TestUserService_Create(t *testing.T) {
 			Password: domain.Password{PlainText: "password123"},
 		}
 
-		err := svc.Create(context.Background(), user)
+		_ , err := svc.Create(context.Background(), user)
 		require.ErrorIs(t, err, domain.ErrInvalidEmail)
 	})
 
@@ -89,7 +95,7 @@ func TestUserService_Create(t *testing.T) {
 			Password: domain.Password{PlainText: "abc"},
 		}
 
-		err := svc.Create(context.Background(), user)
+		_ , err := svc.Create(context.Background(), user)
 		require.ErrorIs(t, err, domain.ErrPasswordTooShort)
 	})
 
@@ -109,7 +115,7 @@ func TestUserService_Create(t *testing.T) {
 			Create(mock.Anything, mock.Anything).
 			Return(repoErr)
 
-		err := svc.Create(context.Background(), user)
+		_ , err := svc.Create(context.Background(), user)
 		require.ErrorIs(t, err, repoErr)
 	})
 }
@@ -727,6 +733,36 @@ func TestUserService_RotateRefreshToken(t *testing.T) {
 
 		result, err := svc.RotateRefreshToken(context.Background(), "old-plaintext")
 		require.Nil(t, result)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
+}
+
+func TestUserService_RevokeRefreshToken(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, mockRefreshTokenRepo, svc := newUserService(t)
+
+		mockRefreshTokenRepo.EXPECT().
+			RevokeByHash(mock.Anything, mock.Anything).
+			Return(nil)
+
+		err := svc.RevokeRefreshToken(context.Background(), "some-plaintext")
+		require.NoError(t, err)
+	})
+
+	t.Run("token not found", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, mockRefreshTokenRepo, svc := newUserService(t)
+
+		mockRefreshTokenRepo.EXPECT().
+			RevokeByHash(mock.Anything, mock.Anything).
+			Return(domain.ErrNotFound)
+
+		err := svc.RevokeRefreshToken(context.Background(), "bad-token")
 		require.ErrorIs(t, err, domain.ErrNotFound)
 	})
 }
