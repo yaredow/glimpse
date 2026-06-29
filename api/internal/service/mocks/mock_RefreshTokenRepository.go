@@ -69,6 +69,65 @@ func (_c *MockRefreshTokenRepository_DeleteAllForUser_Call) RunAndReturn(run fun
 	return _c
 }
 
+// GetByPlainText provides a mock function with given fields: ctx, refreshTokenPlainText
+func (_m *MockRefreshTokenRepository) GetByPlainText(ctx context.Context, refreshTokenPlainText string) (*domain.RefreshToken, error) {
+	ret := _m.Called(ctx, refreshTokenPlainText)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByPlainText")
+	}
+
+	var r0 *domain.RefreshToken
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*domain.RefreshToken, error)); ok {
+		return rf(ctx, refreshTokenPlainText)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *domain.RefreshToken); ok {
+		r0 = rf(ctx, refreshTokenPlainText)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.RefreshToken)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, refreshTokenPlainText)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockRefreshTokenRepository_GetByPlainText_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByPlainText'
+type MockRefreshTokenRepository_GetByPlainText_Call struct {
+	*mock.Call
+}
+
+// GetByPlainText is a helper method to define mock.On call
+//   - ctx context.Context
+//   - refreshTokenPlainText string
+func (_e *MockRefreshTokenRepository_Expecter) GetByPlainText(ctx interface{}, refreshTokenPlainText interface{}) *MockRefreshTokenRepository_GetByPlainText_Call {
+	return &MockRefreshTokenRepository_GetByPlainText_Call{Call: _e.mock.On("GetByPlainText", ctx, refreshTokenPlainText)}
+}
+
+func (_c *MockRefreshTokenRepository_GetByPlainText_Call) Run(run func(ctx context.Context, refreshTokenPlainText string)) *MockRefreshTokenRepository_GetByPlainText_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockRefreshTokenRepository_GetByPlainText_Call) Return(_a0 *domain.RefreshToken, _a1 error) *MockRefreshTokenRepository_GetByPlainText_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockRefreshTokenRepository_GetByPlainText_Call) RunAndReturn(run func(context.Context, string) (*domain.RefreshToken, error)) *MockRefreshTokenRepository_GetByPlainText_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Insert provides a mock function with given fields: ctx, token
 func (_m *MockRefreshTokenRepository) Insert(ctx context.Context, token *domain.RefreshToken) error {
 	ret := _m.Called(ctx, token)
@@ -112,6 +171,160 @@ func (_c *MockRefreshTokenRepository_Insert_Call) Return(_a0 error) *MockRefresh
 }
 
 func (_c *MockRefreshTokenRepository_Insert_Call) RunAndReturn(run func(context.Context, *domain.RefreshToken) error) *MockRefreshTokenRepository_Insert_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RevokeByFamily provides a mock function with given fields: ctx, familyID
+func (_m *MockRefreshTokenRepository) RevokeByFamily(ctx context.Context, familyID string) error {
+	ret := _m.Called(ctx, familyID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RevokeByFamily")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, familyID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockRefreshTokenRepository_RevokeByFamily_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RevokeByFamily'
+type MockRefreshTokenRepository_RevokeByFamily_Call struct {
+	*mock.Call
+}
+
+// RevokeByFamily is a helper method to define mock.On call
+//   - ctx context.Context
+//   - familyID string
+func (_e *MockRefreshTokenRepository_Expecter) RevokeByFamily(ctx interface{}, familyID interface{}) *MockRefreshTokenRepository_RevokeByFamily_Call {
+	return &MockRefreshTokenRepository_RevokeByFamily_Call{Call: _e.mock.On("RevokeByFamily", ctx, familyID)}
+}
+
+func (_c *MockRefreshTokenRepository_RevokeByFamily_Call) Run(run func(ctx context.Context, familyID string)) *MockRefreshTokenRepository_RevokeByFamily_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockRefreshTokenRepository_RevokeByFamily_Call) Return(_a0 error) *MockRefreshTokenRepository_RevokeByFamily_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockRefreshTokenRepository_RevokeByFamily_Call) RunAndReturn(run func(context.Context, string) error) *MockRefreshTokenRepository_RevokeByFamily_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RevokeByHash provides a mock function with given fields: ctx, hash
+func (_m *MockRefreshTokenRepository) RevokeByHash(ctx context.Context, hash []byte) error {
+	ret := _m.Called(ctx, hash)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RevokeByHash")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, []byte) error); ok {
+		r0 = rf(ctx, hash)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockRefreshTokenRepository_RevokeByHash_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RevokeByHash'
+type MockRefreshTokenRepository_RevokeByHash_Call struct {
+	*mock.Call
+}
+
+// RevokeByHash is a helper method to define mock.On call
+//   - ctx context.Context
+//   - hash []byte
+func (_e *MockRefreshTokenRepository_Expecter) RevokeByHash(ctx interface{}, hash interface{}) *MockRefreshTokenRepository_RevokeByHash_Call {
+	return &MockRefreshTokenRepository_RevokeByHash_Call{Call: _e.mock.On("RevokeByHash", ctx, hash)}
+}
+
+func (_c *MockRefreshTokenRepository_RevokeByHash_Call) Run(run func(ctx context.Context, hash []byte)) *MockRefreshTokenRepository_RevokeByHash_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].([]byte))
+	})
+	return _c
+}
+
+func (_c *MockRefreshTokenRepository_RevokeByHash_Call) Return(_a0 error) *MockRefreshTokenRepository_RevokeByHash_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockRefreshTokenRepository_RevokeByHash_Call) RunAndReturn(run func(context.Context, []byte) error) *MockRefreshTokenRepository_RevokeByHash_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Rotate provides a mock function with given fields: ctx, oldRefreshToken, newRefreshToken
+func (_m *MockRefreshTokenRepository) Rotate(ctx context.Context, oldRefreshToken *domain.RefreshToken, newRefreshToken *domain.RefreshToken) (*domain.RefreshToken, error) {
+	ret := _m.Called(ctx, oldRefreshToken, newRefreshToken)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Rotate")
+	}
+
+	var r0 *domain.RefreshToken
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.RefreshToken, *domain.RefreshToken) (*domain.RefreshToken, error)); ok {
+		return rf(ctx, oldRefreshToken, newRefreshToken)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.RefreshToken, *domain.RefreshToken) *domain.RefreshToken); ok {
+		r0 = rf(ctx, oldRefreshToken, newRefreshToken)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.RefreshToken)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *domain.RefreshToken, *domain.RefreshToken) error); ok {
+		r1 = rf(ctx, oldRefreshToken, newRefreshToken)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockRefreshTokenRepository_Rotate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Rotate'
+type MockRefreshTokenRepository_Rotate_Call struct {
+	*mock.Call
+}
+
+// Rotate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - oldRefreshToken *domain.RefreshToken
+//   - newRefreshToken *domain.RefreshToken
+func (_e *MockRefreshTokenRepository_Expecter) Rotate(ctx interface{}, oldRefreshToken interface{}, newRefreshToken interface{}) *MockRefreshTokenRepository_Rotate_Call {
+	return &MockRefreshTokenRepository_Rotate_Call{Call: _e.mock.On("Rotate", ctx, oldRefreshToken, newRefreshToken)}
+}
+
+func (_c *MockRefreshTokenRepository_Rotate_Call) Run(run func(ctx context.Context, oldRefreshToken *domain.RefreshToken, newRefreshToken *domain.RefreshToken)) *MockRefreshTokenRepository_Rotate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*domain.RefreshToken), args[2].(*domain.RefreshToken))
+	})
+	return _c
+}
+
+func (_c *MockRefreshTokenRepository_Rotate_Call) Return(_a0 *domain.RefreshToken, _a1 error) *MockRefreshTokenRepository_Rotate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockRefreshTokenRepository_Rotate_Call) RunAndReturn(run func(context.Context, *domain.RefreshToken, *domain.RefreshToken) (*domain.RefreshToken, error)) *MockRefreshTokenRepository_Rotate_Call {
 	_c.Call.Return(run)
 	return _c
 }

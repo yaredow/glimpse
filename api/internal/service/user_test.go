@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -281,6 +282,117 @@ func TestUserService_Update(t *testing.T) {
 	})
 }
 
+func TestUserService_Activate(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, mockTokenRepo, _, svc := newUserService(t)
+
+		user := &domain.User{
+			ID:        1,
+			Name:      "John",
+			Email:     "john@test.com",
+			Activated: false,
+			Version:   1,
+		}
+
+		mockRepo.EXPECT().
+			GetByToken(mock.Anything, "valid-token", "activation").
+			Return(user, nil)
+
+		mockRepo.EXPECT().
+			Update(mock.Anything, mock.MatchedBy(func(u *domain.User) bool {
+				return u.ID == 1 && u.Activated
+			})).
+			Return(nil)
+
+		mockTokenRepo.EXPECT().
+			DeleteAllForUser(mock.Anything, "activation", int64(1)).
+			Return(nil)
+
+		gotUser, err := svc.Activate(context.Background(), "valid-token")
+		require.NoError(t, err)
+		require.True(t, gotUser.Activated)
+	})
+
+	t.Run("token not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+
+		mockRepo.EXPECT().
+			GetByToken(mock.Anything, "bad-token", "activation").
+			Return(nil, domain.ErrNotFound)
+
+		user, err := svc.Activate(context.Background(), "bad-token")
+		require.Nil(t, user)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
+
+	t.Run("repo error on get by token", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+		repoErr := errors.New("db connection failed")
+
+		mockRepo.EXPECT().
+			GetByToken(mock.Anything, "token", "activation").
+			Return(nil, repoErr)
+
+		user, err := svc.Activate(context.Background(), "token")
+		require.Nil(t, user)
+		require.ErrorIs(t, err, repoErr)
+	})
+
+	t.Run("repo error on update", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+		repoErr := errors.New("update failed")
+
+		user := &domain.User{ID: 1, Activated: false, Version: 1}
+
+		mockRepo.EXPECT().
+			GetByToken(mock.Anything, "token", "activation").
+			Return(user, nil)
+
+		mockRepo.EXPECT().
+			Update(mock.Anything, mock.Anything).
+			Return(repoErr)
+
+		gotUser, err := svc.Activate(context.Background(), "token")
+		require.Nil(t, gotUser)
+		require.ErrorIs(t, err, repoErr)
+	})
+
+	t.Run("repo error on delete tokens", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, mockTokenRepo, _, svc := newUserService(t)
+		repoErr := errors.New("delete failed")
+
+		user := &domain.User{ID: 1, Activated: false, Version: 1}
+
+		mockRepo.EXPECT().
+			GetByToken(mock.Anything, "token", "activation").
+			Return(user, nil)
+
+		mockRepo.EXPECT().
+			Update(mock.Anything, mock.Anything).
+			Return(nil)
+
+		mockTokenRepo.EXPECT().
+			DeleteAllForUser(mock.Anything, "activation", int64(1)).
+			Return(repoErr)
+
+		gotUser, err := svc.Activate(context.Background(), "token")
+		require.Nil(t, gotUser)
+		require.ErrorIs(t, err, repoErr)
+	})
+}
+
 func TestUserService_GetByToken(t *testing.T) {
 	t.Parallel()
 
@@ -465,5 +577,315 @@ func TestUserService_Authenticate(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, user, gotUser)
 		require.NotNil(t, gotToken)
+	})
+}
+
+func TestUserService_RotateRefreshToken(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, mockRefreshTokenRepo, svc := newUserService(t)
+
+		old := &domain.RefreshToken{
+			Hash:      []byte("old-hash"),
+			UserID:    1,
+			ExpiresAt: time.Now().Add(time.Hour),
+			FamilyID:  "family-uuid",
+		}
+
+		newToken := &domain.RefreshToken{
+			Plaintext: "new-plaintext",
+			Hash:      []byte("new-hash"),
+			UserID:    1,
+			ExpiresAt: time.Now().Add(time.Hour),
+			CreatedAt: time.Now(),
+			FamilyID:  "family-uuid",
+		}
+
+		mockRefreshTokenRepo.EXPECT().
+			GetByPlainText(mock.Anything, "old-plaintext").
+			Return(old, nil)
+
+		mockRefreshTokenRepo.EXPECT().
+			Rotate(mock.Anything, old, mock.MatchedBy(func(rt *domain.RefreshToken) bool {
+				return rt.UserID == 1 && rt.FamilyID == "family-uuid"
+			})).
+			Return(newToken, nil)
+
+		result, err := svc.RotateRefreshToken(context.Background(), "old-plaintext")
+		require.NoError(t, err)
+		require.Equal(t, newToken, result)
+	})
+
+	t.Run("old token not found", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, mockRefreshTokenRepo, svc := newUserService(t)
+
+		mockRefreshTokenRepo.EXPECT().
+			GetByPlainText(mock.Anything, "bad-token").
+			Return(nil, domain.ErrNotFound)
+
+		result, err := svc.RotateRefreshToken(context.Background(), "bad-token")
+		require.Nil(t, result)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
+
+	t.Run("token is revoked", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, mockRefreshTokenRepo, svc := newUserService(t)
+
+		now := time.Now()
+		old := &domain.RefreshToken{
+			Hash:      []byte("old-hash"),
+			UserID:    1,
+			ExpiresAt: now.Add(time.Hour),
+			RevokedAt: &now,
+			FamilyID:  "family-uuid",
+		}
+
+		mockRefreshTokenRepo.EXPECT().
+			GetByPlainText(mock.Anything, "revoked-token").
+			Return(old, nil)
+
+		result, err := svc.RotateRefreshToken(context.Background(), "revoked-token")
+		require.Nil(t, result)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
+
+	t.Run("token is revoked with reuse detection", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, mockRefreshTokenRepo, svc := newUserService(t)
+
+		now := time.Now()
+		old := &domain.RefreshToken{
+			Hash:       []byte("old-hash"),
+			UserID:     1,
+			ExpiresAt:  now.Add(time.Hour),
+			RevokedAt:  &now,
+			FamilyID:   "family-uuid",
+			ReplacedBy: []byte("newer-hash"),
+		}
+
+		mockRefreshTokenRepo.EXPECT().
+			GetByPlainText(mock.Anything, "reused-token").
+			Return(old, nil)
+
+		mockRefreshTokenRepo.EXPECT().
+			RevokeByFamily(mock.Anything, "family-uuid").
+			Return(nil)
+
+		result, err := svc.RotateRefreshToken(context.Background(), "reused-token")
+		require.Nil(t, result)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
+
+	t.Run("token is expired", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, mockRefreshTokenRepo, svc := newUserService(t)
+
+		old := &domain.RefreshToken{
+			Hash:      []byte("old-hash"),
+			UserID:    1,
+			ExpiresAt: time.Now().Add(-time.Hour),
+			FamilyID:  "family-uuid",
+		}
+
+		mockRefreshTokenRepo.EXPECT().
+			GetByPlainText(mock.Anything, "expired-token").
+			Return(old, nil)
+
+		result, err := svc.RotateRefreshToken(context.Background(), "expired-token")
+		require.Nil(t, result)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
+
+	t.Run("rotate fails", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, mockRefreshTokenRepo, svc := newUserService(t)
+
+		old := &domain.RefreshToken{
+			Hash:      []byte("old-hash"),
+			UserID:    1,
+			ExpiresAt: time.Now().Add(time.Hour),
+			FamilyID:  "family-uuid",
+		}
+
+		mockRefreshTokenRepo.EXPECT().
+			GetByPlainText(mock.Anything, "old-plaintext").
+			Return(old, nil)
+
+		mockRefreshTokenRepo.EXPECT().
+			Rotate(mock.Anything, old, mock.Anything).
+			Return(nil, domain.ErrNotFound)
+
+		result, err := svc.RotateRefreshToken(context.Background(), "old-plaintext")
+		require.Nil(t, result)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
+}
+
+func TestUserService_RequestPasswordReset(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, mockTokenRepo, _, svc := newUserService(t)
+
+		user := &domain.User{ID: 1, Email: "john@test.com"}
+
+		mockRepo.EXPECT().
+			GetByEmail(mock.Anything, "john@test.com").
+			Return(user, nil)
+
+		mockTokenRepo.EXPECT().
+			DeleteAllForUser(mock.Anything, "password_reset", int64(1)).
+			Return(nil)
+
+		mockTokenRepo.EXPECT().
+			Insert(mock.Anything, mock.MatchedBy(func(t *domain.Token) bool {
+				return t.UserID == 1 && t.Scope == "password_reset"
+			})).
+			Return(nil)
+
+		err := svc.RequestPasswordReset(context.Background(), "john@test.com")
+		require.NoError(t, err)
+	})
+
+	t.Run("invalid email returns nil", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, _, svc := newUserService(t)
+
+		err := svc.RequestPasswordReset(context.Background(), "not-an-email")
+		require.NoError(t, err)
+	})
+
+	t.Run("unknown email returns nil", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+
+		mockRepo.EXPECT().
+			GetByEmail(mock.Anything, "missing@test.com").
+			Return(nil, domain.ErrNotFound)
+
+		err := svc.RequestPasswordReset(context.Background(), "missing@test.com")
+		require.NoError(t, err)
+	})
+
+	t.Run("normalizes email", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, mockTokenRepo, _, svc := newUserService(t)
+
+		user := &domain.User{ID: 1, Email: "john@test.com"}
+
+		mockRepo.EXPECT().
+			GetByEmail(mock.Anything, "john@test.com").
+			Return(user, nil)
+
+		mockTokenRepo.EXPECT().
+			DeleteAllForUser(mock.Anything, "password_reset", int64(1)).
+			Return(nil)
+
+		mockTokenRepo.EXPECT().
+			Insert(mock.Anything, mock.Anything).
+			Return(nil)
+
+		err := svc.RequestPasswordReset(context.Background(), "  John@Test.com  ")
+		require.NoError(t, err)
+	})
+
+	t.Run("repo error on get by email", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+		repoErr := errors.New("db connection failed")
+
+		mockRepo.EXPECT().
+			GetByEmail(mock.Anything, "john@test.com").
+			Return(nil, repoErr)
+
+		err := svc.RequestPasswordReset(context.Background(), "john@test.com")
+		require.ErrorIs(t, err, repoErr)
+	})
+}
+
+func TestUserService_ResetPassword(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, mockTokenRepo, _, svc := newUserService(t)
+
+		user := &domain.User{ID: 1, Version: 1}
+
+		mockRepo.EXPECT().
+			GetByToken(mock.Anything, "valid-token", "password_reset").
+			Return(user, nil)
+
+		mockRepo.EXPECT().
+			Update(mock.Anything, mock.MatchedBy(func(u *domain.User) bool {
+				return u.ID == 1 && len(u.Password.Hash) > 0
+			})).
+			Return(nil)
+
+		mockTokenRepo.EXPECT().
+			DeleteAllForUser(mock.Anything, "password_reset", int64(1)).
+			Return(nil)
+
+		err := svc.ResetPassword(context.Background(), "valid-token", "newpassword123")
+		require.NoError(t, err)
+	})
+
+	t.Run("short password", func(t *testing.T) {
+		t.Parallel()
+
+		_, _, _, svc := newUserService(t)
+
+		err := svc.ResetPassword(context.Background(), "token", "abc")
+		require.ErrorIs(t, err, domain.ErrPasswordTooShort)
+	})
+
+	t.Run("token not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+
+		mockRepo.EXPECT().
+			GetByToken(mock.Anything, "bad-token", "password_reset").
+			Return(nil, domain.ErrNotFound)
+
+		err := svc.ResetPassword(context.Background(), "bad-token", "newpassword123")
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
+
+	t.Run("repo error on update", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+		repoErr := errors.New("update failed")
+
+		user := &domain.User{ID: 1, Version: 1}
+
+		mockRepo.EXPECT().
+			GetByToken(mock.Anything, "token", "password_reset").
+			Return(user, nil)
+
+		mockRepo.EXPECT().
+			Update(mock.Anything, mock.Anything).
+			Return(repoErr)
+
+		err := svc.ResetPassword(context.Background(), "token", "newpassword123")
+		require.ErrorIs(t, err, repoErr)
 	})
 }

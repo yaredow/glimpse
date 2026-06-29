@@ -23,6 +23,65 @@ func (_m *MockUserService) EXPECT() *MockUserService_Expecter {
 	return &MockUserService_Expecter{mock: &_m.Mock}
 }
 
+// Activate provides a mock function with given fields: ctx, tokenPlainText
+func (_m *MockUserService) Activate(ctx context.Context, tokenPlainText string) (*domain.User, error) {
+	ret := _m.Called(ctx, tokenPlainText)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Activate")
+	}
+
+	var r0 *domain.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*domain.User, error)); ok {
+		return rf(ctx, tokenPlainText)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *domain.User); ok {
+		r0 = rf(ctx, tokenPlainText)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, tokenPlainText)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockUserService_Activate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Activate'
+type MockUserService_Activate_Call struct {
+	*mock.Call
+}
+
+// Activate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - tokenPlainText string
+func (_e *MockUserService_Expecter) Activate(ctx interface{}, tokenPlainText interface{}) *MockUserService_Activate_Call {
+	return &MockUserService_Activate_Call{Call: _e.mock.On("Activate", ctx, tokenPlainText)}
+}
+
+func (_c *MockUserService_Activate_Call) Run(run func(ctx context.Context, tokenPlainText string)) *MockUserService_Activate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockUserService_Activate_Call) Return(_a0 *domain.User, _a1 error) *MockUserService_Activate_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockUserService_Activate_Call) RunAndReturn(run func(context.Context, string) (*domain.User, error)) *MockUserService_Activate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Authenticate provides a mock function with given fields: ctx, email, password
 func (_m *MockUserService) Authenticate(ctx context.Context, email string, password string) (*domain.User, *domain.RefreshToken, error) {
 	ret := _m.Called(ctx, email, password)
@@ -135,6 +194,160 @@ func (_c *MockUserService_Create_Call) Return(_a0 error) *MockUserService_Create
 }
 
 func (_c *MockUserService_Create_Call) RunAndReturn(run func(context.Context, *domain.User) error) *MockUserService_Create_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RequestPasswordReset provides a mock function with given fields: ctx, email
+func (_m *MockUserService) RequestPasswordReset(ctx context.Context, email string) error {
+	ret := _m.Called(ctx, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RequestPasswordReset")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, email)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockUserService_RequestPasswordReset_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RequestPasswordReset'
+type MockUserService_RequestPasswordReset_Call struct {
+	*mock.Call
+}
+
+// RequestPasswordReset is a helper method to define mock.On call
+//   - ctx context.Context
+//   - email string
+func (_e *MockUserService_Expecter) RequestPasswordReset(ctx interface{}, email interface{}) *MockUserService_RequestPasswordReset_Call {
+	return &MockUserService_RequestPasswordReset_Call{Call: _e.mock.On("RequestPasswordReset", ctx, email)}
+}
+
+func (_c *MockUserService_RequestPasswordReset_Call) Run(run func(ctx context.Context, email string)) *MockUserService_RequestPasswordReset_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockUserService_RequestPasswordReset_Call) Return(_a0 error) *MockUserService_RequestPasswordReset_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockUserService_RequestPasswordReset_Call) RunAndReturn(run func(context.Context, string) error) *MockUserService_RequestPasswordReset_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ResetPassword provides a mock function with given fields: ctx, tokenPlainText, newPassword
+func (_m *MockUserService) ResetPassword(ctx context.Context, tokenPlainText string, newPassword string) error {
+	ret := _m.Called(ctx, tokenPlainText, newPassword)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ResetPassword")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, tokenPlainText, newPassword)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockUserService_ResetPassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ResetPassword'
+type MockUserService_ResetPassword_Call struct {
+	*mock.Call
+}
+
+// ResetPassword is a helper method to define mock.On call
+//   - ctx context.Context
+//   - tokenPlainText string
+//   - newPassword string
+func (_e *MockUserService_Expecter) ResetPassword(ctx interface{}, tokenPlainText interface{}, newPassword interface{}) *MockUserService_ResetPassword_Call {
+	return &MockUserService_ResetPassword_Call{Call: _e.mock.On("ResetPassword", ctx, tokenPlainText, newPassword)}
+}
+
+func (_c *MockUserService_ResetPassword_Call) Run(run func(ctx context.Context, tokenPlainText string, newPassword string)) *MockUserService_ResetPassword_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *MockUserService_ResetPassword_Call) Return(_a0 error) *MockUserService_ResetPassword_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockUserService_ResetPassword_Call) RunAndReturn(run func(context.Context, string, string) error) *MockUserService_ResetPassword_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RotateRefreshToken provides a mock function with given fields: ctx, refreshTokenPlainText
+func (_m *MockUserService) RotateRefreshToken(ctx context.Context, refreshTokenPlainText string) (*domain.RefreshToken, error) {
+	ret := _m.Called(ctx, refreshTokenPlainText)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RotateRefreshToken")
+	}
+
+	var r0 *domain.RefreshToken
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*domain.RefreshToken, error)); ok {
+		return rf(ctx, refreshTokenPlainText)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *domain.RefreshToken); ok {
+		r0 = rf(ctx, refreshTokenPlainText)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.RefreshToken)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, refreshTokenPlainText)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockUserService_RotateRefreshToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RotateRefreshToken'
+type MockUserService_RotateRefreshToken_Call struct {
+	*mock.Call
+}
+
+// RotateRefreshToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - refreshTokenPlainText string
+func (_e *MockUserService_Expecter) RotateRefreshToken(ctx interface{}, refreshTokenPlainText interface{}) *MockUserService_RotateRefreshToken_Call {
+	return &MockUserService_RotateRefreshToken_Call{Call: _e.mock.On("RotateRefreshToken", ctx, refreshTokenPlainText)}
+}
+
+func (_c *MockUserService_RotateRefreshToken_Call) Run(run func(ctx context.Context, refreshTokenPlainText string)) *MockUserService_RotateRefreshToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockUserService_RotateRefreshToken_Call) Return(_a0 *domain.RefreshToken, _a1 error) *MockUserService_RotateRefreshToken_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockUserService_RotateRefreshToken_Call) RunAndReturn(run func(context.Context, string) (*domain.RefreshToken, error)) *MockUserService_RotateRefreshToken_Call {
 	_c.Call.Return(run)
 	return _c
 }

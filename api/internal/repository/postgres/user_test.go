@@ -110,11 +110,11 @@ func TestUserRepository_Update(t *testing.T) {
 		repo := postgres.NewUserRepository(mock)
 
 		user := &domain.User{
-			ID:       1,
-			Name:     "John Updated",
-			Email:    "john@test.com",
+			ID:        1,
+			Name:      "John Updated",
+			Email:     "john@test.com",
 			Activated: true,
-			Version:  1,
+			Version:   1,
 		}
 		user.Password.Hash = []byte("newhash")
 

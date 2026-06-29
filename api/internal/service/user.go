@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"net/mail"
 	"strings"
 	"time"
@@ -17,9 +18,23 @@ type UserRepository interface {
 	Update(ctx context.Context, user *domain.User) error
 }
 
+type TokenRepository interface {
+	Insert(ctx context.Context, token *domain.Token) error
+	DeleteAllForUser(ctx context.Context, scope string, userID int64) error
+}
+
+type RefreshTokenRepository interface {
+	Insert(ctx context.Context, token *domain.RefreshToken) error
+	DeleteAllForUser(ctx context.Context, userID int64) error
+	GetByPlainText(ctx context.Context, refreshTokenPlainText string) (*domain.RefreshToken, error)
+	RevokeByHash(ctx context.Context, hash []byte) error
+	RevokeByFamily(ctx context.Context, familyID string) error
+	Rotate(ctx context.Context, oldRefreshToken *domain.RefreshToken, newRefreshToken *domain.RefreshToken) (*domain.RefreshToken, error)
+}
+
 type UserService struct {
-	repo           UserRepository
-	tokenRepo      TokenRepository
+	repo             UserRepository
+	tokenRepo        TokenRepository
 	refreshTokenRepo RefreshTokenRepository
 }
 
@@ -115,7 +130,7 @@ func (us *UserService) Authenticate(ctx context.Context, email, password string)
 		return nil, nil, domain.ErrInvalidCredentials
 	}
 
-	refreshToken, err := domain.GenerateRefreshToken(user.ID, 7*24*time.Hour)
+	refreshToken, err := domain.GenerateRefreshToken(user.ID, 7*24*time.Hour, "")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -131,6 +146,123 @@ func (us *UserService) Authenticate(ctx context.Context, email, password string)
 	}
 
 	return user, refreshToken, nil
+}
+
+func (us *UserService) Activate(ctx context.Context, tokenPlainText string) (*domain.User, error) {
+	user, err := us.repo.GetByToken(ctx, tokenPlainText, "activation")
+	if err != nil {
+		return nil, err
+	}
+
+	user.Activated = true
+
+	err = us.repo.Update(ctx, user)
+	if err != nil {
+		switch {
+		case errors.Is(err, domain.ErrNotFound):
+			return nil, domain.ErrNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	err = us.tokenRepo.DeleteAllForUser(ctx, "activation", user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (us *UserService) RequestPasswordReset(ctx context.Context, email string) error {
+	email = strings.TrimSpace(strings.ToLower(email))
+
+	if !isValidEmail(email) {
+		return nil
+	}
+
+	user, err := us.repo.GetByEmail(ctx, email)
+	if err != nil {
+		if err == domain.ErrNotFound {
+			return nil
+		}
+		return err
+	}
+
+	token, err := domain.GenerateToken(user.ID, 30*time.Minute, "password_reset")
+	if err != nil {
+		return err
+	}
+
+	err = us.tokenRepo.DeleteAllForUser(ctx, "password_reset", user.ID)
+	if err != nil {
+		return err
+	}
+
+	err = us.tokenRepo.Insert(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (us *UserService) ResetPassword(ctx context.Context, tokenPlainText, newPassword string) error {
+	if len(newPassword) < 8 {
+		return domain.ErrPasswordTooShort
+	}
+
+	user, err := us.repo.GetByToken(ctx, tokenPlainText, "password_reset")
+	if err != nil {
+		return err
+	}
+
+	err = user.Password.Set(newPassword)
+	if err != nil {
+		return err
+	}
+
+	err = us.repo.Update(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	err = us.tokenRepo.DeleteAllForUser(ctx, "password_reset", user.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (us *UserService) RotateRefreshToken(ctx context.Context, oldPlainText string) (*domain.RefreshToken, error) {
+	old, err := us.refreshTokenRepo.GetByPlainText(ctx, oldPlainText)
+	if err != nil {
+		return nil, err
+	}
+
+	if old.RevokedAt != nil {
+		if old.ReplacedBy != nil {
+			_ = us.refreshTokenRepo.RevokeByFamily(ctx, old.FamilyID)
+		}
+		return nil, domain.ErrNotFound
+	}
+
+	if time.Now().After(old.ExpiresAt) {
+		return nil, domain.ErrNotFound
+	}
+
+	newToken, err := domain.GenerateRefreshToken(old.UserID, 7*24*time.Hour, old.FamilyID)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := us.refreshTokenRepo.Rotate(ctx, old, newToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func isValidEmail(email string) bool {

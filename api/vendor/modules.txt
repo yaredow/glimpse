@@ -40,7 +40,6 @@ github.com/jackc/puddle/v2/internal/genstack
 # github.com/labstack/echo/v5 v5.2.1
 ## explicit; go 1.25.0
 github.com/labstack/echo/v5
-github.com/labstack/echo/v5/middleware
 # github.com/leodido/go-urn v1.4.0
 ## explicit; go 1.18
 github.com/leodido/go-urn
@@ -91,9 +90,6 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 golang.org/x/text/width
-# golang.org/x/time v0.14.0
-## explicit; go 1.24.0
-golang.org/x/time/rate
 # gopkg.in/go-playground/assert.v1 v1.2.1
 ## explicit
 # gopkg.in/go-playground/validator.v9 v9.31.0

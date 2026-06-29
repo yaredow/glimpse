@@ -30,26 +30,27 @@ type RefreshToken struct {
 	ReplacedBy []byte     `json:"-"`
 }
 
-func GenerateRefreshToken(userID int64, ttl time.Duration) (*RefreshToken, error) {
-	randomBytes := make([]byte, 16)
+func GenerateRefreshToken(userID int64, ttl time.Duration, familyID string) (*RefreshToken, error) {
+	token := &RefreshToken{
+		UserID:    userID,
+		ExpiresAt: time.Now().Add(ttl),
+		FamilyID:  familyID,
+	}
+
+	if token.FamilyID == "" {
+		token.FamilyID = uuid.NewString()
+	}
+
+	randomBytes := make([]byte, 32)
 	_, err := rand.Read(randomBytes)
 	if err != nil {
 		return nil, err
 	}
 
-	plaintext := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
-	hash := sha256.Sum256([]byte(plaintext))
+	token.Plaintext = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
 
-	now := time.Now()
-
-	token := &RefreshToken{
-		Hash:      hash[:],
-		Plaintext: plaintext,
-		UserID:    userID,
-		ExpiresAt: now.Add(ttl),
-		CreatedAt: now,
-		FamilyID:  uuid.NewString(),
-	}
+	hash := sha256.Sum256([]byte(token.Plaintext))
+	token.Hash = hash[:]
 
 	return token, nil
 }

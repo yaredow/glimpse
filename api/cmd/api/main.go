@@ -5,14 +5,21 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v5"
-	"github.com/labstack/echo/v5/middleware"
 	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/handler"
+	"github.com/yaredow/glimpse-api/internal/handler/middleware"
 	"github.com/yaredow/glimpse-api/internal/repository/postgres"
 	"github.com/yaredow/glimpse-api/internal/service"
+)
+
+const (
+	defaultTimeout = 30
+	defaultAddress = ":4000"
 )
 
 func main() {
@@ -28,8 +35,15 @@ func main() {
 
 	// Echo
 	e := echo.New()
-	e.Use(middleware.RequestLogger())
-	e.Use(middleware.Recover())
+	e.Use(middleware.CORS)
+	timeoutStr := os.Getenv("CONTEXT_TIMEOUT")
+	timeout, err := strconv.Atoi(timeoutStr)
+	if err != nil {
+		log.Println("failed to parse timeout, using default timeout")
+		timeout = defaultTimeout
+	}
+	timeoutContext := time.Duration(timeout) * time.Second
+	e.Use(middleware.SetRequestContextWithTimeout(timeoutContext))
 
 	// Repositories
 	userRepo := postgres.NewUserRepository(pool)
@@ -47,7 +61,7 @@ func main() {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})
 	})
 
-	if err := e.Start(":4000"); err != nil {
+	if err := e.Start(defaultAddress); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
 	}
 }
