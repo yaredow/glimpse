@@ -23,6 +23,7 @@ type envelope map[string]any
 //go:generate mockery --name UserService --dir . --output mocks --outpkg mocks
 type UserService interface {
 	Create(ctx context.Context, user *domain.User) (*domain.Token, error)
+	GetByID(ctx context.Context, id int64) (*domain.User, error)
 	Authenticate(ctx context.Context, email, password string) (*domain.User, *domain.RefreshToken, error)
 	Activate(ctx context.Context, tokenPlainText string) (*domain.User, error)
 	RequestPasswordReset(ctx context.Context, email string) (*domain.Token, error)

@@ -67,6 +67,9 @@ func main() {
 	// Services
 	userService := service.NewUserService(userRepo, tokenRepo, refreshTokenRepo)
 
+	// Middleware
+	e.Use(middleware.Authenticate(jwtMgr, userService))
+
 	// Handlers
 	handler.NewUserHandler(e, userService, jwtMgr, m, wp)
 

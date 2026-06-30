@@ -15,6 +15,7 @@ import (
 type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
 	GetByEmail(ctx context.Context, email string) (*domain.User, error)
+	GetByID(ctx context.Context, id int64) (*domain.User, error)
 	GetByToken(ctx context.Context, tokenPlainText string, scope string) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) error
 }
@@ -83,6 +84,15 @@ func (us *UserService) Create(ctx context.Context, u *domain.User) (*domain.Toke
 	}
 
 	return token, nil
+}
+
+func (us *UserService) GetByID(ctx context.Context, id int64) (*domain.User, error) {
+	user, err := us.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (us *UserService) GetByEmail(ctx context.Context, email string) (*domain.User, error) {

@@ -14,11 +14,11 @@ import (
 	"github.com/yaredow/glimpse-api/internal/service/mocks"
 )
 
-func newUserService(t *testing.T) (*mocks.MockUserRepository, *mocks.MockTokenRepository, *mocks.MockRefreshTokenRepository, *service.UserService) {
+func newUserService(t *testing.T) (*mocks.UserRepository, *mocks.TokenRepository, *mocks.RefreshTokenRepository, *service.UserService) {
 	t.Helper()
-	mockRepo := mocks.NewMockUserRepository(t)
-	mockTokenRepo := mocks.NewMockTokenRepository(t)
-	mockRefreshTokenRepo := mocks.NewMockRefreshTokenRepository(t)
+	mockRepo := mocks.NewUserRepository(t)
+	mockTokenRepo := mocks.NewTokenRepository(t)
+	mockRefreshTokenRepo := mocks.NewRefreshTokenRepository(t)
 	svc := service.NewUserService(mockRepo, mockTokenRepo, mockRefreshTokenRepo)
 	return mockRepo, mockTokenRepo, mockRefreshTokenRepo, svc
 }
@@ -116,6 +116,59 @@ func TestUserService_Create(t *testing.T) {
 			Return(repoErr)
 
 		_ , err := svc.Create(context.Background(), user)
+		require.ErrorIs(t, err, repoErr)
+	})
+}
+
+func TestUserService_GetByID(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+
+		expectedUser := &domain.User{
+			ID:    1,
+			Name:  "John",
+			Email: "john@test.com",
+		}
+
+		mockRepo.EXPECT().
+			GetByID(mock.Anything, int64(1)).
+			Return(expectedUser, nil)
+
+		user, err := svc.GetByID(context.Background(), 1)
+		require.NoError(t, err)
+		require.Equal(t, expectedUser, user)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+
+		mockRepo.EXPECT().
+			GetByID(mock.Anything, int64(99)).
+			Return(nil, domain.ErrNotFound)
+
+		user, err := svc.GetByID(context.Background(), 99)
+		require.Nil(t, user)
+		require.ErrorIs(t, err, domain.ErrNotFound)
+	})
+
+	t.Run("repo error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+		repoErr := errors.New("db connection failed")
+
+		mockRepo.EXPECT().
+			GetByID(mock.Anything, int64(1)).
+			Return(nil, repoErr)
+
+		user, err := svc.GetByID(context.Background(), 1)
+		require.Nil(t, user)
 		require.ErrorIs(t, err, repoErr)
 	})
 }

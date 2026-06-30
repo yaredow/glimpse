@@ -18,9 +18,9 @@ import (
 	"github.com/yaredow/glimpse-api/internal/handler/mocks"
 )
 
-func setupTest(t *testing.T) (*mocks.MockUserService, *echo.Echo) {
+func setupTest(t *testing.T) (*mocks.UserService, *echo.Echo) {
 	t.Helper()
-	mockSvc := mocks.NewMockUserService(t)
+	mockSvc := mocks.NewUserService(t)
 	e := echo.New()
 	return mockSvc, e
 }
