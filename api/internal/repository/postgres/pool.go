@@ -15,3 +15,24 @@ type Pool interface {
 	Begin(ctx context.Context) (pgx.Tx, error)
 	Close()
 }
+
+type DB struct {
+	Pool
+}
+
+func (db *DB) ExecTx(ctx context.Context, fn func(pgx.Tx) error) error {
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = fn(tx)
+	if err != nil {
+		if rbErr := tx.Rollback(ctx); rbErr != nil {
+			return rbErr
+		}
+		return err
+	}
+
+	return tx.Commit(ctx)
+}

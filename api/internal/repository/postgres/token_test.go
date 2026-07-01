@@ -16,7 +16,7 @@ func TestTokenRepository_Insert(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	repo := postgres.NewTokenRepository(mock)
+	repo := postgres.NewTokenRepository(&postgres.DB{Pool: mock})
 
 	token := &domain.Token{
 		Hash:   []byte("test-hash"),
@@ -39,7 +39,7 @@ func TestTokenRepository_DeleteAllForUser(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	repo := postgres.NewTokenRepository(mock)
+	repo := postgres.NewTokenRepository(&postgres.DB{Pool: mock})
 
 	mock.ExpectExec("DELETE FROM tokens").
 		WithArgs("activation", int64(1)).

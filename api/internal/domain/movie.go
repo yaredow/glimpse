@@ -2,6 +2,11 @@ package domain
 
 import "time"
 
+type Genre struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 type Movie struct {
 	ID                  int64     `json:"id"`
 	TmdbID              int       `json:"tmdb_id"`

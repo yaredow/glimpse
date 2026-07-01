@@ -11,12 +11,12 @@ import (
 )
 
 type UserRespository struct {
-	pool Pool
+	db *DB
 }
 
-func NewUserRepository(p Pool) *UserRespository {
+func NewUserRepository(db *DB) *UserRespository {
 	return &UserRespository{
-		pool: p,
+		db: db,
 	}
 }
 
@@ -34,7 +34,7 @@ func (r *UserRespository) Create(ctx context.Context, u *domain.User) error {
 		u.Password.Hash,
 	}
 
-	err := r.pool.QueryRow(ctx, query, args...).Scan(
+	err := r.db.QueryRow(ctx, query, args...).Scan(
 		&u.ID,
 		&u.Activated,
 		&u.Onboarded,
@@ -66,7 +66,7 @@ func (ur *UserRespository) GetByEmail(ctx context.Context, email string) (*domai
 	`
 
 	var u domain.User
-	err := ur.pool.QueryRow(ctx, query, email).Scan(
+	err := ur.db.QueryRow(ctx, query, email).Scan(
 		&u.ID,
 		&u.Name,
 		&u.Email,
@@ -101,7 +101,7 @@ func (ur *UserRespository) GetByID(ctx context.Context, id int64) (*domain.User,
 	`
 
 	var u domain.User
-	err := ur.pool.QueryRow(ctx, query, id).Scan(
+	err := ur.db.QueryRow(ctx, query, id).Scan(
 		&u.ID,
 		&u.Name,
 		&u.Email,
@@ -144,7 +144,7 @@ func (ur *UserRespository) GetByToken(ctx context.Context, tokenPlainText string
 	`
 
 	var u domain.User
-	err := ur.pool.QueryRow(ctx, query, hash[:], scope).Scan(
+	err := ur.db.QueryRow(ctx, query, hash[:], scope).Scan(
 		&u.ID,
 		&u.Name,
 		&u.Email,
@@ -180,7 +180,7 @@ func (ur *UserRespository) Update(ctx context.Context, user *domain.User) error 
                   skips_remaining, syncs_remaining, last_reset_at, version, created_at, updated_at
     `
 
-	err := ur.pool.QueryRow(ctx, query,
+	err := ur.db.QueryRow(ctx, query,
 		user.Name,
 		user.Email,
 		user.Password.Hash,

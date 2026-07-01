@@ -7,11 +7,11 @@ import (
 )
 
 type TokenRepository struct {
-	pool Pool
+	db *DB
 }
 
-func NewTokenRepository(p Pool) *TokenRepository {
-	return &TokenRepository{pool: p}
+func NewTokenRepository(db *DB) *TokenRepository {
+	return &TokenRepository{db: db}
 }
 
 func (tr *TokenRepository) Insert(ctx context.Context, token *domain.Token) error {
@@ -21,7 +21,7 @@ func (tr *TokenRepository) Insert(ctx context.Context, token *domain.Token) erro
 	`
 
 	args := []any{token.Hash, token.UserID, token.Expiry, token.Scope}
-	_, err := tr.pool.Exec(ctx, query, args...)
+	_, err := tr.db.Exec(ctx, query, args...)
 
 	return err
 }
@@ -31,7 +31,7 @@ func (tr *TokenRepository) DeleteAllForUser(ctx context.Context, scope string, u
 		DELETE FROM tokens
 		WHERE scope = $1 AND user_id = $2
 	`
-	_, err := tr.pool.Exec(ctx, query, scope, userID)
+	_, err := tr.db.Exec(ctx, query, scope, userID)
 
 	return err
 }

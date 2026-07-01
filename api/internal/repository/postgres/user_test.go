@@ -17,7 +17,7 @@ func TestUserRepository_Create(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	repo := postgres.NewUserRepository(mock)
+	repo := postgres.NewUserRepository(&postgres.DB{Pool: mock})
 
 	now := time.Now()
 	mock.ExpectQuery("INSERT INTO users").
@@ -47,7 +47,7 @@ func TestUserRepository_GetByEmail(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	repo := postgres.NewUserRepository(mock)
+	repo := postgres.NewUserRepository(&postgres.DB{Pool: mock})
 
 	now := time.Now()
 	email := "john@test.com"
@@ -73,7 +73,7 @@ func TestUserRepository_GetByToken(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	repo := postgres.NewUserRepository(mock)
+	repo := postgres.NewUserRepository(&postgres.DB{Pool: mock})
 
 	now := time.Now()
 	tokenPlain := "reset-token-abc123"
@@ -107,7 +107,7 @@ func TestUserRepository_Update(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewUserRepository(mock)
+		repo := postgres.NewUserRepository(&postgres.DB{Pool: mock})
 
 		user := &domain.User{
 			ID:        1,
@@ -139,7 +139,7 @@ func TestUserRepository_Update(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewUserRepository(mock)
+		repo := postgres.NewUserRepository(&postgres.DB{Pool: mock})
 
 		user := &domain.User{
 			ID:      1,

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,6 +17,7 @@ import (
 	"github.com/yaredow/glimpse-api/internal/mailer"
 	"github.com/yaredow/glimpse-api/internal/repository/postgres"
 	"github.com/yaredow/glimpse-api/internal/service"
+	"github.com/yaredow/glimpse-api/internal/tmdb"
 	"github.com/yaredow/glimpse-api/internal/worker"
 )
 
@@ -52,13 +54,21 @@ func main() {
 	e.Use(middleware.SetRequestContextWithTimeout(timeoutContext))
 
 	// Repositories
-	userRepo := postgres.NewUserRepository(pool)
-	tokenRepo := postgres.NewTokenRepository(pool)
-	refreshTokenRepo := postgres.NewRefreshTokenRepository(pool)
+	db := &postgres.DB{Pool: pool}
+	userRepo := postgres.NewUserRepository(db)
+	tokenRepo := postgres.NewTokenRepository(db)
+	refreshTokenRepo := postgres.NewRefreshTokenRepository(db)
 	jwtMgr := auth.NewManager([]byte(jwtSecret))
 
-	// Mailer
+	// TMDB
+	tmdbClient := tmdb.NewClient(os.Getenv("TMDB_BEARER_TOKEN"), os.Getenv("TMDB_URL"))
+	recRepo := postgres.NewRecommendationRepository(db)
 
+	syncWorker := worker.NewWorker(recRepo, recRepo, nil, nil, tmdbClient, slog.Default())
+	syncWorker.Start()
+	defer syncWorker.Stop()
+
+	// Mailer
 	m := mailer.New(smtpHost, 25, smtpUsername, smtpPassword, smtpSender)
 
 	// Worker pool

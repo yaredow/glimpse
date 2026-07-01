@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"strings"
 	"time"
 	"unicode"
@@ -93,4 +94,71 @@ func toDomainMovie(tm tmdb.Movie) *domain.Movie {
 	}
 
 	return m
+}
+
+func (w *Worker) syncGenres(ctx context.Context) {
+	w.logger.Info("syncing genres from tmdb")
+
+	resp, err := w.tmdb.GetGenres(ctx)
+	if err != nil {
+		w.logger.Error("failed to fetch genres from tmdb", "error", err)
+		return
+	}
+
+	genres := make([]*domain.Genre, len(resp.Genres))
+	for i, g := range resp.Genres {
+		genres[i] = &domain.Genre{
+			ID:   g.ID,
+			Name: g.Name,
+		}
+	}
+
+	if err := w.genreRepo.UpsertBatchGenres(ctx, genres); err != nil {
+		w.logger.Error("failed to sync genres", "error", err)
+		return
+	}
+
+	w.logger.Info("successfully synced genres", "count", len(genres))
+}
+
+func (w *Worker) syncMovies(ctx context.Context) {
+	seen := make(map[int]tmdb.Movie)
+
+	for page := 1; page <= 5; page++ {
+		resp, err := w.tmdb.GetPopularMovies(ctx, page)
+		if err != nil {
+			w.logger.Error("sync movies: get popular", "page", page, "error", err)
+			continue
+		}
+
+		for _, m := range resp.Results {
+			seen[m.ID] = m
+		}
+	}
+
+	for page := 1; page <= 5; page++ {
+		resp, err := w.tmdb.GetTopRatedMovies(ctx, page)
+		if err != nil {
+			w.logger.Error("sync movies: get top rated", "page", page, "error", err)
+			continue
+		}
+
+		for _, m := range resp.Results {
+			seen[m.ID] = m
+		}
+	}
+
+	w.logger.Info("syncing movies", "count", len(seen))
+
+	movies := make([]*domain.Movie, 0, len(seen))
+	for _, m := range seen {
+		movies = append(movies, toDomainMovie(m))
+	}
+
+	if err := w.movieRepo.UpsertBatchMovies(ctx, movies); err != nil {
+		w.logger.Error("failed to sync movies", "error", err)
+		return
+	}
+
+	w.logger.Info("successfully synced movies", "count", len(movies))
 }
