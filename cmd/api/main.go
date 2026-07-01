@@ -62,9 +62,9 @@ func main() {
 
 	// TMDB
 	tmdbClient := tmdb.NewClient(os.Getenv("TMDB_BEARER_TOKEN"), os.Getenv("TMDB_URL"))
-	recRepo := postgres.NewRecommendationRepository(db)
+	movieRepo := postgres.NewMovieRepository(db)
 
-	syncWorker := worker.NewWorker(recRepo, recRepo, nil, nil, tmdbClient, slog.Default())
+	syncWorker := worker.NewWorker(movieRepo, movieRepo, nil, nil, tmdbClient, slog.Default())
 	syncWorker.Start()
 	defer syncWorker.Stop()
 
@@ -76,12 +76,16 @@ func main() {
 
 	// Services
 	userService := service.NewUserService(userRepo, tokenRepo, refreshTokenRepo)
+	prefRepo := postgres.NewPreferenceRepository(db)
+	prefSvc := service.NewPreferenceService(prefRepo)
 
 	// Middleware
 	e.Use(middleware.Authenticate(jwtMgr, userService))
 
 	// Handlers
 	handler.NewUserHandler(e, userService, jwtMgr, m, wp)
+	handler.NewPreferenceHandler(e, prefSvc)
+	handler.NewOnboardingHandler(e, movieRepo)
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})

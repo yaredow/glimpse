@@ -7,20 +7,20 @@ import (
 	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
-type RecommendationRepository struct {
+type MovieRepository struct {
 	db *DB
 }
 
-func NewRecommendationRepository(db *DB) *RecommendationRepository {
-	return &RecommendationRepository{db: db}
+func NewMovieRepository(db *DB) *MovieRepository {
+	return &MovieRepository{db: db}
 }
 
-func (rr *RecommendationRepository) UpsertBatchMovies(ctx context.Context, movies []*domain.Movie) error {
+func (mr *MovieRepository) UpsertBatchMovies(ctx context.Context, movies []*domain.Movie) error {
 	if len(movies) == 0 {
 		return nil
 	}
 
-	return rr.db.ExecTx(ctx, func(tx pgx.Tx) error {
+	return mr.db.ExecTx(ctx, func(tx pgx.Tx) error {
 		query := `
 			INSERT INTO movies (tmdb_id, title, vague_description, genres, original_language, release_date, vote_average, popularity)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -47,12 +47,12 @@ func (rr *RecommendationRepository) UpsertBatchMovies(ctx context.Context, movie
 	})
 }
 
-func (rr *RecommendationRepository) UpsertBatchGenres(ctx context.Context, genres []*domain.Genre) error {
+func (mr *MovieRepository) UpsertBatchGenres(ctx context.Context, genres []*domain.Genre) error {
 	if len(genres) == 0 {
 		return nil
 	}
 
-	return rr.db.ExecTx(ctx, func(tx pgx.Tx) error {
+	return mr.db.ExecTx(ctx, func(tx pgx.Tx) error {
 		query := `
 			INSERT INTO genres (id, name)
 			VALUES ($1, $2)
@@ -72,4 +72,25 @@ func (rr *RecommendationRepository) UpsertBatchGenres(ctx context.Context, genre
 
 		return nil
 	})
+}
+
+func (mr *MovieRepository) ListAllGenres(ctx context.Context) ([]domain.Genre, error) {
+	query := `SELECT id, name FROM genres ORDER BY name`
+
+	rows, err := mr.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var genres []domain.Genre
+	for rows.Next() {
+		var g domain.Genre
+		if err := rows.Scan(&g.ID, &g.Name); err != nil {
+			return nil, err
+		}
+		genres = append(genres, g)
+	}
+
+	return genres, rows.Err()
 }
