@@ -3,17 +3,15 @@ package handler
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
 	"github.com/yaredow/glimpse-api/internal/handler/middleware"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
+	"gopkg.in/go-playground/validator.v9"
 )
-
-type genreLister interface {
-	ListAllGenres(ctx context.Context) ([]domain.Genre, error)
-}
 
 type EraPreset struct {
 	Label   string `json:"label"`
@@ -33,18 +31,33 @@ func eraPresets() []EraPreset {
 	}
 }
 
-type OnboardingHandler struct {
-	genreLister genreLister
+type genreLister interface {
+	ListAllGenres(ctx context.Context) ([]domain.Genre, error)
 }
 
-func NewOnboardingHandler(e *echo.Echo, genreLister genreLister) *OnboardingHandler {
-	h := &OnboardingHandler{genreLister: genreLister}
+type preferenceUpserter interface {
+	Upsert(ctx context.Context, p *domain.Preference) error
+}
+
+type onboarder interface {
+	UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error
+}
+
+type OnboardingHandler struct {
+	genreLister genreLister
+	prefSvc     preferenceUpserter
+	onboarder   onboarder
+}
+
+func NewOnboardingHandler(e *echo.Echo, genreLister genreLister, prefSvc preferenceUpserter, onboarder onboarder) *OnboardingHandler {
+	h := &OnboardingHandler{genreLister: genreLister, prefSvc: prefSvc, onboarder: onboarder}
 	e.POST("/v1/onboarding/start", h.Start, middleware.RequireAuthenticatedUser())
+	e.POST("/v1/onboarding/finish", h.Complete, middleware.RequireAuthenticatedUser())
 	return h
 }
 
-func (h *OnboardingHandler) Start(c *echo.Context) error {
-	genres, err := h.genreLister.ListAllGenres(c.Request().Context())
+func (oh *OnboardingHandler) Start(c *echo.Context) error {
+	genres, err := oh.genreLister.ListAllGenres(c.Request().Context())
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
@@ -54,4 +67,46 @@ func (h *OnboardingHandler) Start(c *echo.Context) error {
 		"languages": tmdb.CuratedLanguages,
 		"eras":      eraPresets(),
 	})
+}
+
+func (oh *OnboardingHandler) Complete(c *echo.Context) error {
+	var input struct {
+		FavoriteGenres []int    `json:"favorite_genres"`
+		ExcludedGenres []int    `json:"excluded_genres"`
+		Languages      []string `json:"languages"`
+		MinRating      float64  `json:"min_rating" validate:"min=0,max=10"`
+		MinYear        int      `json:"min_year" validate:"min=1888"`
+		MaxYear        int      `json:"max_year" validate:"max=2100"`
+	}
+
+	if err := c.Bind(&input); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	v := validator.New()
+	if err := v.Struct(input); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	user := c.Get("user").(*domain.User)
+
+	p := &domain.Preference{
+		UserID:         user.ID,
+		FavoriteGenres: input.FavoriteGenres,
+		ExcludedGenres: input.ExcludedGenres,
+		Languages:      input.Languages,
+		MinRating:      input.MinRating,
+		MinYear:        input.MinYear,
+		MaxYear:        input.MaxYear,
+	}
+
+	if err := oh.prefSvc.Upsert(c.Request().Context(), p); err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	if err := oh.onboarder.UpdateOnboarded(c.Request().Context(), strconv.FormatInt(user.ID, 10), true); err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, envelope{"preferences": p})
 }

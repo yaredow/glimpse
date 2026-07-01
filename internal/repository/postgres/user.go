@@ -217,3 +217,16 @@ func (ur *UserRespository) Update(ctx context.Context, user *domain.User) error 
 
 	return nil
 }
+
+func (ur *UserRespository) UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error {
+	query := `
+		UPDATE users
+		SET onboarded = $1, updated_at = NOW()
+		WHERE id = $2
+	`
+
+	args := []any{onboarded, userID}
+	_, err := ur.db.Exec(ctx, query, args...)
+
+	return err
+}

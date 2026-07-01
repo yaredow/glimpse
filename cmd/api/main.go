@@ -85,7 +85,7 @@ func main() {
 	// Handlers
 	handler.NewUserHandler(e, userService, jwtMgr, m, wp)
 	handler.NewPreferenceHandler(e, prefSvc)
-	handler.NewOnboardingHandler(e, movieRepo)
+	handler.NewOnboardingHandler(e, movieRepo, prefSvc, userService)
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})

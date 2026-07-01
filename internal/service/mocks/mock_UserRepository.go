@@ -294,6 +294,54 @@ func (_c *MockUserRepository_Update_Call) RunAndReturn(run func(context.Context,
 	return _c
 }
 
+// UpdateOnboarded provides a mock function with given fields: ctx, userID, onboarded
+func (_m *MockUserRepository) UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error {
+	ret := _m.Called(ctx, userID, onboarded)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateOnboarded")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, bool) error); ok {
+		r0 = rf(ctx, userID, onboarded)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockUserRepository_UpdateOnboarded_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateOnboarded'
+type MockUserRepository_UpdateOnboarded_Call struct {
+	*mock.Call
+}
+
+// UpdateOnboarded is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID string
+//   - onboarded bool
+func (_e *MockUserRepository_Expecter) UpdateOnboarded(ctx interface{}, userID interface{}, onboarded interface{}) *MockUserRepository_UpdateOnboarded_Call {
+	return &MockUserRepository_UpdateOnboarded_Call{Call: _e.mock.On("UpdateOnboarded", ctx, userID, onboarded)}
+}
+
+func (_c *MockUserRepository_UpdateOnboarded_Call) Run(run func(ctx context.Context, userID string, onboarded bool)) *MockUserRepository_UpdateOnboarded_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(bool))
+	})
+	return _c
+}
+
+func (_c *MockUserRepository_UpdateOnboarded_Call) Return(_a0 error) *MockUserRepository_UpdateOnboarded_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockUserRepository_UpdateOnboarded_Call) RunAndReturn(run func(context.Context, string, bool) error) *MockUserRepository_UpdateOnboarded_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockUserRepository creates a new instance of MockUserRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockUserRepository(t interface {

@@ -14,12 +14,13 @@ import (
 	"github.com/yaredow/glimpse-api/internal/service/mocks"
 )
 
-func newUserService(t *testing.T) (*mocks.UserRepository, *mocks.TokenRepository, *mocks.RefreshTokenRepository, *service.UserService) {
+func newUserService(t *testing.T) (*mocks.MockUserRepository, *mocks.MockTokenRepository, *mocks.MockRefreshTokenRepository, *service.UserService) {
 	t.Helper()
-	mockRepo := mocks.NewUserRepository(t)
-	mockTokenRepo := mocks.NewTokenRepository(t)
-	mockRefreshTokenRepo := mocks.NewRefreshTokenRepository(t)
+	mockRepo := mocks.NewMockUserRepository(t)
+	mockTokenRepo := mocks.NewMockTokenRepository(t)
+	mockRefreshTokenRepo := mocks.NewMockRefreshTokenRepository(t)
 	svc := service.NewUserService(mockRepo, mockTokenRepo, mockRefreshTokenRepo)
+
 	return mockRepo, mockTokenRepo, mockRefreshTokenRepo, svc
 }
 
@@ -49,7 +50,7 @@ func TestUserService_Create(t *testing.T) {
 			})).
 			Return(nil)
 
-		_ , err := svc.Create(context.Background(), user)
+		_, err := svc.Create(context.Background(), user)
 		require.NoError(t, err)
 		require.True(t, strings.HasPrefix(string(user.Password.Hash), "$2a$"), "password should be bcrypt hashed")
 	})
@@ -65,7 +66,7 @@ func TestUserService_Create(t *testing.T) {
 			Password: domain.Password{PlainText: "password123"},
 		}
 
-		_ , err := svc.Create(context.Background(), user)
+		_, err := svc.Create(context.Background(), user)
 		require.ErrorIs(t, err, domain.ErrNameRequired)
 	})
 
@@ -80,7 +81,7 @@ func TestUserService_Create(t *testing.T) {
 			Password: domain.Password{PlainText: "password123"},
 		}
 
-		_ , err := svc.Create(context.Background(), user)
+		_, err := svc.Create(context.Background(), user)
 		require.ErrorIs(t, err, domain.ErrInvalidEmail)
 	})
 
@@ -95,7 +96,7 @@ func TestUserService_Create(t *testing.T) {
 			Password: domain.Password{PlainText: "abc"},
 		}
 
-		_ , err := svc.Create(context.Background(), user)
+		_, err := svc.Create(context.Background(), user)
 		require.ErrorIs(t, err, domain.ErrPasswordTooShort)
 	})
 
@@ -115,7 +116,7 @@ func TestUserService_Create(t *testing.T) {
 			Create(mock.Anything, mock.Anything).
 			Return(repoErr)
 
-		_ , err := svc.Create(context.Background(), user)
+		_, err := svc.Create(context.Background(), user)
 		require.ErrorIs(t, err, repoErr)
 	})
 }
@@ -975,6 +976,37 @@ func TestUserService_ResetPassword(t *testing.T) {
 			Return(repoErr)
 
 		err := svc.ResetPassword(context.Background(), "token", "newpassword123")
+		require.ErrorIs(t, err, repoErr)
+	})
+}
+
+func TestUserService_UpdateOnboarded(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+
+		mockRepo.EXPECT().
+			UpdateOnboarded(mock.Anything, "1", true).
+			Return(nil)
+
+		err := svc.UpdateOnboarded(context.Background(), "1", true)
+		require.NoError(t, err)
+	})
+
+	t.Run("repo error", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+		repoErr := errors.New("db error")
+
+		mockRepo.EXPECT().
+			UpdateOnboarded(mock.Anything, "1", true).
+			Return(repoErr)
+
+		err := svc.UpdateOnboarded(context.Background(), "1", true)
 		require.ErrorIs(t, err, repoErr)
 	})
 }
