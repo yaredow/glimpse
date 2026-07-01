@@ -1,49 +1,25 @@
-# Glimpse
+# Glimpse API
 
-Stop scrolling. Start watching.
+Go backend for a personalized movie recommendation service designed to eliminate decision fatigue.
 
-Glimpse is a personalized movie recommendation service built to eliminate decision fatigue. Instead of endless scrolling through recommendation algorithms, Glimpse learns your taste and serves you a curated daily selection—something worth your time, not just something that fits an algorithm.
-
-## The Problem
-
-Movie discovery is broken. Streaming services throw thousands of options at you, recommendation algorithms get stuck in filter bubbles, and you end up spending more time choosing than watching. Glimpse flips this: a lightweight, intelligent engine that actually learns what you like and presents only the best matches each day.
-
-## How It Works
-
-Every action matters. Watch, skip, add to your list—each one teaches Glimpse a little more about what you actually like. The daily picks get better as it learns you, and you'll always know why a movie landed on your plate.
-
-## Tech Stack
-
-**App** (React Native)
-- Expo SDK 55 with React Native 0.83
-- Expo Router for file-based navigation
-- React Query for server state
-- React Hook Form for form handling
-- React Native Paper for UI
-- Zod for validation
-
-**API** (Go backend)
-- Go with PostgreSQL
-- TMDB API integration for movie data
-- Deterministic scoring engine with immutable interaction history
-
-## Getting Started
-
-**API Setup**
-```bash
-cd api
-make docker/up      # Start PostgreSQL
-make db/migration/up  # Run migrations
-make run/api        # Start the server with live reload
-```
-
-**App Setup**
-```bash
-cd app
-bun install
-bun start
-```
+The goal of Glimpse is to let users outsource movie discovery to an intelligent, lightweight engine that learns their taste dynamically and presents them with a curated daily selection, rather than an endless wall of choices.
 
 ---
 
-Glimpse exists because I got tired of spending 30 minutes deciding what to watch.
+## Core Philosophy
+
+Instead of relying on heavy machine learning frameworks, Glimpse uses a deterministic, explainable scoring system based on multi-dimensional user affinities (genres, languages, decades, ratings) built directly into a Go and PostgreSQL stack.
+
+- **Dynamic Learning:** Every user action—revealing a card, watching, skipping, or adding to a watchlist—is recorded as an active signal to continuously refine their taste profile.
+- **Exploration & Variety:** The engine avoids the "filter bubble" trap by introducing controlled Gaussian noise (which decays as we learn more about the user) and enforcing genre diversity, ensuring recommendations remain fresh and surprising.
+- **Explainable Scoring:** There are no "black box" decisions. Every recommendation's score can be decomposed into its contributing signals (affinity, popularity, freshness, and noise) for complete transparency.
+- **Cold-Start Resilience:** Simple onboarding inputs seed initial taste profiles, which are rapidly calibrated and overtaken by real-time user interactions within just a few sessions.
+- **Iterability:** By preserving an append-only, immutable history of user interactions, the system allows the affinity model and scoring weights to be recomputed and tuned retroactively.
+
+---
+
+## Tech Stack
+
+- **Language:** Go
+- **Database:** PostgreSQL
+- **Data Source:** TMDB (The Movie Database) API integration for movie catalogs and metadata
