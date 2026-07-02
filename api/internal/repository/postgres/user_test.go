@@ -162,3 +162,23 @@ func TestUserRepository_Update(t *testing.T) {
 		require.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+
+func TestUserRepository_UpdateInteractionsStat(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewUserRepository(&postgres.DB{Pool: mock})
+
+		mock.ExpectExec(`UPDATE users SET total_interactions`).
+			WithArgs("1").
+			WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+		err = repo.UpdateInteractionsStat(context.Background(), "1")
+		require.NoError(t, err)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+}

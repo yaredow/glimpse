@@ -230,3 +230,10 @@ func (ur *UserRespository) UpdateOnboarded(ctx context.Context, userID string, o
 
 	return err
 }
+
+func (ur *UserRespository) UpdateInteractionsStat(ctx context.Context, userID string) error {
+	query := `UPDATE users SET total_interactions = total_interactions + 1, exploration_rate = GREATEST(0.05, 0.4 * exp(-(total_interactions + 1)::float / 50)) WHERE id = $1`
+	_, err := ur.db.Exec(ctx, query, userID)
+
+	return err
+}
