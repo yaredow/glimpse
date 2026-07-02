@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"log/slog"
-	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -12,8 +11,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v5"
 	"github.com/yaredow/glimpse-api/internal/auth"
-	"github.com/yaredow/glimpse-api/internal/handler"
 	"github.com/yaredow/glimpse-api/internal/handler/middleware"
+	"github.com/yaredow/glimpse-api/internal/handler/routes"
 	"github.com/yaredow/glimpse-api/internal/mailer"
 	"github.com/yaredow/glimpse-api/internal/repository/postgres"
 	"github.com/yaredow/glimpse-api/internal/service"
@@ -69,10 +68,10 @@ func main() {
 	defer syncWorker.Stop()
 
 	// Mailer
-	m := mailer.New(smtpHost, 25, smtpUsername, smtpPassword, smtpSender)
+	mailer := mailer.New(smtpHost, 25, smtpUsername, smtpPassword, smtpSender)
 
 	// Worker pool
-	wp := worker.New()
+	worker := worker.New()
 
 	// Services
 	userService := service.NewUserService(userRepo, tokenRepo, refreshTokenRepo)
@@ -82,14 +81,8 @@ func main() {
 	// Middleware
 	e.Use(middleware.Authenticate(jwtMgr, userService))
 
-	// Handlers
-	handler.NewUserHandler(e, userService, jwtMgr, m, wp)
-	handler.NewPreferenceHandler(e, prefSvc)
-	handler.NewOnboardingHandler(e, movieRepo, prefSvc, userService)
-
-	e.GET("/", func(c *echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"message": "Hello, World!"})
-	})
+	// Routes
+	routes.Register(e, userService, jwtMgr, mailer, worker, prefSvc, movieRepo, prefSvc, userService)
 
 	if err := e.Start(defaultAddress); err != nil {
 		e.Logger.Error("failed to start server", "error", err)

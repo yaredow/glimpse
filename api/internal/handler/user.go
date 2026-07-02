@@ -39,18 +39,8 @@ type UserHandler struct {
 	workers *worker.Pool
 }
 
-func NewUserHandler(e *echo.Echo, svc UserService, jwtMgr *auth.JWTManager, mailer mailer.Mailer, workers *worker.Pool) *UserHandler {
-	h := &UserHandler{svc: svc, jwtMgr: jwtMgr, mailer: mailer, workers: workers}
-
-	e.POST("/v1/users", h.Create)
-	e.POST("/v1/login", h.Authenticate)
-	e.PUT("/v1/users/activates", h.Activate)
-	e.POST("/v1/tokens/password-reset", h.RequestPasswordReset)
-	e.PUT("/v1/users/password", h.ResetPassword)
-	e.POST("/v1/tokens/refresh", h.RefreshToken)
-	e.POST("/v1/tokens/logout", h.Logout)
-
-	return h
+func NewUserHandler(svc UserService, jwtMgr *auth.JWTManager, mailer mailer.Mailer, workers *worker.Pool) *UserHandler {
+	return &UserHandler{svc: svc, jwtMgr: jwtMgr, mailer: mailer, workers: workers}
 }
 
 func (uh *UserHandler) Create(c *echo.Context) error {

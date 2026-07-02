@@ -33,7 +33,7 @@ func TestUserHandler_Create(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{"name":"John","email":"john@test.com","password":"password123"}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/users", strings.NewReader(body))
@@ -63,7 +63,7 @@ func TestUserHandler_Create(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{invalid json`
 		req := httptest.NewRequest(http.MethodPost, "/v1/users", strings.NewReader(body))
@@ -81,7 +81,7 @@ func TestUserHandler_Create(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{"name":"","email":"bad","password":"short"}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/users", strings.NewReader(body))
@@ -99,7 +99,7 @@ func TestUserHandler_Create(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{"name":"John","email":"john@test.com","password":"password123"}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/users", strings.NewReader(body))
@@ -125,7 +125,7 @@ func TestUserHandler_Authenticate(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		user := &domain.User{ID: 1, Name: "John", Email: "john@test.com"}
 		refreshToken := &domain.RefreshToken{
@@ -165,7 +165,7 @@ func TestUserHandler_Authenticate(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{invalid json`
 		req := httptest.NewRequest(http.MethodPost, "/v1/authentication", strings.NewReader(body))
@@ -183,7 +183,7 @@ func TestUserHandler_Authenticate(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{"email":"bad","password":"short"}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/authentication", strings.NewReader(body))
@@ -201,7 +201,7 @@ func TestUserHandler_Authenticate(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		mockSvc.EXPECT().
 			Authenticate(mock.Anything, "john@test.com", "wrong-password").
@@ -227,7 +227,7 @@ func TestUserHandler_Activate(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		user := &domain.User{ID: 1, Name: "John", Email: "john@test.com", Activated: true}
 
@@ -256,7 +256,7 @@ func TestUserHandler_Activate(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{invalid json`
 		req := httptest.NewRequest(http.MethodPut, "/v1/users/activates", strings.NewReader(body))
@@ -274,7 +274,7 @@ func TestUserHandler_Activate(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{"tokenPlainText":""}`
 		req := httptest.NewRequest(http.MethodPut, "/v1/users/activates", strings.NewReader(body))
@@ -292,7 +292,7 @@ func TestUserHandler_Activate(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		mockSvc.EXPECT().
 			Activate(mock.Anything, "expired-token").
@@ -318,7 +318,7 @@ func TestUserHandler_RefreshToken(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		refreshToken := &domain.RefreshToken{
 			UserID:    1,
@@ -358,7 +358,7 @@ func TestUserHandler_RefreshToken(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{invalid json`
 		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/refresh", strings.NewReader(body))
@@ -376,7 +376,7 @@ func TestUserHandler_RefreshToken(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{"refresh_token":""}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/refresh", strings.NewReader(body))
@@ -394,7 +394,7 @@ func TestUserHandler_RefreshToken(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		mockSvc.EXPECT().
 			RotateRefreshToken(mock.Anything, "expired-token").
@@ -420,7 +420,7 @@ func TestUserHandler_Logout(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		mockSvc.EXPECT().
 			RevokeRefreshToken(mock.Anything, "valid-refresh-token").
@@ -442,7 +442,7 @@ func TestUserHandler_Logout(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{invalid json`
 		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/logout", strings.NewReader(body))
@@ -460,7 +460,7 @@ func TestUserHandler_Logout(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{"refresh_token":""}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/logout", strings.NewReader(body))
@@ -478,7 +478,7 @@ func TestUserHandler_Logout(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		mockSvc.EXPECT().
 			RevokeRefreshToken(mock.Anything, "bad-token").
@@ -504,7 +504,7 @@ func TestUserHandler_RequestPasswordReset(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		mockSvc.EXPECT().
 			RequestPasswordReset(mock.Anything, "john@test.com").
@@ -526,7 +526,7 @@ func TestUserHandler_RequestPasswordReset(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{invalid json`
 		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/password-reset", strings.NewReader(body))
@@ -544,7 +544,7 @@ func TestUserHandler_RequestPasswordReset(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{"email":"bad"}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/password-reset", strings.NewReader(body))
@@ -562,7 +562,7 @@ func TestUserHandler_RequestPasswordReset(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		mockSvc.EXPECT().
 			RequestPasswordReset(mock.Anything, "john@test.com").
@@ -588,7 +588,7 @@ func TestUserHandler_ResetPassword(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		mockSvc.EXPECT().
 			ResetPassword(mock.Anything, "valid-token", "newpassword123").
@@ -610,7 +610,7 @@ func TestUserHandler_ResetPassword(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{invalid json`
 		req := httptest.NewRequest(http.MethodPut, "/v1/users/password", strings.NewReader(body))
@@ -628,7 +628,7 @@ func TestUserHandler_ResetPassword(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		body := `{"token":"","newPassword":"short"}`
 		req := httptest.NewRequest(http.MethodPut, "/v1/users/password", strings.NewReader(body))
@@ -646,7 +646,7 @@ func TestUserHandler_ResetPassword(t *testing.T) {
 
 		mockSvc, e := setupTest(t)
 		jwtMgr := auth.NewManager([]byte("test-secret"))
-		h := handler.NewUserHandler(e, mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
 		mockSvc.EXPECT().
 			ResetPassword(mock.Anything, "bad-token", "newpassword123").

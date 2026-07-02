@@ -15,13 +15,12 @@ import (
 	"github.com/yaredow/glimpse-api/internal/handler/mocks"
 )
 
-func setupOnboardingTest(t *testing.T) (*mocks.MockgenreLister, *mocks.MockpreferenceUpserter, *mocks.Mockonboarder, *echo.Echo) {
+func setupOnboardingTest(t *testing.T) (*mocks.MockgenreLister, *mocks.MockpreferenceUpserter, *mocks.Mockonboarder) {
 	t.Helper()
 	mockGenreLister := mocks.NewMockgenreLister(t)
 	mockPrefSvc := mocks.NewMockpreferenceUpserter(t)
 	mockOnboarder := mocks.NewMockonboarder(t)
-	e := echo.New()
-	return mockGenreLister, mockPrefSvc, mockOnboarder, e
+	return mockGenreLister, mockPrefSvc, mockOnboarder
 }
 
 func TestOnboardingHandler_Start(t *testing.T) {
@@ -30,8 +29,9 @@ func TestOnboardingHandler_Start(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder, e := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(e, mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		e := echo.New()
 
 		req := httptest.NewRequest(http.MethodPost, "/v1/onboarding/start", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -57,8 +57,9 @@ func TestOnboardingHandler_Start(t *testing.T) {
 	t.Run("repo error", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder, e := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(e, mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		e := echo.New()
 
 		req := httptest.NewRequest(http.MethodPost, "/v1/onboarding/start", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -81,8 +82,9 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder, e := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(e, mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		e := echo.New()
 
 		body := `{"favorite_genres":[28,12],"languages":["en"],"min_rating":6.0,"min_year":1990,"max_year":2025}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/onboarding/finish", strings.NewReader(body))
@@ -115,8 +117,9 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("invalid request body", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder, e := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(e, mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		e := echo.New()
 
 		body := `{invalid json`
 		req := httptest.NewRequest(http.MethodPost, "/v1/onboarding/finish", strings.NewReader(body))
@@ -133,8 +136,9 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("validation error", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder, e := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(e, mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		e := echo.New()
 
 		body := `{"min_rating":15}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/onboarding/finish", strings.NewReader(body))
@@ -151,8 +155,9 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("upsert error", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder, e := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(e, mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		e := echo.New()
 
 		body := `{"favorite_genres":[28],"languages":["en"],"min_rating":5.0,"min_year":1990,"max_year":2025}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/onboarding/finish", strings.NewReader(body))
@@ -173,8 +178,9 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("onboard error", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder, e := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(e, mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		e := echo.New()
 
 		body := `{"favorite_genres":[28],"languages":["en"],"min_rating":5.0,"min_year":1990,"max_year":2025}`
 		req := httptest.NewRequest(http.MethodPost, "/v1/onboarding/finish", strings.NewReader(body))

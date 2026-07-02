@@ -29,7 +29,7 @@ func TestPreferenceHandler_GetPreference(t *testing.T) {
 		t.Parallel()
 
 		mockSvc, e := setupPreferenceTest(t)
-		h := handler.NewPreferenceHandler(e, mockSvc)
+		h := handler.NewPreferenceHandler(mockSvc)
 
 		req := httptest.NewRequest(http.MethodGet, "/v1/me/preferences", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -64,7 +64,7 @@ func TestPreferenceHandler_GetPreference(t *testing.T) {
 		t.Parallel()
 
 		mockSvc, e := setupPreferenceTest(t)
-		h := handler.NewPreferenceHandler(e, mockSvc)
+		h := handler.NewPreferenceHandler(mockSvc)
 
 		req := httptest.NewRequest(http.MethodGet, "/v1/me/preferences", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -94,7 +94,7 @@ func TestPreferenceHandler_UpsertPreference(t *testing.T) {
 		t.Parallel()
 
 		mockSvc, e := setupPreferenceTest(t)
-		h := handler.NewPreferenceHandler(e, mockSvc)
+		h := handler.NewPreferenceHandler(mockSvc)
 
 		body := `{"favorite_genres":[28],"languages":["en"],"min_rating":6.0,"min_year":1990,"max_year":2025}`
 		req := httptest.NewRequest(http.MethodPut, "/v1/me/preferences", strings.NewReader(body))
@@ -123,7 +123,7 @@ func TestPreferenceHandler_UpsertPreference(t *testing.T) {
 		t.Parallel()
 
 		mockSvc, e := setupPreferenceTest(t)
-		h := handler.NewPreferenceHandler(e, mockSvc)
+		h := handler.NewPreferenceHandler(mockSvc)
 
 		body := `{invalid json`
 		req := httptest.NewRequest(http.MethodPut, "/v1/me/preferences", strings.NewReader(body))
@@ -141,7 +141,7 @@ func TestPreferenceHandler_UpsertPreference(t *testing.T) {
 		t.Parallel()
 
 		mockSvc, e := setupPreferenceTest(t)
-		h := handler.NewPreferenceHandler(e, mockSvc)
+		h := handler.NewPreferenceHandler(mockSvc)
 
 		body := `{"min_rating":15}`
 		req := httptest.NewRequest(http.MethodPut, "/v1/me/preferences", strings.NewReader(body))

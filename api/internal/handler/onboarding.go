@@ -8,7 +8,6 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
-	"github.com/yaredow/glimpse-api/internal/handler/middleware"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -31,29 +30,26 @@ func eraPresets() []EraPreset {
 	}
 }
 
-type genreLister interface {
+type GenreLister interface {
 	ListAllGenres(ctx context.Context) ([]domain.Genre, error)
 }
 
-type preferenceUpserter interface {
+type PreferenceUpserter interface {
 	Upsert(ctx context.Context, p *domain.Preference) error
 }
 
-type onboarder interface {
+type Onboarder interface {
 	UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error
 }
 
 type OnboardingHandler struct {
-	genreLister genreLister
-	prefSvc     preferenceUpserter
-	onboarder   onboarder
+	genreLister GenreLister
+	prefSvc     PreferenceUpserter
+	onboarder   Onboarder
 }
 
-func NewOnboardingHandler(e *echo.Echo, genreLister genreLister, prefSvc preferenceUpserter, onboarder onboarder) *OnboardingHandler {
-	h := &OnboardingHandler{genreLister: genreLister, prefSvc: prefSvc, onboarder: onboarder}
-	e.POST("/v1/onboarding/start", h.Start, middleware.RequireAuthenticatedUser())
-	e.POST("/v1/onboarding/finish", h.Complete, middleware.RequireAuthenticatedUser())
-	return h
+func NewOnboardingHandler(genreLister GenreLister, prefSvc PreferenceUpserter, onboarder Onboarder) *OnboardingHandler {
+	return &OnboardingHandler{genreLister: genreLister, prefSvc: prefSvc, onboarder: onboarder}
 }
 
 func (oh *OnboardingHandler) Start(c *echo.Context) error {

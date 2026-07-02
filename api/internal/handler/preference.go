@@ -6,7 +6,6 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
-	"github.com/yaredow/glimpse-api/internal/handler/middleware"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -19,11 +18,8 @@ type PreferenceHandler struct {
 	svc PreferenceService
 }
 
-func NewPreferenceHandler(e *echo.Echo, svc PreferenceService) *PreferenceHandler {
-	h := &PreferenceHandler{svc: svc}
-	e.GET("/v1/me/preferences", h.GetPreference, middleware.RequireAuthenticatedUser())
-	e.PUT("/v1/me/preferences", h.UpsertPreference, middleware.RequireAuthenticatedUser())
-	return h
+func NewPreferenceHandler(svc PreferenceService) *PreferenceHandler {
+	return &PreferenceHandler{svc: svc}
 }
 
 func (h *PreferenceHandler) GetPreference(c *echo.Context) error {
