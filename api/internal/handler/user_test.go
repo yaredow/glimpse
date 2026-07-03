@@ -13,9 +13,9 @@ import (
 	"github.com/yaredow/glimpse-api/internal/auth"
 	"github.com/yaredow/glimpse-api/internal/domain"
 	"github.com/yaredow/glimpse-api/internal/handler"
+	"github.com/yaredow/glimpse-api/internal/handler/mocks"
 	"github.com/yaredow/glimpse-api/internal/mailer"
 	"github.com/yaredow/glimpse-api/internal/worker"
-	"github.com/yaredow/glimpse-api/internal/handler/mocks"
 )
 
 func setupTest(t *testing.T) (*mocks.MockUserService, *echo.Echo) {

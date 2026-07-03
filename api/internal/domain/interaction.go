@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type ActionWeight struct {
+	Delta             float64
+	AffectExploration bool
+}
+
 type ActionType string
 
 const (

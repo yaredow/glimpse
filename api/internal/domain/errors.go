@@ -11,10 +11,10 @@ var (
 )
 
 var (
-	ErrInvalidEmail     = errors.New("invalid email format")
-	ErrDuplicateEmail   = errors.New("email already in use")
-	ErrNameRequired     = errors.New("name is required")
-	ErrPasswordTooShort = errors.New("password must be at least 8 characters")
+	ErrInvalidEmail       = errors.New("invalid email format")
+	ErrDuplicateEmail     = errors.New("email already in use")
+	ErrNameRequired       = errors.New("name is required")
+	ErrPasswordTooShort   = errors.New("password must be at least 8 characters")
 	ErrInvalidCredentials = errors.New("invalid email or password")
 )
 
