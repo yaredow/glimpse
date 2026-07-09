@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -15,12 +16,22 @@ import (
 	"github.com/yaredow/glimpse-api/internal/handler/mocks"
 )
 
-func setupOnboardingTest(t *testing.T) (*mocks.MockgenreLister, *mocks.MockpreferenceUpserter, *mocks.Mockonboarder) {
+type mockAffinitySeeder struct {
+	mock.Mock
+}
+
+func (m *mockAffinitySeeder) SeedFromOnboarding(ctx context.Context, userID int64, genreIDs []int) error {
+	args := m.Called(ctx, userID, genreIDs)
+	return args.Error(0)
+}
+
+func setupOnboardingTest(t *testing.T) (*mocks.MockgenreLister, *mocks.MockpreferenceUpserter, *mocks.Mockonboarder, *mockAffinitySeeder) {
 	t.Helper()
 	mockGenreLister := mocks.NewMockgenreLister(t)
 	mockPrefSvc := mocks.NewMockpreferenceUpserter(t)
 	mockOnboarder := mocks.NewMockonboarder(t)
-	return mockGenreLister, mockPrefSvc, mockOnboarder
+	mockAffSeed := &mockAffinitySeeder{}
+	return mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed
 }
 
 func TestOnboardingHandler_Start(t *testing.T) {
@@ -29,8 +40,8 @@ func TestOnboardingHandler_Start(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed)
 		e := echo.New()
 
 		req := httptest.NewRequest(http.MethodPost, "/v1/onboarding/start", nil)
@@ -57,8 +68,8 @@ func TestOnboardingHandler_Start(t *testing.T) {
 	t.Run("repo error", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed)
 		e := echo.New()
 
 		req := httptest.NewRequest(http.MethodPost, "/v1/onboarding/start", nil)
@@ -82,8 +93,8 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed)
 		e := echo.New()
 
 		body := `{"favorite_genres":[28,12],"languages":["en"],"min_rating":6.0,"min_year":1990,"max_year":2025}`
@@ -103,6 +114,9 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 			UpdateOnboarded(mock.Anything, "1", true).
 			Return(nil)
 
+		mockAffSeed.On("SeedFromOnboarding", mock.Anything, int64(1), []int{28, 12}).
+			Return(nil)
+
 		err := h.Complete(c)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, rec.Code)
@@ -117,8 +131,8 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("invalid request body", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed)
 		e := echo.New()
 
 		body := `{invalid json`
@@ -136,8 +150,8 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("validation error", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed)
 		e := echo.New()
 
 		body := `{"min_rating":15}`
@@ -155,8 +169,8 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("upsert error", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed)
 		e := echo.New()
 
 		body := `{"favorite_genres":[28],"languages":["en"],"min_rating":5.0,"min_year":1990,"max_year":2025}`
@@ -178,8 +192,8 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 	t.Run("onboard error", func(t *testing.T) {
 		t.Parallel()
 
-		mockGenreLister, mockPrefSvc, mockOnboarder := setupOnboardingTest(t)
-		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder)
+		mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed := setupOnboardingTest(t)
+		h := handler.NewOnboardingHandler(mockGenreLister, mockPrefSvc, mockOnboarder, mockAffSeed)
 		e := echo.New()
 
 		body := `{"favorite_genres":[28],"languages":["en"],"min_rating":5.0,"min_year":1990,"max_year":2025}`

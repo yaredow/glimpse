@@ -235,7 +235,7 @@ func TestUserHandler_Activate(t *testing.T) {
 			Activate(mock.Anything, "valid-token").
 			Return(user, nil)
 
-		body := `{"tokenPlainText":"valid-token"}`
+		body := `{"token":"valid-token"}`
 		req := httptest.NewRequest(http.MethodPut, "/v1/users/activates", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -276,7 +276,7 @@ func TestUserHandler_Activate(t *testing.T) {
 		jwtMgr := auth.NewManager([]byte("test-secret"))
 		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
 
-		body := `{"tokenPlainText":""}`
+		body := `{"token":""}`
 		req := httptest.NewRequest(http.MethodPut, "/v1/users/activates", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -298,7 +298,7 @@ func TestUserHandler_Activate(t *testing.T) {
 			Activate(mock.Anything, "expired-token").
 			Return(nil, domain.ErrNotFound)
 
-		body := `{"tokenPlainText":"expired-token"}`
+		body := `{"token":"expired-token"}`
 		req := httptest.NewRequest(http.MethodPut, "/v1/users/activates", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()

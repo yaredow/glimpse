@@ -19,6 +19,8 @@ func Register(
 	genreLister handler.GenreLister,
 	prefUpserter handler.PreferenceUpserter,
 	onboarder handler.Onboarder,
+	gridSvc handler.GridService,
+	affSeed handler.AffinitySeeder,
 ) {
 	userH := handler.NewUserHandler(userSvc, jwtMgr, mailer, workers)
 	e.POST("/v1/users", userH.Create)
@@ -33,7 +35,11 @@ func Register(
 	e.GET("/v1/me/preferences", prefH.GetPreference, middleware.RequireAuthenticatedUser())
 	e.PUT("/v1/me/preferences", prefH.UpsertPreference, middleware.RequireAuthenticatedUser())
 
-	onbH := handler.NewOnboardingHandler(genreLister, prefUpserter, onboarder)
+	onbH := handler.NewOnboardingHandler(genreLister, prefUpserter, onboarder, affSeed)
 	e.POST("/v1/onboarding/start", onbH.Start, middleware.RequireAuthenticatedUser())
 	e.POST("/v1/onboarding/finish", onbH.Complete, middleware.RequireAuthenticatedUser())
+
+	recH := handler.NewRecommendationHandler(gridSvc)
+	e.GET("/v1/grid", recH.GetGrid, middleware.RequireAuthenticatedUser())
+	e.POST("/v1/grid/interactions", recH.RecordInteraction, middleware.RequireAuthenticatedUser())
 }

@@ -42,14 +42,19 @@ type Onboarder interface {
 	UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error
 }
 
+type AffinitySeeder interface {
+	SeedFromOnboarding(ctx context.Context, userID int64, genreIDs []int) error
+}
+
 type OnboardingHandler struct {
 	genreLister GenreLister
 	prefSvc     PreferenceUpserter
 	onboarder   Onboarder
+	affSeed     AffinitySeeder
 }
 
-func NewOnboardingHandler(genreLister GenreLister, prefSvc PreferenceUpserter, onboarder Onboarder) *OnboardingHandler {
-	return &OnboardingHandler{genreLister: genreLister, prefSvc: prefSvc, onboarder: onboarder}
+func NewOnboardingHandler(genreLister GenreLister, prefSvc PreferenceUpserter, onboarder Onboarder, affSeed AffinitySeeder) *OnboardingHandler {
+	return &OnboardingHandler{genreLister: genreLister, prefSvc: prefSvc, onboarder: onboarder, affSeed: affSeed}
 }
 
 func (oh *OnboardingHandler) Start(c *echo.Context) error {
@@ -101,6 +106,10 @@ func (oh *OnboardingHandler) Complete(c *echo.Context) error {
 	}
 
 	if err := oh.onboarder.UpdateOnboarded(c.Request().Context(), strconv.FormatInt(user.ID, 10), true); err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	if err := oh.affSeed.SeedFromOnboarding(c.Request().Context(), user.ID, input.FavoriteGenres); err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 

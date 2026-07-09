@@ -78,11 +78,28 @@ func main() {
 	prefRepo := postgres.NewPreferenceRepository(db)
 	prefSvc := service.NewPreferenceService(prefRepo)
 
+	affinityRepo := postgres.NewAffinityRepository(db)
+	interactionRepo := postgres.NewInteractionRepository(db)
+	gridRepo := postgres.NewGridRepository(db)
+	gridHistoryRepo := postgres.NewGridHistoryRepository(db)
+	genreRepo := postgres.NewGenreRepository(db)
+
+	recSvc := service.NewRecommendationService(
+		movieRepo,
+		affinityRepo,
+		interactionRepo,
+		gridRepo,
+		gridHistoryRepo,
+		userRepo,
+		genreRepo,
+		db,
+	)
+
 	// Middleware
 	e.Use(middleware.Authenticate(jwtMgr, userService))
 
 	// Routes
-	routes.Register(e, userService, jwtMgr, mailer, worker, prefSvc, movieRepo, prefSvc, userService)
+	routes.Register(e, userService, jwtMgr, mailer, worker, prefSvc, movieRepo, prefSvc, userService, recSvc, recSvc)
 
 	if err := e.Start(defaultAddress); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
