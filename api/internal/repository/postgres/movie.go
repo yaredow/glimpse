@@ -95,6 +95,10 @@ func (mr *MovieRepository) ListAllGenres(ctx context.Context) ([]domain.Genre, e
 	return genres, rows.Err()
 }
 
+func (mr *MovieRepository) WithTx(tx pgx.Tx) *MovieRepository {
+	return &MovieRepository{db: &DB{Pool: txPool{tx}}}
+}
+
 func (mr *MovieRepository) GetByID(ctx context.Context, movieID int64) (*domain.Movie, error) {
 	query := `SELECT id, tmdb_id, imdb_id, vague_description, genres, title, original_title, full_synopsis, poster_path, backdrop_path, tagline, director, cast_members, trailer_key, release_date, runtime, vote_average, vote_count, original_language, spoken_languages, production_countries, popularity, shown_count, watched_count, detail_synced_at, created_at FROM movies WHERE id = $1`
 

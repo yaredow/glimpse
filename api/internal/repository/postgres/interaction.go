@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
@@ -12,6 +13,10 @@ type InteractionRepository struct {
 
 func NewInteractionRepository(db *DB) *InteractionRepository {
 	return &InteractionRepository{db: db}
+}
+
+func (ir *InteractionRepository) WithTx(tx pgx.Tx) *InteractionRepository {
+	return &InteractionRepository{db: &DB{Pool: txPool{tx}}}
 }
 
 func (ir *InteractionRepository) Insert(ctx context.Context, interaction *domain.Interaction) error {

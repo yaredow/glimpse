@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
@@ -12,6 +13,10 @@ type GridHistoryRepository struct {
 
 func NewGridHistoryRepository(db *DB) *GridHistoryRepository {
 	return &GridHistoryRepository{db: db}
+}
+
+func (ghr *GridHistoryRepository) WithTx(tx pgx.Tx) *GridHistoryRepository {
+	return &GridHistoryRepository{db: &DB{Pool: txPool{tx}}}
 }
 
 func (ghr *GridHistoryRepository) GetRecent(ctx context.Context, userID int64, limit int) ([]domain.GridHistoryEntry, error) {

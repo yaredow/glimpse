@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
@@ -60,6 +61,10 @@ func (gr *GridRepository) Clear(ctx context.Context, userID int64) error {
 	query := `DELETE FROM daily_pools WHERE user_id = $1`
 	_, err := gr.db.Exec(ctx, query, userID)
 	return err
+}
+
+func (gr *GridRepository) WithTx(tx pgx.Tx) *GridRepository {
+	return &GridRepository{db: &DB{Pool: txPool{tx}}}
 }
 
 func (gr *GridRepository) Insert(ctx context.Context, userID int64, movieID int64, sessionID uuid.UUID, slotNumber int) error {

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
@@ -12,6 +13,10 @@ type AffinityRepository struct {
 
 func NewAffinityRepository(db *DB) *AffinityRepository {
 	return &AffinityRepository{db: db}
+}
+
+func (ar *AffinityRepository) WithTx(tx pgx.Tx) *AffinityRepository {
+	return &AffinityRepository{db: &DB{Pool: txPool{tx}}}
 }
 
 func (ar *AffinityRepository) GetByUserID(ctx context.Context, userID int64) ([]*domain.Affinity, error) {

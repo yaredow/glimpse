@@ -16,6 +16,12 @@ type Pool interface {
 	Close()
 }
 
+type txPool struct {
+	pgx.Tx
+}
+
+func (t txPool) Close() {}
+
 type DB struct {
 	Pool
 }

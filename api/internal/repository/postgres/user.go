@@ -20,6 +20,10 @@ func NewUserRepository(db *DB) *UserRespository {
 	}
 }
 
+func (ur *UserRespository) WithTx(tx pgx.Tx) *UserRespository {
+	return &UserRespository{db: &DB{Pool: txPool{tx}}}
+}
+
 func (r *UserRespository) Create(ctx context.Context, u *domain.User) error {
 	query := `
 		INSERT INTO users (name, email, password_hash)
@@ -60,7 +64,7 @@ func (r *UserRespository) Create(ctx context.Context, u *domain.User) error {
 
 func (ur *UserRespository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	query := `
-	SELECT id, name, email, password_hash, activated, suspended_at, onboarded, skips_remaining, syncs_remaining, last_reset_at, version, created_at, updated_at
+	SELECT id, name, email, password_hash, activated, suspended_at, onboarded, skips_remaining, syncs_remaining, last_reset_at, total_interactions, exploration_rate, version, created_at, updated_at
 	From users
 	WHERE email = $1
 	`
@@ -77,6 +81,8 @@ func (ur *UserRespository) GetByEmail(ctx context.Context, email string) (*domai
 		&u.SkipsRemaining,
 		&u.SyncsRemaining,
 		&u.LastResetAt,
+		&u.TotalInteractions,
+		&u.ExplorationRate,
 		&u.Version,
 		&u.CreatedAt,
 		&u.UpdatedAt,
@@ -95,7 +101,7 @@ func (ur *UserRespository) GetByEmail(ctx context.Context, email string) (*domai
 
 func (ur *UserRespository) GetByID(ctx context.Context, id int64) (*domain.User, error) {
 	query := `
-	SELECT id, name, email, password_hash, activated, suspended_at, onboarded, skips_remaining, syncs_remaining, last_reset_at, version, created_at, updated_at
+	SELECT id, name, email, password_hash, activated, suspended_at, onboarded, skips_remaining, syncs_remaining, last_reset_at, total_interactions, exploration_rate, version, created_at, updated_at
 	From users
 	WHERE id = $1
 	`
@@ -112,6 +118,8 @@ func (ur *UserRespository) GetByID(ctx context.Context, id int64) (*domain.User,
 		&u.SkipsRemaining,
 		&u.SyncsRemaining,
 		&u.LastResetAt,
+		&u.TotalInteractions,
+		&u.ExplorationRate,
 		&u.Version,
 		&u.CreatedAt,
 		&u.UpdatedAt,
@@ -134,8 +142,8 @@ func (ur *UserRespository) GetByToken(ctx context.Context, tokenPlainText string
 	query := `
 		SELECT users.id, users.name, users.email, users.password_hash, users.activated,
 		       users.suspended_at, users.onboarded, users.skips_remaining,
-		       users.syncs_remaining, users.last_reset_at, users.version,
-		       users.created_at, users.updated_at
+		       users.syncs_remaining, users.last_reset_at, users.total_interactions,
+		       users.exploration_rate, users.version, users.created_at, users.updated_at
 		FROM users
 		INNER JOIN tokens ON users.id = tokens.user_id
 		WHERE tokens.hash = $1
@@ -155,6 +163,8 @@ func (ur *UserRespository) GetByToken(ctx context.Context, tokenPlainText string
 		&u.SkipsRemaining,
 		&u.SyncsRemaining,
 		&u.LastResetAt,
+		&u.TotalInteractions,
+		&u.ExplorationRate,
 		&u.Version,
 		&u.CreatedAt,
 		&u.UpdatedAt,
@@ -231,7 +241,7 @@ func (ur *UserRespository) UpdateOnboarded(ctx context.Context, userID string, o
 	return err
 }
 
-func (ur *UserRespository) UpdateInteractionsStat(ctx context.Context, userID string) error {
+func (ur *UserRespository) UpdateInteractionsStat(ctx context.Context, userID int64) error {
 	query := `UPDATE users SET total_interactions = total_interactions + 1, exploration_rate = GREATEST(0.05, 0.4 * exp(-(total_interactions + 1)::float / 50)) WHERE id = $1`
 	_, err := ur.db.Exec(ctx, query, userID)
 

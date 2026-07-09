@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
@@ -12,6 +13,10 @@ type GenreRepository struct {
 
 func NewGenreRepository(db *DB) *GenreRepository {
 	return &GenreRepository{db: db}
+}
+
+func (gr *GenreRepository) WithTx(tx pgx.Tx) *GenreRepository {
+	return &GenreRepository{db: &DB{Pool: txPool{tx}}}
 }
 
 func (gr *GenreRepository) List(ctx context.Context) ([]*domain.Genre, error) {
