@@ -3,34 +3,58 @@ package postgres
 import (
 	"context"
 
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/yaredow/glimpse-api/internal/entity"
-	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
+	"github.com/jackc/pgx/v5"
+	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
-type InteractionRepo struct {
+type InteractionRepository struct {
 	db *DB
 }
 
-func NewInteractionRepo(db *DB) *InteractionRepo {
-	return &InteractionRepo{db: db}
+func NewInteractionRepository(db *DB) *InteractionRepository {
+	return &InteractionRepository{db: db}
 }
 
-func (ir *InteractionRepo) Insert(ctx context.Context, interaction *entity.Interaction) error {
-	return ir.db.q.InsertInteraction(ctx, queries.InsertInteractionParams{
-		UserID:           interaction.UserID,
-		MovieID:          interaction.MovieID,
-		Action:           queries.ActionType(interaction.Action),
-		GridSessionID:    uuid.MustParse(interaction.GridSessionID),
-		GridPosition:     intPtrToPg(interaction.GridPosition),
-		RevealToActionMs: intPtrToPg(interaction.RevealToActionMs),
-	})
+func (ir *InteractionRepository) WithTx(tx pgx.Tx) *InteractionRepository {
+	return &InteractionRepository{db: &DB{Pool: txPool{tx}}}
 }
 
-func intPtrToPg(p *int) pgtype.Int4 {
-	if p == nil {
-		return pgtype.Int4{Valid: false}
+func (ir *InteractionRepository) Insert(ctx context.Context, interaction *domain.Interaction) error {
+	query := `INSERT INTO user_interactions (user_id, movie_id, action, grid_session_id, grid_position, reveal_to_action_ms) VALUES ($1, $2, $3, $4, $5, $6)`
+
+	args := []any{
+		interaction.UserID,
+		interaction.MovieID,
+		interaction.Action,
+		interaction.GridSessionID,
+		interaction.GridPosition,
+		interaction.RevealToActionMS,
 	}
-	return pgtype.Int4{Int32: int32(*p), Valid: true}
+	_, err := ir.db.Exec(ctx, query, args...)
+
+	return err
+}
+
+func (ir *InteractionRepository) List(ctx context.Context, userID int64, limit int) ([]*domain.Interaction, error) {
+	query := `SELECT id, user_id, movie_id, action, grid_session_id, grid_position, reveal_to_action_ms, acted_at FROM user_interactions WHERE user_id = $1 ORDER BY acted_at DESC LIMIT $2`
+
+	rows, err := ir.db.Query(ctx, query, userID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var interactions []*domain.Interaction
+	for rows.Next() {
+		var i domain.Interaction
+		if err := rows.Scan(
+			&i.ID, &i.UserID, &i.MovieID, &i.Action,
+			&i.GridSessionID, &i.GridPosition, &i.RevealToActionMS, &i.ActedAt,
+		); err != nil {
+			return nil, err
+		}
+		interactions = append(interactions, &i)
+	}
+
+	return interactions, rows.Err()
 }

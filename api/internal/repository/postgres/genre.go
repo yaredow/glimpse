@@ -3,76 +3,61 @@ package postgres
 import (
 	"context"
 
-	"github.com/yaredow/glimpse-api/internal/entity"
-	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
+	"github.com/jackc/pgx/v5"
+	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
-type GenreRepo struct {
+type GenreRepository struct {
 	db *DB
 }
 
-func NewGenreRepo(db *DB) *GenreRepo {
-	return &GenreRepo{db: db}
+func NewGenreRepository(db *DB) *GenreRepository {
+	return &GenreRepository{db: db}
 }
 
-func (gr *GenreRepo) List(ctx context.Context) ([]*entity.Genre, error) {
-	rows, err := gr.db.q.ListGenres(ctx)
+func (gr *GenreRepository) WithTx(tx pgx.Tx) *GenreRepository {
+	return &GenreRepository{db: &DB{Pool: txPool{tx}}}
+}
+
+func (gr *GenreRepository) List(ctx context.Context) ([]*domain.Genre, error) {
+	query := `SELECT id, name FROM genres ORDER BY name`
+
+	rows, err := gr.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-	genres := make([]*entity.Genre, len(rows))
-	for i, row := range rows {
-		genres[i] = mapGenre(row)
-	}
-	return genres, nil
-}
+	defer rows.Close()
 
-func (gr *GenreRepo) Upsert(ctx context.Context, genre *entity.Genre) error {
-	return gr.db.q.UpsertGenre(ctx, queries.UpsertGenreParams{
-		ID:   genre.ID,
-		Name: genre.Name,
-	})
-}
-
-func (gr *GenreRepo) UpsertBatch(ctx context.Context, genres []*entity.Genre) error {
-	return gr.db.ExecTx(ctx, func(q *queries.Queries) error {
-		for _, g := range genres {
-			if err := q.UpsertGenre(ctx, queries.UpsertGenreParams{
-				ID:   g.ID,
-				Name: g.Name,
-			}); err != nil {
-				return err
-			}
+	var genres []*domain.Genre
+	for rows.Next() {
+		var g domain.Genre
+		if err := rows.Scan(&g.ID, &g.Name); err != nil {
+			return nil, err
 		}
-		return nil
-	})
+		genres = append(genres, &g)
+	}
+
+	return genres, rows.Err()
 }
 
-func (gr *GenreRepo) GetNamesByIDs(ctx context.Context, ids []int32) ([]string, error) {
-	all, err := gr.db.q.ListGenres(ctx)
+func (gr *GenreRepository) GetNamesByID(ctx context.Context, ids []int) ([]string, error) {
+	query := `SELECT name FROM genres WHERE id = ANY($1) ORDER BY name`
+
+	rows, err := gr.db.Query(ctx, query, ids)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
-	idSet := make(map[int32]struct{}, len(ids))
-	for _, id := range ids {
-		idSet[id] = struct{}{}
-	}
-
-	names := make([]string, 0, len(ids))
-	for _, g := range all {
-		if _, ok := idSet[g.ID]; ok {
-			names = append(names, g.Name)
+	var names []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
 		}
+
+		names = append(names, name)
 	}
-	return names, nil
+
+	return names, rows.Err()
 }
-
-func mapGenre(g queries.Genre) *entity.Genre {
-	return &entity.Genre{
-		ID:   g.ID,
-		Name: g.Name,
-	}
-}
-
-

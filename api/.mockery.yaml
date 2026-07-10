@@ -1,0 +1,14 @@
+quiet: false
+disable-version-string: true
+resolve-type-alias: false
+issue-845-fix: true
+with-expecter: true
+dir: "{{.InterfaceDir}}/mocks"
+outpkg: mocks
+packages:
+  github.com/yaredow/glimpse-api/internal/handler:
+    config:
+      all: true
+  github.com/yaredow/glimpse-api/internal/service:
+    config:
+      all: true

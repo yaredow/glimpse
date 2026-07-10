@@ -1,56 +1,50 @@
 version: 3
-workdir: .
+workdir: internal
+
 allow:
-  depOnAnyVendor: true
-
-components:
-  cmd:
-    in: cmd/**
-  handlerbase:
-    in: internal/handler
-  handler:
-    in: internal/handler/**
-  usecase:
-    in: internal/usecase/**
-  repository:
-    in: internal/repository/**
-  entity:
-    in: internal/entity
-  worker:
-    in: internal/worker/**
-  auth:
-    in: internal/auth
-  db:
-    in: internal/db
-  mailer:
-    in: internal/mailer
-  sqlc:
-    in: internal/sqlc/**
-
-commonComponents:
-  - entity
-
-deps:
-  cmd:
-    anyProjectDeps: true
-  handlerbase:
-    mayDependOn:
-      - usecase
-      - auth
-  handler:
-    mayDependOn:
-      - usecase
-      - auth
-      - handlerbase
-  repository:
-    mayDependOn:
-      - usecase
-      - sqlc
-  worker:
-    mayDependOn:
-      - repository
-      - entity
+  depOnAnyVendor: false
+  deepScan: true
 
 excludeFiles:
   - "^.*_test\\.go$"
-  - "vendor/"
+  - "^.*\\/mocks\\/.*$"
+
+vendors:
+  echo:
+    in:
+      - github.com/labstack/echo/v5
+      - github.com/labstack/echo/v5/**
+  pgx:
+    in:
+      - github.com/jackc/pgx/v5
+      - github.com/jackc/pgx/v5/**
+  crypto:
+    in: golang.org/x/crypto/**
+
+components:
+  handler:     { in: handler/** }
+  service:     { in: service/** }
+  repository:  { in: repository/** }
+  domain:      { in: domain }
+
+commonComponents:
+  - domain
+
+deps:
+  handler:
+    mayDependOn:
+      - service
+    canUse:
+      - echo
+
+  service:
+    mayDependOn:
+      - repository
+    canUse:
+      - crypto
+
+  repository:
+    mayDependOn:
+      - repository
+    canUse:
+      - pgx

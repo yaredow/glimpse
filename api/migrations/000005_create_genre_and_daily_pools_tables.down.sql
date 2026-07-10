@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS daily_pools;
+DROP TABLE IF EXISTS genres;

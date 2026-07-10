@@ -3,46 +3,55 @@ package postgres
 import (
 	"context"
 
-	"github.com/yaredow/glimpse-api/internal/entity"
-	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
+	"github.com/jackc/pgx/v5"
+	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
-type AffinityRepo struct {
+type AffinityRepository struct {
 	db *DB
 }
 
-func NewAffinityRepo(db *DB) *AffinityRepo {
-	return &AffinityRepo{db: db}
+func NewAffinityRepository(db *DB) *AffinityRepository {
+	return &AffinityRepository{db: db}
 }
 
-func (ar *AffinityRepo) GetByUser(ctx context.Context, userID int64) ([]entity.UserAffinity, error) {
-	rows, err := ar.db.q.GetUserAffinities(ctx, userID)
+func (ar *AffinityRepository) WithTx(tx pgx.Tx) *AffinityRepository {
+	return &AffinityRepository{db: &DB{Pool: txPool{tx}}}
+}
+
+func (ar *AffinityRepository) GetByUserID(ctx context.Context, userID int64) ([]*domain.Affinity, error) {
+	query := `SELECT user_id, dimension, value, score, confidence, last_updated FROM user_affinities WHERE user_id = $1`
+
+	rows, err := ar.db.Query(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
-	affs := make([]entity.UserAffinity, len(rows))
-	for i, row := range rows {
-		affs[i] = entity.UserAffinity{
-			UserID:      row.UserID,
-			Dimension:   row.Dimension,
-			Value:       row.Value,
-			Score:       row.Score,
-			Confidence:  row.Confidence,
-			LastUpdated: row.LastUpdated,
+	defer rows.Close()
+
+	var affinities []*domain.Affinity
+	for rows.Next() {
+		var a domain.Affinity
+		if err := rows.Scan(&a.UserID, &a.Dimension, &a.Value, &a.Score, &a.Confidence, &a.LastUpdated); err != nil {
+			return nil, err
 		}
+		affinities = append(affinities, &a)
 	}
-	return affs, nil
+
+	return affinities, rows.Err()
 }
 
-func (ar *AffinityRepo) Decay(ctx context.Context) error {
-	return ar.db.q.DecayAffinies(ctx)
+func (ar *AffinityRepository) Decay(ctx context.Context) error {
+	query := `UPDATE user_affinities SET score = score * 0.95 WHERE score > 0`
+	_, err := ar.db.Exec(ctx, query)
+	return err
 }
 
-func (ar *AffinityRepo) Upsert(ctx context.Context, userID int64, dimension, value string, score float64) error {
-	return ar.db.q.UpsertUserAffinity(ctx, queries.UpsertUserAffinityParams{
-		UserID:    userID,
-		Dimension: dimension,
-		Value:     value,
-		Score:     score,
-	})
+func (ar *AffinityRepository) Upsert(ctx context.Context, userID int64, dimension, value string, delta float64) error {
+	query := `INSERT INTO user_affinities (user_id, dimension, value, score) VALUES ($1, $2, $3, $4)
+		ON CONFLICT (user_id, dimension, value) DO UPDATE SET score = user_affinities.score + $4, confidence = user_affinities.confidence + 0.1, last_updated = NOW()`
+
+	args := []any{userID, dimension, value, delta}
+	_, err := ar.db.Exec(ctx, query, args...)
+
+	return err
 }

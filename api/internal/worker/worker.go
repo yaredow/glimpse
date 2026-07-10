@@ -1,38 +1,80 @@
-// Package worker provides a worker that syncs popular movies from tmdb.
 package worker
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"sync"
 	"time"
 
-	"github.com/yaredow/glimpse-api/internal/repository/postgres"
-	"github.com/yaredow/glimpse-api/internal/repository/tmdb"
+	"github.com/yaredow/glimpse-api/internal/domain"
+	"github.com/yaredow/glimpse-api/internal/tmdb"
+	"golang.org/x/sync/errgroup"
 )
 
+type movieRepo interface {
+	UpsertBatchMovies(ctx context.Context, movies []*domain.Movie) error
+}
+
+type genreRepo interface {
+	UpsertBatchGenres(ctx context.Context, genres []*domain.Genre) error
+}
+
+type affinityRepo interface {
+	Decay(ctx context.Context) error
+}
+
+type gridHistoryRepo interface {
+	CleanupOld(ctx context.Context) error
+}
+
+type Pool struct {
+	wg *errgroup.Group
+}
+
+func New() *Pool {
+	return &Pool{wg: &errgroup.Group{}}
+}
+
+func (p *Pool) Background(fn func()) {
+	p.wg.Go(func() error {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Printf("background panic: %v", err)
+			}
+		}()
+
+		fn()
+		return nil
+	})
+}
+
+func (p *Pool) Wait() error {
+	return p.wg.Wait()
+}
+
 type Worker struct {
-	genreRepo    *postgres.GenreRepo
-	movieRepo    *postgres.MovieRepo
-	affinityRepo *postgres.AffinityRepo
-	gridHistRepo *postgres.GridHistoryRepo
+	movieRepo    movieRepo
+	genreRepo    genreRepo
+	affinityRepo affinityRepo
+	gridHistRepo gridHistoryRepo
 	tmdb         *tmdb.Client
 	logger       *slog.Logger
 	wg           sync.WaitGroup
 	cancel       context.CancelFunc
 }
 
-func New(
-	genreRepo *postgres.GenreRepo,
-	movieRepo *postgres.MovieRepo,
-	affinityRepo *postgres.AffinityRepo,
-	gridHistRepo *postgres.GridHistoryRepo,
+func NewWorker(
+	movieRepo movieRepo,
+	genreRepo genreRepo,
+	affinityRepo affinityRepo,
+	gridHistRepo gridHistoryRepo,
 	tmdb *tmdb.Client,
 	logger *slog.Logger,
 ) *Worker {
 	return &Worker{
-		genreRepo:    genreRepo,
 		movieRepo:    movieRepo,
+		genreRepo:    genreRepo,
 		affinityRepo: affinityRepo,
 		gridHistRepo: gridHistRepo,
 		tmdb:         tmdb,
@@ -44,11 +86,21 @@ func (w *Worker) Start() {
 	ctx, cancel := context.WithCancel(context.Background())
 	w.cancel = cancel
 
-	w.wg.Go(func() { w.runSyncloop(ctx) })
-	w.wg.Go(func() { w.runDecayLoop(ctx) })
+	w.wg.Add(1)
+	go func() { w.runSyncLoop(ctx) }()
+
+	w.wg.Add(1)
+	go func() { w.runDecayLoop(ctx) }()
 }
 
-func (w *Worker) runSyncloop(ctx context.Context) {
+func (w *Worker) Stop() {
+	w.cancel()
+	w.wg.Wait()
+}
+
+func (w *Worker) runSyncLoop(ctx context.Context) {
+	defer w.wg.Done()
+
 	w.syncGenres(ctx)
 	w.syncMovies(ctx)
 
@@ -67,6 +119,8 @@ func (w *Worker) runSyncloop(ctx context.Context) {
 }
 
 func (w *Worker) runDecayLoop(ctx context.Context) {
+	defer w.wg.Done()
+
 	ticker := time.NewTicker(24 * time.Hour)
 	defer ticker.Stop()
 
@@ -92,9 +146,4 @@ func (w *Worker) decay(ctx context.Context) {
 	}
 
 	w.logger.Info("nightly decay complete")
-}
-
-func (w *Worker) Stop() {
-	w.cancel()
-	w.wg.Wait()
 }

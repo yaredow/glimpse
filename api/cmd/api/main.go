@@ -2,105 +2,106 @@ package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"os"
-	"strings"
+	"strconv"
+	"time"
 
-	"github.com/go-chi/httplog/v3"
-	"github.com/joho/godotenv"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo/v5"
 	"github.com/yaredow/glimpse-api/internal/auth"
-	"github.com/yaredow/glimpse-api/internal/db"
-	"github.com/yaredow/glimpse-api/internal/handler"
-	interactionhandler "github.com/yaredow/glimpse-api/internal/handler/interaction"
 	"github.com/yaredow/glimpse-api/internal/handler/middleware"
-	moviehandler "github.com/yaredow/glimpse-api/internal/handler/movie"
-	preferencehandler "github.com/yaredow/glimpse-api/internal/handler/preference"
-	userhandler "github.com/yaredow/glimpse-api/internal/handler/user"
+	"github.com/yaredow/glimpse-api/internal/handler/routes"
 	"github.com/yaredow/glimpse-api/internal/mailer"
 	"github.com/yaredow/glimpse-api/internal/repository/postgres"
-	"github.com/yaredow/glimpse-api/internal/repository/tmdb"
-	recusecase "github.com/yaredow/glimpse-api/internal/usecase/recommendation"
-	userusecase "github.com/yaredow/glimpse-api/internal/usecase/user"
+	"github.com/yaredow/glimpse-api/internal/service"
+	"github.com/yaredow/glimpse-api/internal/tmdb"
 	"github.com/yaredow/glimpse-api/internal/worker"
 )
 
+const (
+	defaultTimeout = 30
+	defaultAddress = ":4000"
+)
+
 func main() {
-	_ = godotenv.Load()
+	// Environment variables
+	jwtSecret := os.Getenv("JWT_SECRET")
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpUsername := os.Getenv("SMTP_USERNAME")
+	smtpPassword := os.Getenv("SMTP_PASSWORD")
+	smtpSender := os.Getenv("SMTP_SENDER")
 
-	cfg, err := LoadConfig()
+	// Server
+	pool, err := pgxpool.New(context.Background(), os.Getenv("DB_DSN"))
 	if err != nil {
-		slog.New(slog.NewJSONHandler(os.Stderr, nil)).Error("failed to load config", "error", err)
-		os.Exit(1)
-	}
-
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	logFormat := httplog.SchemaECS.Concise(cfg.Env == "development")
-
-	migrateDSN := strings.Replace(cfg.DatabaseURL, "postgres://", "pgx5://", 1)
-	if err = db.RunMigrations(migrateDSN); err != nil {
-		logger.Error("migration failed", "error", err)
-		os.Exit(1)
-	}
-
-	pool, err := db.OpenDB(context.Background(), cfg.DatabaseURL)
-	if err != nil {
-		logger.Error("failed to connect to database", "error", err)
-		os.Exit(1)
+		log.Fatal("unable to connect to the database", err)
 	}
 	defer pool.Close()
-	logger.Info("database connection pool established")
 
-	jwtManager := auth.NewManager([]byte(cfg.JWTSecret), cfg.JWTIssuer)
-	tmdbClient := tmdb.NewClient(cfg.TMDBAPIKey, cfg.TMDBBaseURL)
-	mailer := mailer.New(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword, cfg.SMTPSender)
+	// Echo
+	e := echo.New()
+	e.Use(middleware.CORS)
+	timeoutStr := os.Getenv("CONTEXT_TIMEOUT")
+	timeout, err := strconv.Atoi(timeoutStr)
+	if err != nil {
+		log.Println("failed to parse timeout, using default timeout")
+		timeout = defaultTimeout
+	}
+	timeoutContext := time.Duration(timeout) * time.Second
+	e.Use(middleware.SetRequestContextWithTimeout(timeoutContext))
 
-	pgdb := postgres.NewDB(pool)
-	userRepo := postgres.NewUserRepo(pgdb)
-	tokenRepo := postgres.NewTokenRepo(pgdb)
-	baseHandler := handler.NewBase(logger)
-	userUC := userusecase.NewUserUsecase(userRepo, tokenRepo, jwtManager, mailer)
-	userHandler := userhandler.New(baseHandler, userUC)
-	authMiddleware := middleware.NewAuth(jwtManager, userRepo, baseHandler)
+	// Repositories
+	db := &postgres.DB{Pool: pool}
+	userRepo := postgres.NewUserRepository(db)
+	tokenRepo := postgres.NewTokenRepository(db)
+	refreshTokenRepo := postgres.NewRefreshTokenRepository(db)
+	jwtMgr := auth.NewManager([]byte(jwtSecret))
 
-	movieRepo := postgres.NewMovieRepo(pgdb)
-	affinityRepo := postgres.NewAffinityRepo(pgdb)
-	interactionRepo := postgres.NewInteractionRepo(pgdb)
-	gridRepo := postgres.NewGridRepo(pgdb)
-	gridHistoryRepo := postgres.NewGridHistoryRepo(pgdb)
-	genreRepo := postgres.NewGenreRepo(pgdb)
-	preferenceRepo := postgres.NewPreferenceRepo(pgdb)
+	// TMDB
+	tmdbClient := tmdb.NewClient(os.Getenv("TMDB_BEARER_TOKEN"), os.Getenv("TMDB_URL"))
+	movieRepo := postgres.NewMovieRepository(db)
 
-	recUC := recusecase.New(movieRepo, affinityRepo, interactionRepo, gridRepo, gridHistoryRepo, userRepo, genreRepo, preferenceRepo, pgdb)
+	// Mailer
+	mailer := mailer.New(smtpHost, 25, smtpUsername, smtpPassword, smtpSender)
 
-	movieHandler := moviehandler.New(baseHandler, recUC)
-	interactionHandler := interactionhandler.New(baseHandler, recUC)
-	preferenceHandler := preferencehandler.New(baseHandler, recUC)
+	// Worker pool
+	wp := worker.New()
 
-	w := worker.New(genreRepo, movieRepo, affinityRepo, gridHistoryRepo, tmdbClient, logger)
-	w.Start()
-	defer w.Stop()
+	// Services
+	userService := service.NewUserService(userRepo, tokenRepo, refreshTokenRepo)
+	prefRepo := postgres.NewPreferenceRepository(db)
+	prefSvc := service.NewPreferenceService(prefRepo)
 
-	r := handler.NewRouter(logger, logFormat, handler.Routes{
-		Authenticate:          authMiddleware.Authenticate,
-		RequireAuthenticatedUser: authMiddleware.RequireAuthenticatedUser,
-		Register:              userHandler.Register,
-		Activate:              userHandler.Activate,
-		UpdatePassword:        userHandler.UpdateUserPassword,
-		Login:                 userHandler.Login,
-		Refresh:               userHandler.RefreshToken,
-		Revoke:                userHandler.RevokeToken,
-		CreateActivation:      userHandler.CreateActivationToken,
-		CreatePasswordReset:   userHandler.CreatePasswordResetToken,
-		GetTodayGrid:          movieHandler.GetTodayGrid,
-		RecordInteraction:     interactionHandler.RecordInteraction,
-		StartOnboarding:       preferenceHandler.StartOnboarding,
-		FinishOnboarding:      preferenceHandler.FinishOnboarding,
-		GetPreferences:        preferenceHandler.GetPreferences,
-		UpdatePreferences:     preferenceHandler.UpdatePreferences,
-	})
+	affinityRepo := postgres.NewAffinityRepository(db)
+	interactionRepo := postgres.NewInteractionRepository(db)
+	gridRepo := postgres.NewGridRepository(db)
+	gridHistoryRepo := postgres.NewGridHistoryRepository(db)
+	genreRepo := postgres.NewGenreRepository(db)
 
-	if err := serve(cfg, logger, r); err != nil {
-		logger.Error("server error", "error", err)
-		os.Exit(1)
+	syncWorker := worker.NewWorker(movieRepo, movieRepo, affinityRepo, gridHistoryRepo, tmdbClient, slog.Default())
+	syncWorker.Start()
+	defer syncWorker.Stop()
+
+	recSvc := service.NewRecommendationService(
+		movieRepo,
+		affinityRepo,
+		interactionRepo,
+		gridRepo,
+		gridHistoryRepo,
+		userRepo,
+		genreRepo,
+		db,
+	)
+
+	// Middleware
+	e.Use(middleware.Authenticate(jwtMgr, userService))
+
+	// Routes
+	routes.Register(e, userService, jwtMgr, mailer, wp, prefSvc, movieRepo, prefSvc, userService, recSvc, recSvc)
+
+	if err := e.Start(defaultAddress); err != nil {
+		e.Logger.Error("failed to start server", "error", err)
 	}
 }

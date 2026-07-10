@@ -3,86 +3,72 @@ package postgres
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/yaredow/glimpse-api/internal/entity"
-	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
-	recusecase "github.com/yaredow/glimpse-api/internal/usecase/recommendation"
+	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
-type PreferenceRepo struct {
+type PreferenceRepository struct {
 	db *DB
 }
 
-func NewPreferenceRepo(db *DB) *PreferenceRepo {
-	return &PreferenceRepo{db: db}
+func NewPreferenceRepository(db *DB) *PreferenceRepository {
+	return &PreferenceRepository{db: db}
 }
 
-func (pr *PreferenceRepo) GetByUser(ctx context.Context, userID int64) (*entity.Preference, error) {
-	row, err := pr.db.q.GetUserPreference(ctx, userID)
+func (pr *PreferenceRepository) GetByUserID(ctx context.Context, userID int64) (*domain.Preference, error) {
+	query := `
+		SELECT user_id, favorite_genres, excluded_genres, languages, min_rating, min_year, max_year, created_at, updated_at
+		FROM user_preferences
+		WHERE user_id = $1`
+
+	var p domain.Preference
+	var favGenres, exclGenres []int32
+
+	err := pr.db.QueryRow(ctx, query, userID).Scan(
+		&p.UserID, &favGenres, &exclGenres, &p.Languages, &p.MinRating, &p.MinYear, &p.MaxYear, &p.CreatedAt, &p.UpdatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, recusecase.ErrRecordNotFound
+			return nil, nil
 		}
-		return nil, fmt.Errorf("get preference: %w", err)
+		return nil, err
 	}
-	return mapPreference(row), nil
+
+	p.FavoriteGenres = make([]int, len(favGenres))
+	for i, g := range favGenres {
+		p.FavoriteGenres[i] = int(g)
+	}
+	p.ExcludedGenres = make([]int, len(exclGenres))
+	for i, g := range exclGenres {
+		p.ExcludedGenres[i] = int(g)
+	}
+
+	return &p, nil
 }
 
-func (pr *PreferenceRepo) Upsert(ctx context.Context, userID int64, input recusecase.UpsertPreferenceInput, onboarded bool) (*entity.Preference, error) {
-	row, err := pr.db.q.UpsertPreference(ctx, queries.UpsertPreferenceParams{
-		UserID:         userID,
-		FavoriteGenres: input.FavoriteGenres,
-		ExcludedGenres: input.ExcludedGenres,
-		Languages:      input.Languages,
-		MinRating:      input.MinRating,
-		Onboarded:      onboarded,
-		MinYear:        input.MinYear,
-		MaxYear:        input.MaxYear,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("upsert preference: %w", err)
+func (pr *PreferenceRepository) Upsert(ctx context.Context, p *domain.Preference) error {
+	favGenres := make([]int32, len(p.FavoriteGenres))
+	for i, g := range p.FavoriteGenres {
+		favGenres[i] = int32(g)
 	}
-	return mapPreference(row), nil
-}
-
-func (pr *PreferenceRepo) Update(ctx context.Context, userID int64, input recusecase.UpsertPreferenceInput) (*entity.Preference, error) {
-	current, err := pr.db.q.GetUserPreference(ctx, userID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, recusecase.ErrRecordNotFound
-		}
-		return nil, fmt.Errorf("get current preference: %w", err)
+	exclGenres := make([]int32, len(p.ExcludedGenres))
+	for i, g := range p.ExcludedGenres {
+		exclGenres[i] = int32(g)
 	}
 
-	row, err := pr.db.q.UpsertPreference(ctx, queries.UpsertPreferenceParams{
-		UserID:         userID,
-		FavoriteGenres: input.FavoriteGenres,
-		ExcludedGenres: input.ExcludedGenres,
-		Languages:      input.Languages,
-		MinRating:      input.MinRating,
-		Onboarded:      current.Onboarded,
-		MinYear:        input.MinYear,
-		MaxYear:        input.MaxYear,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("update preference: %w", err)
-	}
-	return mapPreference(row), nil
-}
+	query := `
+		INSERT INTO user_preferences (user_id, favorite_genres, excluded_genres, languages, min_rating, min_year, max_year)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		ON CONFLICT (user_id) DO UPDATE SET
+			favorite_genres = EXCLUDED.favorite_genres,
+			excluded_genres = EXCLUDED.excluded_genres,
+			languages       = EXCLUDED.languages,
+			min_rating      = EXCLUDED.min_rating,
+			min_year        = EXCLUDED.min_year,
+			max_year        = EXCLUDED.max_year,
+			updated_at      = NOW()`
 
-func mapPreference(p queries.UserPreference) *entity.Preference {
-	return &entity.Preference{
-		UserID:         p.UserID,
-		FavoriteGenres: p.FavoriteGenres,
-		ExcludedGenres: p.ExcludedGenres,
-		Languages:      p.Languages,
-		MinRating:      p.MinRating,
-		Onboarded:      p.Onboarded,
-		CreatedAt:      p.CreatedAt,
-		UpdatedAt:      p.UpdatedAt,
-		MinYear:        p.MinYear,
-		MaxYear:        p.MaxYear,
-	}
+	_, err := pr.db.Exec(ctx, query, p.UserID, favGenres, exclGenres, p.Languages, p.MinRating, p.MinYear, p.MaxYear)
+	return err
 }

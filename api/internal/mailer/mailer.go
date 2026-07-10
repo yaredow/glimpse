@@ -1,10 +1,9 @@
-// Package mailer provides a simple mailer implementation.
 package mailer
 
 import (
 	"bytes"
 	"embed"
-	"text/template"
+	"html/template"
 	"time"
 
 	"github.com/go-mail/mail/v2"
@@ -18,17 +17,17 @@ type Mailer struct {
 	sender string
 }
 
-func New(host string, port int, username, password, sender string) *Mailer {
+func New(host string, port int, username, password, sender string) Mailer {
 	dialer := mail.NewDialer(host, port, username, password)
 	dialer.Timeout = 5 * time.Second
 
-	return &Mailer{
+	return Mailer{
 		dialer: dialer,
 		sender: sender,
 	}
 }
 
-func (m *Mailer) Send(recipient, templateFile string, data any) error {
+func (m Mailer) Send(recipient, templateFile string, data any) error {
 	tmpl, err := template.New("email").ParseFS(templatesFs, "templates/"+templateFile)
 	if err != nil {
 		return err

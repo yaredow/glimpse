@@ -4,84 +4,74 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/yaredow/glimpse-api/internal/sqlc/queries"
-	recusecase "github.com/yaredow/glimpse-api/internal/usecase/recommendation"
+	"github.com/jackc/pgx/v5"
+	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
-type GridRepo struct {
+type GridRepository struct {
 	db *DB
 }
 
-func NewGridRepo(db *DB) *GridRepo {
-	return &GridRepo{db: db}
+func NewGridRepository(db *DB) *GridRepository {
+	return &GridRepository{db: db}
 }
 
-func (gr *GridRepo) GetUserGrid(ctx context.Context, userID int64) ([]recusecase.GridSlot, error) {
-	rows, err := gr.db.q.GetUserGrid(ctx, userID)
+func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.GridSlotResponse, error) {
+	query := `
+		SELECT
+			m.id,
+			m.tmdb_id,
+			d.slot_number,
+			d.is_revealed,
+			m.vague_description,
+			m.genres,
+			d.grid_session_id
+		FROM daily_pools d
+		JOIN movies m ON m.id = d.movie_id
+		WHERE d.user_id = $1
+		ORDER BY d.slot_number`
+
+	rows, err := gr.db.Query(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
-	s := make([]recusecase.GridSlot, len(rows))
-	for i, row := range rows {
-		s[i] = recusecase.GridSlot{
-			MovieID:          row.MovieID,
-			TmdbID:           row.TmdbID,
-			SlotNumber:       row.SlotNumber,
-			IsRevealed:       row.IsRevealed,
-			VagueDescription: row.VagueDescription,
-			Genres:           row.Genres,
-			GridSessionID:    row.GridSessionID,
+	defer rows.Close()
+
+	var slots []domain.GridSlotResponse
+	for rows.Next() {
+		var s domain.GridSlotResponse
+		if err := rows.Scan(
+			&s.MovieID,
+			&s.TmdbID,
+			&s.SlotNumber,
+			&s.IsRevealed,
+			&s.VagueDescription,
+			&s.Genres,
+			&s.GridSessionID,
+		); err != nil {
+			return nil, err
 		}
+		slots = append(slots, s)
 	}
-	return s, nil
+
+	return slots, rows.Err()
 }
 
-func (gr *GridRepo) Clear(ctx context.Context, userID int64) error {
-	return gr.db.q.ClearUserGrid(ctx, userID)
+func (gr *GridRepository) Clear(ctx context.Context, userID int64) error {
+	query := `DELETE FROM daily_pools WHERE user_id = $1`
+	_, err := gr.db.Exec(ctx, query, userID)
+	return err
 }
 
-func (gr *GridRepo) InsertSlot(ctx context.Context, userID int64, movieID int64, slotNumber int32, sessionID uuid.UUID) error {
-	return gr.db.q.InsertGridSlot(ctx, queries.InsertGridSlotParams{
-		UserID:        userID,
-		MovieID:       movieID,
-		SlotNumber:    slotNumber,
-		GridSessionID: sessionID,
-	})
+func (gr *GridRepository) WithTx(tx pgx.Tx) *GridRepository {
+	return &GridRepository{db: &DB{Pool: txPool{tx}}}
 }
 
-type GridHistoryRepo struct {
-	db *DB
-}
+func (gr *GridRepository) Insert(ctx context.Context, userID int64, movieID int64, sessionID uuid.UUID, slotNumber int) error {
+	query := `INSERT INTO daily_pools (user_id, movie_id, slot_number, grid_session_id) VALUES ($1, $2, $3, $4)`
 
-func NewGridHistoryRepo(db *DB) *GridHistoryRepo {
-	return &GridHistoryRepo{db: db}
-}
+	args := []any{userID, movieID, slotNumber, sessionID}
+	_, err := gr.db.Exec(ctx, query, args...)
 
-func (ghr *GridHistoryRepo) GetRecentlyShown(ctx context.Context, userID int64, limit int32) ([]recusecase.GridHistoryEntry, error) {
-	rows, err := ghr.db.q.GetRecentlyShownMovies(ctx, queries.GetRecentlyShownMoviesParams{
-		UserID: userID,
-		Limit:  limit,
-	})
-	if err != nil {
-		return nil, err
-	}
-	entries := make([]recusecase.GridHistoryEntry, len(rows))
-	for i, row := range rows {
-		entries[i] = recusecase.GridHistoryEntry{
-			MovieID: row.MovieID,
-			ShownAt: row.ShownAt,
-		}
-	}
-	return entries, nil
-}
-
-func (ghr *GridHistoryRepo) CleanupOld(ctx context.Context) error {
-	return ghr.db.q.CleanupOldGridHistory(ctx)
-}
-
-func (ghr *GridHistoryRepo) Insert(ctx context.Context, userID int64, movieID int64) error {
-	return ghr.db.q.InsertGridHistory(ctx, queries.InsertGridHistoryParams{
-		UserID:  userID,
-		MovieID: movieID,
-	})
+	return err
 }

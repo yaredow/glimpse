@@ -1,81 +1,75 @@
-// Package middleware
 package middleware
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
 
+	"github.com/labstack/echo/v5"
 	"github.com/yaredow/glimpse-api/internal/auth"
-	"github.com/yaredow/glimpse-api/internal/handler"
-	userusecase "github.com/yaredow/glimpse-api/internal/usecase/user"
+	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
-type AuthMiddleware struct {
-	jwt      *auth.JWTManager
-	userRepo userusecase.UserRespository
-	base     handler.Base
+type userGetter interface {
+	GetByID(ctx context.Context, id int64) (*domain.User, error)
 }
 
-func NewAuth(jwt *auth.JWTManager, userRepo userusecase.UserRespository, base handler.Base) *AuthMiddleware {
-	return &AuthMiddleware{
-		jwt:      jwt,
-		userRepo: userRepo,
-		base:     base,
+func Authenticate(jwtMgr *auth.JWTManager, userSvc userGetter) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c *echo.Context) error {
+			c.Response().Header().Set("Vary", "Authorization")
+
+			authHeader := c.Request().Header.Get("Authorization")
+			if authHeader == "" {
+				return next(c)
+			}
+
+			parts := strings.Split(authHeader, " ")
+			if len(parts) != 2 || parts[0] != "Bearer" {
+				return c.JSON(http.StatusUnauthorized, map[string]any{
+					"error": "invalid authorization header",
+				})
+			}
+
+			userID, err := jwtMgr.ValidateJWTToken(parts[1])
+			if err != nil {
+				switch {
+				case errors.Is(err, auth.ErrInvalidJWTToken), errors.Is(err, auth.ErrExpiredJWTToken):
+					return c.JSON(http.StatusUnauthorized, map[string]any{
+						"error": "invalid jwt token",
+					})
+				default:
+					return c.JSON(http.StatusInternalServerError, map[string]any{
+						"error": "internal server error",
+					})
+				}
+			}
+
+			user, err := userSvc.GetByID(c.Request().Context(), userID)
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, map[string]any{
+					"error": "invalid authentication token",
+				})
+			}
+
+			c.Set("user", user)
+			return next(c)
+		}
 	}
 }
 
-func (m *AuthMiddleware) Authenticate(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Vary", "Authorization")
-
-		authorizationHeader := r.Header.Get("Authorization")
-		if authorizationHeader == "" {
-			r = handler.ContextSetUser(r, nil)
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		headerParts := strings.Split(authorizationHeader, " ")
-		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			m.base.InvalidAuthenticationToken(w, r)
-			return
-		}
-
-		token := headerParts[1]
-		userID, err := m.jwt.ValidateJWTToken(token)
-		if err != nil {
-			switch {
-			case errors.Is(err, auth.ErrInvalidJWTToken), errors.Is(err, auth.ErrExpiredToken):
-				m.base.InvalidAuthenticationToken(w, r)
-			default:
-				m.base.ServerError(w, r, err)
+func RequireAuthenticatedUser() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c *echo.Context) error {
+			user := c.Get("user")
+			if user == nil {
+				return c.JSON(http.StatusUnauthorized, map[string]any{
+					"error": "you must be authenticated to access this resource",
+				})
 			}
-			return
-		}
 
-		user, err := m.userRepo.GetByID(r.Context(), userID)
-		if err != nil {
-			if errors.Is(err, userusecase.ErrRecordNotFound) {
-				m.base.InvalidAuthenticationToken(w, r)
-				return
-			}
-			m.base.ServerError(w, r, err)
-			return
+			return next(c)
 		}
-
-		r = handler.ContextSetUser(r, user)
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (m *AuthMiddleware) RequireAuthenticatedUser(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := handler.ContextGetUser(r)
-		if user == nil {
-			m.base.AuthenticationRequired(w, r)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+	}
 }

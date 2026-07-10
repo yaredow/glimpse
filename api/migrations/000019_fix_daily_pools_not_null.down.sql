@@ -1,2 +1,0 @@
-ALTER TABLE daily_pools ALTER COLUMN movie_id DROP NOT NULL;
-ALTER TABLE daily_pools ALTER COLUMN user_id DROP NOT NULL;

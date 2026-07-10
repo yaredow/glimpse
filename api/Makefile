@@ -72,12 +72,6 @@ db/migration/down: confirm
 	@echo "Running down migrations..."
 	migrate -path ./migrations -database ${DB_DSN} down 1
 
-## sqlc/generate: generate Go code from SQL queries
-.PHONY: sqlc/generate
-sqlc/generate:
-	@echo 'Generating Go code from SQL...'
-	sqlc generate
-
 # ==================================================================================== #
 # QUALITY CONTROL
 # ==================================================================================== #

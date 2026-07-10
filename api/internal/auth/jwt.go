@@ -1,4 +1,3 @@
-// Package auth provides authentication and authorization functionality.
 package auth
 
 import (
@@ -11,21 +10,19 @@ import (
 )
 
 var (
-	ErrInvalidJWTToken = errors.New("invalid token")
-	ErrExpiredToken    = errors.New("expired token")
+	ErrInvalidJWTToken = errors.New("invalid jwt token")
+	ErrExpiredJWTToken = errors.New("expired jwt token")
 )
 
 const JWTTTL = 10 * time.Minute
 
 type JWTManager struct {
 	secret []byte
-	issuer string
 }
 
-func NewManager(secret []byte, issuer string) *JWTManager {
+func NewManager(secret []byte) *JWTManager {
 	return &JWTManager{
 		secret: secret,
-		issuer: issuer,
 	}
 }
 
@@ -37,7 +34,7 @@ func (m *JWTManager) GenerateToken(userID int64) (string, time.Time, error) {
 		ExpiresAt: jwt.NewNumericDate(expiry),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 		NotBefore: jwt.NewNumericDate(time.Now()),
-		Issuer:    m.issuer,
+		Issuer:    "glimpse-api",
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -61,12 +58,16 @@ func (m *JWTManager) ValidateJWTToken(tokenStr string) (int64, error) {
 	})
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			return 0, ErrExpiredToken
+			return 0, ErrExpiredJWTToken
 		}
 		return 0, ErrInvalidJWTToken
 	}
 
 	if !token.Valid {
+		return 0, ErrInvalidJWTToken
+	}
+
+	if claims.Issuer != "glimpse-api" {
 		return 0, ErrInvalidJWTToken
 	}
 
