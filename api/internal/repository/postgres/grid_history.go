@@ -47,7 +47,7 @@ func (ghr *GridHistoryRepository) Insert(ctx context.Context, userID int64, movi
 	return err
 }
 
-func (ghr *GridHistoryRepository) Clean(ctx context.Context) error {
+func (ghr *GridHistoryRepository) CleanupOld(ctx context.Context) error {
 	query := `DELETE FROM user_grid_history WHERE shown_at < NOW() - INTERVAL '30 days'`
 	_, err := ghr.db.Exec(ctx, query)
 

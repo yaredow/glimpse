@@ -989,10 +989,10 @@ func TestUserService_UpdateOnboarded(t *testing.T) {
 		mockRepo, _, _, svc := newUserService(t)
 
 		mockRepo.EXPECT().
-			UpdateOnboarded(mock.Anything, "1", true).
+			UpdateOnboarded(mock.Anything, int64(1), true).
 			Return(nil)
 
-		err := svc.UpdateOnboarded(context.Background(), "1", true)
+		err := svc.UpdateOnboarded(context.Background(), int64(1), true)
 		require.NoError(t, err)
 	})
 
@@ -1003,10 +1003,10 @@ func TestUserService_UpdateOnboarded(t *testing.T) {
 		repoErr := errors.New("db error")
 
 		mockRepo.EXPECT().
-			UpdateOnboarded(mock.Anything, "1", true).
+			UpdateOnboarded(mock.Anything, int64(1), true).
 			Return(repoErr)
 
-		err := svc.UpdateOnboarded(context.Background(), "1", true)
+		err := svc.UpdateOnboarded(context.Background(), int64(1), true)
 		require.ErrorIs(t, err, repoErr)
 	})
 }

@@ -22,7 +22,7 @@ func (_m *Mockonboarder) EXPECT() *Mockonboarder_Expecter {
 }
 
 // UpdateOnboarded provides a mock function with given fields: ctx, userID, onboarded
-func (_m *Mockonboarder) UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error {
+func (_m *Mockonboarder) UpdateOnboarded(ctx context.Context, userID int64, onboarded bool) error {
 	ret := _m.Called(ctx, userID, onboarded)
 
 	if len(ret) == 0 {
@@ -30,7 +30,7 @@ func (_m *Mockonboarder) UpdateOnboarded(ctx context.Context, userID string, onb
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, bool) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, int64, bool) error); ok {
 		r0 = rf(ctx, userID, onboarded)
 	} else {
 		r0 = ret.Error(0)
@@ -46,15 +46,15 @@ type Mockonboarder_UpdateOnboarded_Call struct {
 
 // UpdateOnboarded is a helper method to define mock.On call
 //   - ctx context.Context
-//   - userID string
+//   - userID int64
 //   - onboarded bool
 func (_e *Mockonboarder_Expecter) UpdateOnboarded(ctx interface{}, userID interface{}, onboarded interface{}) *Mockonboarder_UpdateOnboarded_Call {
 	return &Mockonboarder_UpdateOnboarded_Call{Call: _e.mock.On("UpdateOnboarded", ctx, userID, onboarded)}
 }
 
-func (_c *Mockonboarder_UpdateOnboarded_Call) Run(run func(ctx context.Context, userID string, onboarded bool)) *Mockonboarder_UpdateOnboarded_Call {
+func (_c *Mockonboarder_UpdateOnboarded_Call) Run(run func(ctx context.Context, userID int64, onboarded bool)) *Mockonboarder_UpdateOnboarded_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(bool))
+		run(args[0].(context.Context), args[1].(int64), args[2].(bool))
 	})
 	return _c
 }
@@ -64,7 +64,7 @@ func (_c *Mockonboarder_UpdateOnboarded_Call) Return(_a0 error) *Mockonboarder_U
 	return _c
 }
 
-func (_c *Mockonboarder_UpdateOnboarded_Call) RunAndReturn(run func(context.Context, string, bool) error) *Mockonboarder_UpdateOnboarded_Call {
+func (_c *Mockonboarder_UpdateOnboarded_Call) RunAndReturn(run func(context.Context, int64, bool) error) *Mockonboarder_UpdateOnboarded_Call {
 	_c.Call.Return(run)
 	return _c
 }

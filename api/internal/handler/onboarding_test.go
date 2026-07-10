@@ -111,7 +111,7 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 			Return(nil)
 
 		mockOnboarder.EXPECT().
-			UpdateOnboarded(mock.Anything, "1", true).
+			UpdateOnboarded(mock.Anything, int64(1), true).
 			Return(nil)
 
 		mockAffSeed.On("SeedFromOnboarding", mock.Anything, int64(1), []int{28, 12}).
@@ -208,7 +208,7 @@ func TestOnboardingHandler_Complete(t *testing.T) {
 			Return(nil)
 
 		mockOnboarder.EXPECT().
-			UpdateOnboarded(mock.Anything, "1", true).
+			UpdateOnboarded(mock.Anything, int64(1), true).
 			Return(domain.ErrInternalServerError)
 
 		err := h.Complete(c)

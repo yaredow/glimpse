@@ -137,7 +137,9 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 	}
 
 	if err := rs.db.ExecTx(ctx, func(tx pgx.Tx) error {
-		gtx := rs.grid.(*postgres.GridRepository).WithTx(tx)
+		txDB := postgres.NewDBFromTx(tx)
+
+		gtx := postgres.NewGridRepository(txDB)
 		if err := gtx.Clear(ctx, userID); err != nil {
 			return fmt.Errorf("clear grid: %w", err)
 		}
@@ -148,7 +150,7 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 			}
 		}
 
-		ghtx := rs.gridHistory.(*postgres.GridHistoryRepository).WithTx(tx)
+		ghtx := postgres.NewGridHistoryRepository(txDB)
 		for _, movieID := range movieIDs {
 			if err := ghtx.Insert(ctx, userID, movieID); err != nil {
 				return fmt.Errorf("insert grid history: %w", err)
@@ -187,14 +189,16 @@ func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, 
 	dims := MovieDimensions(movie.Genres, movie.OriginalLanguage, year, movie.VoteAverage)
 
 	return rs.db.ExecTx(ctx, func(tx pgx.Tx) error {
-		atx := rs.affinities.(*postgres.AffinityRepository).WithTx(tx)
+		txDB := postgres.NewDBFromTx(tx)
+
+		atx := postgres.NewAffinityRepository(txDB)
 		for _, dim := range dims {
-			if err := atx.Upsert(ctx, userID, dim.Name, dim.Values, weight.Delta); err != nil {
+			if err := atx.Upsert(ctx, userID, dim.Name, dim.Value, weight.Delta); err != nil {
 				return fmt.Errorf("upsert affinity: %w", err)
 			}
 		}
 
-		itx := rs.interactions.(*postgres.InteractionRepository).WithTx(tx)
+		itx := postgres.NewInteractionRepository(txDB)
 		if err := itx.Insert(ctx, &domain.Interaction{
 			UserID:           userID,
 			MovieID:          movieID,
@@ -207,13 +211,13 @@ func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, 
 		}
 
 		if weight.AffectExploration {
-			utx := rs.users.(*postgres.UserRespository).WithTx(tx)
+			utx := postgres.NewUserRepository(txDB)
 			if err := utx.UpdateInteractionsStat(ctx, userID); err != nil {
 				return fmt.Errorf("update interaction stats: %w", err)
 			}
 		}
 
-		mtx := rs.movies.(*postgres.MovieRepository).WithTx(tx)
+		mtx := postgres.NewMovieRepository(txDB)
 		shown := action == "revealed" || action == "watched"
 		watched := action == "watched"
 		if err := mtx.UpdateWatchCount(ctx, movieID, shown, watched); err != nil {

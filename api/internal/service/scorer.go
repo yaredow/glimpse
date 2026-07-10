@@ -85,13 +85,13 @@ func hasCommonGenre(a, b []string) bool {
 
 func MovieDimensions(genres []string, language string, releaseYear int32, voteAvg float64) []domain.Dimension {
 	dims := []domain.Dimension{
-		{Name: "language", Values: language},
-		{Name: "decade", Values: decadeOf(releaseYear)},
-		{Name: "rating_band", Values: ratingBand(voteAvg)},
+		{Name: "language", Value: language},
+		{Name: "decade", Value: decadeOf(releaseYear)},
+		{Name: "rating_band", Value: ratingBand(voteAvg)},
 	}
 
 	for _, genre := range genres {
-		dims = append(dims, domain.Dimension{Name: "genre", Values: genre})
+		dims = append(dims, domain.Dimension{Name: "genre", Value: genre})
 	}
 
 	return dims

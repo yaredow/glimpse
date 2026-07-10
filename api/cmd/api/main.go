@@ -63,15 +63,11 @@ func main() {
 	tmdbClient := tmdb.NewClient(os.Getenv("TMDB_BEARER_TOKEN"), os.Getenv("TMDB_URL"))
 	movieRepo := postgres.NewMovieRepository(db)
 
-	syncWorker := worker.NewWorker(movieRepo, movieRepo, nil, nil, tmdbClient, slog.Default())
-	syncWorker.Start()
-	defer syncWorker.Stop()
-
 	// Mailer
 	mailer := mailer.New(smtpHost, 25, smtpUsername, smtpPassword, smtpSender)
 
 	// Worker pool
-	worker := worker.New()
+	wp := worker.New()
 
 	// Services
 	userService := service.NewUserService(userRepo, tokenRepo, refreshTokenRepo)
@@ -83,6 +79,10 @@ func main() {
 	gridRepo := postgres.NewGridRepository(db)
 	gridHistoryRepo := postgres.NewGridHistoryRepository(db)
 	genreRepo := postgres.NewGenreRepository(db)
+
+	syncWorker := worker.NewWorker(movieRepo, movieRepo, affinityRepo, gridHistoryRepo, tmdbClient, slog.Default())
+	syncWorker.Start()
+	defer syncWorker.Stop()
 
 	recSvc := service.NewRecommendationService(
 		movieRepo,
@@ -99,7 +99,7 @@ func main() {
 	e.Use(middleware.Authenticate(jwtMgr, userService))
 
 	// Routes
-	routes.Register(e, userService, jwtMgr, mailer, worker, prefSvc, movieRepo, prefSvc, userService, recSvc, recSvc)
+	routes.Register(e, userService, jwtMgr, mailer, wp, prefSvc, movieRepo, prefSvc, userService, recSvc, recSvc)
 
 	if err := e.Start(defaultAddress); err != nil {
 		e.Logger.Error("failed to start server", "error", err)

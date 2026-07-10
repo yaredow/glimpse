@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v5"
@@ -39,7 +38,7 @@ type PreferenceUpserter interface {
 }
 
 type Onboarder interface {
-	UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error
+	UpdateOnboarded(ctx context.Context, userID int64, onboarded bool) error
 }
 
 type AffinitySeeder interface {
@@ -105,7 +104,7 @@ func (oh *OnboardingHandler) Complete(c *echo.Context) error {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 
-	if err := oh.onboarder.UpdateOnboarded(c.Request().Context(), strconv.FormatInt(user.ID, 10), true); err != nil {
+	if err := oh.onboarder.UpdateOnboarded(c.Request().Context(), user.ID, true); err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 

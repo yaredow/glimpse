@@ -10,21 +10,21 @@ import (
 	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
-type UserRespository struct {
+type UserRepository struct {
 	db *DB
 }
 
-func NewUserRepository(db *DB) *UserRespository {
-	return &UserRespository{
+func NewUserRepository(db *DB) *UserRepository {
+	return &UserRepository{
 		db: db,
 	}
 }
 
-func (ur *UserRespository) WithTx(tx pgx.Tx) *UserRespository {
-	return &UserRespository{db: &DB{Pool: txPool{tx}}}
+func (ur *UserRepository) WithTx(tx pgx.Tx) *UserRepository {
+	return &UserRepository{db: &DB{Pool: txPool{tx}}}
 }
 
-func (r *UserRespository) Create(ctx context.Context, u *domain.User) error {
+func (r *UserRepository) Create(ctx context.Context, u *domain.User) error {
 	query := `
 		INSERT INTO users (name, email, password_hash)
 		VALUES ($1, $2, $3)
@@ -62,7 +62,7 @@ func (r *UserRespository) Create(ctx context.Context, u *domain.User) error {
 	return nil
 }
 
-func (ur *UserRespository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (ur *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	query := `
 	SELECT id, name, email, password_hash, activated, suspended_at, onboarded, skips_remaining, syncs_remaining, last_reset_at, total_interactions, exploration_rate, version, created_at, updated_at
 	From users
@@ -99,7 +99,7 @@ func (ur *UserRespository) GetByEmail(ctx context.Context, email string) (*domai
 	return &u, nil
 }
 
-func (ur *UserRespository) GetByID(ctx context.Context, id int64) (*domain.User, error) {
+func (ur *UserRepository) GetByID(ctx context.Context, id int64) (*domain.User, error) {
 	query := `
 	SELECT id, name, email, password_hash, activated, suspended_at, onboarded, skips_remaining, syncs_remaining, last_reset_at, total_interactions, exploration_rate, version, created_at, updated_at
 	From users
@@ -136,7 +136,7 @@ func (ur *UserRespository) GetByID(ctx context.Context, id int64) (*domain.User,
 	return &u, nil
 }
 
-func (ur *UserRespository) GetByToken(ctx context.Context, tokenPlainText string, scope string) (*domain.User, error) {
+func (ur *UserRepository) GetByToken(ctx context.Context, tokenPlainText string, scope string) (*domain.User, error) {
 	hash := sha256.Sum256([]byte(tokenPlainText))
 
 	query := `
@@ -181,7 +181,7 @@ func (ur *UserRespository) GetByToken(ctx context.Context, tokenPlainText string
 	return &u, nil
 }
 
-func (ur *UserRespository) Update(ctx context.Context, user *domain.User) error {
+func (ur *UserRepository) Update(ctx context.Context, user *domain.User) error {
 	query := `
         UPDATE users
         SET name = $1, email = $2, password_hash = $3, activated = $4, version = version + 1
@@ -228,7 +228,7 @@ func (ur *UserRespository) Update(ctx context.Context, user *domain.User) error 
 	return nil
 }
 
-func (ur *UserRespository) UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error {
+func (ur *UserRepository) UpdateOnboarded(ctx context.Context, userID int64, onboarded bool) error {
 	query := `
 		UPDATE users
 		SET onboarded = $1, updated_at = NOW()
@@ -241,7 +241,7 @@ func (ur *UserRespository) UpdateOnboarded(ctx context.Context, userID string, o
 	return err
 }
 
-func (ur *UserRespository) UpdateInteractionsStat(ctx context.Context, userID int64) error {
+func (ur *UserRepository) UpdateInteractionsStat(ctx context.Context, userID int64) error {
 	query := `UPDATE users SET total_interactions = total_interactions + 1, exploration_rate = GREATEST(0.05, 0.4 * exp(-(total_interactions + 1)::float / 50)) WHERE id = $1`
 	_, err := ur.db.Exec(ctx, query, userID)
 

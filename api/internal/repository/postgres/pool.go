@@ -26,6 +26,10 @@ type DB struct {
 	Pool
 }
 
+func NewDBFromTx(tx pgx.Tx) *DB {
+	return &DB{Pool: txPool{tx}}
+}
+
 func (db *DB) ExecTx(ctx context.Context, fn func(pgx.Tx) error) error {
 	tx, err := db.Begin(ctx)
 	if err != nil {

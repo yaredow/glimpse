@@ -17,7 +17,7 @@ func TestRefreshTokenRepository_Insert(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	repo := postgres.NewRefreshTokenRepository(mock)
+	repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 	token := &domain.RefreshToken{
 		Hash:      []byte("test-hash"),
@@ -41,7 +41,7 @@ func TestRefreshTokenRepository_DeleteAllForUser(t *testing.T) {
 	require.NoError(t, err)
 	defer mock.Close()
 
-	repo := postgres.NewRefreshTokenRepository(mock)
+	repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 	mock.ExpectExec("DELETE FROM refresh_tokens").
 		WithArgs(int64(1)).
@@ -58,7 +58,7 @@ func TestRefreshTokenRepository_GetByPlainText(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		now := time.Now()
 		rows := pgxmock.NewRows([]string{"hash", "user_id", "expires_at", "created_at", "revoked_at", "family_id", "replaced_by_hash"}).
@@ -83,7 +83,7 @@ func TestRefreshTokenRepository_GetByPlainText(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		mock.ExpectQuery("SELECT hash, user_id, expires_at, created_at, revoked_at, family_id, replaced_by_hash FROM refresh_tokens WHERE").
 			WithArgs(pgxmock.AnyArg()).
@@ -102,7 +102,7 @@ func TestRefreshTokenRepository_Rotate(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		old := &domain.RefreshToken{
 			Hash:     []byte("old-hash"),
@@ -137,7 +137,7 @@ func TestRefreshTokenRepository_Rotate(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		mock.ExpectBegin().WillReturnError(pgx.ErrTxClosed)
 
@@ -152,7 +152,7 @@ func TestRefreshTokenRepository_Rotate(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		old := &domain.RefreshToken{
 			Hash:     []byte("old-hash"),
@@ -171,6 +171,7 @@ func TestRefreshTokenRepository_Rotate(t *testing.T) {
 		mock.ExpectExec("INSERT INTO refresh_tokens").
 			WithArgs([]byte("new-hash"), int64(1), pgxmock.AnyArg(), pgxmock.AnyArg(), "family-uuid").
 			WillReturnError(pgx.ErrTxClosed)
+		mock.ExpectRollback()
 
 		result, err := repo.Rotate(context.Background(), old, newToken)
 		require.Error(t, err)
@@ -183,7 +184,7 @@ func TestRefreshTokenRepository_Rotate(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		old := &domain.RefreshToken{
 			Hash:     []byte("old-hash"),
@@ -205,6 +206,7 @@ func TestRefreshTokenRepository_Rotate(t *testing.T) {
 		mock.ExpectExec("UPDATE refresh_tokens SET revoked_at").
 			WithArgs([]byte("new-hash"), []byte("old-hash")).
 			WillReturnResult(pgxmock.NewResult("UPDATE", 0))
+		mock.ExpectRollback()
 
 		result, err := repo.Rotate(context.Background(), old, newToken)
 		require.ErrorIs(t, err, domain.ErrNotFound)
@@ -219,7 +221,7 @@ func TestRefreshTokenRepository_RevokeByHash(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		mock.ExpectExec("UPDATE refresh_tokens SET revoked_at").
 			WithArgs([]byte("hash-value")).
@@ -235,7 +237,7 @@ func TestRefreshTokenRepository_RevokeByHash(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		mock.ExpectExec("UPDATE refresh_tokens SET revoked_at").
 			WithArgs([]byte("hash-value")).
@@ -253,7 +255,7 @@ func TestRefreshTokenRepository_RevokeByFamily(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		mock.ExpectExec("UPDATE refresh_tokens SET revoked_at").
 			WithArgs("family-uuid").
@@ -269,7 +271,7 @@ func TestRefreshTokenRepository_RevokeByFamily(t *testing.T) {
 		require.NoError(t, err)
 		defer mock.Close()
 
-		repo := postgres.NewRefreshTokenRepository(mock)
+		repo := postgres.NewRefreshTokenRepository(&postgres.DB{Pool: mock})
 
 		mock.ExpectExec("UPDATE refresh_tokens SET revoked_at").
 			WithArgs("family-uuid").

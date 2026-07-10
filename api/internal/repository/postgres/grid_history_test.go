@@ -30,7 +30,7 @@ func TestGridHistoryRepository_Insert(t *testing.T) {
 	})
 }
 
-func TestGridHistoryRepository_Clean(t *testing.T) {
+func TestGridHistoryRepository_CleanupOld(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
@@ -43,7 +43,7 @@ func TestGridHistoryRepository_Clean(t *testing.T) {
 		mock.ExpectExec(`DELETE FROM user_grid_history WHERE shown_at < NOW\(\) - INTERVAL '30 days'`).
 			WillReturnResult(pgxmock.NewResult("DELETE", 10))
 
-		err = repo.Clean(context.Background())
+		err = repo.CleanupOld(context.Background())
 		require.NoError(t, err)
 		require.NoError(t, mock.ExpectationsWereMet())
 	})

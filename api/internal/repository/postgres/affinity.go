@@ -40,6 +40,12 @@ func (ar *AffinityRepository) GetByUserID(ctx context.Context, userID int64) ([]
 	return affinities, rows.Err()
 }
 
+func (ar *AffinityRepository) Decay(ctx context.Context) error {
+	query := `UPDATE user_affinities SET score = score * 0.95 WHERE score > 0`
+	_, err := ar.db.Exec(ctx, query)
+	return err
+}
+
 func (ar *AffinityRepository) Upsert(ctx context.Context, userID int64, dimension, value string, delta float64) error {
 	query := `INSERT INTO user_affinities (user_id, dimension, value, score) VALUES ($1, $2, $3, $4)
 		ON CONFLICT (user_id, dimension, value) DO UPDATE SET score = user_affinities.score + $4, confidence = user_affinities.confidence + 0.1, last_updated = NOW()`

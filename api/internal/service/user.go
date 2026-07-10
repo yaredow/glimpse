@@ -18,7 +18,7 @@ type UserRepository interface {
 	GetByID(ctx context.Context, id int64) (*domain.User, error)
 	GetByToken(ctx context.Context, tokenPlainText string, scope string) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) error
-	UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error
+	UpdateOnboarded(ctx context.Context, userID int64, onboarded bool) error
 }
 
 type TokenRepository interface {
@@ -297,7 +297,7 @@ func (us *UserService) RevokeRefreshToken(ctx context.Context, plainText string)
 	return us.refreshTokenRepo.RevokeByHash(ctx, hash[:])
 }
 
-func (us *UserService) UpdateOnboarded(ctx context.Context, userID string, onboarded bool) error {
+func (us *UserService) UpdateOnboarded(ctx context.Context, userID int64, onboarded bool) error {
 	return us.repo.UpdateOnboarded(ctx, userID, onboarded)
 }
 
