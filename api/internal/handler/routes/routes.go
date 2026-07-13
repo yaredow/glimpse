@@ -23,8 +23,8 @@ func Register(
 	affSeed handler.AffinitySeeder,
 ) {
 	userH := handler.NewUserHandler(userSvc, jwtMgr, mailer, workers)
-	e.POST("/v1/users", userH.Create)
-	e.POST("/v1/login", userH.Authenticate)
+	e.POST("/v1/users/register", userH.Create)
+	e.POST("/v1/users/login", userH.Authenticate)
 	e.PUT("/v1/users/activates", userH.Activate)
 	e.POST("/v1/tokens/password-reset", userH.RequestPasswordReset)
 	e.PUT("/v1/users/password", userH.ResetPassword)
@@ -36,7 +36,7 @@ func Register(
 	e.PUT("/v1/me/preferences", prefH.UpsertPreference, middleware.RequireAuthenticatedUser())
 
 	onbH := handler.NewOnboardingHandler(genreLister, prefUpserter, onboarder, affSeed)
-	e.POST("/v1/onboarding/start", onbH.Start, middleware.RequireAuthenticatedUser())
+	e.GET("/v1/onboarding/start", onbH.Start, middleware.RequireAuthenticatedUser())
 	e.POST("/v1/onboarding/finish", onbH.Complete, middleware.RequireAuthenticatedUser())
 
 	recH := handler.NewRecommendationHandler(gridSvc)

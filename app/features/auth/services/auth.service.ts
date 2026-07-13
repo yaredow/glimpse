@@ -5,7 +5,7 @@ import { useAuthStore } from "../store/auth.store";
 
 export const logIn = async (data: LoginFormData): Promise<LoginResponse> => {
   return api
-    .post("v1/tokens/login", { json: data, context: { auth: false } })
+    .post("v1/users/login", { json: data, context: { auth: false } })
     .json<LoginResponse>();
 };
 

@@ -6,14 +6,12 @@ export interface RegisterResponse {
 
 export interface AccessToken {
   token: string;
-  expiry: string;
+  expires_at: string;
 }
-
-type refreshToken = string;
 
 export interface LoginResponse {
   access_token: AccessToken;
-  refresh_token: refreshToken;
+  refresh_token: AccessToken;
 }
 
 export interface RefreshResponse {

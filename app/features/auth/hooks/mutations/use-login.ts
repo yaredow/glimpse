@@ -15,7 +15,7 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: (data: LoginFormData) => logIn(data),
     onSuccess: async (data) => {
-      await setTokens(data.access_token.token, data.refresh_token);
+      await setTokens(data.access_token.token, data.refresh_token.token);
       queryClient.removeQueries({ queryKey: authKeys.preferences() });
 
       const prefs = await checkPreferences().catch(() => null);
