@@ -1,6 +1,23 @@
 package domain
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
+
+type MovieDetailParams struct {
+	ImdbID              *string          `json:"imdb_id,omitempty"`
+	Tagline             *string          `json:"tagline,omitempty"`
+	Director            *string          `json:"director,omitempty"`
+	CastMembers         json.RawMessage  `json:"cast_members,omitempty"`
+	TrailerKey          *string          `json:"trailer_key,omitempty"`
+	Runtime             *int             `json:"runtime,omitempty"`
+	FullSynopsis        *string          `json:"full_synopsis,omitempty"`
+	PosterPath          *string          `json:"poster_path,omitempty"`
+	BackdropPath        *string          `json:"backdrop_path,omitempty"`
+	SpokenLanguages     []string         `json:"spoken_languages,omitempty"`
+	ProductionCountries []string         `json:"production_countries,omitempty"`
+}
 
 type Movie struct {
 	ID                  int64      `json:"id"`
@@ -15,9 +32,9 @@ type Movie struct {
 	BackdropPath        *string    `json:"backdrop_path,omitempty"`
 	Tagline             *string    `json:"tagline,omitempty"`
 	Director            *string    `json:"director,omitempty"`
-	CastMembers         []byte     `json:"cast_members,omitempty"`
-	TrailerKey          *string    `json:"trailer_key,omitempty"`
-	ReleaseDate         time.Time  `json:"release_date"`
+	CastMembers         json.RawMessage `json:"cast_members,omitempty"`
+	TrailerKey          *string         `json:"trailer_key,omitempty"`
+	ReleaseDate         time.Time       `json:"release_date"`
 	Runtime             *int       `json:"runtime,omitempty"`
 	VoteAverage         float64    `json:"vote_average"`
 	VoteCount           *int       `json:"vote_count,omitempty"`
@@ -28,6 +45,7 @@ type Movie struct {
 	ShownCount          int        `json:"-"`
 	WatchedCount        int        `json:"-"`
 	GlobalWatchRate     float64    `json:"-"`
+	IsWatched           bool       `json:"is_watched,omitempty"`
 	DetailSyncedAt      *time.Time `json:"-"`
 	Version             int        `json:"-"`
 	CreatedAt           time.Time  `json:"created_at"`

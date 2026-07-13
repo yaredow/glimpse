@@ -21,6 +21,7 @@ func Register(
 	onboarder handler.Onboarder,
 	gridSvc handler.GridService,
 	affSeed handler.AffinitySeeder,
+	movieSvc handler.MovieService,
 ) {
 	userH := handler.NewUserHandler(userSvc, jwtMgr, mailer, workers)
 	e.POST("/v1/users/register", userH.Create)
@@ -40,6 +41,9 @@ func Register(
 	e.POST("/v1/onboarding/finish", onbH.Complete, middleware.RequireAuthenticatedUser())
 
 	recH := handler.NewRecommendationHandler(gridSvc)
-	e.GET("/v1/grid", recH.GetGrid, middleware.RequireAuthenticatedUser())
+	e.GET("/v1/grid/today", recH.GetGrid, middleware.RequireAuthenticatedUser())
 	e.POST("/v1/grid/interactions", recH.RecordInteraction, middleware.RequireAuthenticatedUser())
+
+	movieH := handler.NewMovieHandler(movieSvc)
+	e.GET("/v1/movies/:id", movieH.GetMovie, middleware.RequireAuthenticatedUser())
 }

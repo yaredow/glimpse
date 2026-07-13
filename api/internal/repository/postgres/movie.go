@@ -168,6 +168,30 @@ func (mr *MovieRepository) GetCandidateMovies(ctx context.Context, userID int64,
 	return movies, rows.Err()
 }
 
+func (mr *MovieRepository) UpdateMovieDetail(ctx context.Context, tmdbID int, d *domain.MovieDetailParams) error {
+	query := `UPDATE movies SET
+		imdb_id              = $2,
+		tagline              = $3,
+		director             = $4,
+		cast_members         = $5,
+		trailer_key          = $6,
+		runtime              = $7,
+		full_synopsis        = $8,
+		poster_path          = $9,
+		backdrop_path        = $10,
+		spoken_languages     = $11,
+		production_countries = $12,
+		detail_synced_at     = NOW()
+	WHERE tmdb_id = $1`
+
+	_, err := mr.db.Exec(ctx, query,
+		tmdbID, d.ImdbID, d.Tagline, d.Director, d.CastMembers,
+		d.TrailerKey, d.Runtime, d.FullSynopsis, d.PosterPath,
+		d.BackdropPath, d.SpokenLanguages, d.ProductionCountries,
+	)
+	return err
+}
+
 func (mr *MovieRepository) UpdateWatchCount(ctx context.Context, movieID int64, shown, watched bool) error {
 	query := `UPDATE movies SET
 		shown_count   = shown_count + CASE WHEN $2 THEN 1 ELSE 0 END,

@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"time"
 	"unicode"
@@ -10,6 +11,93 @@ import (
 	"github.com/yaredow/glimpse-api/internal/domain"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
 )
+
+type castMemberJSON struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Character   string `json:"character"`
+	ProfilePath string `json:"profile_path"`
+	Order       int    `json:"order"`
+}
+
+func toMovieDetailParams(detail *tmdb.MovieDetailResponse) *domain.MovieDetailParams {
+	p := &domain.MovieDetailParams{
+		ImdbID:       detail.ImdbID,
+		Tagline:      detail.Tagline,
+		Runtime:      detail.Runtime,
+		FullSynopsis: &detail.Overview,
+		PosterPath:   &detail.PosterPath,
+		BackdropPath: &detail.BackdropPath,
+	}
+
+	if detail.Overview == "" {
+		p.FullSynopsis = nil
+	}
+	if detail.PosterPath == "" {
+		p.PosterPath = nil
+	}
+	if detail.BackdropPath == "" {
+		p.BackdropPath = nil
+	}
+
+	if detail.Credits != nil {
+		for _, member := range detail.Credits.Crew {
+			if member.Job == "Director" {
+				p.Director = &member.Name
+				break
+			}
+		}
+
+		n := len(detail.Credits.Cast)
+		if n > 10 {
+			n = 10
+		}
+		cast := make([]castMemberJSON, n)
+		for i := range cast {
+			m := detail.Credits.Cast[i]
+			cast[i] = castMemberJSON{
+				ID:          m.ID,
+				Name:        m.Name,
+				Character:   m.Character,
+				ProfilePath: m.ProfilePath,
+				Order:       m.Order,
+			}
+		}
+		if len(cast) > 0 {
+			data, _ := json.Marshal(cast)
+			p.CastMembers = data
+		}
+	}
+
+	if detail.Videos != nil {
+		for _, v := range detail.Videos.Results {
+			if v.Site == "YouTube" && v.Type == "Trailer" {
+				p.TrailerKey = &v.Key
+				if v.Official {
+					break
+				}
+			}
+		}
+	}
+
+	if len(detail.SpokenLanguages) > 0 {
+		codes := make([]string, len(detail.SpokenLanguages))
+		for i, l := range detail.SpokenLanguages {
+			codes[i] = l.Iso6391
+		}
+		p.SpokenLanguages = codes
+	}
+
+	if len(detail.ProductionCountries) > 0 {
+		codes := make([]string, len(detail.ProductionCountries))
+		for i, c := range detail.ProductionCountries {
+			codes[i] = c.Iso31661
+		}
+		p.ProductionCountries = codes
+	}
+
+	return p
+}
 
 func parseDate(s string) time.Time {
 	if s == "" {
@@ -119,6 +207,21 @@ func (w *Worker) syncGenres(ctx context.Context) {
 	}
 
 	w.logger.Info("successfully synced genres", "count", len(genres))
+}
+
+func (w *Worker) SyncMovieDetail(ctx context.Context, tmdbID int) error {
+	resp, err := w.tmdb.GetMovieDetails(ctx, tmdbID)
+	if err != nil {
+		return err
+	}
+
+	params := toMovieDetailParams(resp)
+	if err := w.movieRepo.UpdateMovieDetail(ctx, tmdbID, params); err != nil {
+		return err
+	}
+
+	w.logger.Info("synced movie detail", "tmdb_id", tmdbID)
+	return nil
 }
 
 func (w *Worker) syncMovies(ctx context.Context) {

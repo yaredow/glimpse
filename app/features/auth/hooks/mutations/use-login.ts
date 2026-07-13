@@ -26,7 +26,7 @@ export const useLogin = () => {
         text1: "Login successful",
       });
 
-      if (prefs?.preferences?.onboarded) {
+      if (prefs?.preference?.favorite_genres?.length) {
         router.push("/(app)/(tabs)");
       } else {
         router.push("/(onboarding)");

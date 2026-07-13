@@ -14,5 +14,5 @@ export const submitPreferences = (data: FinishOnboardingPayload) => {
 };
 
 export const checkPreferences = () => {
-  return api.get("v1/users/preferences").json<PreferenceResponse>();
+  return api.get("v1/me/preferences").json<PreferenceResponse>();
 };

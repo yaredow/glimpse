@@ -13,12 +13,13 @@ export const useFinishOnboarding = () => {
 
   return useMutation({
     mutationFn: (data: FinishOnboardingPayload) => submitPreferences(data),
-    onSuccess: () => {
+    onSuccess: async () => {
       reset();
-      queryClient.invalidateQueries({ queryKey: authKeys.preferences() });
+      await queryClient.invalidateQueries({ queryKey: authKeys.preferences() });
       router.replace("/(app)/(tabs)");
     },
     onError: async (error: Error) => {
+      console.log("finish onboarding error", error.message);
       Toast.show({
         type: "error",
         text1: "Failed to save preferences",

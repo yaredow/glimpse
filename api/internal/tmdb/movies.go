@@ -67,3 +67,73 @@ func (c *Client) GetGenres(ctx context.Context) (*GenreListResponse, error) {
 
 	return &result, nil
 }
+
+type (
+	CastMember struct {
+		ID          int    `json:"id"`
+		Name        string `json:"name"`
+		Character   string `json:"character"`
+		ProfilePath string `json:"profile_path"`
+		Order       int    `json:"order"`
+	}
+
+	CrewMember struct {
+		ID          int    `json:"id"`
+		Name        string `json:"name"`
+		Job         string `json:"job"`
+		Department  string `json:"department"`
+		ProfilePath string `json:"profile_path"`
+	}
+
+	CreditsResponse struct {
+		Cast []CastMember `json:"cast"`
+		Crew []CrewMember `json:"crew"`
+	}
+
+	Video struct {
+		Key      string `json:"key"`
+		Site     string `json:"site"`
+		Type     string `json:"type"`
+		Official bool   `json:"official"`
+	}
+
+	VideosResponse struct {
+		Results []Video `json:"results"`
+	}
+
+	MovieDetailResponse struct {
+		ID                  int                 `json:"id"`
+		ImdbID              *string             `json:"imdb_id"`
+		Runtime             *int                `json:"runtime"`
+		Tagline             *string             `json:"tagline"`
+		Overview            string              `json:"overview"`
+		PosterPath          string              `json:"poster_path"`
+		BackdropPath        string              `json:"backdrop_path"`
+		SpokenLanguages     []SpokenLanguage    `json:"spoken_languages"`
+		ProductionCountries []ProductionCountry `json:"production_countries"`
+		Credits             *CreditsResponse    `json:"credits"`
+		Videos              *VideosResponse     `json:"videos"`
+		Recommendations     *MovieListResponse  `json:"recommendations"`
+	}
+
+	SpokenLanguage struct {
+		Iso6391 string `json:"iso_639_1"`
+		Name    string `json:"name"`
+	}
+
+	ProductionCountry struct {
+		Iso31661 string `json:"iso_3166_1"`
+		Name     string `json:"name"`
+	}
+)
+
+func (c *Client) GetMovieDetails(ctx context.Context, tmdbID int) (*MovieDetailResponse, error) {
+	var result MovieDetailResponse
+	path := fmt.Sprintf("/movie/%d?append_to_response=credits,videos,recommendations&language=en-US", tmdbID)
+
+	if err := c.do(ctx, path, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}

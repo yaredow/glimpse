@@ -31,16 +31,14 @@ export interface FinishOnboardingPayload {
 }
 
 export interface UserPreference {
-  user_id: number;
   favorite_genres: number[];
   excluded_genres: number[];
   languages: string[];
   min_rating: number;
-  onboarded: boolean;
   min_year: number;
   max_year: number;
 }
 
 export interface PreferenceResponse {
-  preferences: UserPreference;
+  preference: UserPreference;
 }

@@ -9,7 +9,7 @@ import { PaperProvider } from "react-native-paper";
 import { netflixTheme } from "@/lib/colors";
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "@/features/auth/store/auth.store";
-import { usePreferences } from "@/features/onboarding/hooks/queries/use-preferences";
+import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -48,8 +48,8 @@ function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
     data,
     isLoading: isPreferenceLoading,
     isFetched: isPreferenceFetched,
-  } = usePreferences();
-  const isOnboarded = !!data?.preferences?.onboarded;
+  } = useGetPreferences();
+  const isOnboarded = !!data?.preference?.favorite_genres?.length;
 
   if (isAuthenticated && isPreferenceLoading && !isPreferenceFetched) {
     return null;

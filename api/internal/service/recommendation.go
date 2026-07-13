@@ -46,6 +46,8 @@ type RecGenreRepository interface {
 	GetNamesByID(ctx context.Context, ids []int) ([]string, error)
 }
 
+type DetailSyncer func(ctx context.Context, tmdbID int) error
+
 type RecommendationService struct {
 	movies       RecMovieRepository
 	affinities   RecAffinityRepository
@@ -55,6 +57,7 @@ type RecommendationService struct {
 	users        RecUserRepository
 	genres       RecGenreRepository
 	db           *postgres.DB
+	syncDetail   DetailSyncer
 }
 
 func NewRecommendationService(
@@ -66,6 +69,7 @@ func NewRecommendationService(
 	users RecUserRepository,
 	genres RecGenreRepository,
 	db *postgres.DB,
+	syncDetail DetailSyncer,
 ) *RecommendationService {
 	return &RecommendationService{
 		movies:       movies,
@@ -76,6 +80,7 @@ func NewRecommendationService(
 		users:        users,
 		genres:       genres,
 		db:           db,
+		syncDetail:   syncDetail,
 	}
 }
 
@@ -165,6 +170,15 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 	grid, err := rs.grid.GetByID(ctx, userID)
 	if err != nil {
 		return nil, uuid.Nil, fmt.Errorf("get new grid: %w", err)
+	}
+
+	if rs.syncDetail != nil {
+		for _, sm := range picked {
+			tmdbID := sm.Movie.TmdbID
+			go func(id int) {
+				_ = rs.syncDetail(context.Background(), id)
+			}(tmdbID)
+		}
 	}
 
 	return grid, sessionID, nil

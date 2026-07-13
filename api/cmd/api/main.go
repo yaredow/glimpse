@@ -93,13 +93,16 @@ func main() {
 		userRepo,
 		genreRepo,
 		db,
+		syncWorker.SyncMovieDetail,
 	)
+
+	movieSvc := service.NewMovieService(movieRepo, interactionRepo)
 
 	// Middleware
 	e.Use(middleware.Authenticate(jwtMgr, userService))
 
 	// Routes
-	routes.Register(e, userService, jwtMgr, mailer, wp, prefSvc, movieRepo, prefSvc, userService, recSvc, recSvc)
+	routes.Register(e, userService, jwtMgr, mailer, wp, prefSvc, movieRepo, prefSvc, userService, recSvc, recSvc, movieSvc)
 
 	if err := e.Start(defaultAddress); err != nil {
 		e.Logger.Error("failed to start server", "error", err)

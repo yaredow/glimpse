@@ -35,6 +35,13 @@ func (ir *InteractionRepository) Insert(ctx context.Context, interaction *domain
 	return err
 }
 
+func (ir *InteractionRepository) HasWatched(ctx context.Context, userID, movieID int64) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM user_interactions WHERE user_id = $1 AND movie_id = $2 AND action = 'watched')`
+	var exists bool
+	err := ir.db.QueryRow(ctx, query, userID, movieID).Scan(&exists)
+	return exists, err
+}
+
 func (ir *InteractionRepository) List(ctx context.Context, userID int64, limit int) ([]*domain.Interaction, error) {
 	query := `SELECT id, user_id, movie_id, action, grid_session_id, grid_position, reveal_to_action_ms, acted_at FROM user_interactions WHERE user_id = $1 ORDER BY acted_at DESC LIMIT $2`
 

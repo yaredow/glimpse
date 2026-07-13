@@ -14,6 +14,7 @@ import (
 
 type movieRepo interface {
 	UpsertBatchMovies(ctx context.Context, movies []*domain.Movie) error
+	UpdateMovieDetail(ctx context.Context, tmdbID int, detail *domain.MovieDetailParams) error
 }
 
 type genreRepo interface {
