@@ -17,6 +17,10 @@ export default function AppLayout() {
         name="movies/create"
         options={{ title: "Create Movie" }}
       />
+      <Stack.Screen
+        name="movies/[id]"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

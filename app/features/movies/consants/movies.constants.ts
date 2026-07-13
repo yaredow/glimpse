@@ -18,3 +18,5 @@ export const GENRES = [
   "War",
   "Western",
 ] as const;
+
+export const DETAIL_TABS = ["CAST", "DETAILS"] as const;

@@ -1,18 +1,30 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Button,
-  Card,
-  Chip,
-  Divider,
+  Animated,
+  Pressable,
+  ScrollView,
+  StyleSheet,
   Text,
-} from "react-native-paper";
+  View,
+} from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGetMovie } from "@/features/movies/hooks/query/use-get-movie";
+import MovieTrailer from "@/features/movies/components/movie-trailer";
+import MovieActions from "@/features/movies/components/movie-actions";
+import MovieSynopsis from "@/features/movies/components/movie-synopsis";
+import MovieCast from "@/features/movies/components/movie-cast";
+import MovieDetailTabs from "@/features/movies/components/movie-detail-tabs";
+
+const HEADER_THRESHOLD = 300;
 
 export default function MovieDetail() {
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const movieId = Number.parseInt(String(id), 10);
+  const insets = useSafeAreaInsets();
 
   const { data, isPending, isError, error, refetch } = useGetMovie(
     Number.isFinite(movieId) ? movieId : 0,
@@ -20,163 +32,204 @@ export default function MovieDetail() {
 
   const movie = data?.movie;
 
+  const [activeTab, setActiveTab] = useState("CAST");
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: false },
+  );
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, HEADER_THRESHOLD],
+    outputRange: [0, 1],
+    extrapolate: "clamp",
+  });
+
+  const buttonTop = scrollY.interpolate({
+    inputRange: [0, HEADER_THRESHOLD],
+    outputRange: [insets.top + 20, insets.top],
+    extrapolate: "clamp",
+  });
+
+  if (isPending) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#E50914" />
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>Couldn't load movie</Text>
+        <Pressable onPress={() => refetch()}>
+          <Text style={styles.retryText}>Tap to retry</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  if (!movie) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>Movie not found</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Stack.Screen
-        options={{
-          title: movie?.title ?? "Reveal",
-        }}
-      />
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.animatedHeader,
+          {
+            paddingTop: insets.top,
+            backgroundColor: "rgba(20, 20, 20, 1)",
+            opacity: headerOpacity,
+          },
+        ]}
+      >
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          {movie.title}
+        </Text>
+      </Animated.View>
 
-      {isPending ? (
-        <View style={styles.center}>
-          <ActivityIndicator />
-          <Text style={styles.muted}>Preparing the reveal...</Text>
-        </View>
-      ) : isError ? (
-        <View style={styles.center}>
-          <Text variant="titleMedium">Couldn’t reveal the movie</Text>
-          <Text style={styles.muted}>{error?.message}</Text>
-          <Button mode="contained" onPress={() => refetch()}>
-            Retry
-          </Button>
-        </View>
-      ) : !movie ? (
-        <View style={styles.center}>
-          <Text variant="titleMedium">Movie not found</Text>
-        </View>
-      ) : (
-        <View style={styles.content}>
-          <View style={[styles.posterPlaceholder, { backgroundColor: colors.surfaceVariant }]}>
-            <MaterialCommunityIcons name="filmstrip" size={80} color={colors.onSurfaceVariant} />
-            <View style={[styles.revealBadge, { backgroundColor: colors.primary }]}>
-              <Text variant="labelLarge" style={{ color: colors.onPrimary }}>REVEALED</Text>
-            </View>
-          </View>
+      <Animated.View style={[styles.backButton, { top: buttonTop }]}>
+        <Pressable onPress={() => router.back()} style={styles.backPressable}>
+          <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
+        </Pressable>
+      </Animated.View>
 
-          <Card mode="elevated" style={styles.card}>
-            <Card.Content>
-              <Text variant="headlineMedium" style={styles.title}>
-                {movie.title}
-              </Text>
+      <ScrollView
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <MovieTrailer movie={movie} />
+        <MovieActions
+          movie={movie}
+          onToggleWatched={() => {}}
+        />
+        {movie.full_synopsis ? (
+          <MovieSynopsis synopsis={movie.full_synopsis} />
+        ) : null}
 
-              <View style={styles.metaRow}>
-                {movie.release_date ? (
-                  <Text style={styles.metaText}>
-                    {new Date(movie.release_date).getFullYear()}
-                  </Text>
-                ) : null}
-                {movie.runtime ? (
-                  <Text style={styles.metaText}>{movie.runtime}m</Text>
-                ) : null}
-              </View>
-
-              {movie.genres && movie.genres.length > 0 ? (
-                <View style={styles.genres}>
-                  {movie.genres.map((g) => (
-                    <Chip key={g} compact>
-                      {g}
-                    </Chip>
-                  ))}
+        <MovieDetailTabs activeTab={activeTab} onTabPress={setActiveTab}>
+          {activeTab === "CAST" && movie.cast_members ? (
+            <MovieCast cast={movie.cast_members} />
+          ) : null}
+          {activeTab === "DETAILS" && (
+            <View style={styles.detailsSection}>
+              {movie.tagline ? (
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>TAGLINE</Text>
+                  <Text style={styles.detailValue}>{movie.tagline}</Text>
                 </View>
               ) : null}
-
-              <Divider style={styles.divider} />
-
-              <Text variant="bodyLarge" style={styles.description}>
-                {movie.vague_description}
-              </Text>
-
-              {movie.full_synopsis ? (
-                <>
-                  <Divider style={styles.divider} />
-                  <Text variant="titleMedium" style={{ marginBottom: 8 }}>Synopsis</Text>
-                  <Text variant="bodyMedium">{movie.full_synopsis}</Text>
-                </>
+              {movie.spoken_languages && movie.spoken_languages.length > 0 ? (
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>LANGUAGES</Text>
+                  <Text style={styles.detailValue}>
+                    {movie.spoken_languages.join(", ")}
+                  </Text>
+                </View>
               ) : null}
-
-              <Divider style={styles.divider} />
-
-              <Button 
-                mode={movie.is_watched ? "outlined" : "contained"} 
-                onPress={() => {/* TODO: Implement watch toggle mutation */}}
-                icon={movie.is_watched ? "check" : "eye"}
-                style={styles.watchButton}
-              >
-                {movie.is_watched ? "Watched" : "Mark as Watched"}
-              </Button>
-            </Card.Content>
-          </Card>
-        </View>
-      )}
-    </ScrollView>
+              {movie.production_countries && movie.production_countries.length > 0 ? (
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>COUNTRIES</Text>
+                  <Text style={styles.detailValue}>
+                    {movie.production_countries.join(", ")}
+                  </Text>
+                </View>
+              ) : null}
+              {movie.vote_count ? (
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>RATING</Text>
+                  <Text style={styles.detailValue}>
+                    {movie.vote_average.toFixed(1)} / 10 ({movie.vote_count.toLocaleString()} votes)
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          )}
+        </MovieDetailTabs>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: "#141414",
+  },
+  scrollContent: {
     paddingBottom: 40,
   },
-  content: {
+  centerContainer: {
     flex: 1,
-  },
-  posterPlaceholder: {
-    height: 300,
+    backgroundColor: "#141414",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: -20,
+    gap: 16,
   },
-  revealBadge: {
+  animatedHeader: {
     position: "absolute",
-    bottom: 40,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  center: {
-    flex: 1,
-    height: 400,
-    justifyContent: "center",
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    zIndex: 10,
+    height: 90,
   },
-  muted: {
-    opacity: 0.7,
+  headerTitle: {
+    flex: 1,
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
   },
-  card: {
-    marginHorizontal: 16,
-    borderRadius: 24,
-    elevation: 4,
+  backButton: {
+    position: "absolute",
+    left: 0,
+    zIndex: 11,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    paddingHorizontal: 16,
   },
-  title: {
-    marginBottom: 8,
+  backPressable: {
+    padding: 5,
+  },
+  errorText: {
+    color: "white",
+    fontSize: 16,
+  },
+  retryText: {
+    color: "#E50914",
+    fontSize: 14,
     fontWeight: "bold",
   },
-  metaRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 16,
+  detailsSection: {
+    gap: 16,
   },
-  metaText: {
-    opacity: 0.8,
+  detailItem: {
+    gap: 4,
   },
-  genres: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
+  detailLabel: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#E50914",
   },
-  divider: {
-    marginVertical: 20,
-    opacity: 0.3,
-  },
-  description: {
-    lineHeight: 24,
-    fontStyle: "italic",
-    opacity: 0.9,
-  },
-  watchButton: {
-    marginTop: 8,
-    borderRadius: 12,
+  detailValue: {
+    fontSize: 14,
+    color: "#F0F0F0",
+    lineHeight: 20,
   },
 });

@@ -1,11 +1,11 @@
 import { api } from "@/lib/api";
 import {
-  Movie,
   GridMovie,
+  MovieDetailResponse,
 } from "../types/movies.type";
 
-export const getMovie = async (id: number) => {
-  return api.get(`v1/movies/${id}`).json<{ movie: Movie }>();
+export const getMovie = async (id: number): Promise<MovieDetailResponse> => {
+  return api.get(`v1/movies/${id}`).json<MovieDetailResponse>();
 };
 
 export const getTodaysGrid = async () => {

@@ -1,3 +1,11 @@
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string;
+  order: number;
+}
+
 export interface Movie {
   id: number;
   tmdb_id: number;
@@ -9,11 +17,17 @@ export interface Movie {
   full_synopsis: string;
   poster_path?: string;
   backdrop_path?: string;
+  tagline?: string;
+  director?: string;
+  cast_members?: CastMember[];
+  trailer_key?: string;
   release_date: string;
   runtime: number;
   vote_average: number;
   vote_count: number;
   original_language: string;
+  spoken_languages?: string[];
+  production_countries?: string[];
   popularity: number;
   created_at: string;
   is_watched?: boolean;
@@ -33,6 +47,10 @@ export interface MovieFilters {
   pageSize?: number;
   genre?: string;
   search?: string;
+}
+
+export interface MovieDetailResponse {
+  movie: Movie;
 }
 
 export interface PaginatedResponse<T> {
