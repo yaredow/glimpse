@@ -1,4 +1,4 @@
-import { Inter_900Black, useFonts } from "@expo-google-fonts/inter";
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { QueryProvider } from "@/lib/query-provider";
@@ -17,7 +17,10 @@ export default function RootLayout() {
   useOnlineManager();
   const { isAuthenticated, isRestoring, restoreToken } = useAuthStore();
   const [loaded, error] = useFonts({
-    Inter_900Black,
+    Inter_400Regular: require("@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf"),
+    Inter_600SemiBold: require("@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf"),
+    Inter_700Bold: require("@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf"),
+    Inter_900Black: require("@expo-google-fonts/inter/900Black/Inter_900Black.ttf"),
   });
 
   useEffect(() => {

@@ -26,7 +26,9 @@ export default function Watched() {
         </View>
       ) : watchedMovies.length === 0 ? (
         <View style={styles.centered}>
-          <Text variant="bodyLarge">You haven't watched any movies yet.</Text>
+          <Text variant="bodyLarge">
+            You haven&apos;t watched any movies yet.
+          </Text>
         </View>
       ) : (
         <FlatList
