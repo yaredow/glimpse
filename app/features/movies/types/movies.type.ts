@@ -39,6 +39,7 @@ export interface GridMovie {
   movie_id: number;
   tmdb_id: number;
   vague_description: string;
+  tagline?: string;
   genres: string[];
 }
 

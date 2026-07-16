@@ -23,6 +23,7 @@ export const MovieCard = ({ movie, width }: { movie: Movie; width?: number }) =>
         <Text variant="labelSmall" numberOfLines={1} style={styles.title}>
           {movie.title}
         </Text>
+
         {year && <Text style={styles.year}>{year}</Text>}
       </View>
     </Card>

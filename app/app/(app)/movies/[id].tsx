@@ -26,7 +26,7 @@ export default function MovieDetail() {
   const movieId = Number.parseInt(String(id), 10);
   const insets = useSafeAreaInsets();
 
-  const { data, isPending, isError, error, refetch } = useGetMovie(
+  const { data, isPending, isError, refetch } = useGetMovie(
     Number.isFinite(movieId) ? movieId : 0,
   );
 
@@ -63,7 +63,7 @@ export default function MovieDetail() {
   if (isError) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Couldn't load movie</Text>
+        <Text style={styles.errorText}>Couldn&apos;t load movie</Text>
         <Pressable onPress={() => refetch()}>
           <Text style={styles.retryText}>Tap to retry</Text>
         </Pressable>
@@ -108,10 +108,7 @@ export default function MovieDetail() {
         contentContainerStyle={styles.scrollContent}
       >
         <MovieTrailer movie={movie} />
-        <MovieActions
-          movie={movie}
-          onToggleWatched={() => {}}
-        />
+        <MovieActions movie={movie} onToggleWatched={() => {}} />
         {movie.full_synopsis ? (
           <MovieSynopsis synopsis={movie.full_synopsis} />
         ) : null}
@@ -136,7 +133,8 @@ export default function MovieDetail() {
                   </Text>
                 </View>
               ) : null}
-              {movie.production_countries && movie.production_countries.length > 0 ? (
+              {movie.production_countries &&
+              movie.production_countries.length > 0 ? (
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>COUNTRIES</Text>
                   <Text style={styles.detailValue}>
@@ -148,7 +146,8 @@ export default function MovieDetail() {
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>RATING</Text>
                   <Text style={styles.detailValue}>
-                    {movie.vote_average.toFixed(1)} / 10 ({movie.vote_count.toLocaleString()} votes)
+                    {movie.vote_average.toFixed(1)} / 10 (
+                    {movie.vote_count.toLocaleString()} votes)
                   </Text>
                 </View>
               ) : null}

@@ -24,6 +24,7 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			d.slot_number,
 			d.is_revealed,
 			m.vague_description,
+			m.tagline,
 			m.genres,
 			d.grid_session_id
 		FROM daily_pools d
@@ -46,6 +47,7 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			&s.SlotNumber,
 			&s.IsRevealed,
 			&s.VagueDescription,
+			&s.Tagline,
 			&s.Genres,
 			&s.GridSessionID,
 		); err != nil {
