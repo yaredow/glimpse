@@ -13,14 +13,7 @@ export default function AppLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="movies/create"
-        options={{ title: "Create Movie" }}
-      />
-      <Stack.Screen
-        name="movies/[id]"
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="movies/[id]" options={{ headerShown: false }} />
     </Stack>
   );
 }

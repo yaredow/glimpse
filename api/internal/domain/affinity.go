@@ -1,3 +1,4 @@
+// Package domain contains the domain objects used by the API.
 package domain
 
 import "time"

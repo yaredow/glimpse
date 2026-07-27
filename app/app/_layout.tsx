@@ -1,5 +1,5 @@
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { QueryProvider } from "@/lib/query-provider";
 import { useOnlineManager } from "@/hooks/use-online-manager";
@@ -51,10 +51,22 @@ function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
     data,
     isLoading: isPreferenceLoading,
     isFetched: isPreferenceFetched,
-  } = useGetPreferences();
+  } = useGetPreferences(isAuthenticated);
   const isOnboarded = !!data?.preference?.favorite_genres?.length;
 
-  if (isAuthenticated && isPreferenceLoading && !isPreferenceFetched) {
+  useEffect(() => {
+    if (!isPreferenceFetched) return;
+
+    if (isAuthenticated && isOnboarded) {
+      router.replace("/(app)/(tabs)");
+    } else if (isAuthenticated && !isOnboarded) {
+      router.replace("/(onboarding)");
+    } else {
+      router.replace("/(auth)/login");
+    }
+  }, [isAuthenticated, isPreferenceFetched, isOnboarded]);
+
+  if (isAuthenticated && isPreferenceLoading) {
     return null;
   }
 
