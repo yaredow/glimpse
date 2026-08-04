@@ -1,12 +1,16 @@
-import { useRef, useEffect } from "react";
-import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  interpolate,
+} from "react-native-reanimated";
+import { tmdbImage } from "../consants/images";
 import type { GridMovie } from "../types/movies.type";
 
 interface MysteryCardProps {
@@ -14,7 +18,6 @@ interface MysteryCardProps {
   index: number;
   isCenter: boolean;
   isExpanded: boolean;
-  animatedStyle: any;
   onPress: () => void;
   onReveal: () => void;
 }
@@ -24,165 +27,134 @@ export default function MysteryCard({
   index,
   isCenter,
   isExpanded,
-  animatedStyle,
   onPress,
   onReveal,
 }: MysteryCardProps) {
-  const revealOpacity = useRef(new Animated.Value(0)).current;
-  const revealScale = useRef(new Animated.Value(0.95)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const expandAnim = useRef(new Animated.Value(0)).current;
+  const expanded = useSharedValue(0);
+  const contentPhase = useSharedValue(0);
+  const [posterFailed, setPosterFailed] = useState(false);
+
+  // The Daily Five uses the poster artwork, not the wide backdrop artwork.
+  const posterSrc = tmdbImage(movie.poster_path);
 
   useEffect(() => {
     if (isExpanded) {
-      Animated.spring(expandAnim, {
-        toValue: 1,
-        friction: 8,
-        tension: 40,
-        useNativeDriver: false,
-      }).start();
-
-      Animated.parallel([
-        Animated.timing(revealOpacity, {
-          toValue: 1,
-          duration: 500,
-          delay: 300,
-          useNativeDriver: false,
-        }),
-        Animated.spring(revealScale, {
-          toValue: 1,
-          friction: 8,
-          tension: 40,
-          useNativeDriver: false,
-        }),
-      ]).start();
+      expanded.value = withSpring(1, { stiffness: 160, damping: 20, mass: 0.8 });
+      contentPhase.value = withTiming(1, { duration: 350 });
     } else {
-      Animated.timing(expandAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-      revealOpacity.setValue(0);
-      revealScale.setValue(0.95);
+      expanded.value = withTiming(0, { duration: 250 });
+      contentPhase.value = withTiming(0, { duration: 180 });
     }
-  }, [isExpanded, expandAnim, revealOpacity, revealScale]);
+  }, [isExpanded]);
 
-  useEffect(() => {
-    if (isCenter && !isExpanded) {
-      const pulse = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 0.5,
-            duration: 1500,
-            useNativeDriver: false,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1500,
-            useNativeDriver: false,
-          }),
-        ]),
-      );
-      pulse.start();
-      return () => pulse.stop();
-    } else {
-      pulseAnim.setValue(1);
-    }
-  }, [isCenter, isExpanded, pulseAnim]);
+  const veilStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(expanded.value, [0, 0.4, 1], [0.25, 0.05, 0]),
+  }));
 
-  const cardWidth = expandAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [160, 300],
-  });
-  const cardHeight = expandAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [224, 420],
-  });
-  const cardBorderRadius = expandAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [16, 20],
-  });
-  const numberOpacity = expandAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 0],
-  });
-  const shadowOpacity = expandAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.8, 0.95],
-  });
-  const shadowRadius = expandAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [30, 60],
-  });
+  const badgeStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(expanded.value, [0, 0.4], [1, 0]),
+    transform: [{ translateY: interpolate(expanded.value, [0, 1], [0, -10]) }],
+  }));
 
-  const handleReveal = () => {
-    onReveal();
-  };
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: contentPhase.value,
+    transform: [{ translateY: interpolate(contentPhase.value, [0, 1], [20, 0]) }],
+  }));
+
+  const showPoster = !!(posterSrc && !posterFailed);
 
   return (
-    <Animated.View
-      style={[
-        styles.card,
-        animatedStyle,
-        {
-          width: cardWidth,
-          height: cardHeight,
-          borderRadius: cardBorderRadius,
-          shadowOpacity,
-          shadowRadius,
-        },
-      ]}
-    >
-      <Pressable onPress={onPress} style={StyleSheet.absoluteFill}>
-        <View style={styles.inner}>
-          <View style={styles.topRow}>
-            <MaterialCommunityIcons
-              name="filmstrip"
-              size={18}
-              color="#E50914"
-              style={{ opacity: 0.8 }}
+    <Animated.View style={styles.card}>
+      <Pressable onPress={onPress} style={styles.pressable}>
+        {showPoster ? (
+          <>
+            <Image
+              source={{ uri: posterSrc }}
+              style={styles.poster}
+              contentFit="cover"
+              blurRadius={isExpanded ? 0 : 24}
+              transition={300}
+              cachePolicy="memory-disk"
+              onError={() => setPosterFailed(true)}
             />
-            <MaterialCommunityIcons
-              name="lock-outline"
-              size={16}
-              color="#666"
+          </>
+        ) : (
+          <View style={styles.placeholder}>
+            <LinearGradient
+              colors={["#1A1625", "#0D0D0D"]}
+              style={StyleSheet.absoluteFill}
             />
-          </View>
-
-          <Animated.View
-            style={[
-              styles.numberContainer,
-              { opacity: numberOpacity },
-            ]}
-          >
-            <Text style={styles.number}>{index + 1}</Text>
-          </Animated.View>
-
-          {isCenter && !isExpanded ? (
-            <Animated.View style={[styles.tapHint, { opacity: pulseAnim }]}>
-              <Text style={styles.tapHintText}>Tap to Inspect</Text>
-            </Animated.View>
-          ) : null}
-
-          <Animated.View
-            style={[
-              styles.revealContent,
-              {
-                opacity: revealOpacity,
-                transform: [{ scale: revealScale }],
-              },
-            ]}
-            pointerEvents={isExpanded ? "auto" : "none"}
-          >
-            <Text style={styles.tagline}>
-              {movie.tagline || movie.vague_description}
+            <Text style={styles.placeholderTitle} numberOfLines={2}>
+              {movie.title}
             </Text>
+            {movie.genres.length > 0 ? (
+              <Text style={styles.placeholderGenres} numberOfLines={1}>
+                {movie.genres.slice(0, 3).join("  \u00B7  ")}
+              </Text>
+            ) : null}
+          </View>
+        )}
 
-            <Pressable style={styles.revealButton} onPress={handleReveal}>
-              <Text style={styles.revealText}>Reveal Movie</Text>
-            </Pressable>
-          </Animated.View>
-        </View>
+        <Animated.View style={[styles.veil, veilStyle]} pointerEvents="none">
+          <LinearGradient
+            colors={["rgba(0,0,0,0.08)", "transparent", "rgba(0,0,0,0.28)"]}
+            locations={[0, 0.42, 1]}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
+
+        <Animated.View style={[styles.badge, badgeStyle]} pointerEvents="none">
+          <View style={styles.lockChip}>
+            <MaterialCommunityIcons name="lock-outline" size={13} color="#E50914" />
+            <Text style={styles.lockLabel}>{index + 1}</Text>
+          </View>
+        </Animated.View>
+
+        <Animated.View
+          style={[styles.revealPanel, contentStyle]}
+          pointerEvents={isExpanded ? "auto" : "none"}
+        >
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.12)", "rgba(0,0,0,0.62)"]}
+            locations={[0, 0.58, 1]}
+            style={styles.revealGradient}
+          >
+            <View style={styles.revealInner}>
+              <View style={styles.ratingBadge}>
+                <MaterialCommunityIcons name="star" size={11} color="#FFD700" />
+                <Text style={styles.ratingText}>
+                  {(movie.vote_average ?? 0).toFixed(1)}
+                </Text>
+              </View>
+
+              <Text style={styles.movieTitle} numberOfLines={2}>
+                {movie.title}
+              </Text>
+
+              <Text style={styles.tagline} numberOfLines={2}>
+                {movie.tagline || movie.vague_description}
+              </Text>
+
+              <View style={styles.genreRow}>
+                {movie.genres.slice(0, 3).map((g) => (
+                  <View key={g} style={styles.genreChip}>
+                    <Text style={styles.genreText}>{g}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <Pressable style={styles.revealButton} onPress={onReveal}>
+                <MaterialCommunityIcons
+                  name="eye-outline"
+                  size={14}
+                  color="white"
+                  style={{ marginRight: 5 }}
+                />
+                <Text style={styles.revealLabel}>REVEAL MOVIE</Text>
+              </Pressable>
+            </View>
+          </LinearGradient>
+        </Animated.View>
       </Pressable>
     </Animated.View>
   );
@@ -190,89 +162,150 @@ export default function MysteryCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#1C1C1C",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 20,
-  },
-  inner: {
-    flex: 1,
-    padding: 16,
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  pressable: {
-    flex: 1,
-    padding: 16,
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  topRow: {
     width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    zIndex: 10,
+    height: "100%",
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: "#111",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.06)",
   },
-  numberContainer: {
+  pressable: { flex: 1 },
+  poster: { ...StyleSheet.absoluteFill },
+
+  placeholder: {
     ...StyleSheet.absoluteFill,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 1,
+    paddingHorizontal: 28,
+    gap: 12,
   },
-  number: {
+  placeholderTitle: {
     fontFamily: "Inter_700Bold",
-    fontSize: 64,
-    color: "#E50914",
-    opacity: 0.8,
+    fontSize: 18,
+    color: "#555",
+    textAlign: "center",
   },
-  tapHint: {
-    position: "absolute",
-    bottom: 16,
-    zIndex: 10,
-  },
-  tapHintText: {
+  placeholderGenres: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 10,
-    letterSpacing: 2,
+    fontSize: 11,
     color: "#E50914",
+    letterSpacing: 1.5,
     textTransform: "uppercase",
   },
-  revealContent: {
+
+  veil: {
     ...StyleSheet.absoluteFill,
-    padding: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 20,
-    backgroundColor: "rgba(28, 28, 28, 0.98)",
-    zIndex: 20,
+    backgroundColor: "rgba(8,8,8,0.25)",
   },
+
+  badge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+  },
+  lockChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(229,9,20,0.3)",
+  },
+  lockLabel: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 13,
+    color: "#E50914",
+  },
+
+  revealPanel: {
+    ...StyleSheet.absoluteFill,
+  },
+  revealGradient: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  revealInner: {
+    padding: 14,
+    paddingBottom: 16,
+    gap: 6,
+  },
+
+  ratingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 3,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  ratingText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 11,
+    color: "#FFD700",
+  },
+
+  movieTitle: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 20,
+    color: "white",
+    letterSpacing: -0.4,
+  },
+
   tagline: {
     fontFamily: "Inter_400Regular",
     fontStyle: "italic",
-    fontSize: 16,
-    color: "white",
-    textAlign: "center",
-    lineHeight: 24,
+    fontSize: 12,
+    color: "#bbb",
+    lineHeight: 16,
   },
+
+  desc: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    color: "#999",
+    lineHeight: 16,
+  },
+
+  genreRow: {
+    flexDirection: "row",
+    gap: 5,
+    flexWrap: "wrap",
+  },
+  genreChip: {
+    backgroundColor: "rgba(229,9,20,0.12)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "rgba(229,9,20,0.2)",
+  },
+  genreText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 10,
+    color: "#E50914",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
   revealButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#E50914",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 8,
-    shadowColor: "#E50914",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
-    elevation: 10,
+    marginTop: 4,
   },
-  revealText: {
+  revealLabel: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 11,
-    letterSpacing: 2,
+    letterSpacing: 1.5,
     color: "white",
     textTransform: "uppercase",
   },

@@ -22,20 +22,41 @@ func (mr *MovieRepository) UpsertBatchMovies(ctx context.Context, movies []*doma
 
 	return mr.db.ExecTx(ctx, func(tx pgx.Tx) error {
 		query := `
-			INSERT INTO movies (tmdb_id, title, vague_description, genres, original_language, release_date, vote_average, popularity)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			INSERT INTO movies (tmdb_id, title, vague_description, genres, poster_path, backdrop_path, original_language, release_date, vote_average, popularity)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 			ON CONFLICT (tmdb_id) DO UPDATE SET
 				title             = EXCLUDED.title,
 				vague_description = EXCLUDED.vague_description,
 				genres            = EXCLUDED.genres,
+				poster_path       = COALESCE(EXCLUDED.poster_path, movies.poster_path),
+				backdrop_path     = COALESCE(EXCLUDED.backdrop_path, movies.backdrop_path),
 				original_language = EXCLUDED.original_language,
 				release_date      = EXCLUDED.release_date,
 				vote_average      = EXCLUDED.vote_average,
 				popularity        = EXCLUDED.popularity`
 
 		for _, m := range movies {
+			var posterPath any
+			if m.PosterPath != nil {
+				posterPath = *m.PosterPath
+			}
+
+			var backdropPath any
+			if m.BackdropPath != nil {
+				backdropPath = *m.BackdropPath
+			}
+
 			args := []any{
-				m.TmdbID, m.Title, m.VagueDescription, m.Genres, m.OriginalLanguage, m.ReleaseDate, m.VoteAverage, m.Popularity,
+				m.TmdbID,
+				m.Title,
+				m.VagueDescription,
+				m.Genres,
+				posterPath,
+				backdropPath,
+				m.OriginalLanguage,
+				m.ReleaseDate,
+				m.VoteAverage,
+				m.Popularity,
 			}
 
 			if _, err := tx.Exec(ctx, query, args...); err != nil {

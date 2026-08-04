@@ -26,6 +26,11 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			m.vague_description,
 			m.tagline,
 			m.genres,
+			m.title,
+			m.poster_path,
+			m.backdrop_path,
+			m.vote_average,
+			m.release_date,
 			d.grid_session_id
 		FROM daily_pools d
 		JOIN movies m ON m.id = d.movie_id
@@ -49,6 +54,11 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			&s.VagueDescription,
 			&s.Tagline,
 			&s.Genres,
+			&s.Title,
+			&s.PosterPath,
+			&s.BackdropPath,
+			&s.VoteAverage,
+			&s.ReleaseDate,
 			&s.GridSessionID,
 		); err != nil {
 			return nil, err

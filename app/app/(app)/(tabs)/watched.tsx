@@ -6,11 +6,9 @@ import { useGetTodaysGrid } from "@/features/movies/hooks/query/use-today-grid";
 
 export default function Watched() {
   const { colors } = useTheme();
-  // For now, we fetch all and filter client-side.
-  // Ideally, the backend would support a 'watched' filter.
   const { data, isPending } = useGetTodaysGrid();
 
-  const watchedMovies = data?.movies.filter((m) => m.is_watched) ?? [];
+  const revealedMovies = data?.grid.filter((m) => m.is_revealed) ?? [];
 
   return (
     <SafeAreaView
@@ -24,17 +22,17 @@ export default function Watched() {
         <View style={styles.centered}>
           <Text>Loading history...</Text>
         </View>
-      ) : watchedMovies.length === 0 ? (
+      ) : revealedMovies.length === 0 ? (
         <View style={styles.centered}>
           <Text variant="bodyLarge">
-            You haven&apos;t watched any movies yet.
+            You haven&apos;t revealed any movies yet.
           </Text>
         </View>
       ) : (
         <FlatList
-          data={watchedMovies}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <MovieCard movie={item} />}
+          data={revealedMovies}
+          keyExtractor={(item) => item.movie_id.toString()}
+          renderItem={({ item }) => <MovieCard movie={item as any} />}
           numColumns={3}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.list}

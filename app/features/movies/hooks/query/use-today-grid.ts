@@ -6,7 +6,8 @@ import { getTodaysGrid } from "../../services/movie.service";
 
 export const useGetTodaysGrid = () => {
   return useQuery<{ grid: GridMovie[] }, HTTPError>({
-    queryKey: moviesKeys.all(),
+    queryKey: moviesKeys.todayGrid(),
     queryFn: getTodaysGrid,
+    refetchOnMount: "always",
   });
 };

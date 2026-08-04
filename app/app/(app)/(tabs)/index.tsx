@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +11,7 @@ import { useGetTodaysGrid } from "@/features/movies/hooks/query/use-today-grid";
 import ExploreHeader from "@/features/movies/components/explore-header";
 import CoverflowCarousel from "@/features/movies/components/coverflow-carousel";
 import SyncButton from "@/features/movies/components/sync-button";
+import SkeletonLoader from "@/features/movies/components/skeleton-loader";
 
 export default function Discover() {
   const { data, isPending } = useGetTodaysGrid();
@@ -25,16 +25,6 @@ export default function Discover() {
     // TODO: sync with backend
   }, []);
 
-  if (isPending) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#E50914" />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <ExploreHeader />
@@ -46,16 +36,21 @@ export default function Discover() {
         <View style={styles.hero}>
           <Text style={styles.title}>Your Daily Five</Text>
           <Text style={styles.subtitle}>
-            Five sealed envelopes. Five unknown stories. Break the seal to
-            discover what awaits in the dark.
+            Five sealed envelopes. Five unknown stories. Unlock what awaits.
           </Text>
         </View>
 
-        <CoverflowCarousel movies={movies} onReveal={handleReveal} />
+        {isPending ? (
+          <SkeletonLoader count={5} />
+        ) : (
+          <>
+            <CoverflowCarousel movies={movies} onReveal={handleReveal} />
 
-        <View style={styles.syncArea}>
-          <SyncButton onSync={handleSync} />
-        </View>
+            <View style={styles.syncArea}>
+              <SyncButton onSync={handleSync} />
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -70,15 +65,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingBottom: 120,
   },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   hero: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 24,
+    paddingBottom: 20,
     alignItems: "center",
   },
   title: {
@@ -99,7 +89,7 @@ const styles = StyleSheet.create({
   },
   syncArea: {
     alignItems: "center",
-    paddingTop: 24,
+    paddingTop: 28,
     paddingBottom: 16,
   },
 });

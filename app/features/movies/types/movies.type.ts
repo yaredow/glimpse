@@ -41,6 +41,11 @@ export interface GridMovie {
   vague_description: string;
   tagline?: string;
   genres: string[];
+  title: string;
+  poster_path?: string;
+  backdrop_path?: string;
+  vote_average: number;
+  release_date: string;
 }
 
 export interface MovieFilters {

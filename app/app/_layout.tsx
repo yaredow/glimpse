@@ -1,6 +1,7 @@
 import { useFonts } from "expo-font";
-import { Stack, router } from "expo-router";
+import { Stack, router, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryProvider } from "@/lib/query-provider";
 import { useOnlineManager } from "@/hooks/use-online-manager";
 import * as SplashScreen from "expo-splash-screen";
@@ -38,15 +39,19 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
-      <PaperProvider theme={netflixTheme}>
-        <RootNavigator isAuthenticated={isAuthenticated} />
-      </PaperProvider>
-    </QueryProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryProvider>
+        <PaperProvider theme={netflixTheme}>
+          <RootNavigator isAuthenticated={isAuthenticated} />
+        </PaperProvider>
+      </QueryProvider>
+    </GestureHandlerRootView>
   );
 }
 
 function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const segments = useSegments();
+  const currentGroup = segments[0];
   const {
     data,
     isLoading: isPreferenceLoading,
@@ -58,13 +63,16 @@ function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
     if (!isPreferenceFetched) return;
 
     if (isAuthenticated && isOnboarded) {
+      if (currentGroup === "(app)") return;
       router.replace("/(app)/(tabs)");
     } else if (isAuthenticated && !isOnboarded) {
+      if (currentGroup === "(onboarding)") return;
       router.replace("/(onboarding)");
     } else {
+      if (currentGroup === "(auth)") return;
       router.replace("/(auth)/login");
     }
-  }, [isAuthenticated, isPreferenceFetched, isOnboarded]);
+  }, [currentGroup, isAuthenticated, isPreferenceFetched, isOnboarded]);
 
   if (isAuthenticated && isPreferenceLoading) {
     return null;

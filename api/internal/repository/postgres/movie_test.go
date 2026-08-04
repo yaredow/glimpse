@@ -261,7 +261,7 @@ func TestMovieRepository_UpsertBatchMovies(t *testing.T) {
 
 		mock.ExpectBegin()
 		mock.ExpectExec("INSERT INTO movies").
-			WithArgs(123, "Test Movie", "A test movie description.", []string{"Action", "Comedy"}, "en", time.Time{}, 7.5, 100.0).
+			WithArgs(123, "Test Movie", "A test movie description.", []string{"Action", "Comedy"}, nil, nil, "en", time.Time{}, 7.5, 100.0).
 			WillReturnResult(pgxmock.NewResult("INSERT", 1))
 		mock.ExpectCommit()
 
