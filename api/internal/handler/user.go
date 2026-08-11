@@ -196,6 +196,11 @@ func (uh *UserHandler) ResetPassword(c *echo.Context) error {
 	return c.JSON(http.StatusOK, envelope{"message": "password updated successfully"})
 }
 
+func (uh *UserHandler) GetMe(c *echo.Context) error {
+	user := c.Get("user").(*domain.User)
+	return c.JSON(http.StatusOK, envelope{"user": user})
+}
+
 func (uh *UserHandler) RefreshToken(c *echo.Context) error {
 	var input struct {
 		RefreshToken string `json:"refresh_token" validate:"required"`

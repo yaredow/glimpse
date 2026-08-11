@@ -31,6 +31,7 @@ func Register(
 	e.PUT("/v1/users/password", userH.ResetPassword)
 	e.POST("/v1/tokens/refresh", userH.RefreshToken)
 	e.POST("/v1/tokens/revoke", userH.Logout)
+	e.GET("/v1/me", userH.GetMe, middleware.RequireAuthenticatedUser())
 
 	prefH := handler.NewPreferenceHandler(prefSvc)
 	e.GET("/v1/me/preferences", prefH.GetPreference, middleware.RequireAuthenticatedUser())
