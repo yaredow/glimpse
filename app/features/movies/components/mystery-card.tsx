@@ -72,7 +72,7 @@ export default function MysteryCard({
               source={{ uri: posterSrc }}
               style={styles.poster}
               contentFit="cover"
-              blurRadius={isExpanded ? 0 : 24}
+              blurRadius={24}
               transition={300}
               cachePolicy="memory-disk"
               onError={() => setPosterFailed(true)}
@@ -120,17 +120,6 @@ export default function MysteryCard({
             style={styles.revealGradient}
           >
             <View style={styles.revealInner}>
-              <View style={styles.ratingBadge}>
-                <MaterialCommunityIcons name="star" size={11} color="#FFD700" />
-                <Text style={styles.ratingText}>
-                  {(movie.vote_average ?? 0).toFixed(1)}
-                </Text>
-              </View>
-
-              <Text style={styles.movieTitle} numberOfLines={2}>
-                {movie.title}
-              </Text>
-
               <Text style={styles.tagline} numberOfLines={2}>
                 {movie.tagline || movie.vague_description}
               </Text>

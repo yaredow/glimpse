@@ -1,5 +1,5 @@
-import { TouchableOpacity, StyleSheet, View } from "react-native";
-import { Tabs, router } from "expo-router";
+import { StyleSheet } from "react-native";
+import { Tabs } from "expo-router";
 import { useTheme } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
