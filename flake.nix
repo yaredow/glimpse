@@ -12,7 +12,10 @@
       pkgs = import nixpkgs { inherit system; };
     in
     {
-      packages.${system}.api = pkgs.callPackage ./api/package.nix { };
+      packages.${system} = {
+        api = pkgs.callPackage ./api/package.nix { };
+        app = pkgs.callPackage ./app/package.nix { };
+      };
 
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
