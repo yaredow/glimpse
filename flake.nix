@@ -12,6 +12,15 @@
       pkgs = import nixpkgs { inherit system; };
     in
     {
+      packages.${system}.api = pkgs.buildGoModule {
+        pname = "glimpse-api";
+        version = "0.1.0";
+        src = ./api;
+        vendorHash = null;
+
+        subPackages = [ "cmd/api" ];
+      };
+
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
           go
