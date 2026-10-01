@@ -8,30 +8,55 @@
   outputs =
     { self, nixpkgs }:
     let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
+      system = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
+
+      forAllSystems =
+        f:
+        nixpkgs.lib.genAttrs system (
+          system:
+          f {
+            pkgs = import nixpkgs { inherit system; };
+
+          }
+        );
     in
+
     {
-      packages.${system} = {
-        api = pkgs.callPackage ./api/package.nix { };
-        app = pkgs.callPackage ./app/package.nix { };
-      };
+      packages = forAllSystems (
+        { pkgs }: {
+          default = pkgs.callPackage ./api/package.nix { };
+          api = pkgs.callPackage ./api/package.nix { };
+          app = pkgs.callPackage ./app/package.nix { };
+        }
+      );
 
-      devShells.${system}.default = pkgs.mkShell {
-        packages = with pkgs; [
-          go
-          air
-          golangci-lint
-          go-migrate
-          postgresql_16
-          bun
-        ];
-        shellHook = ''
-          echo "Welcome to Glimps Development Environment"
-          echo "Go: $(go version)"
-          echo "Bun: $(bun --version)"
-        '';
-      };
+      devShells = forAllSystems (
+        { pkgs }: {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              go
+              air
+              golangci-lint
+              go-migrate
+              postgresql_16
+              bun
+            ];
+
+            shellHook = ''
+              echo "✨ Welcome to Glimpse
+              Development Environment"
+              echo "Go:  $(go version)"
+              echo "Bun: $(bun --version)"
+            '';
+
+          };
+
+        }
+      );
+
     };
-
 }
