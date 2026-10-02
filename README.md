@@ -1,50 +1,58 @@
-
 # Glimpse
 
-Stop scrolling. Start watching.
+Personalized daily movie recommendations designed to cut through decision fatigue. Instead of endless catalogs, it serves a curated 5-card daily grid powered by an explainable, multi-dimensional user affinity engine.
 
-Glimpse is a personalized movie recommendation service built to eliminate decision fatigue. Instead of endless scrolling through recommendation algorithms, Glimpse learns your taste and serves you a curated daily selection—something worth your time, not just something that fits an algorithm.
+---
 
-## The Problem
+## Architecture
 
-Movie discovery is broken. Streaming services throw thousands of options at you, recommendation algorithms get stuck in filter bubbles, and you end up spending more time choosing than watching. Glimpse flips this: a lightweight, intelligent engine that actually learns what you like and presents only the best matches each day.
+- **`api/` (Backend)**: Go, PostgreSQL (`pgx/v5`), Echo v5, TMDB API integration.
+  - Multi-dimensional affinity scoring (`genre`, `language`, `decade`, `rating`).
+  - Exploration decay with Gaussian noise and diversity enforcement.
+  - Append-only immutable interaction log.
+- **`app/` (Mobile & Web)**: React Native / Expo with Bun.
+  - Expo Router, TanStack Query & Form, React Native Paper.
 
-## How It Works
+---
 
-Every action matters. Watch, skip, add to your list—each one teaches Glimpse a little more about what you actually like. The daily picks get better as it learns you, and you'll always know why a movie landed on your plate.
+## Development
 
-## Tech Stack
+### 1. Environment Setup
 
-**App** (React Native)
-- Expo SDK 55 with React Native 0.83
-- Expo Router for file-based navigation
-- React Query for server state
-- React Hook Form for form handling
-- React Native Paper for UI
-- Zod for validation
+Using **Nix** (reproducible toolchain for Go, Bun, Postgres tools, Air):
 
-**API** (Go backend)
-- Go with PostgreSQL
-- TMDB API integration for movie data
-- Deterministic scoring engine with immutable interaction history
-
-## Getting Started
-
-**API Setup**
 ```bash
-cd api
-make docker/up      # Start PostgreSQL
-make db/migration/up  # Run migrations
-make run/api        # Start the server with live reload
+direnv allow
+# or manually enter:
+nix develop
 ```
 
-**App Setup**
+### 2. Run the Backend
+
+```bash
+cd api
+cp .env.example .env    # Configure TMDB credentials
+make docker/up          # Start PostgreSQL container
+make db/migration/up    # Run database migrations
+air                     # Start API with live-reload (port :4000)
+```
+
+### 3. Run the Frontend
+
 ```bash
 cd app
 bun install
-bun start
+bun start               # Start Metro bundler / Expo dev server
 ```
 
 ---
 
-Glimpse exists because I got tired of spending 30 minutes deciding what to watch.
+## Production Builds (Nix)
+
+```bash
+# Build standalone Go API binary (outputs to ./result/bin/api)
+nix build .#api
+
+# Build static web export of the Expo app (outputs to ./result/)
+nix build .#app
+```
