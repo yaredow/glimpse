@@ -40,8 +40,9 @@
             packages = with pkgs; [
               go
               air
+              android-tools
               golangci-lint
-              go-migrate
+              (go-migrate.overrideAttrs { tags = [ "postgres" ]; })
               postgresql_16
               bun
             ];

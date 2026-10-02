@@ -94,6 +94,7 @@ func main() {
 		genreRepo,
 		db,
 		syncWorker.SyncMovieDetail,
+		wp,
 	)
 
 	movieSvc := service.NewMovieService(movieRepo, interactionRepo)

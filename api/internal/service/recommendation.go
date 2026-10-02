@@ -46,6 +46,10 @@ type RecGenreRepository interface {
 	GetNamesByID(ctx context.Context, ids []int) ([]string, error)
 }
 
+type TaskRunner interface {
+	Background(fn func())
+}
+
 type DetailSyncer func(ctx context.Context, tmdbID int) error
 
 type RecommendationService struct {
@@ -58,6 +62,7 @@ type RecommendationService struct {
 	genres       RecGenreRepository
 	db           *postgres.DB
 	syncDetail   DetailSyncer
+	runner       TaskRunner
 }
 
 func NewRecommendationService(
@@ -70,6 +75,7 @@ func NewRecommendationService(
 	genres RecGenreRepository,
 	db *postgres.DB,
 	syncDetail DetailSyncer,
+	runner TaskRunner,
 ) *RecommendationService {
 	return &RecommendationService{
 		movies:       movies,
@@ -81,6 +87,7 @@ func NewRecommendationService(
 		genres:       genres,
 		db:           db,
 		syncDetail:   syncDetail,
+		runner:       runner,
 	}
 }
 
@@ -172,12 +179,12 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 		return nil, uuid.Nil, fmt.Errorf("get new grid: %w", err)
 	}
 
-	if rs.syncDetail != nil {
+	if rs.syncDetail != nil && rs.runner != nil {
 		for _, sm := range picked {
 			tmdbID := sm.Movie.TmdbID
-			go func(id int) {
-				_ = rs.syncDetail(context.Background(), id)
-			}(tmdbID)
+			rs.runner.Background(func() {
+				_ = rs.syncDetail(context.Background(), tmdbID)
+			})
 		}
 	}
 
