@@ -1,4 +1,3 @@
-import { StyleSheet } from "react-native";
 import { Tabs } from "expo-router";
 import { useTheme } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -52,5 +51,3 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({});

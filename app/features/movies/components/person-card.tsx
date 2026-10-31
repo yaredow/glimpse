@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { tmdbImage } from "../consants/images";
@@ -12,16 +13,26 @@ const { width } = Dimensions.get("window");
 const cardWidth = width * 0.22;
 
 export default function PersonCard({ name, character, profilePath }: PersonCardProps) {
-  const imageUri = tmdbImage(profilePath, "w185") ?? undefined;
+  const [imageError, setImageError] = useState(false);
+  const imageUri = tmdbImage(profilePath, "w185");
 
   return (
     <View style={styles.card}>
       <View style={styles.imageWrapper}>
-        {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.image} contentFit="cover" />
+        {imageUri && !imageError ? (
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.image}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={200}
+            onError={() => setImageError(true)}
+          />
         ) : (
           <View style={[styles.image, styles.placeholder]}>
-            <Text style={styles.placeholderText}>?</Text>
+            <Text style={styles.placeholderText}>
+              {name ? name.charAt(0).toUpperCase() : "?"}
+            </Text>
           </View>
         )}
       </View>

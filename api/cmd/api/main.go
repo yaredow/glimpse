@@ -97,7 +97,7 @@ func main() {
 		wp,
 	)
 
-	movieSvc := service.NewMovieService(movieRepo, interactionRepo)
+	movieSvc := service.NewMovieService(movieRepo, interactionRepo, syncWorker.SyncMovieDetail)
 
 	// Middleware
 	e.Use(middleware.Authenticate(jwtMgr, userService))

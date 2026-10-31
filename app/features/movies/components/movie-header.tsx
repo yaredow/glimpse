@@ -11,7 +11,7 @@ interface MovieHeaderProps {
 }
 
 const backdropUrl = (path?: string | null) =>
-  tmdbImage(path, "original") ?? undefined;
+  tmdbImage(path, "w780") ?? undefined;
 const posterUrl = (path?: string | null) =>
   tmdbImage(path, "w500") ?? undefined;
 
@@ -20,16 +20,26 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
     ? new Date(movie.release_date).getFullYear()
     : null;
 
+  const backdropSrc = backdropUrl(movie.backdrop_path || movie.poster_path);
+  const posterSrc = posterUrl(movie.poster_path);
+
   return (
     <View style={styles.container}>
-      <Image
-        source={{ uri: backdropUrl(movie.backdrop_path) }}
-        style={styles.backdrop}
-        contentFit="cover"
-      />
+      {backdropSrc ? (
+        <Image
+          source={{ uri: backdropSrc }}
+          style={styles.backdrop}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={300}
+        />
+      ) : (
+        <View style={[styles.backdrop, styles.backdropFallback]} />
+      )}
       <LinearGradient
         colors={["transparent", "rgba(20, 20, 20, 0.95)"]}
         style={styles.gradient}
+        pointerEvents="none"
       />
 
       <View style={styles.content}>
@@ -55,7 +65,12 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
             ) : null}
 
             {movie.trailer_key ? (
-              <Pressable style={styles.trailerButton} onPress={onTrailerPress}>
+              <Pressable
+                style={styles.trailerButton}
+                onPress={onTrailerPress}
+                accessibilityRole="button"
+                accessibilityLabel="Watch trailer"
+              >
                 <MaterialCommunityIcons name="play" size={14} color="white" />
                 <Text style={styles.trailerText}>TRAILER</Text>
               </Pressable>
@@ -63,13 +78,19 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
           </View>
         </View>
 
-        {movie.poster_path ? (
+        {posterSrc ? (
           <Image
-            source={{ uri: posterUrl(movie.poster_path) }}
+            source={{ uri: posterSrc }}
             style={styles.poster}
             contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={300}
           />
-        ) : null}
+        ) : (
+          <View style={[styles.poster, styles.posterFallback]}>
+            <MaterialCommunityIcons name="filmstrip" size={32} color="#666" />
+          </View>
+        )}
       </View>
     </View>
   );
@@ -151,5 +172,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     borderColor: "white",
+  },
+  backdropFallback: {
+    backgroundColor: "#1F1F1F",
+  },
+  posterFallback: {
+    backgroundColor: "#262626",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

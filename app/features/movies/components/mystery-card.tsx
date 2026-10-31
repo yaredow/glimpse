@@ -43,8 +43,8 @@ export default function MysteryCard({
   const contentPhase = useSharedValue(0);
   const [posterFailed, setPosterFailed] = useState(false);
 
-  // The Daily Five uses the poster artwork, not the wide backdrop artwork.
-  const posterSrc = tmdbImage(movie.poster_path);
+  // The Daily Five uses the poster artwork, with backdrop fallback if poster missing.
+  const posterSrc = tmdbImage(movie.poster_path || movie.backdrop_path, "w500");
 
   useEffect(() => {
     if (isRevealed) return;

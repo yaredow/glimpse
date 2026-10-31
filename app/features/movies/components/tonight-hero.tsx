@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ActivityIndicator, Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -26,8 +27,9 @@ export default function TonightHero({
   onViewDetails,
   isLockingIn = false,
 }: TonightHeroProps) {
+  const [posterError, setPosterError] = useState(false);
   const isLockedIn = movie.action === "locked_in";
-  const posterSrc = tmdbImage(movie.poster_path);
+  const posterSrc = tmdbImage(movie.poster_path || movie.backdrop_path, "w500");
   const releaseYear = movie.release_date
     ? new Date(movie.release_date).getFullYear()
     : null;
@@ -36,13 +38,14 @@ export default function TonightHero({
     <View style={styles.container}>
       {/* Featured Card */}
       <Pressable onPress={onViewDetails} style={styles.card}>
-        {posterSrc ? (
+        {posterSrc && !posterError ? (
           <Image
             source={{ uri: posterSrc }}
             style={styles.poster}
             contentFit="cover"
             transition={300}
             cachePolicy="memory-disk"
+            onError={() => setPosterError(true)}
           />
         ) : (
           <View style={styles.placeholder}>

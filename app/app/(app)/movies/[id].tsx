@@ -107,6 +107,7 @@ export default function MovieDetail() {
           },
           headerAnimatedStyle,
         ]}
+        pointerEvents="box-none"
       >
         <Text style={styles.headerTitle} numberOfLines={1}>
           {movie.title}
