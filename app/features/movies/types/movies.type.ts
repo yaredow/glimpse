@@ -33,9 +33,26 @@ export interface Movie {
   is_watched?: boolean;
 }
 
+export type MovieInteractionAction =
+  | "revealed"
+  | "watched"
+  | "skipped"
+  | "watchlist_add"
+  | "pick_tonight"
+  | "locked_in";
+
+export interface RecordInteractionPayload {
+  movie_id: number;
+  action: MovieInteractionAction;
+  grid_session_id: string;
+  grid_position?: number;
+  reveal_action_ms?: number;
+}
+
 export interface GridMovie {
   slot_number: number;
   is_revealed: boolean;
+  action?: MovieInteractionAction | null;
   movie_id: number;
   tmdb_id: number;
   vague_description: string;
@@ -46,6 +63,7 @@ export interface GridMovie {
   backdrop_path?: string;
   vote_average: number;
   release_date: string;
+  grid_session_id?: string;
 }
 
 export interface MovieFilters {

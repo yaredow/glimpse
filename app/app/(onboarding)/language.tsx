@@ -3,7 +3,7 @@ import { Text, useTheme, ActivityIndicator } from "react-native-paper";
 import { router } from "expo-router";
 import { Button } from "@/components/ui/button";
 import StepLayout from "@/features/onboarding/components/step-layout";
-import LanguageSelector from "@/features/onboarding/components/language-selector";
+import LanguageRatingSelector from "@/features/onboarding/components/language-rating-selector";
 import { useOnboardingData } from "@/features/onboarding/hooks/queries/use-onboarding-data";
 import { useOnboardingStore } from "@/features/onboarding/store/onboarding.store";
 
@@ -11,16 +11,25 @@ export default function LanguageScreen() {
   const { colors } = useTheme();
   const { data, isLoading, error, refetch } = useOnboardingData();
   const storedLanguages = useOnboardingStore((s) => s.languages);
+  const storedRating = useOnboardingStore((s) => s.minRating);
   const setLanguages = useOnboardingStore((s) => s.setLanguages);
+  const setMinRating = useOnboardingStore((s) => s.setMinRating);
 
-  const handleNext = (selectedCodes: string[]) => {
+  const handleNext = (selectedCodes: string[], rating: number) => {
     setLanguages(selectedCodes);
+    setMinRating(rating);
     router.push("/(onboarding)/disliked");
   };
 
   if (isLoading) {
     return (
-      <StepLayout step={2} totalSteps={5} title="Languages">
+      <StepLayout
+        step={2}
+        totalSteps={4}
+        title="Languages & Quality"
+        subtitle="Loading preferences..."
+        onBack={() => router.back()}
+      >
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -30,7 +39,13 @@ export default function LanguageScreen() {
 
   if (error || !data) {
     return (
-      <StepLayout step={2} totalSteps={5} title="Languages">
+      <StepLayout
+        step={2}
+        totalSteps={4}
+        title="Languages & Quality"
+        subtitle="Unable to load options"
+        onBack={() => router.back()}
+      >
         <View style={styles.center}>
           <Text
             variant="bodyLarge"
@@ -47,10 +62,17 @@ export default function LanguageScreen() {
   }
 
   return (
-    <StepLayout step={2} totalSteps={5} title="Languages">
-      <LanguageSelector
+    <StepLayout
+      step={2}
+      totalSteps={4}
+      title="Languages & Quality"
+      subtitle="Set your spoken language preferences and minimum rating standard"
+      onBack={() => router.back()}
+    >
+      <LanguageRatingSelector
         languages={data.languages}
-        initialSelected={storedLanguages}
+        initialLanguages={storedLanguages}
+        initialRating={storedRating}
         onNext={handleNext}
         onBack={() => router.back()}
       />

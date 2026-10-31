@@ -7,15 +7,16 @@ import { getErrorMessage } from "@/lib/error";
 
 export const useRegister = () => {
   const router = useRouter();
+
   return useMutation({
     mutationFn: (data: RegisterFormData) => register(data),
     onSuccess: () => {
       Toast.show({
         type: "success",
         text1: "Registration successful",
-        text2: "You can now log in",
-        onHide: () => router.push("/(auth)/activate"),
+        text2: "Please enter your activation code",
       });
+      router.push("/(auth)/activate");
     },
     onError: async (error: Error) => {
       Toast.show({

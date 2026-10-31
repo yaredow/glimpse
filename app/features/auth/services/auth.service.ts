@@ -17,7 +17,10 @@ export const register = async (data: RegisterFormData) => {
 
 export const activateAccount = async (token: string) => {
   return api
-    .put("v1/users/activate", { json: { token }, context: { auth: false } })
+    .put("v1/users/activates", {
+      json: { token: token.trim() },
+      context: { auth: false },
+    })
     .json();
 };
 

@@ -1,45 +1,44 @@
-import { useRef } from "react";
-import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 interface SyncButtonProps {
   onSync: () => void;
+  syncsRemaining?: number;
 }
 
-export default function SyncButton({ onSync }: SyncButtonProps) {
-  const spinAnim = useRef(new Animated.Value(0)).current;
+export default function SyncButton({
+  onSync,
+  syncsRemaining = 3,
+}: SyncButtonProps) {
+  const rotation = useSharedValue(0);
 
   const handlePress = () => {
-    Animated.timing(spinAnim, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start(() => {
-      spinAnim.setValue(0);
-    });
+    rotation.set(
+      withTiming(rotation.get() + 360, { duration: 800 }, () => {
+        rotation.set(0);
+      }),
+    );
     onSync();
   };
 
-  const spin = spinAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
 
   return (
     <View style={styles.container}>
       <Pressable style={styles.button} onPress={handlePress}>
-        <Animated.View style={{ transform: [{ rotate: spin }] }}>
+        <Animated.View style={animatedStyle}>
           <MaterialCommunityIcons name="sync" size={18} color="#E50914" />
         </Animated.View>
         <Text style={styles.label}>Sync Selection</Text>
       </Pressable>
-      <Text style={styles.count}>3 syncs remaining today</Text>
+      <Text style={styles.count}>{syncsRemaining} syncs remaining today</Text>
     </View>
   );
 }

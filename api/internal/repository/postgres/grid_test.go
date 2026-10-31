@@ -3,10 +3,12 @@ package postgres_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/pashagolub/pgxmock/v5"
 	"github.com/stretchr/testify/require"
+	"github.com/yaredow/glimpse-api/internal/domain"
 	"github.com/yaredow/glimpse-api/internal/repository/postgres"
 )
 
@@ -67,6 +69,26 @@ func TestGridRepository_Insert(t *testing.T) {
 	})
 }
 
+func TestGridRepository_MarkRevealed(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewGridRepository(&postgres.DB{Pool: mock})
+
+		mock.ExpectExec(`UPDATE daily_pools SET is_revealed = TRUE WHERE user_id = \$1 AND movie_id = \$2`).
+			WithArgs(int64(1), int64(10)).
+			WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+		err = repo.MarkRevealed(context.Background(), 1, 10)
+		require.NoError(t, err)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+}
+
 func TestGridRepository_GetByID(t *testing.T) {
 	t.Parallel()
 
@@ -78,9 +100,20 @@ func TestGridRepository_GetByID(t *testing.T) {
 		repo := postgres.NewGridRepository(&postgres.DB{Pool: mock})
 
 		sessionID := uuid.New()
+		releaseDate := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
+		tagline := "They never saw it coming"
+		posterPath := "/poster.jpg"
+		backdropPath := "/backdrop.jpg"
+
 		rows := pgxmock.NewRows([]string{
-			"id", "tmdb_id", "slot_number", "is_revealed", "vague_description", "genres", "grid_session_id",
-		}).AddRow(int64(10), 550, 1, false, "A mysterious journey", []string{"Drama", "Action"}, sessionID)
+			"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
+			"tagline", "genres", "title", "poster_path", "backdrop_path",
+			"vote_average", "release_date", "grid_session_id", "action",
+		}).AddRow(
+			int64(10), 550, 1, false, "A mysterious journey",
+			&tagline, []string{"Drama", "Action"}, "Inception", &posterPath, &backdropPath,
+			8.5, releaseDate, sessionID, nil,
+		)
 
 		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 ORDER BY d.slot_number`).
 			WithArgs(int64(1)).
@@ -93,9 +126,46 @@ func TestGridRepository_GetByID(t *testing.T) {
 		require.Equal(t, 550, slots[0].TmdbID)
 		require.Equal(t, 1, slots[0].SlotNumber)
 		require.False(t, slots[0].IsRevealed)
+		require.Nil(t, slots[0].Action)
 		require.Equal(t, "A mysterious journey", slots[0].VagueDescription)
+		require.Equal(t, &tagline, slots[0].Tagline)
 		require.Equal(t, []string{"Drama", "Action"}, slots[0].Genres)
+		require.Equal(t, "Inception", slots[0].Title)
 		require.Equal(t, sessionID, slots[0].GridSessionID)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("with action sets revealed", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewGridRepository(&postgres.DB{Pool: mock})
+
+		sessionID := uuid.New()
+		releaseDate := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
+		action := domain.ActionWatched
+
+		rows := pgxmock.NewRows([]string{
+			"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
+			"tagline", "genres", "title", "poster_path", "backdrop_path",
+			"vote_average", "release_date", "grid_session_id", "action",
+		}).AddRow(
+			int64(10), 550, 1, false, "A mysterious journey",
+			nil, []string{"Drama"}, "Inception", nil, nil,
+			8.5, releaseDate, sessionID, &action,
+		)
+
+		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 ORDER BY d.slot_number`).
+			WithArgs(int64(1)).
+			WillReturnRows(rows)
+
+		slots, err := repo.GetByID(context.Background(), 1)
+		require.NoError(t, err)
+		require.Len(t, slots, 1)
+		require.True(t, slots[0].IsRevealed)
+		require.NotNil(t, slots[0].Action)
+		require.Equal(t, domain.ActionWatched, *slots[0].Action)
 		require.NoError(t, mock.ExpectationsWereMet())
 	})
 
@@ -109,7 +179,9 @@ func TestGridRepository_GetByID(t *testing.T) {
 		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 ORDER BY d.slot_number`).
 			WithArgs(int64(1)).
 			WillReturnRows(pgxmock.NewRows([]string{
-				"id", "tmdb_id", "slot_number", "is_revealed", "vague_description", "genres", "grid_session_id",
+				"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
+				"tagline", "genres", "title", "poster_path", "backdrop_path",
+				"vote_average", "release_date", "grid_session_id", "action",
 			}))
 
 		slots, err := repo.GetByID(context.Background(), 1)

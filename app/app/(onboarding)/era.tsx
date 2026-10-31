@@ -19,7 +19,13 @@ export default function EraScreen() {
 
   if (isLoading) {
     return (
-      <StepLayout step={1} totalSteps={5} title="Movie Era">
+      <StepLayout
+        step={1}
+        totalSteps={4}
+        title="Movie Era"
+        subtitle="Loading cinema periods..."
+        onBack={() => router.back()}
+      >
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -29,7 +35,13 @@ export default function EraScreen() {
 
   if (error || !data) {
     return (
-      <StepLayout step={1} totalSteps={5} title="Movie Era">
+      <StepLayout
+        step={1}
+        totalSteps={4}
+        title="Movie Era"
+        subtitle="Failed to load eras"
+        onBack={() => router.back()}
+      >
         <View style={styles.center}>
           <Text
             variant="bodyLarge"
@@ -45,16 +57,22 @@ export default function EraScreen() {
     );
   }
 
-  const initialSelected =
+  const initialEra =
     minYear !== null && maxYear !== null
-      ? { min_year: minYear as number, max_year: maxYear as number }
+      ? { min_year: minYear, max_year: maxYear }
       : null;
 
   return (
-    <StepLayout step={1} totalSteps={5} title="Movie Era">
+    <StepLayout
+      step={1}
+      totalSteps={4}
+      title="Movie Era"
+      subtitle="Select the release period that matches your taste"
+      onBack={() => router.back()}
+    >
       <EraSelector
         eras={data.eras}
-        initialSelected={initialSelected}
+        initialSelected={initialEra}
         onNext={handleNext}
         onBack={() => router.back()}
       />

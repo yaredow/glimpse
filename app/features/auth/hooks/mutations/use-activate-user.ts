@@ -12,11 +12,10 @@ export const useActivateUser = () => {
     onSuccess: () => {
       Toast.show({
         type: "success",
-        text1: "Account activated",
-        onHide: () => {
-          router.push("/(app)/(tabs)");
-        },
+        text1: "Account activated successfully!",
+        text2: "Please sign in to complete onboarding",
       });
+      router.replace("/(auth)/login");
     },
     onError: async (error: Error) => {
       Toast.show({

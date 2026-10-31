@@ -7,7 +7,6 @@ export default function OnboardingLayout() {
       <Stack.Screen name="era" />
       <Stack.Screen name="language" />
       <Stack.Screen name="disliked" />
-      <Stack.Screen name="rating" />
     </Stack>
   );
 }

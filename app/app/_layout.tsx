@@ -52,45 +52,36 @@ export default function RootLayout() {
 function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
   const segments = useSegments();
   const currentGroup = segments[0];
-  const {
-    data,
-    isLoading: isPreferenceLoading,
-    isFetched: isPreferenceFetched,
-  } = useGetPreferences(isAuthenticated);
+  const { data, isFetched: isPreferenceFetched } =
+    useGetPreferences(isAuthenticated);
   const isOnboarded = !!data?.preference?.favorite_genres?.length;
 
   useEffect(() => {
-    if (!isPreferenceFetched) return;
-
-    if (isAuthenticated && isOnboarded) {
-      if (currentGroup === "(app)") return;
-      router.replace("/(app)/(tabs)");
-    } else if (isAuthenticated && !isOnboarded) {
-      if (currentGroup === "(onboarding)") return;
-      router.replace("/(onboarding)");
-    } else {
+    if (!isAuthenticated) {
       if (currentGroup === "(auth)") return;
       router.replace("/(auth)/login");
+      return;
+    }
+
+    if (!isPreferenceFetched) return;
+
+    if (isOnboarded) {
+      if (currentGroup === "(app)") return;
+      router.replace("/(app)/(tabs)");
+    } else {
+      if (currentGroup === "(onboarding)") return;
+      router.replace("/(onboarding)");
     }
   }, [currentGroup, isAuthenticated, isPreferenceFetched, isOnboarded]);
-
-  if (isAuthenticated && isPreferenceLoading) {
-    return null;
-  }
 
   return (
     <>
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={isAuthenticated && !isOnboarded}>
-          <Stack.Screen name="(onboarding)" />
-        </Stack.Protected>
-        <Stack.Protected guard={isAuthenticated && isOnboarded}>
-          <Stack.Screen name="(app)" />
-        </Stack.Protected>
-        <Stack.Protected guard={!isAuthenticated}>
-          <Stack.Screen name="(auth)" />
-        </Stack.Protected>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(onboarding)" />
+        <Stack.Screen name="(app)" />
       </Stack>
       <Toast />
     </>

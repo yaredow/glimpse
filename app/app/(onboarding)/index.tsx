@@ -20,15 +20,14 @@ export default function FavoriteGenresScreen() {
 
   if (isLoading) {
     return (
-      <StepLayout step={0} totalSteps={5} title="Favorite Genres">
+      <StepLayout
+        step={0}
+        totalSteps={4}
+        title="Your Film DNA"
+        subtitle="Finding your vibe..."
+      >
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text
-            variant="bodyMedium"
-            style={{ color: colors.onSurfaceVariant, marginTop: 16 }}
-          >
-            Finding your vibe...
-          </Text>
         </View>
       </StepLayout>
     );
@@ -36,17 +35,18 @@ export default function FavoriteGenresScreen() {
 
   if (error || !data) {
     return (
-      <StepLayout step={0} totalSteps={5} title="Favorite Genres">
+      <StepLayout
+        step={0}
+        totalSteps={4}
+        title="Your Film DNA"
+        subtitle="Unable to load genres right now"
+      >
         <View style={styles.center}>
           <Text
-            variant="bodyLarge"
-            style={{
-              color: colors.error,
-              textAlign: "center",
-              marginBottom: 16,
-            }}
+            variant="bodyMedium"
+            style={{ color: colors.error, marginBottom: 16 }}
           >
-            Something went wrong.
+            Failed to connect to the server.
           </Text>
           <Button variant="outline" onPress={() => refetch()}>
             Retry
@@ -57,13 +57,17 @@ export default function FavoriteGenresScreen() {
   }
 
   return (
-    <StepLayout step={0} totalSteps={5} title="Favorite Genres">
+    <StepLayout
+      step={0}
+      totalSteps={4}
+      title="Your Film DNA"
+      subtitle="Choose at least 2 genres that define what you love to watch"
+    >
       <GenreSelector
         genres={data.genres}
         initialSelected={storedGenres}
         onNext={handleNext}
-        subtitle="Pick the genres you love. Choose at least one."
-        buttonLabel="Next Step"
+        minSelection={2}
       />
     </StepLayout>
   );

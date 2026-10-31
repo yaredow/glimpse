@@ -1,17 +1,22 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
-  Animated,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import Animated, {
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGetMovie } from "@/features/movies/hooks/query/use-get-movie";
+import type { MovieInteractionAction } from "@/features/movies/types/movies.type";
 import MovieTrailer from "@/features/movies/components/movie-trailer";
 import MovieActions from "@/features/movies/components/movie-actions";
 import MovieSynopsis from "@/features/movies/components/movie-synopsis";
@@ -22,7 +27,12 @@ const HEADER_THRESHOLD = 300;
 
 export default function MovieDetail() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, sessionId, slot, action } = useLocalSearchParams<{
+    id: string;
+    sessionId?: string;
+    slot?: string;
+    action?: string;
+  }>();
   const movieId = Number.parseInt(String(id), 10);
   const insets = useSafeAreaInsets();
 
@@ -33,24 +43,31 @@ export default function MovieDetail() {
   const movie = data?.movie;
 
   const [activeTab, setActiveTab] = useState("CAST");
-  const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollY = useSharedValue(0);
 
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    { useNativeDriver: false },
-  );
-
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, HEADER_THRESHOLD],
-    outputRange: [0, 1],
-    extrapolate: "clamp",
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.set(event.contentOffset.y);
+    },
   });
 
-  const buttonTop = scrollY.interpolate({
-    inputRange: [0, HEADER_THRESHOLD],
-    outputRange: [insets.top + 20, insets.top],
-    extrapolate: "clamp",
-  });
+  const headerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      scrollY.value,
+      [0, HEADER_THRESHOLD],
+      [0, 1],
+      "clamp",
+    ),
+  }));
+
+  const buttonAnimatedStyle = useAnimatedStyle(() => ({
+    top: interpolate(
+      scrollY.value,
+      [0, HEADER_THRESHOLD],
+      [insets.top + 20, insets.top],
+      "clamp",
+    ),
+  }));
 
   if (isPending) {
     return (
@@ -87,8 +104,8 @@ export default function MovieDetail() {
           {
             paddingTop: insets.top,
             backgroundColor: "rgba(20, 20, 20, 1)",
-            opacity: headerOpacity,
           },
+          headerAnimatedStyle,
         ]}
       >
         <Text style={styles.headerTitle} numberOfLines={1}>
@@ -96,19 +113,25 @@ export default function MovieDetail() {
         </Text>
       </Animated.View>
 
-      <Animated.View style={[styles.backButton, { top: buttonTop }]}>
+      <Animated.View style={[styles.backButton, buttonAnimatedStyle]}>
         <Pressable onPress={() => router.back()} style={styles.backPressable}>
           <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
         </Pressable>
       </Animated.View>
 
-      <ScrollView
-        onScroll={handleScroll}
+      <Animated.ScrollView
+        onScroll={scrollHandler}
         scrollEventThrottle={16}
         contentContainerStyle={styles.scrollContent}
       >
         <MovieTrailer movie={movie} />
-        <MovieActions movie={movie} onToggleWatched={() => {}} />
+        <MovieActions
+          movie={movie}
+          sessionId={sessionId}
+          slot={slot ? Number.parseInt(slot, 10) : undefined}
+          initialAction={action as MovieInteractionAction | undefined}
+          onActionComplete={() => router.back()}
+        />
         {movie.full_synopsis ? (
           <MovieSynopsis synopsis={movie.full_synopsis} />
         ) : null}
@@ -154,7 +177,7 @@ export default function MovieDetail() {
             </View>
           )}
         </MovieDetailTabs>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }

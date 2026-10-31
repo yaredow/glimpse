@@ -19,6 +19,7 @@ export const useLogin = () => {
       });
     },
     onError: async (error: Error) => {
+      console.error("❌ [LOGIN ERROR]:", error);
       Toast.show({
         type: "error",
         text1: "Login failed",

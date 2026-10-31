@@ -16,6 +16,8 @@ type ActionWeightsMap map[string]domain.ActionWeight
 var ActionWeights = ActionWeightsMap{
 	"watched":       {Delta: 2.0, AffectExploration: true},
 	"watchlist_add": {Delta: 1.5, AffectExploration: true},
+	"pick_tonight":  {Delta: 2.5, AffectExploration: true},
+	"locked_in":     {Delta: 3.0, AffectExploration: true},
 	"revealed":      {Delta: 0.3, AffectExploration: false},
 	"skipped":       {Delta: -0.5, AffectExploration: true},
 }

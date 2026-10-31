@@ -8,6 +8,7 @@ export const api = http.extend({
   hooks: {
     beforeRequest: [
       async ({ request, options }) => {
+        console.log("📡 [API REQUEST]", request.method, request.url);
         if (options.context?.auth !== false) {
           const token = await getValidAccessToken();
           if (token) {
@@ -18,6 +19,7 @@ export const api = http.extend({
     ],
     afterResponse: [
       async ({ request, options, response, retryCount }) => {
+        console.log("📥 [API RESPONSE]", response.status, request.url);
         if (
           response.status === 401 &&
           options.context?.auth !== false &&

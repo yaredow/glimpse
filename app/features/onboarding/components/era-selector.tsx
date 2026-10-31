@@ -1,15 +1,26 @@
 import { useState } from "react";
-import { StyleSheet, View, Pressable } from "react-native";
-import { Text, useTheme } from "react-native-paper";
+import { StyleSheet, View, Pressable, ScrollView } from "react-native";
+import { Text } from "react-native-paper";
 import { Button } from "@/components/ui/button";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import type { EraPreset } from "../types/onboarding.type";
 
 interface EraSelectorProps {
   eras: EraPreset[];
   initialSelected: { min_year: number; max_year: number } | null;
   onNext: (min: number, max: number) => void;
-  onBack: () => void;
+  onBack?: () => void;
 }
+
+const ERA_ICONS: Record<string, string> = {
+  "Modern Hits": "rocket-launch-outline",
+  "The New Millennium": "disc",
+  "90s Nostalgia": "cassette",
+  "Retro Classics": "radio",
+  "Timeless Cinema": "filmstrip",
+  Everything: "earth",
+};
 
 export default function EraSelector({
   eras,
@@ -17,19 +28,22 @@ export default function EraSelector({
   onNext,
   onBack,
 }: EraSelectorProps) {
-  const { colors } = useTheme();
   const [selected, setSelected] = useState<EraPreset | null>(() => {
-    if (!initialSelected) return null;
+    if (!initialSelected) {
+      // Default to "Everything" or first
+      return eras.find((e) => e.min_year === 1888) || eras[0] || null;
+    }
     return (
       eras.find(
         (e) =>
           e.min_year === initialSelected.min_year &&
           e.max_year === initialSelected.max_year,
-      ) || null
+      ) || eras[0] || null
     );
   });
 
   const handleSelect = (era: EraPreset) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelected(era);
   };
 
@@ -41,18 +55,17 @@ export default function EraSelector({
 
   return (
     <View style={styles.container}>
-      <Text
-        variant="titleMedium"
-        style={[styles.subtitle, { color: colors.onSurfaceVariant }]}
+      <ScrollView
+        contentContainerStyle={styles.grid}
+        showsVerticalScrollIndicator={false}
       >
-        When was your favorite movie made?
-      </Text>
-
-      <View style={styles.grid}>
         {eras.map((era) => {
           const isSelected =
             selected?.min_year === era.min_year &&
             selected?.max_year === era.max_year;
+
+          const title = era.label.split(" (")[0];
+          const icon = ERA_ICONS[title] || "movie-outline";
 
           return (
             <Pressable
@@ -60,61 +73,66 @@ export default function EraSelector({
               onPress={() => handleSelect(era)}
               style={[
                 styles.card,
-                {
-                  backgroundColor: isSelected
-                    ? colors.primary
-                    : colors.surfaceVariant,
-                  borderColor: isSelected ? colors.primary : colors.outline,
-                },
+                isSelected ? styles.cardSelected : styles.cardUnselected,
               ]}
             >
+              <View style={styles.cardHeader}>
+                <View
+                  style={[
+                    styles.iconBox,
+                    isSelected
+                      ? styles.iconBoxSelected
+                      : styles.iconBoxUnselected,
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name={icon as any}
+                    size={20}
+                    color={isSelected ? "#E50914" : "#A1A1AA"}
+                  />
+                </View>
+                {isSelected && (
+                  <MaterialCommunityIcons
+                    name="check-circle"
+                    size={18}
+                    color="#E50914"
+                  />
+                )}
+              </View>
+
               <Text
-                variant="titleMedium"
                 style={[
-                  styles.label,
-                  { color: isSelected ? colors.onPrimary : colors.onSurface },
+                  styles.title,
+                  isSelected ? styles.titleSelected : styles.titleUnselected,
                 ]}
               >
-                {era.label.split(" (")[0]}
+                {title}
               </Text>
               <Text
-                variant="labelSmall"
                 style={[
                   styles.years,
-                  {
-                    color: isSelected
-                      ? colors.onPrimaryContainer
-                      : colors.onSurfaceVariant,
-                  },
+                  isSelected ? styles.yearsSelected : styles.yearsUnselected,
                 ]}
               >
                 {era.min_year === 1888
                   ? "All Time"
-                  : `${era.min_year} — ${era.max_year}`}
+                  : `${era.min_year} – ${era.max_year}`}
               </Text>
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
 
-      <View style={[styles.footer, { borderTopColor: colors.outline }]}>
-        <Button
-          variant="text"
-          onPress={onBack}
-          textColor={colors.onSurfaceVariant}
-          haptic="light"
-          style={styles.backButton}
-        >
-          Back
-        </Button>
-
+      {/* Floating Bottom Bar */}
+      <View style={styles.footer}>
         <Button
           variant="primary"
           onPress={handleNext}
           disabled={!selected}
           haptic="success"
+          style={styles.nextButton}
         >
-          Next Step
+          Continue
         </Button>
       </View>
     </View>
@@ -125,37 +143,72 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  subtitle: {
-    textAlign: "center",
-    marginBottom: 32,
-  },
   grid: {
-    flexDirection: "column",
+    paddingTop: 8,
+    paddingBottom: 24,
     gap: 12,
   },
   card: {
-    padding: 20,
+    padding: 16,
     borderRadius: 12,
-    borderWidth: 1,
-    justifyContent: "center",
+    borderWidth: 1.5,
   },
-  label: {
-    fontWeight: "bold",
-    marginBottom: 4,
+  cardUnselected: {
+    backgroundColor: "#18181B",
+    borderColor: "#27272A",
   },
-  years: {
-    letterSpacing: 1,
-    opacity: 0.8,
+  cardSelected: {
+    backgroundColor: "#201012",
+    borderColor: "#E50914",
   },
-  footer: {
+  cardHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: 24,
+    marginBottom: 8,
+  },
+  iconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconBoxUnselected: {
+    backgroundColor: "#27272A",
+  },
+  iconBoxSelected: {
+    backgroundColor: "rgba(229, 9, 20, 0.15)",
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  titleUnselected: {
+    color: "#F4F4F5",
+  },
+  titleSelected: {
+    color: "#FFFFFF",
+  },
+  years: {
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  yearsUnselected: {
+    color: "#71717A",
+  },
+  yearsSelected: {
+    color: "#FCA5A5",
+  },
+  footer: {
+    paddingTop: 16,
     borderTopWidth: 1,
+    borderTopColor: "#27272A",
     marginTop: "auto",
   },
-  backButton: {
-    marginLeft: -16,
+  nextButton: {
+    width: "100%",
+    borderRadius: 8,
   },
 });

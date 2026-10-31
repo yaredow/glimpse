@@ -8,7 +8,7 @@ export default function Watched() {
   const { colors } = useTheme();
   const { data, isPending } = useGetTodaysGrid();
 
-  const revealedMovies = data?.grid.filter((m) => m.is_revealed) ?? [];
+  const watchedMovies = data?.grid.filter((m) => m.action === "watched") ?? [];
 
   return (
     <SafeAreaView
@@ -22,15 +22,15 @@ export default function Watched() {
         <View style={styles.centered}>
           <Text>Loading history...</Text>
         </View>
-      ) : revealedMovies.length === 0 ? (
+      ) : watchedMovies.length === 0 ? (
         <View style={styles.centered}>
           <Text variant="bodyLarge">
-            You haven&apos;t revealed any movies yet.
+            You haven&apos;t marked any movies as watched yet.
           </Text>
         </View>
       ) : (
         <FlatList
-          data={revealedMovies}
+          data={watchedMovies}
           keyExtractor={(item) => item.movie_id.toString()}
           renderItem={({ item }) => <MovieCard movie={item as any} />}
           numColumns={3}

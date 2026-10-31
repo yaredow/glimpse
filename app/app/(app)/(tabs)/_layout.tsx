@@ -25,7 +25,7 @@ export default function TabsLayout() {
         options={{
           title: "Discover",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="auto-fix" color={color} size={size} />
+            <MaterialCommunityIcons name="auto-fix" color={color ? String(color) : undefined} size={size} />
           ),
         }}
       />
@@ -35,7 +35,7 @@ export default function TabsLayout() {
         options={{
           title: "Watched",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="history" color={color} size={size} />
+            <MaterialCommunityIcons name="history" color={color ? String(color) : undefined} size={size} />
           ),
         }}
       />
@@ -45,7 +45,7 @@ export default function TabsLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account" color={color} size={size} />
+            <MaterialCommunityIcons name="account" color={color ? String(color) : undefined} size={size} />
           ),
         }}
       />

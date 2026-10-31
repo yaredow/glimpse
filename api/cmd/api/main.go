@@ -22,7 +22,7 @@ import (
 
 const (
 	defaultTimeout = 30
-	defaultAddress = ":4000"
+	defaultAddress = "0.0.0.0:4000"
 )
 
 func main() {

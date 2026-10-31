@@ -5,14 +5,10 @@ export
 help:
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
 
-## dev/up: start background services (PostgreSQL) via devenv
-.PHONY: dev/up
-dev/up:
-	devenv up
-
-## run/api: run API with live reload
+## run/api: ensure Postgres is up and run API with live reload
 .PHONY: run/api
 run/api:
+	devenv up -d
 	air
 
 ## db/psql: connect to the database with psql

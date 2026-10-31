@@ -1,19 +1,15 @@
-import { useCallback, useMemo, useState } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  View,
-  Dimensions,
-} from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useCallback, useState } from "react";
+import { Pressable, StyleSheet, View, Dimensions } from "react-native";
+import { usePanGesture, GestureDetector } from "react-native-gesture-handler";
+import { useFocusEffect } from "expo-router";
 import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
+import { scheduleOnRN } from "react-native-worklets";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   interpolate,
   Extrapolation,
-  runOnJS,
   type SharedValue,
 } from "react-native-reanimated";
 import MysteryCard from "./mystery-card";
@@ -21,7 +17,7 @@ import type { GridMovie } from "../types/movies.type";
 
 interface CoverflowCarouselProps {
   movies: GridMovie[];
-  onReveal: (movieId: number) => void;
+  onReveal: (movie: GridMovie) => void;
 }
 
 const { width: SW } = Dimensions.get("window");
@@ -37,6 +33,15 @@ export default function CoverflowCarousel({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
+  // An expanded card must be a locked mystery card. Revealed/actioned cards are never expanded.
+  const activeExpandedIndex =
+    expandedIndex !== null &&
+    movies[expandedIndex] &&
+    !movies[expandedIndex].is_revealed &&
+    !movies[expandedIndex].action
+      ? expandedIndex
+      : null;
+
   const scrollX = useSharedValue(0);
   const activeIndex = useSharedValue(0);
   const isDragging = useSharedValue(false);
@@ -48,99 +53,129 @@ export default function CoverflowCarousel({
     (index: number, velocityX = 0) => {
       const target = Math.max(0, Math.min(index, movies.length - 1));
       const targetPos = -target * ITEM_W;
-      scrollX.value = withSpring(targetPos, {
-        stiffness: 180,
-        damping: 24,
-        mass: 0.9,
-        velocity: velocityX * 0.1,
-      });
-      activeIndex.value = target;
-      runOnJS(setCurrentIndex)(target);
+      scrollX.set(
+        withSpring(targetPos, {
+          stiffness: 180,
+          damping: 24,
+          mass: 0.9,
+          velocity: velocityX * 0.1,
+        }),
+      );
+      activeIndex.set(target);
+      scheduleOnRN(setCurrentIndex, target);
     },
     [movies.length, scrollX, activeIndex],
   );
 
-  const panGesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .activeOffsetX([-12, 12])
-        .failOffsetY([-12, 12])
-        .enabled(expandedIndex === null)
-        .onBegin(() => {
-          isDragging.value = true;
-        })
-        .onUpdate((e) => {
-          const raw = e.translationX - activeIndex.value * ITEM_W;
-          scrollX.value =
-            raw > 0 ? 0 : raw < maxScroll ? maxScroll : raw;
-        })
-        .onEnd((e) => {
-          isDragging.value = false;
-          const currentOffset = -activeIndex.value * ITEM_W;
-          const offset = currentOffset + e.translationX;
-          const threshold = ITEM_W / 3;
-          let target = activeIndex.value;
+  const panGesture = usePanGesture({
+    activeOffsetX: [-12, 12],
+    failOffsetY: [-12, 12],
+    enabled: activeExpandedIndex === null,
+    onBegin: () => {
+      isDragging.set(true);
+    },
+    onUpdate: (e) => {
+      const raw = e.translationX - activeIndex.get() * ITEM_W;
+      scrollX.set(raw > 0 ? 0 : raw < maxScroll ? maxScroll : raw);
+    },
+    onDeactivate: (e) => {
+      isDragging.set(false);
+      const threshold = ITEM_W / 3;
+      let target = activeIndex.get();
 
-          if (e.translationX < -threshold) {
-            target =
-              activeIndex.value + 1 > movies.length - 1
-                ? movies.length - 1
-                : activeIndex.value + 1;
-          } else if (e.translationX > threshold) {
-            target = activeIndex.value - 1 < 0 ? 0 : activeIndex.value - 1;
-          }
+      if (e.translationX < -threshold) {
+        target =
+          activeIndex.get() + 1 > movies.length - 1
+            ? movies.length - 1
+            : activeIndex.get() + 1;
+      } else if (e.translationX > threshold) {
+        target = activeIndex.get() - 1 < 0 ? 0 : activeIndex.get() - 1;
+      }
 
-          runOnJS(snapToIndex)(target, e.velocityX);
-          runOnJS(impactAsync)(ImpactFeedbackStyle.Light);
-        }),
-    [expandedIndex, maxScroll, movies.length, snapToIndex],
-  );
+      scheduleOnRN(snapToIndex, target, e.velocityX);
+      scheduleOnRN(impactAsync, ImpactFeedbackStyle.Light);
+    },
+    onFinalize: () => {
+      isDragging.set(false);
+    },
+  });
 
   const handleCloseExpanded = useCallback(() => {
     setExpandedIndex(null);
-    overlayOpacity.value = withSpring(0, {
-      stiffness: 200,
-      damping: 22,
-    });
+    overlayOpacity.set(
+      withSpring(0, {
+        stiffness: 200,
+        damping: 22,
+      }),
+    );
   }, [overlayOpacity]);
+
+  // When returning to the screen or when grid data changes, ensure no card remains expanded
+  useFocusEffect(
+    useCallback(() => {
+      setExpandedIndex(null);
+      overlayOpacity.set(0);
+    }, [overlayOpacity]),
+  );
 
   const handleCardPress = useCallback(
     (cardIndex: number) => {
-      if (expandedIndex !== null) {
-        if (cardIndex === expandedIndex) {
+      if (activeExpandedIndex !== null) {
+        if (cardIndex === activeExpandedIndex) {
           handleCloseExpanded();
         }
         return;
       }
 
-      if (cardIndex === currentIndex) {
-        setExpandedIndex(cardIndex);
-        overlayOpacity.value = withSpring(1, {
+      if (cardIndex !== currentIndex) {
+        snapToIndex(cardIndex);
+        return;
+      }
+
+      const movie = movies[cardIndex];
+      const isRevealed = movie?.is_revealed || !!movie?.action;
+      const isSkippedOrWatched =
+        movie?.action === "skipped" || movie?.action === "watched";
+
+      if (isSkippedOrWatched) {
+        return;
+      }
+
+      if (isRevealed) {
+        onReveal(movie);
+        return;
+      }
+
+      setExpandedIndex(cardIndex);
+      overlayOpacity.set(
+        withSpring(1, {
           stiffness: 200,
           damping: 22,
-        });
-      } else {
-        snapToIndex(cardIndex);
-      }
+        }),
+      );
     },
     [
+      activeExpandedIndex,
       currentIndex,
-      expandedIndex,
       handleCloseExpanded,
+      movies,
+      onReveal,
       overlayOpacity,
       snapToIndex,
     ],
   );
 
   const handleReveal = useCallback(
-    (movieId: number) => {
-      onReveal(movieId);
+    (movie: GridMovie) => {
+      setExpandedIndex(null);
+      overlayOpacity.set(0);
+      onReveal(movie);
     },
-    [onReveal],
+    [onReveal, overlayOpacity],
   );
 
   const overlayAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: overlayOpacity.value,
+    opacity: overlayOpacity.get(),
   }));
 
   const containerOffset = (SW - CARD_W) / 2;
@@ -149,7 +184,7 @@ export default function CoverflowCarousel({
     <View style={styles.container}>
       <Animated.View
         style={[styles.expandOverlay, overlayAnimatedStyle]}
-        pointerEvents={expandedIndex !== null ? "auto" : "none"}
+        pointerEvents={activeExpandedIndex !== null ? "auto" : "none"}
       >
         <Pressable
           style={StyleSheet.absoluteFill}
@@ -161,15 +196,12 @@ export default function CoverflowCarousel({
         <View
           style={[
             styles.carouselArea,
-            expandedIndex !== null && styles.expandedCarouselArea,
+            activeExpandedIndex !== null && styles.expandedCarouselArea,
           ]}
           collapsable={false}
         >
           <View
-            style={[
-              styles.track,
-              { paddingHorizontal: containerOffset },
-            ]}
+            style={[styles.track, { paddingHorizontal: containerOffset }]}
             collapsable={false}
           >
             {movies.map((movie, i) => (
@@ -180,9 +212,9 @@ export default function CoverflowCarousel({
                 scrollX={scrollX}
                 containerOffset={containerOffset}
                 isCenter={i === currentIndex}
-                isExpanded={expandedIndex === i}
+                isExpanded={activeExpandedIndex === i}
                 onPress={() => handleCardPress(i)}
-                onReveal={() => handleReveal(movie.movie_id)}
+                onReveal={() => handleReveal(movie)}
               />
             ))}
           </View>
@@ -222,7 +254,7 @@ function CardSlot({
 }) {
   const animatedStyle = useAnimatedStyle(() => {
     const baseLeft = index * ITEM_W + containerOffset;
-    const position = scrollX.value + baseLeft;
+    const position = scrollX.get() + baseLeft;
     const diff = position - containerOffset;
     const absPos = diff < 0 ? -diff : diff;
     const maxDist = ITEM_W;

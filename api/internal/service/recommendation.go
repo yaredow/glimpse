@@ -26,6 +26,7 @@ type RecGridRepository interface {
 	GetByID(ctx context.Context, userID int64) ([]domain.GridSlotResponse, error)
 	Clear(ctx context.Context, userID int64) error
 	Insert(ctx context.Context, userID int64, movieID int64, sessionID uuid.UUID, slotNumber int) error
+	MarkRevealed(ctx context.Context, userID, movieID int64) error
 }
 
 type RecGridHistoryRepository interface {
@@ -229,6 +230,11 @@ func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, 
 			RevealToActionMS: revealActionMs,
 		}); err != nil {
 			return fmt.Errorf("insert interaction: %w", err)
+		}
+
+		gtx := postgres.NewGridRepository(txDB)
+		if err := gtx.MarkRevealed(ctx, userID, movieID); err != nil {
+			return fmt.Errorf("mark slot revealed: %w", err)
 		}
 
 		if weight.AffectExploration {

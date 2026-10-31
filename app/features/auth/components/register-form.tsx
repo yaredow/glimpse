@@ -11,7 +11,7 @@ export const RegisterForm = () => {
 
   const form = useForm({
     defaultValues: {
-      username: "",
+      name: "",
       email: "",
       password: "",
     } as RegisterFormData,
@@ -29,16 +29,16 @@ export const RegisterForm = () => {
         Create Account
       </Text>
 
-      <form.Field name="username">
+      <form.Field name="name">
         {(field) => (
           <View style={styles.field}>
             <TextInput
-              label="Username"
+              label="Full Name"
               mode="outlined"
               value={field.state.value}
               onChangeText={field.handleChange}
               onBlur={field.handleBlur}
-              autoCapitalize="none"
+              autoCapitalize="words"
             />
             {field.state.meta.errors ? (
               <Text

@@ -31,7 +31,16 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			m.backdrop_path,
 			m.vote_average,
 			m.release_date,
-			d.grid_session_id
+			d.grid_session_id,
+			(
+				SELECT ui.action
+				FROM user_interactions ui
+				WHERE ui.user_id = d.user_id
+				  AND ui.movie_id = d.movie_id
+				  AND ui.grid_session_id = d.grid_session_id
+				ORDER BY ui.acted_at DESC
+				LIMIT 1
+			) AS action
 		FROM daily_pools d
 		JOIN movies m ON m.id = d.movie_id
 		WHERE d.user_id = $1
@@ -60,13 +69,23 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			&s.VoteAverage,
 			&s.ReleaseDate,
 			&s.GridSessionID,
+			&s.Action,
 		); err != nil {
 			return nil, err
+		}
+		if s.Action != nil {
+			s.IsRevealed = true
 		}
 		slots = append(slots, s)
 	}
 
 	return slots, rows.Err()
+}
+
+func (gr *GridRepository) MarkRevealed(ctx context.Context, userID, movieID int64) error {
+	query := `UPDATE daily_pools SET is_revealed = TRUE WHERE user_id = $1 AND movie_id = $2`
+	_, err := gr.db.Exec(ctx, query, userID, movieID)
+	return err
 }
 
 func (gr *GridRepository) Clear(ctx context.Context, userID int64) error {

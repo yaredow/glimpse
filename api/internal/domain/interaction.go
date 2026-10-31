@@ -18,6 +18,8 @@ const (
 	ActionWatched      ActionType = "watched"
 	ActionSkipped      ActionType = "skipped"
 	ActionWatchlistAdd ActionType = "watchlist_add"
+	ActionPickTonight  ActionType = "pick_tonight"
+	ActionLockedIn     ActionType = "locked_in"
 )
 
 type Interaction struct {
