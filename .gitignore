@@ -1,4 +1,42 @@
+# Nix & Devenv
 result
 result-*
 .direnv/
+.direnv
+.devenv/
+.devenv*
+devenv.local.nix
+devenv.local.yaml
 .envrc
+.pre-commit-config.yaml
+
+# Node & Package Managers
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next/
+**/.next/
+out/
+
+# Expo & React Native
+.expo/
+**/.expo/
+android/
+ios/
+
+# Environment files
+.env
+.env*.local
+!.env.example
+**/.env
+!**/.env.example
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

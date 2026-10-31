@@ -1,80 +1,42 @@
 -include .env
 export
 
-# ==================================================================================== #
-# HELPERS
-# ==================================================================================== #
-
-## help: show available make targets
 .PHONY: help
 help:
-	@echo "Usage:"
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
 
-.PHONY: confirm
-confirm:
-	@echo "Are you sure? [y/N]" && read ans && [ $${ans: -N} = y ]
+## dev/up: start background services (PostgreSQL) via devenv
+.PHONY: dev/up
+dev/up:
+	devenv up
 
-
-# ==================================================================================== #
-# DOCKER
-# ==================================================================================== #
-
-## docker/up: start Docker services in detached mode
-.PHONY: docker/up
-docker/up:
-		docker compose up -d
-
-## docker/down: stop and remove Docker services
-.PHONY: docker/down
-docker/down:
-		docker compose down
-
-## docker/db/shell: open a psql shell in the db container
-.PHONY: docker/db/shell
-docker/db/shell:
-		docker compose exec db psql -U ${DB_USER} -d ${DB_NAME}
-
-
-# ==================================================================================== #
-# DEVELOPMENT
-# ==================================================================================== #
-
-## run/api: run API with live reload (installs air if missing)
+## run/api: run API with live reload
 .PHONY: run/api
-run/api: docker/up
-	@if ! command -v air > /dev/null; then \
-		echo "Installing Air..."; \
-		go install github.com/air-verse/air@latest; \
-	fi
+run/api:
 	air
 
 ## db/psql: connect to the database with psql
 .PHONY: db/psql
 db/psql:
-	psql ${DB_DSN}
+	psql "${DB_DSN}"
 
-## db/migration/new: create a new SQL migration file
+## db/migration/new: create a new SQL migration file (e.g. make db/migration/new name=add_users)
 .PHONY: db/migration/new
 db/migration/new:
-	@echo "Creating a migration file for ${name}"
+	@echo "Creating a migration file for ${name}..."
 	migrate create -seq -ext=.sql -dir=./migrations ${name}
 
-## db/migration/up: apply all pending up migrations
+## db/migration/up: apply all pending migrations
 .PHONY: db/migration/up
-db/migration/up: confirm
+db/migration/up:
 	@echo "Running up migrations..."
 	migrate -path ./migrations -database ${DB_DSN} up
 
 ## db/migration/down: roll back the most recent migration
 .PHONY: db/migration/down
-db/migration/down: confirm
+db/migration/down:
 	@echo "Running down migrations..."
 	migrate -path ./migrations -database ${DB_DSN} down 1
-
-# ==================================================================================== #
-# QUALITY CONTROL
-# ==================================================================================== #
 
 ## tidy: format code and tidy/verify Go modules
 .PHONY: tidy
