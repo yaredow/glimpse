@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, StyleSheet, View, Dimensions } from "react-native";
 import { usePanGesture, GestureDetector } from "react-native-gesture-handler";
 import { useFocusEffect } from "expo-router";
@@ -32,6 +32,12 @@ export default function CoverflowCarousel({
 }: CoverflowCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [prevFirstId, setPrevFirstId] = useState(movies[0]?.movie_id);
+
+  if (movies[0]?.movie_id !== prevFirstId) {
+    setPrevFirstId(movies[0]?.movie_id);
+    setExpandedIndex(null);
+  }
 
   // An expanded card must be a locked mystery card. Revealed/actioned cards are never expanded.
   const activeExpandedIndex =
@@ -66,6 +72,11 @@ export default function CoverflowCarousel({
     },
     [movies.length, scrollX, activeIndex],
   );
+
+  const firstMovieId = movies[0]?.movie_id;
+  useEffect(() => {
+    snapToIndex(0);
+  }, [firstMovieId, snapToIndex]);
 
   const panGesture = usePanGesture({
     activeOffsetX: [-12, 12],

@@ -8,7 +8,8 @@ export type ConfirmableAction =
   | "pick_tonight"
   | "watched"
   | "skipped"
-  | "locked_in";
+  | "locked_in"
+  | "sync";
 
 interface ActionConfirmModalProps {
   visible: boolean;
@@ -82,6 +83,25 @@ const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
         or undo this skip until tomorrow&apos;s batch.
       </Text>
     ),
+  },
+  sync: {
+    icon: "sync",
+    title: "Sync a Fresh Batch?",
+    confirmText: "Sync Fresh Batch",
+    cancelText: "Keep Current Movies",
+    renderDescription: (_title, syncs = 3) => {
+      const remainingAfter = Math.max(0, syncs - 1);
+      return (
+        <Text variant="bodyMedium" style={styles.description}>
+          This will eliminate your current selection and draw 5 fresh mystery
+          movies. You will have{" "}
+          <Text style={styles.highlightText}>
+            {remainingAfter} {remainingAfter === 1 ? "sync" : "syncs"}
+          </Text>{" "}
+          remaining today.
+        </Text>
+      );
+    },
   },
 };
 

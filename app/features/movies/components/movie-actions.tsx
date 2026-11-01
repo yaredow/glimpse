@@ -32,7 +32,7 @@ export default function MovieActions({
   onActionComplete,
 }: MovieActionsProps) {
   const [loadingAction, setLoadingAction] = useState<MovieInteractionAction | null>(null);
-  const [pendingAction, setPendingAction] = useState<ConfirmableAction | null>(null);
+  const [pendingAction, setPendingAction] = useState<Extract<ConfirmableAction, MovieInteractionAction> | null>(null);
   const { data: profileData } = useProfile();
   const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
   const recordMutation = useRecordInteraction();

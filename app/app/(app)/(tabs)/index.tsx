@@ -10,6 +10,7 @@ import { router } from "expo-router";
 import Toast from "react-native-toast-message";
 import { useGetTodaysGrid } from "@/features/movies/hooks/query/use-today-grid";
 import { useRecordInteraction } from "@/features/movies/hooks/mutations/use-record-interactions";
+import { useSyncGrid } from "@/features/movies/hooks/mutations/use-sync-grid";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import type { GridMovie } from "@/features/movies/types/movies.type";
 import ExploreHeader from "@/features/movies/components/explore-header";
@@ -20,12 +21,14 @@ import SkeletonLoader from "@/features/movies/components/skeleton-loader";
 import ActionConfirmModal from "@/features/movies/components/action-confirm-modal";
 
 export default function Discover() {
-  const { data, isPending, refetch } = useGetTodaysGrid();
+  const { data, isPending } = useGetTodaysGrid();
   const { data: profileData } = useProfile();
   const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
   const recordInteraction = useRecordInteraction();
+  const syncMutation = useSyncGrid();
   const [isLockingIn, setIsLockingIn] = useState(false);
   const [showLockConfirm, setShowLockConfirm] = useState(false);
+  const [showSyncConfirm, setShowSyncConfirm] = useState(false);
 
   const movies = data?.grid ?? [];
   const tonightPick = movies.find(
@@ -59,9 +62,37 @@ export default function Discover() {
     [recordInteraction],
   );
 
-  const handleSync = useCallback(() => {
-    refetch();
-  }, [refetch]);
+  const handleRequestSync = useCallback(() => {
+    if (syncsRemaining <= 0 || syncMutation.isPending) {
+      Toast.show({
+        type: "info",
+        text1: "No Syncs Remaining",
+        text2: "You have used all 3 syncs for today.",
+      });
+      return;
+    }
+    setShowSyncConfirm(true);
+  }, [syncsRemaining, syncMutation.isPending]);
+
+  const handleConfirmSync = useCallback(() => {
+    setShowSyncConfirm(false);
+    syncMutation.mutate(undefined, {
+      onSuccess: (res) => {
+        Toast.show({
+          type: "success",
+          text1: "Fresh Batch Synced! 🎬",
+          text2: `${res.syncs_remaining} ${res.syncs_remaining === 1 ? "sync" : "syncs"} remaining today.`,
+        });
+      },
+      onError: (err) => {
+        Toast.show({
+          type: "error",
+          text1: "Sync Failed",
+          text2: err.message,
+        });
+      },
+    });
+  }, [syncMutation]);
 
   const handleLockIn = useCallback(() => {
     if (!tonightPick || isLockingIn) return;
@@ -139,7 +170,7 @@ export default function Discover() {
             movie={tonightPick}
             syncsRemaining={syncsRemaining}
             onLockIn={() => setShowLockConfirm(true)}
-            onSync={handleSync}
+            onSync={handleRequestSync}
             onViewDetails={handleViewDetails}
             isLockingIn={isLockingIn}
           />
@@ -148,7 +179,11 @@ export default function Discover() {
             <CoverflowCarousel movies={movies} onReveal={handleReveal} />
 
             <View style={styles.syncArea}>
-              <SyncButton onSync={handleSync} syncsRemaining={syncsRemaining} />
+              <SyncButton
+                onSync={handleRequestSync}
+                syncsRemaining={syncsRemaining}
+                isSyncing={syncMutation.isPending}
+              />
             </View>
           </>
         )}
@@ -167,6 +202,15 @@ export default function Discover() {
           onCancel={() => setShowLockConfirm(false)}
         />
       ) : null}
+
+      <ActionConfirmModal
+        visible={showSyncConfirm}
+        action="sync"
+        movieTitle=""
+        syncsRemaining={syncsRemaining}
+        onConfirm={handleConfirmSync}
+        onCancel={() => setShowSyncConfirm(false)}
+      />
     </SafeAreaView>
   );
 }
