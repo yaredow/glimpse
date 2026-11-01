@@ -169,8 +169,11 @@ func (mr *MovieRepository) GetCandidateMovies(ctx context.Context, userID int64,
 			END
 		)
 		AND (
+			$6::text[] IS NULL OR NOT m.genres && $6
+		)
+		AND (
 			CASE 
-				WHEN $6::date IS NOT NULL THEN m.release_date >= $6 AND m.release_date <= $7
+				WHEN $7::date IS NOT NULL THEN m.release_date >= $7 AND m.release_date <= $8
 				ELSE m.release_date >= make_date(up.min_year, 1, 1) AND m.release_date <= make_date(up.max_year, 12, 31)
 			END
 		)
@@ -180,16 +183,18 @@ func (mr *MovieRepository) GetCandidateMovies(ctx context.Context, userID int64,
 	var requiredGenre *string
 	var anyGenres []string
 	var requireAllGenres []string
+	var excludedGenres []string
 	var minDate, maxDate *time.Time
 	if filter != nil {
 		requiredGenre = filter.RequiredGenre
 		anyGenres = filter.AnyGenres
 		requireAllGenres = filter.RequireAllGenres
+		excludedGenres = filter.ExcludedGenres
 		minDate = filter.MinDate
 		maxDate = filter.MaxDate
 	}
 
-	rows, err := mr.db.Query(ctx, query, userID, limit, requiredGenre, anyGenres, requireAllGenres, minDate, maxDate)
+	rows, err := mr.db.Query(ctx, query, userID, limit, requiredGenre, anyGenres, requireAllGenres, excludedGenres, minDate, maxDate)
 	if err != nil {
 		return nil, err
 	}

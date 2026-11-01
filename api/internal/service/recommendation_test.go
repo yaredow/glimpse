@@ -12,14 +12,15 @@ func TestGetMoodFilter(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name              string
-		mood              string
-		expectNil         bool
-		wantRequiredGenre string
-		wantAnyGenres     []string
-		wantAllGenres     []string
-		wantMinYear       int
-		wantMaxYear       int
+		name               string
+		mood               string
+		expectNil          bool
+		wantRequiredGenre  string
+		wantAnyGenres      []string
+		wantAllGenres      []string
+		wantExcludedGenres []string
+		wantMinYear        int
+		wantMaxYear        int
 	}{
 		{
 			name:      "surprise returns nil",
@@ -37,36 +38,42 @@ func TestGetMoodFilter(t *testing.T) {
 			expectNil: true,
 		},
 		{
-			name:              "horror returns required Horror",
-			mood:              "horror",
-			wantRequiredGenre: "Horror",
+			name:               "horror returns required Horror",
+			mood:               "horror",
+			wantRequiredGenre:  "Horror",
+			wantExcludedGenres: []string{"Animation", "Family"},
 		},
 		{
-			name:              "spooky alias returns required Horror",
-			mood:              "spooky",
-			wantRequiredGenre: "Horror",
+			name:               "spooky alias returns required Horror",
+			mood:               "spooky",
+			wantRequiredGenre:  "Horror",
+			wantExcludedGenres: []string{"Animation", "Family"},
 		},
 		{
-			name:          "action_crime returns action crime",
-			mood:          "action_crime",
-			wantAnyGenres: []string{"Action", "Crime"},
+			name:               "action_crime returns action crime",
+			mood:               "action_crime",
+			wantAnyGenres:      []string{"Action", "Crime"},
+			wantExcludedGenres: []string{"Animation", "Family", "Romance", "Comedy"},
 		},
 		{
-			name:          "psychological returns mystery and sci-fi thriller",
-			mood:          "psychological",
-			wantAnyGenres: []string{"Mystery"},
-			wantAllGenres: []string{"Science Fiction", "Thriller"},
+			name:               "psychological returns mystery and sci-fi thriller",
+			mood:               "psychological",
+			wantAnyGenres:      []string{"Mystery"},
+			wantAllGenres:      []string{"Science Fiction", "Thriller"},
+			wantExcludedGenres: []string{"Animation", "Family", "Comedy", "Action"},
 		},
 		{
-			name:              "comedy returns required Comedy",
-			mood:              "comedy",
-			wantRequiredGenre: "Comedy",
+			name:               "comedy returns required Comedy without action or scifi",
+			mood:               "comedy",
+			wantRequiredGenre:  "Comedy",
+			wantExcludedGenres: []string{"Action", "Adventure", "Science Fiction", "Fantasy", "War"},
 		},
 		{
-			name:        "classics returns 1975 to 1999",
-			mood:        "classics",
-			wantMinYear: 1975,
-			wantMaxYear: 1999,
+			name:               "classics returns 1975 to 1999",
+			mood:               "classics",
+			wantExcludedGenres: []string{"Animation", "Family"},
+			wantMinYear:        1975,
+			wantMaxYear:        1999,
 		},
 	}
 
@@ -90,6 +97,9 @@ func TestGetMoodFilter(t *testing.T) {
 			}
 			if len(tc.wantAllGenres) > 0 {
 				require.Equal(t, tc.wantAllGenres, filter.RequireAllGenres)
+			}
+			if len(tc.wantExcludedGenres) > 0 {
+				require.Equal(t, tc.wantExcludedGenres, filter.ExcludedGenres)
 			}
 			if tc.wantMinYear > 0 {
 				require.NotNil(t, filter.MinDate)

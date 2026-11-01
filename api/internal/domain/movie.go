@@ -9,6 +9,7 @@ type CandidateFilter struct {
 	RequiredGenre    *string
 	AnyGenres        []string
 	RequireAllGenres []string
+	ExcludedGenres   []string
 	MinDate          *time.Time
 	MaxDate          *time.Time
 }

@@ -100,28 +100,33 @@ func GetMoodFilter(mood string) *domain.CandidateFilter {
 	case "horror", "spooky":
 		genre := "Horror"
 		return &domain.CandidateFilter{
-			RequiredGenre: &genre,
+			RequiredGenre:  &genre,
+			ExcludedGenres: []string{"Animation", "Family"},
 		}
 	case "action_crime", "adrenaline":
 		return &domain.CandidateFilter{
-			AnyGenres: []string{"Action", "Crime"},
+			AnyGenres:      []string{"Action", "Crime"},
+			ExcludedGenres: []string{"Animation", "Family", "Romance", "Comedy"},
 		}
 	case "psychological", "mind_bender":
 		return &domain.CandidateFilter{
 			AnyGenres:        []string{"Mystery"},
 			RequireAllGenres: []string{"Science Fiction", "Thriller"},
+			ExcludedGenres:   []string{"Animation", "Family", "Comedy", "Action"},
 		}
 	case "comedy", "feel_good":
 		genre := "Comedy"
 		return &domain.CandidateFilter{
-			RequiredGenre: &genre,
+			RequiredGenre:  &genre,
+			ExcludedGenres: []string{"Action", "Adventure", "Science Fiction", "Fantasy", "War"},
 		}
 	case "classics", "nostalgia":
 		start := time.Date(1975, 1, 1, 0, 0, 0, 0, time.UTC)
 		end := time.Date(1999, 12, 31, 23, 59, 59, 0, time.UTC)
 		return &domain.CandidateFilter{
-			MinDate: &start,
-			MaxDate: &end,
+			MinDate:        &start,
+			MaxDate:        &end,
+			ExcludedGenres: []string{"Animation", "Family"},
 		}
 	default:
 		return nil

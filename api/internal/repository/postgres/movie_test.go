@@ -215,7 +215,7 @@ func TestMovieRepository_GetCandidateMovies(t *testing.T) {
 		)
 
 		mock.ExpectQuery(`SELECT\s+m\.id,\s+m\.tmdb_id,\s+m\.imdb_id,\s+m\.vague_description,\s+m\.genres,\s+m\.title,\s+m\.original_title,\s+m\.full_synopsis,\s+m\.poster_path,\s+m\.backdrop_path,\s+m\.tagline,\s+m\.director,\s+m\.cast_members,\s+m\.trailer_key,\s+m\.release_date,\s+m\.runtime,\s+m\.vote_average,\s+m\.vote_count,\s+m\.original_language,\s+m\.spoken_languages,\s+m\.production_countries,\s+m\.popularity,\s+m\.shown_count,\s+m\.watched_count,\s+m\.detail_synced_at,\s+m\.created_at\s+FROM\s+movies\s+m\s+JOIN\s+user_preferences\s+up\s+ON\s+up\.user_id\s+=\s+\$1\s+WHERE\s+m\.id\s+NOT\s+IN\s+\(\s*SELECT\s+movie_id\s+FROM\s+user_grid_history\s+WHERE\s+user_id\s+=\s+\$1\s*\).*ORDER\s+BY\s+m\.popularity\s+DESC\s+LIMIT\s+\$2`).
-			WithArgs(int64(1), 200, (*string)(nil), []string(nil), []string(nil), (*time.Time)(nil), (*time.Time)(nil)).
+			WithArgs(int64(1), 200, (*string)(nil), []string(nil), []string(nil), []string(nil), (*time.Time)(nil), (*time.Time)(nil)).
 			WillReturnRows(rows)
 
 		movies, err := repo.GetCandidateMovies(context.Background(), 1, 200, nil)
@@ -252,11 +252,12 @@ func TestMovieRepository_GetCandidateMovies(t *testing.T) {
 
 		horror := "Horror"
 		filter := &domain.CandidateFilter{
-			RequiredGenre: &horror,
+			RequiredGenre:  &horror,
+			ExcludedGenres: []string{"Animation", "Family"},
 		}
 
 		mock.ExpectQuery(`SELECT\s+m\.id,\s+m\.tmdb_id,\s+m\.imdb_id,\s+m\.vague_description,\s+m\.genres,\s+m\.title,\s+m\.original_title,\s+m\.full_synopsis,\s+m\.poster_path,\s+m\.backdrop_path,\s+m\.tagline,\s+m\.director,\s+m\.cast_members,\s+m\.trailer_key,\s+m\.release_date,\s+m\.runtime,\s+m\.vote_average,\s+m\.vote_count,\s+m\.original_language,\s+m\.spoken_languages,\s+m\.production_countries,\s+m\.popularity,\s+m\.shown_count,\s+m\.watched_count,\s+m\.detail_synced_at,\s+m\.created_at\s+FROM\s+movies\s+m\s+JOIN\s+user_preferences\s+up\s+ON\s+up\.user_id\s+=\s+\$1\s+WHERE\s+m\.id\s+NOT\s+IN\s+\(\s*SELECT\s+movie_id\s+FROM\s+user_grid_history\s+WHERE\s+user_id\s+=\s+\$1\s*\).*ORDER\s+BY\s+m\.popularity\s+DESC\s+LIMIT\s+\$2`).
-			WithArgs(int64(1), 200, filter.RequiredGenre, []string(nil), []string(nil), (*time.Time)(nil), (*time.Time)(nil)).
+			WithArgs(int64(1), 200, filter.RequiredGenre, []string(nil), []string(nil), filter.ExcludedGenres, (*time.Time)(nil), (*time.Time)(nil)).
 			WillReturnRows(rows)
 
 		movies, err := repo.GetCandidateMovies(context.Background(), 1, 200, filter)
@@ -293,13 +294,14 @@ func TestMovieRepository_GetCandidateMovies(t *testing.T) {
 		)
 
 		filter := &domain.CandidateFilter{
-			AnyGenres: []string{"Crime", "Thriller"},
-			MinDate:   &minDate,
-			MaxDate:   &maxDate,
+			AnyGenres:      []string{"Crime", "Thriller"},
+			ExcludedGenres: []string{"Animation", "Family"},
+			MinDate:        &minDate,
+			MaxDate:        &maxDate,
 		}
 
 		mock.ExpectQuery(`SELECT\s+m\.id,\s+m\.tmdb_id,\s+m\.imdb_id,\s+m\.vague_description,\s+m\.genres,\s+m\.title,\s+m\.original_title,\s+m\.full_synopsis,\s+m\.poster_path,\s+m\.backdrop_path,\s+m\.tagline,\s+m\.director,\s+m\.cast_members,\s+m\.trailer_key,\s+m\.release_date,\s+m\.runtime,\s+m\.vote_average,\s+m\.vote_count,\s+m\.original_language,\s+m\.spoken_languages,\s+m\.production_countries,\s+m\.popularity,\s+m\.shown_count,\s+m\.watched_count,\s+m\.detail_synced_at,\s+m\.created_at\s+FROM\s+movies\s+m\s+JOIN\s+user_preferences\s+up\s+ON\s+up\.user_id\s+=\s+\$1\s+WHERE\s+m\.id\s+NOT\s+IN\s+\(\s*SELECT\s+movie_id\s+FROM\s+user_grid_history\s+WHERE\s+user_id\s+=\s+\$1\s*\).*ORDER\s+BY\s+m\.popularity\s+DESC\s+LIMIT\s+\$2`).
-			WithArgs(int64(1), 200, (*string)(nil), filter.AnyGenres, []string(nil), filter.MinDate, filter.MaxDate).
+			WithArgs(int64(1), 200, (*string)(nil), filter.AnyGenres, []string(nil), filter.ExcludedGenres, filter.MinDate, filter.MaxDate).
 			WillReturnRows(rows)
 
 		movies, err := repo.GetCandidateMovies(context.Background(), 1, 200, filter)
@@ -317,7 +319,7 @@ func TestMovieRepository_GetCandidateMovies(t *testing.T) {
 		repo := postgres.NewMovieRepository(&postgres.DB{Pool: mock})
 
 		mock.ExpectQuery(`SELECT\s+m\.id,\s+m\.tmdb_id,\s+m\.imdb_id,\s+m\.vague_description,\s+m\.genres,\s+m\.title,\s+m\.original_title,\s+m\.full_synopsis,\s+m\.poster_path,\s+m\.backdrop_path,\s+m\.tagline,\s+m\.director,\s+m\.cast_members,\s+m\.trailer_key,\s+m\.release_date,\s+m\.runtime,\s+m\.vote_average,\s+m\.vote_count,\s+m\.original_language,\s+m\.spoken_languages,\s+m\.production_countries,\s+m\.popularity,\s+m\.shown_count,\s+m\.watched_count,\s+m\.detail_synced_at,\s+m\.created_at\s+FROM\s+movies\s+m\s+JOIN\s+user_preferences\s+up\s+ON\s+up\.user_id\s+=\s+\$1\s+WHERE\s+m\.id\s+NOT\s+IN\s+\(\s*SELECT\s+movie_id\s+FROM\s+user_grid_history\s+WHERE\s+user_id\s+=\s+\$1\s*\).*ORDER\s+BY\s+m\.popularity\s+DESC\s+LIMIT\s+\$2`).
-			WithArgs(int64(1), 200, (*string)(nil), []string(nil), []string(nil), (*time.Time)(nil), (*time.Time)(nil)).
+			WithArgs(int64(1), 200, (*string)(nil), []string(nil), []string(nil), []string(nil), (*time.Time)(nil), (*time.Time)(nil)).
 			WillReturnRows(pgxmock.NewRows([]string{
 				"id", "tmdb_id", "imdb_id", "vague_description", "genres", "title",
 				"original_title", "full_synopsis", "poster_path", "backdrop_path",
