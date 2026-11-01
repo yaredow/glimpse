@@ -106,3 +106,20 @@ func (gr *GridRepository) Insert(ctx context.Context, userID int64, movieID int6
 
 	return err
 }
+
+func (gr *GridRepository) IsLockedIn(ctx context.Context, userID int64) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM daily_pools d
+			JOIN user_interactions ui ON ui.user_id = d.user_id
+			                         AND ui.movie_id = d.movie_id
+			                         AND ui.grid_session_id = d.grid_session_id
+			WHERE d.user_id = $1
+			  AND ui.action = 'locked_in'
+		)
+	`
+	var locked bool
+	err := gr.db.QueryRow(ctx, query, userID).Scan(&locked)
+	return locked, err
+}

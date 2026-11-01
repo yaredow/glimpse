@@ -13,6 +13,7 @@ import (
 type GridService interface {
 	GenerateGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, uuid.UUID, error)
 	RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs *int) error
+	SyncGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, int, error)
 }
 
 type RecommendationHandler struct {
@@ -60,4 +61,18 @@ func (rh *RecommendationHandler) RecordInteraction(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, envelope{"message": "interaction recorded"})
+}
+
+func (rh *RecommendationHandler) SyncGrid(c *echo.Context) error {
+	user := c.Get("user").(*domain.User)
+
+	grid, syncsRemaining, err := rh.svc.SyncGrid(c.Request().Context(), user.ID)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, envelope{
+		"grid":            grid,
+		"syncs_remaining": syncsRemaining,
+	})
 }

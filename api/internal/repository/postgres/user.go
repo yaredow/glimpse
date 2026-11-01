@@ -247,3 +247,38 @@ func (ur *UserRepository) UpdateInteractionsStat(ctx context.Context, userID int
 
 	return err
 }
+
+func (ur *UserRepository) DecrementSyncs(ctx context.Context, userID int64) (int, error) {
+	query := `
+		UPDATE users
+		SET syncs_remaining = syncs_remaining - 1,
+		    updated_at = NOW()
+		WHERE id = $1 AND syncs_remaining > 0
+		RETURNING syncs_remaining
+	`
+
+	var remaining int
+	err := ur.db.QueryRow(ctx, query, userID).Scan(&remaining)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, domain.ErrNoSyncsRemaining
+		}
+		return 0, err
+	}
+
+	return remaining, nil
+}
+
+func (ur *UserRepository) ResetDailySyncsIfDue(ctx context.Context, userID int64) error {
+	query := `
+		UPDATE users
+		SET syncs_remaining = 3,
+		    skips_remaining = 3,
+		    last_reset_at = NOW(),
+		    updated_at = NOW()
+		WHERE id = $1
+		  AND (last_reset_at < CURRENT_DATE OR last_reset_at < NOW() - INTERVAL '24 hours')
+	`
+	_, err := ur.db.Exec(ctx, query, userID)
+	return err
+}

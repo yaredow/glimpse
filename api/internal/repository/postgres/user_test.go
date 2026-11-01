@@ -183,3 +183,60 @@ func TestUserRepository_UpdateInteractionsStat(t *testing.T) {
 		require.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+
+func TestUserRepository_DecrementSyncs(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewUserRepository(&postgres.DB{Pool: mock})
+
+		mock.ExpectQuery(`UPDATE users SET syncs_remaining = syncs_remaining - 1`).
+			WithArgs(int64(1)).
+			WillReturnRows(pgxmock.NewRows([]string{"syncs_remaining"}).AddRow(2))
+
+		rem, err := repo.DecrementSyncs(context.Background(), int64(1))
+		require.NoError(t, err)
+		require.Equal(t, 2, rem)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("no syncs remaining", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewUserRepository(&postgres.DB{Pool: mock})
+
+		mock.ExpectQuery(`UPDATE users SET syncs_remaining = syncs_remaining - 1`).
+			WithArgs(int64(1)).
+			WillReturnRows(pgxmock.NewRows([]string{"syncs_remaining"}))
+
+		_, err = repo.DecrementSyncs(context.Background(), int64(1))
+		require.ErrorIs(t, err, domain.ErrNoSyncsRemaining)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+}
+
+func TestUserRepository_ResetDailySyncsIfDue(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewUserRepository(&postgres.DB{Pool: mock})
+
+		mock.ExpectExec(`UPDATE users SET syncs_remaining = 3`).
+			WithArgs(int64(1)).
+			WillReturnResult(pgxmock.NewResult("UPDATE", 1))
+
+		err = repo.ResetDailySyncsIfDue(context.Background(), int64(1))
+		require.NoError(t, err)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+}

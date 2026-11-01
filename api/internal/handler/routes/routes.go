@@ -44,6 +44,7 @@ func Register(
 	recH := handler.NewRecommendationHandler(gridSvc)
 	e.GET("/v1/grid/today", recH.GetGrid, middleware.RequireAuthenticatedUser())
 	e.POST("/v1/grid/interactions", recH.RecordInteraction, middleware.RequireAuthenticatedUser())
+	e.POST("/v1/grid/sync", recH.SyncGrid, middleware.RequireAuthenticatedUser())
 
 	movieH := handler.NewMovieHandler(movieSvc)
 	e.GET("/v1/movies/:id", movieH.GetMovie, middleware.RequireAuthenticatedUser())

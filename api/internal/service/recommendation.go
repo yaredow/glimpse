@@ -27,6 +27,7 @@ type RecGridRepository interface {
 	Clear(ctx context.Context, userID int64) error
 	Insert(ctx context.Context, userID int64, movieID int64, sessionID uuid.UUID, slotNumber int) error
 	MarkRevealed(ctx context.Context, userID, movieID int64) error
+	IsLockedIn(ctx context.Context, userID int64) (bool, error)
 }
 
 type RecGridHistoryRepository interface {
@@ -41,6 +42,8 @@ type RecInteractionRepository interface {
 type RecUserRepository interface {
 	GetByID(ctx context.Context, userID int64) (*domain.User, error)
 	UpdateInteractionsStat(ctx context.Context, userID int64) error
+	DecrementSyncs(ctx context.Context, userID int64) (int, error)
+	ResetDailySyncsIfDue(ctx context.Context, userID int64) error
 }
 
 type RecGenreRepository interface {
@@ -93,6 +96,8 @@ func NewRecommendationService(
 }
 
 func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, uuid.UUID, error) {
+	_ = rs.users.ResetDailySyncsIfDue(ctx, userID)
+
 	existing, err := rs.grid.GetByID(ctx, userID)
 	if err != nil {
 		return nil, uuid.Nil, fmt.Errorf("get existing grid: %w", err)
@@ -190,6 +195,116 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 	}
 
 	return grid, sessionID, nil
+}
+
+func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, int, error) {
+	_ = rs.users.ResetDailySyncsIfDue(ctx, userID)
+
+	user, err := rs.users.GetByID(ctx, userID)
+	if err != nil {
+		return nil, 0, fmt.Errorf("get user: %w", err)
+	}
+
+	if user.SyncsRemaining <= 0 {
+		return nil, 0, domain.ErrNoSyncsRemaining
+	}
+
+	locked, err := rs.grid.IsLockedIn(ctx, userID)
+	if err != nil {
+		return nil, 0, fmt.Errorf("check locked status: %w", err)
+	}
+	if locked {
+		return nil, 0, domain.ErrSelectionLocked
+	}
+
+	affinityPtrs, err := rs.affinities.GetByUserID(ctx, userID)
+	if err != nil {
+		return nil, 0, fmt.Errorf("get affinities: %w", err)
+	}
+
+	affinities := make([]domain.Affinity, len(affinityPtrs))
+	for i, a := range affinityPtrs {
+		affinities[i] = *a
+	}
+
+	candidates, err := rs.movies.GetCandidateMovies(ctx, userID, 200)
+	if err != nil {
+		return nil, 0, fmt.Errorf("get candidates: %w", err)
+	}
+
+	recentEntries, err := rs.gridHistory.GetRecent(ctx, userID, 50)
+	if err != nil {
+		return nil, 0, fmt.Errorf("get recently shown: %w", err)
+	}
+
+	recentlyShown := make(map[int64]time.Time, len(recentEntries))
+	for _, e := range recentEntries {
+		recentlyShown[e.MovieID] = e.ShownAt
+	}
+
+	scored := ScoreMovies(candidates, affinities, recentlyShown, user.TotalInteractions)
+	if len(scored) < 5 {
+		return nil, 0, domain.ErrNotEnoughCandidates
+	}
+
+	picked := enforceDiversity(scored)
+	sessionID := uuid.New()
+
+	movieIDs := make([]int64, len(picked))
+	for i, sm := range picked {
+		movieIDs[i] = sm.Movie.ID
+	}
+
+	var remainingSyncs int
+
+	if err := rs.db.ExecTx(ctx, func(tx pgx.Tx) error {
+		txDB := postgres.NewDBFromTx(tx)
+
+		gtx := postgres.NewGridRepository(txDB)
+		if err := gtx.Clear(ctx, userID); err != nil {
+			return fmt.Errorf("clear grid: %w", err)
+		}
+
+		for i, movieID := range movieIDs {
+			if err := gtx.Insert(ctx, userID, movieID, sessionID, i+1); err != nil {
+				return fmt.Errorf("insert slot %d: %w", i+1, err)
+			}
+		}
+
+		ghtx := postgres.NewGridHistoryRepository(txDB)
+		for _, movieID := range movieIDs {
+			if err := ghtx.Insert(ctx, userID, movieID); err != nil {
+				return fmt.Errorf("insert grid history: %w", err)
+			}
+		}
+
+		utx := postgres.NewUserRepository(txDB)
+		rem, err := utx.DecrementSyncs(ctx, userID)
+		if err != nil {
+			return fmt.Errorf("decrement syncs: %w", err)
+		}
+		remainingSyncs = rem
+
+		return nil
+	}); err != nil {
+		return nil, 0, fmt.Errorf("sync grid transaction: %w", err)
+	}
+
+	grid, err := rs.grid.GetByID(ctx, userID)
+	if err != nil {
+		return nil, 0, fmt.Errorf("get new grid: %w", err)
+	}
+
+	if rs.syncDetail != nil && rs.runner != nil {
+		for _, sm := range picked {
+			tmdbID := sm.Movie.TmdbID
+			rs.runner.Background(func() {
+				_ = rs.syncDetail(context.Background(), tmdbID)
+			})
+		}
+	}
+
+	return grid, remainingSyncs, nil
 }
 
 func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs *int) error {

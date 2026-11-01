@@ -22,6 +22,8 @@ func getStatusCode(err error) int {
 		return http.StatusConflict
 	case domain.ErrInvalidCredentials:
 		return http.StatusUnauthorized
+	case domain.ErrNoSyncsRemaining, domain.ErrSelectionLocked:
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}

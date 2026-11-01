@@ -190,3 +190,41 @@ func TestGridRepository_GetByID(t *testing.T) {
 		require.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+
+func TestGridRepository_IsLockedIn(t *testing.T) {
+	t.Parallel()
+
+	t.Run("locked true", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewGridRepository(&postgres.DB{Pool: mock})
+
+		mock.ExpectQuery(`SELECT EXISTS`).
+			WithArgs(int64(1)).
+			WillReturnRows(pgxmock.NewRows([]string{"exists"}).AddRow(true))
+
+		locked, err := repo.IsLockedIn(context.Background(), 1)
+		require.NoError(t, err)
+		require.True(t, locked)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("locked false", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewGridRepository(&postgres.DB{Pool: mock})
+
+		mock.ExpectQuery(`SELECT EXISTS`).
+			WithArgs(int64(1)).
+			WillReturnRows(pgxmock.NewRows([]string{"exists"}).AddRow(false))
+
+		locked, err := repo.IsLockedIn(context.Background(), 1)
+		require.NoError(t, err)
+		require.False(t, locked)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+}
