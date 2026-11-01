@@ -10,7 +10,7 @@ const BASE_URL = rawUrl.endsWith("/") ? rawUrl : `${rawUrl}/`;
 
 console.log("🌐 [API BASE_URL]:", BASE_URL);
 
-export { HTTPError } from "ky";
+export { HTTPError, isHTTPError } from "ky";
 
 export const http = ky.create({
   prefix: BASE_URL,
