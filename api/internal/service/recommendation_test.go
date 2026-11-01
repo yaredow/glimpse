@@ -12,12 +12,14 @@ func TestGetMoodFilter(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name        string
-		mood        string
-		expectNil   bool
-		wantGenres  []string
-		wantMinYear int
-		wantMaxYear int
+		name              string
+		mood              string
+		expectNil         bool
+		wantRequiredGenre string
+		wantAnyGenres     []string
+		wantAllGenres     []string
+		wantMinYear       int
+		wantMaxYear       int
 	}{
 		{
 			name:      "surprise returns nil",
@@ -35,28 +37,34 @@ func TestGetMoodFilter(t *testing.T) {
 			expectNil: true,
 		},
 		{
-			name:       "spooky returns horror thriller mystery",
-			mood:       "spooky",
-			wantGenres: []string{"Horror", "Thriller", "Mystery"},
+			name:              "horror returns required Horror",
+			mood:              "horror",
+			wantRequiredGenre: "Horror",
 		},
 		{
-			name:       "mind_bender returns sci-fi mystery thriller",
-			mood:       "mind_bender",
-			wantGenres: []string{"Science Fiction", "Mystery", "Thriller"},
+			name:              "spooky alias returns required Horror",
+			mood:              "spooky",
+			wantRequiredGenre: "Horror",
 		},
 		{
-			name:       "feel_good returns comedy animation family romance",
-			mood:       "feel_good",
-			wantGenres: []string{"Comedy", "Animation", "Family", "Romance"},
+			name:          "action_crime returns action crime",
+			mood:          "action_crime",
+			wantAnyGenres: []string{"Action", "Crime"},
 		},
 		{
-			name:       "adrenaline returns action adventure crime",
-			mood:       "adrenaline",
-			wantGenres: []string{"Action", "Adventure", "Crime"},
+			name:          "psychological returns mystery and sci-fi thriller",
+			mood:          "psychological",
+			wantAnyGenres: []string{"Mystery"},
+			wantAllGenres: []string{"Science Fiction", "Thriller"},
 		},
 		{
-			name:        "nostalgia returns 1975 to 1999",
-			mood:        "nostalgia",
+			name:              "comedy returns required Comedy",
+			mood:              "comedy",
+			wantRequiredGenre: "Comedy",
+		},
+		{
+			name:        "classics returns 1975 to 1999",
+			mood:        "classics",
 			wantMinYear: 1975,
 			wantMaxYear: 1999,
 		},
@@ -73,13 +81,17 @@ func TestGetMoodFilter(t *testing.T) {
 			}
 
 			require.NotNil(t, filter)
-			if len(tc.wantGenres) > 0 {
-				require.Equal(t, tc.wantGenres, filter.Genres)
-				require.Nil(t, filter.MinDate)
-				require.Nil(t, filter.MaxDate)
+			if tc.wantRequiredGenre != "" {
+				require.NotNil(t, filter.RequiredGenre)
+				require.Equal(t, tc.wantRequiredGenre, *filter.RequiredGenre)
+			}
+			if len(tc.wantAnyGenres) > 0 {
+				require.Equal(t, tc.wantAnyGenres, filter.AnyGenres)
+			}
+			if len(tc.wantAllGenres) > 0 {
+				require.Equal(t, tc.wantAllGenres, filter.RequireAllGenres)
 			}
 			if tc.wantMinYear > 0 {
-				require.Empty(t, filter.Genres)
 				require.NotNil(t, filter.MinDate)
 				require.NotNil(t, filter.MaxDate)
 				require.Equal(t, tc.wantMinYear, filter.MinDate.Year())
@@ -90,3 +102,4 @@ func TestGetMoodFilter(t *testing.T) {
 		})
 	}
 }
+

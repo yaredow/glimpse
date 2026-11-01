@@ -13,11 +13,11 @@ export type ConfirmableAction =
 
 export type SyncMood =
   | "surprise"
-  | "spooky"
-  | "mind_bender"
-  | "feel_good"
-  | "adrenaline"
-  | "nostalgia";
+  | "horror"
+  | "action_crime"
+  | "psychological"
+  | "comedy"
+  | "classics";
 
 export interface MoodOption {
   id: SyncMood;
@@ -31,37 +31,37 @@ export const MOOD_OPTIONS: MoodOption[] = [
     id: "surprise",
     label: "Surprise Me",
     icon: "dice-multiple-outline",
-    description: "pure algorithmic serendipity based on your overall taste",
+    description: "fresh mystery picks across all genres tailored to your taste",
   },
   {
-    id: "spooky",
-    label: "Spooky & Dark",
-    icon: "candle",
-    description: "spine-chilling horror, dark thrillers, and mysterious suspense",
+    id: "horror",
+    label: "Horror",
+    icon: "skull-outline",
+    description: "pure horror films — supernatural dread, slashers, and terrifying tension",
   },
   {
-    id: "mind_bender",
-    label: "Mind-Benders",
-    icon: "brain",
-    description: "thought-provoking sci-fi puzzles and twist-heavy mysteries",
+    id: "action_crime",
+    label: "Action & Crime",
+    icon: "target",
+    description: "high-stakes action features, intense heists, and crime thrillers",
   },
   {
-    id: "feel_good",
-    label: "Feel-Good",
-    icon: "popcorn",
-    description: "lighthearted comedies, heartwarming animations, and comfort escapes",
+    id: "psychological",
+    label: "Psychological & Mystery",
+    icon: "head-cog-outline",
+    description: "cerebral puzzles, investigative mysteries, and psychological tension",
   },
   {
-    id: "adrenaline",
-    label: "Adrenaline",
-    icon: "lightning-bolt-outline",
-    description: "high-octane action, daring adventures, and gritty crime heists",
+    id: "comedy",
+    label: "Comedy",
+    icon: "emoticon-happy-outline",
+    description: "laugh-out-loud comedies and sharp, witty cinema",
   },
   {
-    id: "nostalgia",
-    label: "Nostalgia",
+    id: "classics",
+    label: "90s & Classics",
     icon: "filmstrip",
-    description: "retro cinema classics and gems released between 1975 and 1999",
+    description: "retro classics and cinema landmarks released between 1975 and 1999",
   },
 ];
 
@@ -238,8 +238,7 @@ export default function ActionConfirmModal({
                 return (
                   <View style={styles.syncDescriptionContainer}>
                     <Text variant="bodyMedium" style={styles.description}>
-                      Eliminate your current selection and draw 5 fresh mystery
-                      movies tailored for{" "}
+                      Draw 5 fresh mystery picks:{" "}
                       <Text style={styles.highlightText}>
                         {activeMood.description}
                       </Text>

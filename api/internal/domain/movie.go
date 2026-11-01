@@ -6,9 +6,11 @@ import (
 )
 
 type CandidateFilter struct {
-	Genres  []string
-	MinDate *time.Time
-	MaxDate *time.Time
+	RequiredGenre    *string
+	AnyGenres        []string
+	RequireAllGenres []string
+	MinDate          *time.Time
+	MaxDate          *time.Time
 }
 
 type MovieDetailParams struct {

@@ -97,23 +97,26 @@ func NewRecommendationService(
 
 func GetMoodFilter(mood string) *domain.CandidateFilter {
 	switch mood {
-	case "spooky":
+	case "horror", "spooky":
+		genre := "Horror"
 		return &domain.CandidateFilter{
-			Genres: []string{"Horror", "Thriller", "Mystery"},
+			RequiredGenre: &genre,
 		}
-	case "mind_bender":
+	case "action_crime", "adrenaline":
 		return &domain.CandidateFilter{
-			Genres: []string{"Science Fiction", "Mystery", "Thriller"},
+			AnyGenres: []string{"Action", "Crime"},
 		}
-	case "feel_good":
+	case "psychological", "mind_bender":
 		return &domain.CandidateFilter{
-			Genres: []string{"Comedy", "Animation", "Family", "Romance"},
+			AnyGenres:        []string{"Mystery"},
+			RequireAllGenres: []string{"Science Fiction", "Thriller"},
 		}
-	case "adrenaline":
+	case "comedy", "feel_good":
+		genre := "Comedy"
 		return &domain.CandidateFilter{
-			Genres: []string{"Action", "Adventure", "Crime"},
+			RequiredGenre: &genre,
 		}
-	case "nostalgia":
+	case "classics", "nostalgia":
 		start := time.Date(1975, 1, 1, 0, 0, 0, 0, time.UTC)
 		end := time.Date(1999, 12, 31, 23, 59, 59, 0, time.UTC)
 		return &domain.CandidateFilter{

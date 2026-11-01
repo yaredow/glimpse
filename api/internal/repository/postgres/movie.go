@@ -158,7 +158,11 @@ func (mr *MovieRepository) GetCandidateMovies(ctx context.Context, userID int64,
 		AND m.vote_average >= up.min_rating
 		AND (
 			CASE 
-				WHEN $3::text[] IS NOT NULL THEN m.genres && $3
+				WHEN $3::text IS NOT NULL THEN $3 = ANY(m.genres)
+				WHEN $4::text[] IS NOT NULL OR $5::text[] IS NOT NULL THEN (
+					($4::text[] IS NOT NULL AND m.genres && $4) OR
+					($5::text[] IS NOT NULL AND m.genres @> $5)
+				)
 				ELSE (CARDINALITY(up.excluded_genres) = 0 OR NOT m.genres && ARRAY(
 					SELECT name FROM genres WHERE id = ANY(up.excluded_genres)
 				))
@@ -166,22 +170,26 @@ func (mr *MovieRepository) GetCandidateMovies(ctx context.Context, userID int64,
 		)
 		AND (
 			CASE 
-				WHEN $4::date IS NOT NULL THEN m.release_date >= $4 AND m.release_date <= $5
+				WHEN $6::date IS NOT NULL THEN m.release_date >= $6 AND m.release_date <= $7
 				ELSE m.release_date >= make_date(up.min_year, 1, 1) AND m.release_date <= make_date(up.max_year, 12, 31)
 			END
 		)
 		ORDER BY m.popularity DESC
 		LIMIT $2`
 
-	var genres []string
+	var requiredGenre *string
+	var anyGenres []string
+	var requireAllGenres []string
 	var minDate, maxDate *time.Time
 	if filter != nil {
-		genres = filter.Genres
+		requiredGenre = filter.RequiredGenre
+		anyGenres = filter.AnyGenres
+		requireAllGenres = filter.RequireAllGenres
 		minDate = filter.MinDate
 		maxDate = filter.MaxDate
 	}
 
-	rows, err := mr.db.Query(ctx, query, userID, limit, genres, minDate, maxDate)
+	rows, err := mr.db.Query(ctx, query, userID, limit, requiredGenre, anyGenres, requireAllGenres, minDate, maxDate)
 	if err != nil {
 		return nil, err
 	}
