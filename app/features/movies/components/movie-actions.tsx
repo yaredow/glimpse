@@ -74,8 +74,8 @@ export default function MovieActions({
           } else if (action === "pick_tonight" || action === "watchlist_add") {
             Toast.show({
               type: "success",
-              text1: "Tonight's Pick! 🍿",
-              text2: "Selected as tonight's feature.",
+              text1: "Today's Pick! 🍿",
+              text2: "Selected as today's feature.",
             });
           } else if (action === "locked_in") {
             Toast.show({
@@ -129,7 +129,7 @@ export default function MovieActions({
           ) : initialAction === "pick_tonight" || initialAction === "watchlist_add" ? (
             <View style={[styles.statusBanner, styles.bannerPick]}>
               <MaterialCommunityIcons name="star" size={16} color="#FFFFFF" />
-              <Text style={styles.bannerPickText}>Selected as Tonight&apos;s Pick</Text>
+              <Text style={styles.bannerPickText}>Selected as Today&apos;s Pick</Text>
             </View>
           ) : initialAction === "skipped" ? (
             <View style={[styles.statusBanner, styles.bannerSkipped]}>
@@ -198,7 +198,7 @@ export default function MovieActions({
               )}
             </Pressable>
 
-            {/* 3. Tonight's Pick Button */}
+            {/* 3. Today's Pick Button */}
             <Pressable
               style={[
                 styles.actionBtn,
@@ -217,7 +217,7 @@ export default function MovieActions({
                     size={18}
                     color="#121212"
                   />
-                  <Text style={styles.pickBtnText}>Tonight&apos;s Pick</Text>
+                  <Text style={styles.pickBtnText}>Today&apos;s Pick</Text>
                 </>
               )}
             </Pressable>

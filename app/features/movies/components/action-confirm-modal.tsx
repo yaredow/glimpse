@@ -4,7 +4,11 @@ import { Button, Surface, Text, useTheme } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export type ConfirmableAction = "pick_tonight" | "watched" | "skipped";
+export type ConfirmableAction =
+  | "pick_tonight"
+  | "watched"
+  | "skipped"
+  | "locked_in";
 
 interface ActionConfirmModalProps {
   visible: boolean;
@@ -26,17 +30,30 @@ interface ActionModalConfig {
 const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
   pick_tonight: {
     icon: "star-outline",
-    title: "Make this Tonight's Feature?",
-    confirmText: "Confirm Feature",
+    title: "Make this Today's Pick?",
+    confirmText: "Confirm Today's Pick",
     cancelText: "Keep Browsing",
-    renderDescription: (_title, syncs = 3) => (
+    renderDescription: (title, syncs = 3) => (
       <Text variant="bodyMedium" style={styles.description}>
-        You have{" "}
+        <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
+        selected as your movie for today. You will have{" "}
         <Text style={styles.highlightText}>
           {syncs} {syncs === 1 ? "sync" : "syncs"}
         </Text>{" "}
-        remaining today. You can still sync another set if you change your mind,
-        or lock this in as your final watch.
+        remaining if you decide to sync a fresh batch.
+      </Text>
+    ),
+  },
+  locked_in: {
+    icon: "play-circle-outline",
+    title: "Lock In Today's Movie?",
+    confirmText: "Lock In Selection",
+    cancelText: "Not Yet",
+    renderDescription: (title) => (
+      <Text variant="bodyMedium" style={styles.description}>
+        <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
+        permanently locked as your movie for today. Once locked, your daily
+        selection is final and you won&apos;t be able to sync or change it.
       </Text>
     ),
   },
@@ -111,12 +128,10 @@ export default function ActionConfirmModal({
             },
           ]}
         >
-          {/* Top Drag Handle Indicator */}
           <View style={styles.dragHandleContainer}>
             <View style={styles.dragHandle} />
           </View>
 
-          {/* Action Icon Badge */}
           <View style={styles.iconContainer}>
             <MaterialCommunityIcons
               name={config.icon}
@@ -125,15 +140,12 @@ export default function ActionConfirmModal({
             />
           </View>
 
-          {/* Title */}
           <Text variant="titleLarge" style={styles.title}>
             {config.title}
           </Text>
 
-          {/* Description */}
           {config.renderDescription(movieTitle, syncsRemaining)}
 
-          {/* Actions: Stacked Vertically */}
           <View style={styles.buttonStack}>
             <Button
               mode="contained"

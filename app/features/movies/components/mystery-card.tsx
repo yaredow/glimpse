@@ -160,7 +160,7 @@ export default function MysteryCard({
             ) : action === "pick_tonight" || action === "watchlist_add" ? (
               <View style={[styles.statusChip, styles.pickChip]}>
                 <MaterialCommunityIcons name="star" size={13} color="#f59e0b" />
-                <Text style={styles.pickLabel}>TONIGHT&apos;S PICK</Text>
+                <Text style={styles.pickLabel}>TODAY&apos;S PICK</Text>
               </View>
             ) : action === "watched" ? (
               <View style={[styles.statusChip, styles.watchedChip]}>

@@ -63,7 +63,7 @@ export default function TonightHero({
           ) : (
             <View style={[styles.badge, styles.pickBadge]}>
               <MaterialCommunityIcons name="star" size={14} color="#f59e0b" />
-              <Text style={styles.pickBadgeText}>TONIGHT&apos;S FEATURE</Text>
+              <Text style={styles.pickBadgeText}>TODAY&apos;S PICK</Text>
             </View>
           )}
         </View>
@@ -131,7 +131,7 @@ export default function TonightHero({
           <View style={styles.celebrationBox}>
             <MaterialCommunityIcons name="popcorn" size={26} color="#f59e0b" />
             <View style={styles.celebrationTexts}>
-              <Text style={styles.celebrationTitle}>Selection Locked For Tonight</Text>
+              <Text style={styles.celebrationTitle}>Selection Locked For Today</Text>
               <Text style={styles.celebrationSubtitle}>
                 Grab your popcorn and enjoy the movie!
               </Text>
@@ -150,7 +150,7 @@ export default function TonightHero({
               ) : (
                 <>
                   <MaterialCommunityIcons name="play-circle" size={20} color="#000" />
-                  <Text style={styles.lockInBtnText}>Lock In &amp; Start Watching</Text>
+                  <Text style={styles.lockInBtnText}>Lock In for Today</Text>
                 </>
               )}
             </Pressable>

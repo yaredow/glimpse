@@ -17,6 +17,7 @@ import CoverflowCarousel from "@/features/movies/components/coverflow-carousel";
 import TonightHero from "@/features/movies/components/tonight-hero";
 import SyncButton from "@/features/movies/components/sync-button";
 import SkeletonLoader from "@/features/movies/components/skeleton-loader";
+import ActionConfirmModal from "@/features/movies/components/action-confirm-modal";
 
 export default function Discover() {
   const { data, isPending, refetch } = useGetTodaysGrid();
@@ -24,6 +25,7 @@ export default function Discover() {
   const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
   const recordInteraction = useRecordInteraction();
   const [isLockingIn, setIsLockingIn] = useState(false);
+  const [showLockConfirm, setShowLockConfirm] = useState(false);
 
   const movies = data?.grid ?? [];
   const tonightPick = movies.find(
@@ -118,14 +120,14 @@ export default function Discover() {
             {tonightPick
               ? tonightPick.action === "locked_in"
                 ? "Now Watching"
-                : "Tonight's Feature"
+                : "Today's Pick"
               : "Your Daily Five"}
           </Text>
           <Text style={styles.subtitle}>
             {tonightPick
               ? tonightPick.action === "locked_in"
                 ? "Your selection for today is locked in. Enjoy the show!"
-                : "You picked this from your Daily Five. Ready to start watching?"
+                : "You picked this from your Daily Five. Ready to lock it in?"
               : "Five sealed envelopes. Five unknown stories. Unlock what awaits."}
           </Text>
         </View>
@@ -136,7 +138,7 @@ export default function Discover() {
           <TonightHero
             movie={tonightPick}
             syncsRemaining={syncsRemaining}
-            onLockIn={handleLockIn}
+            onLockIn={() => setShowLockConfirm(true)}
             onSync={handleSync}
             onViewDetails={handleViewDetails}
             isLockingIn={isLockingIn}
@@ -151,6 +153,20 @@ export default function Discover() {
           </>
         )}
       </ScrollView>
+
+      {tonightPick ? (
+        <ActionConfirmModal
+          visible={showLockConfirm}
+          action="locked_in"
+          movieTitle={tonightPick.title}
+          syncsRemaining={syncsRemaining}
+          onConfirm={() => {
+            setShowLockConfirm(false);
+            handleLockIn();
+          }}
+          onCancel={() => setShowLockConfirm(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
