@@ -123,22 +123,22 @@ export default function MovieActions({
         <View style={styles.finalizedContainer}>
           {initialAction === "locked_in" ? (
             <View style={[styles.statusBanner, styles.bannerPick]}>
-              <MaterialCommunityIcons name="play-circle" size={16} color="#f59e0b" />
+              <MaterialCommunityIcons name="play-circle" size={16} color="#FFFFFF" />
               <Text style={styles.bannerPickText}>Now Watching 🍿</Text>
             </View>
           ) : initialAction === "pick_tonight" || initialAction === "watchlist_add" ? (
             <View style={[styles.statusBanner, styles.bannerPick]}>
-              <MaterialCommunityIcons name="star" size={16} color="#f59e0b" />
+              <MaterialCommunityIcons name="star" size={16} color="#FFFFFF" />
               <Text style={styles.bannerPickText}>Selected as Tonight&apos;s Pick</Text>
             </View>
           ) : initialAction === "skipped" ? (
             <View style={[styles.statusBanner, styles.bannerSkipped]}>
-              <MaterialCommunityIcons name="close-circle" size={16} color="#ef4444" />
+              <MaterialCommunityIcons name="close-circle" size={16} color="#71717A" />
               <Text style={styles.bannerSkippedText}>Skipped for Today</Text>
             </View>
           ) : (
             <View style={[styles.statusBanner, styles.bannerWatched]}>
-              <MaterialCommunityIcons name="check-circle" size={16} color="#22c55e" />
+              <MaterialCommunityIcons name="check-circle" size={16} color="#FFFFFF" />
               <Text style={styles.bannerWatchedText}>Marked as Watched</Text>
             </View>
           )}
@@ -185,13 +185,13 @@ export default function MovieActions({
               onPress={() => setPendingAction("watched")}
             >
               {loadingAction === "watched" ? (
-                <ActivityIndicator size="small" color="#22c55e" />
+                <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <>
                   <MaterialCommunityIcons
                     name="check-circle-outline"
                     size={20}
-                    color="#22c55e"
+                    color="#FFFFFF"
                   />
                   <Text style={styles.watchedBtnText}>Watched</Text>
                 </>
@@ -209,13 +209,13 @@ export default function MovieActions({
               onPress={() => setPendingAction("pick_tonight")}
             >
               {loadingAction === "pick_tonight" ? (
-                <ActivityIndicator size="small" color="white" />
+                <ActivityIndicator size="small" color="#121212" />
               ) : (
                 <>
                   <MaterialCommunityIcons
                     name="star"
                     size={18}
-                    color="#f59e0b"
+                    color="#121212"
                   />
                   <Text style={styles.pickBtnText}>Tonight&apos;s Pick</Text>
                 </>
@@ -272,26 +272,26 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.08)",
   },
   skipBtnText: {
-    color: "#ccc",
+    color: "#A1A1AA",
     fontFamily: "Inter_600SemiBold",
     fontSize: 13,
   },
   watchedBtn: {
-    borderColor: "rgba(34,197,94,0.3)",
-    backgroundColor: "rgba(34,197,94,0.08)",
+    borderColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "#1e1e1e",
   },
   watchedBtnText: {
-    color: "#22c55e",
+    color: "#FFFFFF",
     fontFamily: "Inter_600SemiBold",
     fontSize: 13,
   },
   pickBtn: {
-    borderColor: "rgba(245,158,11,0.4)",
-    backgroundColor: "rgba(245,158,11,0.12)",
+    borderColor: "#FFFFFF",
+    backgroundColor: "#FFFFFF",
     flex: 1.3,
   },
   pickBtnText: {
-    color: "#f59e0b",
+    color: "#121212",
     fontFamily: "Inter_700Bold",
     fontSize: 13,
   },
@@ -324,29 +324,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   bannerWatched: {
-    backgroundColor: "rgba(34,197,94,0.1)",
-    borderColor: "rgba(34,197,94,0.3)",
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.12)",
   },
   bannerWatchedText: {
-    color: "#22c55e",
+    color: "#FFFFFF",
     fontFamily: "Inter_600SemiBold",
     fontSize: 13,
   },
   bannerSkipped: {
-    backgroundColor: "rgba(239,68,68,0.1)",
-    borderColor: "rgba(239,68,68,0.3)",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderColor: "rgba(255,255,255,0.08)",
   },
   bannerSkippedText: {
-    color: "#ef4444",
+    color: "#71717A",
     fontFamily: "Inter_600SemiBold",
     fontSize: 13,
   },
   bannerPick: {
-    backgroundColor: "rgba(245,158,11,0.12)",
-    borderColor: "rgba(245,158,11,0.4)",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderColor: "rgba(255,255,255,0.15)",
   },
   bannerPickText: {
-    color: "#f59e0b",
+    color: "#FFFFFF",
     fontFamily: "Inter_700Bold",
     fontSize: 13,
   },

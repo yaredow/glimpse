@@ -1,6 +1,8 @@
 import React from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Button, Modal, Portal, Surface, Text, useTheme } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type ConfirmableAction = "pick_tonight" | "watched" | "skipped";
 
@@ -15,9 +17,6 @@ interface ActionConfirmModalProps {
 
 interface ActionModalConfig {
   icon: keyof typeof MaterialCommunityIcons.glyphMap;
-  accentColor: string;
-  bgGlow: string;
-  borderGlow: string;
   title: string;
   confirmText: string;
   cancelText: string;
@@ -26,17 +25,14 @@ interface ActionModalConfig {
 
 const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
   pick_tonight: {
-    icon: "star",
-    accentColor: "#f59e0b",
-    bgGlow: "rgba(245, 158, 11, 0.15)",
-    borderGlow: "rgba(245, 158, 11, 0.35)",
+    icon: "star-outline",
     title: "Make this Tonight's Feature?",
-    confirmText: "Confirm Pick",
+    confirmText: "Confirm Feature",
     cancelText: "Keep Browsing",
     renderDescription: (_title, syncs = 3) => (
-      <Text style={styles.modalBody}>
+      <Text variant="bodyMedium" style={styles.description}>
         You have{" "}
-        <Text style={styles.highlightPick}>
+        <Text style={styles.highlightText}>
           {syncs} {syncs === 1 ? "sync" : "syncs"}
         </Text>{" "}
         remaining today. You can still sync another set if you change your mind,
@@ -45,34 +41,28 @@ const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
     ),
   },
   watched: {
-    icon: "check-circle",
-    accentColor: "#22c55e",
-    bgGlow: "rgba(34, 197, 94, 0.15)",
-    borderGlow: "rgba(34, 197, 94, 0.35)",
+    icon: "check-circle-outline",
     title: "Mark as Watched?",
     confirmText: "Mark as Watched",
     cancelText: "Cancel",
     renderDescription: (title) => (
-      <Text style={styles.modalBody}>
-        <Text style={styles.highlightTitle}>&ldquo;{title}&rdquo;</Text> will be
+      <Text variant="bodyMedium" style={styles.description}>
+        <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
         permanently recorded in your watched history and locked for today. It
         will help tailor your future recommendations.
       </Text>
     ),
   },
   skipped: {
-    icon: "close-circle",
-    accentColor: "#ef4444",
-    bgGlow: "rgba(239, 68, 68, 0.15)",
-    borderGlow: "rgba(239, 68, 68, 0.35)",
+    icon: "close-circle-outline",
     title: "Skip This Movie?",
     confirmText: "Skip Movie",
     cancelText: "Keep Browsing",
     renderDescription: (title) => (
-      <Text style={styles.modalBody}>
-        <Text style={styles.highlightTitle}>&ldquo;{title}&rdquo;</Text> will be
-        skipped and permanently locked for today. You won&apos;t be able to open
-        its details or undo this skip until tomorrow&apos;s batch.
+      <Text variant="bodyMedium" style={styles.description}>
+        <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
+        skipped and locked for today. You won&apos;t be able to open its details
+        or undo this skip until tomorrow&apos;s batch.
       </Text>
     ),
   },
@@ -86,150 +76,157 @@ export default function ActionConfirmModal({
   onConfirm,
   onCancel,
 }: ActionConfirmModalProps) {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+
   if (!action) return null;
 
   const config = ACTION_CONFIGS[action];
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onCancel}
-    >
-      <View style={styles.modalOverlay}>
-        <View
-          style={[styles.modalDialog, { borderColor: config.borderGlow }]}
+    <Portal>
+      <Modal
+        visible={visible}
+        onDismiss={onCancel}
+        contentContainerStyle={styles.modalContentContainer}
+      >
+        <Surface
+          elevation={3}
+          style={[
+            styles.drawerSurface,
+            {
+              backgroundColor: theme.colors.elevation.level2,
+              paddingBottom: Math.max(insets.bottom + 12, 28),
+            },
+          ]}
         >
-          {/* Top Icon Badge */}
-          <View
-            style={[
-              styles.modalIconContainer,
-              { backgroundColor: config.bgGlow },
-            ]}
-          >
+          {/* Top Drag Handle Indicator */}
+          <View style={styles.dragHandle} />
+
+          {/* Action Icon Badge */}
+          <View style={styles.iconContainer}>
             <MaterialCommunityIcons
               name={config.icon}
-              size={28}
-              color={config.accentColor}
+              size={26}
+              color="#FFFFFF"
             />
           </View>
 
-          {/* Dialog Title */}
-          <Text style={styles.modalTitle}>{config.title}</Text>
+          {/* Title */}
+          <Text variant="titleLarge" style={styles.title}>
+            {config.title}
+          </Text>
 
-          {/* Dialog Description */}
+          {/* Description */}
           {config.renderDescription(movieTitle, syncsRemaining)}
 
-          {/* Action Buttons */}
-          <View style={styles.modalButtons}>
-            <Pressable
-              style={[styles.modalBtn, styles.modalCancelBtn]}
-              onPress={onCancel}
-            >
-              <Text style={styles.modalCancelText}>{config.cancelText}</Text>
-            </Pressable>
-
-            <Pressable
-              style={[
-                styles.modalBtn,
-                { backgroundColor: config.accentColor },
-              ]}
+          {/* Actions: Stacked Vertically */}
+          <View style={styles.buttonStack}>
+            <Button
+              mode="contained"
               onPress={onConfirm}
+              buttonColor="#FFFFFF"
+              textColor="#121212"
+              style={styles.confirmBtn}
+              contentStyle={styles.btnContent}
+              labelStyle={styles.confirmBtnLabel}
             >
-              <Text
-                style={[
-                  styles.modalConfirmText,
-                  action === "pick_tonight"
-                    ? styles.textDark
-                    : styles.textLight,
-                ]}
-              >
-                {config.confirmText}
-              </Text>
-            </Pressable>
+              {config.confirmText}
+            </Button>
+
+            <Button
+              mode="text"
+              onPress={onCancel}
+              textColor="#A1A1AA"
+              style={styles.cancelBtn}
+              contentStyle={styles.btnContent}
+              labelStyle={styles.cancelBtnLabel}
+            >
+              {config.cancelText}
+            </Button>
           </View>
-        </View>
-      </View>
-    </Modal>
+        </Surface>
+      </Modal>
+    </Portal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.78)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 24,
+  modalContentContainer: {
+    justifyContent: "flex-end",
+    margin: 0,
   },
-  modalDialog: {
-    width: "100%",
-    backgroundColor: "#1c1c1e",
-    borderRadius: 20,
-    padding: 24,
-    alignItems: "center",
+  drawerSurface: {
+    borderTopStartRadius: 28,
+    borderTopEndRadius: 28,
     borderWidth: 1,
-    gap: 12,
-  },
-  modalIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
+    borderBottomWidth: 0,
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    paddingHorizontal: 24,
+    paddingTop: 12,
     alignItems: "center",
-    marginBottom: 4,
   },
-  modalTitle: {
-    color: "#fff",
-    fontSize: 18,
+  dragHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    marginBottom: 20,
+    marginTop: 2,
+  },
+  iconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  title: {
+    color: "#FFFFFF",
     fontFamily: "Inter_700Bold",
+    fontSize: 20,
     textAlign: "center",
+    marginBottom: 10,
   },
-  modalBody: {
-    color: "#bbb",
-    fontSize: 14,
+  description: {
+    color: "#A1A1AA",
     fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    lineHeight: 22,
     textAlign: "center",
-    lineHeight: 20,
+    marginBottom: 24,
+    paddingHorizontal: 8,
   },
-  highlightPick: {
-    color: "#f59e0b",
-    fontFamily: "Inter_700Bold",
-  },
-  highlightTitle: {
-    color: "white",
+  highlightText: {
+    color: "#FFFFFF",
     fontFamily: "Inter_600SemiBold",
   },
-  modalButtons: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
+  buttonStack: {
+    width: "100%",
+    gap: 4,
+  },
+  confirmBtn: {
+    borderRadius: 12,
     width: "100%",
   },
-  modalBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+  cancelBtn: {
+    borderRadius: 12,
+    width: "100%",
   },
-  modalCancelBtn: {
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+  btnContent: {
+    paddingVertical: 6,
   },
-  modalCancelText: {
-    color: "#aaa",
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-  },
-  modalConfirmText: {
-    fontSize: 14,
+  confirmBtnLabel: {
     fontFamily: "Inter_700Bold",
+    fontSize: 15,
+    letterSpacing: 0.2,
   },
-  textDark: {
-    color: "#000",
-  },
-  textLight: {
-    color: "#fff",
+  cancelBtnLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
   },
 });
