@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Modal,
   Pressable,
   Share,
   StyleSheet,
@@ -13,6 +12,9 @@ import Toast from "react-native-toast-message";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useRecordInteraction } from "../hooks/mutations/use-record-interactions";
 import type { Movie, MovieInteractionAction } from "../types/movies.type";
+import ActionConfirmModal, {
+  ConfirmableAction,
+} from "./action-confirm-modal";
 
 interface MovieActionsProps {
   movie: Movie;
@@ -30,7 +32,7 @@ export default function MovieActions({
   onActionComplete,
 }: MovieActionsProps) {
   const [loadingAction, setLoadingAction] = useState<MovieInteractionAction | null>(null);
-  const [showPickConfirm, setShowPickConfirm] = useState(false);
+  const [pendingAction, setPendingAction] = useState<ConfirmableAction | null>(null);
   const { data: profileData } = useProfile();
   const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
   const recordMutation = useRecordInteraction();
@@ -96,6 +98,13 @@ export default function MovieActions({
     );
   };
 
+  const handleConfirmAction = () => {
+    if (!pendingAction) return;
+    const actionToRun = pendingAction;
+    setPendingAction(null);
+    handleAction(actionToRun);
+  };
+
   const handleShare = async () => {
     try {
       await Share.share({
@@ -149,7 +158,7 @@ export default function MovieActions({
                 loadingAction === "skipped" && styles.btnDisabled,
               ]}
               disabled={!!loadingAction}
-              onPress={() => handleAction("skipped")}
+              onPress={() => setPendingAction("skipped")}
             >
               {loadingAction === "skipped" ? (
                 <ActivityIndicator size="small" color="#999" />
@@ -173,7 +182,7 @@ export default function MovieActions({
                 loadingAction === "watched" && styles.btnDisabled,
               ]}
               disabled={!!loadingAction}
-              onPress={() => handleAction("watched")}
+              onPress={() => setPendingAction("watched")}
             >
               {loadingAction === "watched" ? (
                 <ActivityIndicator size="small" color="#22c55e" />
@@ -197,7 +206,7 @@ export default function MovieActions({
                 loadingAction === "pick_tonight" && styles.btnDisabled,
               ]}
               disabled={!!loadingAction}
-              onPress={() => setShowPickConfirm(true)}
+              onPress={() => setPendingAction("pick_tonight")}
             >
               {loadingAction === "pick_tonight" ? (
                 <ActivityIndicator size="small" color="white" />
@@ -221,46 +230,15 @@ export default function MovieActions({
         </>
       )}
 
-      {/* Tonight's Pick Confirmation Modal */}
-      <Modal
-        visible={showPickConfirm}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowPickConfirm(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalDialog}>
-            <View style={styles.modalIconContainer}>
-              <MaterialCommunityIcons name="star" size={28} color="#f59e0b" />
-            </View>
-
-            <Text style={styles.modalTitle}>Make this Tonight&apos;s Feature?</Text>
-
-            <Text style={styles.modalBody}>
-              You have <Text style={styles.modalHighlight}>{syncsRemaining} {syncsRemaining === 1 ? "sync" : "syncs"}</Text> remaining today. You can still sync another set if you change your mind, or lock this in as your final watch.
-            </Text>
-
-            <View style={styles.modalButtons}>
-              <Pressable
-                style={[styles.modalBtn, styles.modalCancelBtn]}
-                onPress={() => setShowPickConfirm(false)}
-              >
-                <Text style={styles.modalCancelText}>Keep Browsing</Text>
-              </Pressable>
-
-              <Pressable
-                style={[styles.modalBtn, styles.modalConfirmBtn]}
-                onPress={() => {
-                  setShowPickConfirm(false);
-                  handleAction("pick_tonight");
-                }}
-              >
-                <Text style={styles.modalConfirmText}>Confirm Pick</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* Action Confirmation Modal */}
+      <ActionConfirmModal
+        visible={pendingAction !== null}
+        action={pendingAction}
+        movieTitle={movie.title}
+        syncsRemaining={syncsRemaining}
+        onConfirm={handleConfirmAction}
+        onCancel={() => setPendingAction(null)}
+      />
     </View>
   );
 }
@@ -378,77 +356,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#1e1e1e",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.78)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 24,
-  },
-  modalDialog: {
-    width: "100%",
-    backgroundColor: "#1c1c1e",
-    borderRadius: 20,
-    padding: 24,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(245, 158, 11, 0.3)",
-    gap: 12,
-  },
-  modalIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "rgba(245, 158, 11, 0.15)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  modalTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontFamily: "Inter_700Bold",
-    textAlign: "center",
-  },
-  modalBody: {
-    color: "#bbb",
-    fontSize: 14,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  modalHighlight: {
-    color: "#f59e0b",
-    fontFamily: "Inter_700Bold",
-  },
-  modalButtons: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
-    width: "100%",
-  },
-  modalBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalCancelBtn: {
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-  },
-  modalCancelText: {
-    color: "#aaa",
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-  },
-  modalConfirmBtn: {
-    backgroundColor: "#f59e0b",
-  },
-  modalConfirmText: {
-    color: "#000",
-    fontSize: 14,
-    fontFamily: "Inter_700Bold",
   },
 });
