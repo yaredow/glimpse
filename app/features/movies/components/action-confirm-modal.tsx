@@ -1,6 +1,14 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, Modal, Portal, Surface, Text, useTheme } from "react-native-paper";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Animated,
+  BackHandler,
+  Easing,
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
+import { Button, Portal, Surface, Text, useTheme } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -22,6 +30,8 @@ interface ActionModalConfig {
   cancelText: string;
   renderDescription: (title: string, syncs?: number) => React.ReactNode;
 }
+
+const SLIDE_DISTANCE = 450;
 
 const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
   pick_tonight: {
@@ -79,100 +89,265 @@ export default function ActionConfirmModal({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  if (!action) return null;
+  // Manage mounted state during open / close transitions
+  const [prevVisible, setPrevVisible] = useState(visible);
+  const [mounted, setMounted] = useState(visible);
 
-  const config = ACTION_CONFIGS[action];
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
+    if (visible) {
+      setMounted(true);
+    }
+  }
+
+  // Preserve the last action while the drawer animates off-screen
+  const [prevAction, setPrevAction] = useState<ConfirmableAction | null>(action);
+  const [cachedAction, setCachedAction] = useState<ConfirmableAction | null>(action);
+
+  if (action !== prevAction) {
+    setPrevAction(action);
+    if (action) {
+      setCachedAction(action);
+    }
+  }
+
+  const currentAction = action || cachedAction;
+
+  const [slideAnim] = useState(() => new Animated.Value(SLIDE_DISTANCE));
+  const [backdropAnim] = useState(() => new Animated.Value(0));
+
+  const handleDismiss = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(backdropAnim, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: SLIDE_DISTANCE,
+        duration: 220,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) {
+        setMounted(false);
+        onCancel();
+      }
+    });
+  }, [backdropAnim, slideAnim, onCancel]);
+
+  useEffect(() => {
+    if (visible) {
+      slideAnim.setValue(SLIDE_DISTANCE);
+      backdropAnim.setValue(0);
+      Animated.parallel([
+        Animated.timing(backdropAnim, {
+          toValue: 1,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 280,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(backdropAnim, {
+          toValue: 0,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: SLIDE_DISTANCE,
+          duration: 200,
+          easing: Easing.in(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]).start(({ finished }) => {
+        if (finished) {
+          setMounted(false);
+        }
+      });
+    }
+  }, [visible, backdropAnim, slideAnim]);
+
+  // Android hardware back button handler
+  useEffect(() => {
+    if (!mounted) return;
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        handleDismiss();
+        return true;
+      }
+    );
+
+    return () => subscription.remove();
+  }, [mounted, handleDismiss]);
+
+  // Swipe-down pan gesture for drag handle
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 5,
+        onPanResponderMove: (_, gestureState) => {
+          if (gestureState.dy > 0) {
+            slideAnim.setValue(gestureState.dy);
+          }
+        },
+        onPanResponderRelease: (_, gestureState) => {
+          if (gestureState.dy > 80 || gestureState.vy > 0.5) {
+            handleDismiss();
+          } else {
+            Animated.spring(slideAnim, {
+              toValue: 0,
+              useNativeDriver: true,
+              bounciness: 4,
+            }).start();
+          }
+        },
+      }),
+    [handleDismiss, slideAnim]
+  );
+
+  if (!mounted || !currentAction) return null;
+
+  const config = ACTION_CONFIGS[currentAction];
 
   return (
     <Portal>
-      <Modal
-        visible={visible}
-        onDismiss={onCancel}
-        contentContainerStyle={styles.modalContentContainer}
-      >
-        <Surface
-          elevation={3}
+      <View style={styles.overlay} pointerEvents="box-none">
+        {/* Backdrop: Fades In / Out */}
+        <Animated.View
           style={[
-            styles.drawerSurface,
+            StyleSheet.absoluteFill,
             {
-              backgroundColor: theme.colors.elevation.level2,
-              paddingBottom: Math.max(insets.bottom + 12, 28),
+              backgroundColor: theme.colors.backdrop || "rgba(0, 0, 0, 0.65)",
+              opacity: backdropAnim,
             },
           ]}
         >
-          {/* Top Drag Handle Indicator */}
-          <View style={styles.dragHandle} />
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={handleDismiss}
+            accessibilityRole="button"
+            accessibilityLabel="Dismiss confirmation drawer"
+          />
+        </Animated.View>
 
-          {/* Action Icon Badge */}
-          <View style={styles.iconContainer}>
-            <MaterialCommunityIcons
-              name={config.icon}
-              size={26}
-              color="#FFFFFF"
-            />
-          </View>
-
-          {/* Title */}
-          <Text variant="titleLarge" style={styles.title}>
-            {config.title}
-          </Text>
-
-          {/* Description */}
-          {config.renderDescription(movieTitle, syncsRemaining)}
-
-          {/* Actions: Stacked Vertically */}
-          <View style={styles.buttonStack}>
-            <Button
-              mode="contained"
-              onPress={onConfirm}
-              buttonColor="#FFFFFF"
-              textColor="#121212"
-              style={styles.confirmBtn}
-              contentStyle={styles.btnContent}
-              labelStyle={styles.confirmBtnLabel}
+        {/* Drawer: Anchored strictly to the bottom & emerges smoothly */}
+        <Animated.View
+          style={[
+            styles.drawerContainer,
+            {
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <Surface
+            elevation={3}
+            style={[
+              styles.drawerSurface,
+              {
+                backgroundColor: theme.colors.elevation.level2,
+                paddingBottom: Math.max(insets.bottom + 12, 28),
+              },
+            ]}
+          >
+            {/* Top Drag Handle (with swipe-down gesture) */}
+            <View
+              style={styles.dragHandleContainer}
+              {...panResponder.panHandlers}
             >
-              {config.confirmText}
-            </Button>
+              <View style={styles.dragHandle} />
+            </View>
 
-            <Button
-              mode="text"
-              onPress={onCancel}
-              textColor="#A1A1AA"
-              style={styles.cancelBtn}
-              contentStyle={styles.btnContent}
-              labelStyle={styles.cancelBtnLabel}
-            >
-              {config.cancelText}
-            </Button>
-          </View>
-        </Surface>
-      </Modal>
+            {/* Action Icon Badge */}
+            <View style={styles.iconContainer}>
+              <MaterialCommunityIcons
+                name={config.icon}
+                size={26}
+                color="#FFFFFF"
+              />
+            </View>
+
+            {/* Title */}
+            <Text variant="titleLarge" style={styles.title}>
+              {config.title}
+            </Text>
+
+            {/* Description */}
+            {config.renderDescription(movieTitle, syncsRemaining)}
+
+            {/* Actions: Stacked Vertically */}
+            <View style={styles.buttonStack}>
+              <Button
+                mode="contained"
+                onPress={onConfirm}
+                buttonColor="#FFFFFF"
+                textColor="#121212"
+                style={styles.confirmBtn}
+                contentStyle={styles.btnContent}
+                labelStyle={styles.confirmBtnLabel}
+              >
+                {config.confirmText}
+              </Button>
+
+              <Button
+                mode="text"
+                onPress={handleDismiss}
+                textColor="#A1A1AA"
+                style={styles.cancelBtn}
+                contentStyle={styles.btnContent}
+                labelStyle={styles.cancelBtnLabel}
+              >
+                {config.cancelText}
+              </Button>
+            </View>
+          </Surface>
+        </Animated.View>
+      </View>
     </Portal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalContentContainer: {
+  overlay: {
+    ...StyleSheet.absoluteFill,
     justifyContent: "flex-end",
-    margin: 0,
+    zIndex: 9999,
+  },
+  drawerContainer: {
+    width: "100%",
+    justifyContent: "flex-end",
   },
   drawerSurface: {
+    width: "100%",
     borderTopStartRadius: 28,
     borderTopEndRadius: 28,
     borderWidth: 1,
     borderBottomWidth: 0,
     borderColor: "rgba(255, 255, 255, 0.08)",
     paddingHorizontal: 24,
-    paddingTop: 12,
+    paddingTop: 8,
     alignItems: "center",
+  },
+  dragHandleContainer: {
+    width: "100%",
+    alignItems: "center",
+    paddingVertical: 10,
   },
   dragHandle: {
     width: 36,
     height: 4,
     borderRadius: 2,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    marginBottom: 20,
-    marginTop: 2,
   },
   iconContainer: {
     width: 52,
@@ -184,6 +359,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
+    marginTop: 4,
   },
   title: {
     color: "#FFFFFF",
