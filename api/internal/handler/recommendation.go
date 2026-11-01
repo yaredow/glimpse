@@ -13,7 +13,7 @@ import (
 type GridService interface {
 	GenerateGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, uuid.UUID, error)
 	RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs *int) error
-	SyncGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, int, error)
+	SyncGrid(ctx context.Context, userID int64, mood string) ([]domain.GridSlotResponse, int, error)
 }
 
 type RecommendationHandler struct {
@@ -66,7 +66,16 @@ func (rh *RecommendationHandler) RecordInteraction(c *echo.Context) error {
 func (rh *RecommendationHandler) SyncGrid(c *echo.Context) error {
 	user := c.Get("user").(*domain.User)
 
-	grid, syncsRemaining, err := rh.svc.SyncGrid(c.Request().Context(), user.ID)
+	var input struct {
+		Mood string `json:"mood"`
+	}
+	if c.Request().Body != nil && c.Request().ContentLength != 0 {
+		if err := c.Bind(&input); err != nil {
+			return c.JSON(http.StatusBadRequest, ResponseError{Message: "invalid request body"})
+		}
+	}
+
+	grid, syncsRemaining, err := rh.svc.SyncGrid(c.Request().Context(), user.ID, input.Mood)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}

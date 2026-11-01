@@ -32,8 +32,8 @@ func (m *mockGridService) RecordInteraction(ctx context.Context, userID, movieID
 	return args.Error(0)
 }
 
-func (m *mockGridService) SyncGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, int, error) {
-	args := m.Called(ctx, userID)
+func (m *mockGridService) SyncGrid(ctx context.Context, userID int64, mood string) ([]domain.GridSlotResponse, int, error) {
+	args := m.Called(ctx, userID, mood)
 	grid, _ := args.Get(0).([]domain.GridSlotResponse)
 	return grid, args.Int(1), args.Error(2)
 }
@@ -202,7 +202,7 @@ func TestRecommendationHandler_SyncGrid(t *testing.T) {
 			{MovieID: 20, TmdbID: 200, SlotNumber: 1, IsRevealed: false, VagueDescription: "desc2", Genres: []string{"Drama"}, GridSessionID: sessionID},
 		}
 
-		mockSvc.On("SyncGrid", mock.Anything, int64(1)).Return(grid, 2, nil)
+		mockSvc.On("SyncGrid", mock.Anything, int64(1), "").Return(grid, 2, nil)
 
 		req := httptest.NewRequest(http.MethodPost, "/v1/grid/sync", nil)
 		rec := httptest.NewRecorder()
@@ -224,12 +224,46 @@ func TestRecommendationHandler_SyncGrid(t *testing.T) {
 		require.Equal(t, int64(20), resp.Grid[0].MovieID)
 	})
 
+	t.Run("success with mood", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		sessionID := uuid.New()
+		grid := []domain.GridSlotResponse{
+			{MovieID: 25, TmdbID: 250, SlotNumber: 1, IsRevealed: false, VagueDescription: "spooky desc", Genres: []string{"Horror"}, GridSessionID: sessionID},
+		}
+
+		mockSvc.On("SyncGrid", mock.Anything, int64(1), "spooky").Return(grid, 1, nil)
+
+		body := `{"mood":"spooky"}`
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/sync", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.SyncGrid(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, rec.Code)
+
+		var resp struct {
+			Grid           []domain.GridSlotResponse `json:"grid"`
+			SyncsRemaining int                       `json:"syncs_remaining"`
+		}
+		err = json.Unmarshal(rec.Body.Bytes(), &resp)
+		require.NoError(t, err)
+		require.Len(t, resp.Grid, 1)
+		require.Equal(t, 1, resp.SyncsRemaining)
+		require.Equal(t, int64(25), resp.Grid[0].MovieID)
+	})
+
 	t.Run("no syncs remaining", func(t *testing.T) {
 		t.Parallel()
 
 		mockSvc, h, e := newRecHandlerTest(t)
 
-		mockSvc.On("SyncGrid", mock.Anything, int64(1)).Return(nil, 0, domain.ErrNoSyncsRemaining)
+		mockSvc.On("SyncGrid", mock.Anything, int64(1), "").Return(nil, 0, domain.ErrNoSyncsRemaining)
 
 		req := httptest.NewRequest(http.MethodPost, "/v1/grid/sync", nil)
 		rec := httptest.NewRecorder()
@@ -246,7 +280,7 @@ func TestRecommendationHandler_SyncGrid(t *testing.T) {
 
 		mockSvc, h, e := newRecHandlerTest(t)
 
-		mockSvc.On("SyncGrid", mock.Anything, int64(1)).Return(nil, 0, domain.ErrSelectionLocked)
+		mockSvc.On("SyncGrid", mock.Anything, int64(1), "").Return(nil, 0, domain.ErrSelectionLocked)
 
 		req := httptest.NewRequest(http.MethodPost, "/v1/grid/sync", nil)
 		rec := httptest.NewRecorder()

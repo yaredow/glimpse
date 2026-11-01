@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
@@ -140,7 +141,7 @@ func (mr *MovieRepository) GetByID(ctx context.Context, movieID int64) (*domain.
 	return &m, nil
 }
 
-func (mr *MovieRepository) GetCandidateMovies(ctx context.Context, userID int64, limit int) ([]*domain.Movie, error) {
+func (mr *MovieRepository) GetCandidateMovies(ctx context.Context, userID int64, limit int, filter *domain.CandidateFilter) ([]*domain.Movie, error) {
 	query := `
 		SELECT m.id, m.tmdb_id, m.imdb_id, m.vague_description, m.genres, m.title,
 			m.original_title, m.full_synopsis, m.poster_path, m.backdrop_path,
@@ -154,16 +155,33 @@ func (mr *MovieRepository) GetCandidateMovies(ctx context.Context, userID int64,
 			SELECT movie_id FROM user_grid_history WHERE user_id = $1
 		)
 		AND m.original_language = ANY(up.languages)
-		AND m.release_date >= make_date(up.min_year, 1, 1)
-		AND m.release_date <= make_date(up.max_year, 12, 31)
 		AND m.vote_average >= up.min_rating
-		AND (CARDINALITY(up.excluded_genres) = 0 OR NOT m.genres && ARRAY(
-			SELECT name FROM genres WHERE id = ANY(up.excluded_genres)
-		))
+		AND (
+			CASE 
+				WHEN $3::text[] IS NOT NULL THEN m.genres && $3
+				ELSE (CARDINALITY(up.excluded_genres) = 0 OR NOT m.genres && ARRAY(
+					SELECT name FROM genres WHERE id = ANY(up.excluded_genres)
+				))
+			END
+		)
+		AND (
+			CASE 
+				WHEN $4::date IS NOT NULL THEN m.release_date >= $4 AND m.release_date <= $5
+				ELSE m.release_date >= make_date(up.min_year, 1, 1) AND m.release_date <= make_date(up.max_year, 12, 31)
+			END
+		)
 		ORDER BY m.popularity DESC
 		LIMIT $2`
 
-	rows, err := mr.db.Query(ctx, query, userID, limit)
+	var genres []string
+	var minDate, maxDate *time.Time
+	if filter != nil {
+		genres = filter.Genres
+		minDate = filter.MinDate
+		maxDate = filter.MaxDate
+	}
+
+	rows, err := mr.db.Query(ctx, query, userID, limit, genres, minDate, maxDate)
 	if err != nil {
 		return nil, err
 	}

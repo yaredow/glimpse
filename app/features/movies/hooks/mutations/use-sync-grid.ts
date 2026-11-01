@@ -7,7 +7,7 @@ export const useSyncGrid = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: syncGrid,
+    mutationFn: (mood?: string) => syncGrid(mood),
     onSuccess: (data) => {
       queryClient.setQueryData(moviesKeys.todayGrid(), { grid: data.grid });
       queryClient.invalidateQueries({ queryKey: moviesKeys.todayGrid() });

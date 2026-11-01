@@ -18,7 +18,9 @@ import CoverflowCarousel from "@/features/movies/components/coverflow-carousel";
 import TonightHero from "@/features/movies/components/tonight-hero";
 import SyncButton from "@/features/movies/components/sync-button";
 import SkeletonLoader from "@/features/movies/components/skeleton-loader";
-import ActionConfirmModal from "@/features/movies/components/action-confirm-modal";
+import ActionConfirmModal, {
+  SyncMood,
+} from "@/features/movies/components/action-confirm-modal";
 
 export default function Discover() {
   const { data, isPending } = useGetTodaysGrid();
@@ -74,25 +76,28 @@ export default function Discover() {
     setShowSyncConfirm(true);
   }, [syncsRemaining, syncMutation.isPending]);
 
-  const handleConfirmSync = useCallback(() => {
-    setShowSyncConfirm(false);
-    syncMutation.mutate(undefined, {
-      onSuccess: (res) => {
-        Toast.show({
-          type: "success",
-          text1: "Fresh Batch Synced! 🎬",
-          text2: `${res.syncs_remaining} ${res.syncs_remaining === 1 ? "sync" : "syncs"} remaining today.`,
-        });
-      },
-      onError: (err) => {
-        Toast.show({
-          type: "error",
-          text1: "Sync Failed",
-          text2: err.message,
-        });
-      },
-    });
-  }, [syncMutation]);
+  const handleConfirmSync = useCallback(
+    (mood?: SyncMood) => {
+      setShowSyncConfirm(false);
+      syncMutation.mutate(mood, {
+        onSuccess: (res) => {
+          Toast.show({
+            type: "success",
+            text1: "Fresh Batch Synced! 🎬",
+            text2: `${res.syncs_remaining} ${res.syncs_remaining === 1 ? "sync" : "syncs"} remaining today.`,
+          });
+        },
+        onError: (err) => {
+          Toast.show({
+            type: "error",
+            text1: "Sync Failed",
+            text2: err.message,
+          });
+        },
+      });
+    },
+    [syncMutation],
+  );
 
   const handleLockIn = useCallback(() => {
     if (!tonightPick || isLockingIn) return;

@@ -1,5 +1,5 @@
-import React from "react";
-import { Modal, Pressable, StyleSheet, View } from "react-native";
+import React, { useState } from "react";
+import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Button, Surface, Text, useTheme } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -11,12 +11,66 @@ export type ConfirmableAction =
   | "locked_in"
   | "sync";
 
+export type SyncMood =
+  | "surprise"
+  | "spooky"
+  | "mind_bender"
+  | "feel_good"
+  | "adrenaline"
+  | "nostalgia";
+
+export interface MoodOption {
+  id: SyncMood;
+  label: string;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  description: string;
+}
+
+export const MOOD_OPTIONS: MoodOption[] = [
+  {
+    id: "surprise",
+    label: "Surprise Me",
+    icon: "dice-multiple-outline",
+    description: "pure algorithmic serendipity based on your overall taste",
+  },
+  {
+    id: "spooky",
+    label: "Spooky & Dark",
+    icon: "candle",
+    description: "spine-chilling horror, dark thrillers, and mysterious suspense",
+  },
+  {
+    id: "mind_bender",
+    label: "Mind-Benders",
+    icon: "brain",
+    description: "thought-provoking sci-fi puzzles and twist-heavy mysteries",
+  },
+  {
+    id: "feel_good",
+    label: "Feel-Good",
+    icon: "popcorn",
+    description: "lighthearted comedies, heartwarming animations, and comfort escapes",
+  },
+  {
+    id: "adrenaline",
+    label: "Adrenaline",
+    icon: "lightning-bolt-outline",
+    description: "high-octane action, daring adventures, and gritty crime heists",
+  },
+  {
+    id: "nostalgia",
+    label: "Nostalgia",
+    icon: "filmstrip",
+    description: "retro cinema classics and gems released between 1975 and 1999",
+  },
+];
+
 interface ActionConfirmModalProps {
   visible: boolean;
   action: ConfirmableAction | null;
   movieTitle: string;
   syncsRemaining?: number;
-  onConfirm: () => void;
+  onConfirm: (mood?: SyncMood) => void;
   onCancel: () => void;
 }
 
@@ -115,6 +169,15 @@ export default function ActionConfirmModal({
 }: ActionConfirmModalProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const [selectedMood, setSelectedMood] = useState<SyncMood>("surprise");
+  const [prevVisible, setPrevVisible] = useState(visible);
+
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
+    if (visible) {
+      setSelectedMood("surprise");
+    }
+  }
 
   if (!action) return null;
 
@@ -164,12 +227,94 @@ export default function ActionConfirmModal({
             {config.title}
           </Text>
 
-          {config.renderDescription(movieTitle, syncsRemaining)}
+          {action === "sync" ? (
+            <>
+              {(() => {
+                const remainingAfter = Math.max(0, (syncsRemaining ?? 3) - 1);
+                const activeMood =
+                  MOOD_OPTIONS.find((m) => m.id === selectedMood) ??
+                  MOOD_OPTIONS[0];
+
+                return (
+                  <View style={styles.syncDescriptionContainer}>
+                    <Text variant="bodyMedium" style={styles.description}>
+                      Eliminate your current selection and draw 5 fresh mystery
+                      movies tailored for{" "}
+                      <Text style={styles.highlightText}>
+                        {activeMood.description}
+                      </Text>
+                      .
+                    </Text>
+                    <Text variant="bodySmall" style={styles.syncRemainingText}>
+                      You will have{" "}
+                      <Text style={styles.highlightText}>
+                        {remainingAfter}{" "}
+                        {remainingAfter === 1 ? "sync" : "syncs"}
+                      </Text>{" "}
+                      remaining today.
+                    </Text>
+                  </View>
+                );
+              })()}
+
+              <View style={styles.moodSection}>
+                <Text variant="labelSmall" style={styles.moodHeader}>
+                  CHOOSE A VIBE
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.moodScrollContent}
+                >
+                  {MOOD_OPTIONS.map((mood) => {
+                    const isSelected = selectedMood === mood.id;
+                    return (
+                      <Pressable
+                        key={mood.id}
+                        onPress={() => setSelectedMood(mood.id)}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected: isSelected }}
+                        accessibilityLabel={mood.label}
+                        style={[
+                          styles.moodChip,
+                          isSelected
+                            ? styles.moodChipSelected
+                            : styles.moodChipUnselected,
+                        ]}
+                      >
+                        <MaterialCommunityIcons
+                          name={mood.icon}
+                          size={18}
+                          color={isSelected ? "#121212" : "#A1A1AA"}
+                          style={styles.moodIcon}
+                        />
+                        <Text
+                          variant="labelMedium"
+                          style={[
+                            styles.moodLabel,
+                            isSelected
+                              ? styles.moodLabelSelected
+                              : styles.moodLabelUnselected,
+                          ]}
+                        >
+                          {mood.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            </>
+          ) : (
+            config.renderDescription(movieTitle, syncsRemaining)
+          )}
 
           <View style={styles.buttonStack}>
             <Button
               mode="contained"
-              onPress={onConfirm}
+              onPress={() =>
+                onConfirm(action === "sync" ? selectedMood : undefined)
+              }
               buttonColor="#FFFFFF"
               textColor="#121212"
               style={styles.confirmBtn}
@@ -255,6 +400,69 @@ const styles = StyleSheet.create({
   highlightText: {
     color: "#FFFFFF",
     fontFamily: "Inter_600SemiBold",
+  },
+  syncDescriptionContainer: {
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  syncRemainingText: {
+    color: "#71717A",
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    textAlign: "center",
+    marginTop: -16,
+    marginBottom: 8,
+    lineHeight: 18,
+  },
+  moodSection: {
+    width: "100%",
+    marginTop: 10,
+    marginBottom: 24,
+  },
+  moodHeader: {
+    color: "#71717A",
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 1.2,
+    fontSize: 11,
+    marginBottom: 10,
+    paddingHorizontal: 4,
+    textTransform: "uppercase",
+  },
+  moodScrollContent: {
+    flexDirection: "row",
+    gap: 8,
+    paddingVertical: 2,
+    paddingHorizontal: 2,
+  },
+  moodChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
+  },
+  moodChipUnselected: {
+    backgroundColor: "#1E1E1E",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.08)",
+  },
+  moodChipSelected: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
+  },
+  moodIcon: {
+    marginRight: 6,
+  },
+  moodLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+  },
+  moodLabelUnselected: {
+    color: "#A1A1AA",
+  },
+  moodLabelSelected: {
+    color: "#121212",
   },
   buttonStack: {
     width: "100%",

@@ -13,7 +13,7 @@ import (
 
 type RecMovieRepository interface {
 	GetByID(ctx context.Context, movieID int64) (*domain.Movie, error)
-	GetCandidateMovies(ctx context.Context, userID int64, limit int) ([]*domain.Movie, error)
+	GetCandidateMovies(ctx context.Context, userID int64, limit int, filter *domain.CandidateFilter) ([]*domain.Movie, error)
 	UpdateWatchCount(ctx context.Context, movieID int64, shown, watched bool) error
 }
 
@@ -95,6 +95,36 @@ func NewRecommendationService(
 	}
 }
 
+func GetMoodFilter(mood string) *domain.CandidateFilter {
+	switch mood {
+	case "spooky":
+		return &domain.CandidateFilter{
+			Genres: []string{"Horror", "Thriller", "Mystery"},
+		}
+	case "mind_bender":
+		return &domain.CandidateFilter{
+			Genres: []string{"Science Fiction", "Mystery", "Thriller"},
+		}
+	case "feel_good":
+		return &domain.CandidateFilter{
+			Genres: []string{"Comedy", "Animation", "Family", "Romance"},
+		}
+	case "adrenaline":
+		return &domain.CandidateFilter{
+			Genres: []string{"Action", "Adventure", "Crime"},
+		}
+	case "nostalgia":
+		start := time.Date(1975, 1, 1, 0, 0, 0, 0, time.UTC)
+		end := time.Date(1999, 12, 31, 23, 59, 59, 0, time.UTC)
+		return &domain.CandidateFilter{
+			MinDate: &start,
+			MaxDate: &end,
+		}
+	default:
+		return nil
+	}
+}
+
 func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, uuid.UUID, error) {
 	_ = rs.users.ResetDailySyncsIfDue(ctx, userID)
 
@@ -120,7 +150,7 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 		affinities[i] = *a
 	}
 
-	candidates, err := rs.movies.GetCandidateMovies(ctx, userID, 200)
+	candidates, err := rs.movies.GetCandidateMovies(ctx, userID, 200, nil)
 	if err != nil {
 		return nil, uuid.Nil, fmt.Errorf("get candidates: %w", err)
 	}
@@ -197,7 +227,7 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 	return grid, sessionID, nil
 }
 
-func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, int, error) {
+func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64, mood string) ([]domain.GridSlotResponse, int, error) {
 	_ = rs.users.ResetDailySyncsIfDue(ctx, userID)
 
 	user, err := rs.users.GetByID(ctx, userID)
@@ -227,7 +257,8 @@ func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64) ([]
 		affinities[i] = *a
 	}
 
-	candidates, err := rs.movies.GetCandidateMovies(ctx, userID, 200)
+	filter := GetMoodFilter(mood)
+	candidates, err := rs.movies.GetCandidateMovies(ctx, userID, 200, filter)
 	if err != nil {
 		return nil, 0, fmt.Errorf("get candidates: %w", err)
 	}

@@ -19,8 +19,10 @@ export const recordInteraction = (payload: RecordInteractionPayload) => {
     .json<{ message: string }>();
 };
 
-export const syncGrid = async () => {
+export const syncGrid = async (mood?: string) => {
   return api
-    .post("v1/grid/sync")
+    .post("v1/grid/sync", {
+      json: mood ? { mood } : {},
+    })
     .json<{ grid: GridMovie[]; syncs_remaining: number }>();
 };

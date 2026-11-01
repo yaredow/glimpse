@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+type CandidateFilter struct {
+	Genres  []string
+	MinDate *time.Time
+	MaxDate *time.Time
+}
+
 type MovieDetailParams struct {
 	ImdbID              *string         `json:"imdb_id,omitempty"`
 	Tagline             *string         `json:"tagline,omitempty"`
