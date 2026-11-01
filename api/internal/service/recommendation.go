@@ -37,6 +37,7 @@ type RecGridHistoryRepository interface {
 
 type RecInteractionRepository interface {
 	Insert(ctx context.Context, interaction *domain.Interaction) error
+	GetHistory(ctx context.Context, userID int64, action string) ([]domain.HistoryMovie, error)
 }
 
 type RecUserRepository interface {
@@ -422,4 +423,8 @@ func (rs *RecommendationService) SeedFromOnboarding(ctx context.Context, userID 
 	}
 
 	return nil
+}
+
+func (rs *RecommendationService) GetHistory(ctx context.Context, userID int64, action string) ([]domain.HistoryMovie, error) {
+	return rs.interactions.GetHistory(ctx, userID, action)
 }

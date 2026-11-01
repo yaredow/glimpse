@@ -1,6 +1,7 @@
 import { api } from "@/lib/api";
 import {
   GridMovie,
+  HistoryResponse,
   MovieDetailResponse,
   RecordInteractionPayload,
 } from "../types/movies.type";
@@ -25,4 +26,11 @@ export const syncGrid = async (mood?: string) => {
       json: mood ? { mood } : {},
     })
     .json<{ grid: GridMovie[]; syncs_remaining: number }>();
+};
+
+export const getHistory = async (action?: string) => {
+  const searchParams = action ? { action } : undefined;
+  return api
+    .get("v1/me/history", { searchParams })
+    .json<HistoryResponse>();
 };

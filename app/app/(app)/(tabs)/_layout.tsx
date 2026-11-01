@@ -1,40 +1,55 @@
 import { Tabs } from "expo-router";
-import { useTheme } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useAppTheme } from "@/lib/theme";
 
 export default function TabsLayout() {
-  const { colors } = useTheme();
+  const theme = useAppTheme();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.outline,
-          height: 80,
-          paddingVertical: 8,
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.outlineVariant,
+          borderTopWidth: 1,
+          height: 68,
+          paddingTop: 8,
+          paddingBottom: 10,
         },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.onSurfaceVariant,
+        tabBarActiveTintColor: theme.colors.textPrimary,
+        tabBarInactiveTintColor: theme.colors.textMuted,
+        tabBarLabelStyle: {
+          fontFamily: "Inter_600SemiBold",
+          fontSize: 11,
+          letterSpacing: 0.3,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Discover",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="auto-fix" color={color ? String(color) : undefined} size={size} />
+          title: "Today",
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? "filmstrip-box" : "filmstrip"}
+              color={color ? String(color) : undefined}
+              size={size}
+            />
           ),
         }}
       />
 
       <Tabs.Screen
-        name="watched"
+        name="journal"
         options={{
-          title: "Watched",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="history" color={color ? String(color) : undefined} size={size} />
+          title: "Journal",
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? "bookmark" : "bookmark-outline"}
+              color={color ? String(color) : undefined}
+              size={size}
+            />
           ),
         }}
       />
@@ -43,8 +58,12 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account" color={color ? String(color) : undefined} size={size} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? "account" : "account-outline"}
+              color={color ? String(color) : undefined}
+              size={size}
+            />
           ),
         }}
       />

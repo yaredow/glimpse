@@ -1,308 +1,254 @@
-import { useCallback, useEffect, useState } from "react";
-import { Pressable, StyleSheet, View, Dimensions } from "react-native";
-import { usePanGesture, GestureDetector } from "react-native-gesture-handler";
-import { useFocusEffect } from "expo-router";
-import { impactAsync, ImpactFeedbackStyle } from "expo-haptics";
-import { scheduleOnRN } from "react-native-worklets";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import {
+  Dimensions,
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
+import * as Haptics from "expo-haptics";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
   Extrapolation,
-  type SharedValue,
+  interpolate,
+  SharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
 } from "react-native-reanimated";
+import { useAppTheme } from "@/lib/theme";
 import MysteryCard from "./mystery-card";
 import type { GridMovie } from "../types/movies.type";
 
+export interface CoverflowCarouselHandle {
+  scrollToIndex: (index: number) => void;
+}
+
 interface CoverflowCarouselProps {
   movies: GridMovie[];
+  hasTodayPick?: boolean;
   onReveal: (movie: GridMovie) => void;
+  onPickTonight?: (movie: GridMovie) => void;
+  onWatched?: (movie: GridMovie) => void;
+  onSkip?: (movie: GridMovie) => void;
+  onViewDetails?: (movie: GridMovie) => void;
 }
 
 const { width: SW } = Dimensions.get("window");
-const CARD_W = SW - 64;
-const CARD_H = CARD_W * 1.25;
-const SPACING = 14;
+const CARD_W = Math.round(SW * 0.78);
+const CARD_H = Math.round(CARD_W * 1.54);
+const SPACING = 16;
 const ITEM_W = CARD_W + SPACING;
+const INSET = Math.round((SW - CARD_W) / 2);
 
-export default function CoverflowCarousel({
-  movies,
-  onReveal,
-}: CoverflowCarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const [prevFirstId, setPrevFirstId] = useState(movies[0]?.movie_id);
-
-  if (movies[0]?.movie_id !== prevFirstId) {
-    setPrevFirstId(movies[0]?.movie_id);
-    setExpandedIndex(null);
-  }
-
-  // An expanded card must be a locked mystery card. Revealed/actioned cards are never expanded.
-  const activeExpandedIndex =
-    expandedIndex !== null &&
-    movies[expandedIndex] &&
-    !movies[expandedIndex].is_revealed &&
-    !movies[expandedIndex].action
-      ? expandedIndex
-      : null;
-
-  const scrollX = useSharedValue(0);
-  const activeIndex = useSharedValue(0);
-  const isDragging = useSharedValue(false);
-  const overlayOpacity = useSharedValue(0);
-
-  const maxScroll = -(movies.length - 1) * ITEM_W;
-
-  const snapToIndex = useCallback(
-    (index: number, velocityX = 0) => {
-      const target = Math.max(0, Math.min(index, movies.length - 1));
-      const targetPos = -target * ITEM_W;
-      scrollX.set(
-        withSpring(targetPos, {
-          stiffness: 180,
-          damping: 24,
-          mass: 0.9,
-          velocity: velocityX * 0.1,
-        }),
-      );
-      activeIndex.set(target);
-      scheduleOnRN(setCurrentIndex, target);
-    },
-    [movies.length, scrollX, activeIndex],
-  );
-
-  const firstMovieId = movies[0]?.movie_id;
-  useEffect(() => {
-    snapToIndex(0);
-  }, [firstMovieId, snapToIndex]);
-
-  const panGesture = usePanGesture({
-    activeOffsetX: [-12, 12],
-    failOffsetY: [-12, 12],
-    enabled: activeExpandedIndex === null,
-    onBegin: () => {
-      isDragging.set(true);
-    },
-    onUpdate: (e) => {
-      const raw = e.translationX - activeIndex.get() * ITEM_W;
-      scrollX.set(raw > 0 ? 0 : raw < maxScroll ? maxScroll : raw);
-    },
-    onDeactivate: (e) => {
-      isDragging.set(false);
-      const threshold = ITEM_W / 3;
-      let target = activeIndex.get();
-
-      if (e.translationX < -threshold) {
-        target =
-          activeIndex.get() + 1 > movies.length - 1
-            ? movies.length - 1
-            : activeIndex.get() + 1;
-      } else if (e.translationX > threshold) {
-        target = activeIndex.get() - 1 < 0 ? 0 : activeIndex.get() - 1;
-      }
-
-      scheduleOnRN(snapToIndex, target, e.velocityX);
-      scheduleOnRN(impactAsync, ImpactFeedbackStyle.Light);
-    },
-    onFinalize: () => {
-      isDragging.set(false);
-    },
-  });
-
-  const handleCloseExpanded = useCallback(() => {
-    setExpandedIndex(null);
-    overlayOpacity.set(
-      withSpring(0, {
-        stiffness: 200,
-        damping: 22,
-      }),
-    );
-  }, [overlayOpacity]);
-
-  // When returning to the screen or when grid data changes, ensure no card remains expanded
-  useFocusEffect(
-    useCallback(() => {
-      setExpandedIndex(null);
-      overlayOpacity.set(0);
-    }, [overlayOpacity]),
-  );
-
-  const handleCardPress = useCallback(
-    (cardIndex: number) => {
-      if (activeExpandedIndex !== null) {
-        if (cardIndex === activeExpandedIndex) {
-          handleCloseExpanded();
-        }
-        return;
-      }
-
-      if (cardIndex !== currentIndex) {
-        snapToIndex(cardIndex);
-        return;
-      }
-
-      const movie = movies[cardIndex];
-      const isRevealed = movie?.is_revealed || !!movie?.action;
-      const isSkippedOrWatched =
-        movie?.action === "skipped" || movie?.action === "watched";
-
-      if (isSkippedOrWatched) {
-        return;
-      }
-
-      if (isRevealed) {
-        onReveal(movie);
-        return;
-      }
-
-      setExpandedIndex(cardIndex);
-      overlayOpacity.set(
-        withSpring(1, {
-          stiffness: 200,
-          damping: 22,
-        }),
-      );
-    },
-    [
-      activeExpandedIndex,
-      currentIndex,
-      handleCloseExpanded,
+const CoverflowCarousel = forwardRef<CoverflowCarouselHandle, CoverflowCarouselProps>(
+  function CoverflowCarousel(
+    {
       movies,
+      hasTodayPick = false,
       onReveal,
-      overlayOpacity,
-      snapToIndex,
-    ],
-  );
-
-  const handleReveal = useCallback(
-    (movie: GridMovie) => {
-      setExpandedIndex(null);
-      overlayOpacity.set(0);
-      onReveal(movie);
+      onPickTonight,
+      onWatched,
+      onSkip,
+      onViewDetails,
     },
-    [onReveal, overlayOpacity],
-  );
+    ref,
+  ) {
+    const theme = useAppTheme();
+    const flatListRef = useRef<FlatList<GridMovie>>(null);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
-  const overlayAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: overlayOpacity.get(),
-  }));
+    const scrollX = useSharedValue(0);
 
-  const containerOffset = (SW - CARD_W) / 2;
+    const scrollHandler = useAnimatedScrollHandler({
+      onScroll: (event) => {
+        scrollX.value = event.contentOffset.x;
+      },
+    });
 
-  return (
-    <View style={styles.container}>
-      <Animated.View
-        style={[styles.expandOverlay, overlayAnimatedStyle]}
-        pointerEvents={activeExpandedIndex !== null ? "auto" : "none"}
-      >
-        <Pressable
-          style={StyleSheet.absoluteFill}
-          onPress={handleCloseExpanded}
+    const handleMomentumScrollEnd = (
+      event: NativeSyntheticEvent<NativeScrollEvent>,
+    ) => {
+      const rawIndex = Math.round(event.nativeEvent.contentOffset.x / ITEM_W);
+      const clampedIndex = Math.max(0, Math.min(rawIndex, movies.length - 1));
+      if (clampedIndex !== currentIndex) {
+        setCurrentIndex(clampedIndex);
+        Haptics.selectionAsync();
+      }
+    };
+
+    const scrollToIndex = (index: number) => {
+      flatListRef.current?.scrollToOffset({
+        offset: index * ITEM_W,
+        animated: true,
+      });
+      setCurrentIndex(index);
+      Haptics.selectionAsync();
+    };
+
+    useImperativeHandle(ref, () => ({
+      scrollToIndex,
+    }));
+
+    const renderItem = ({ item, index }: { item: GridMovie; index: number }) => {
+      return (
+        <CardSlot
+          movie={item}
+          index={index}
+          total={movies.length}
+          scrollX={scrollX}
+          isCenter={index === currentIndex}
+          hasTodayPick={hasTodayPick}
+          onPressAdjacent={() => scrollToIndex(index)}
+          onReveal={() => onReveal(item)}
+          onPickTonight={() => onPickTonight?.(item)}
+          onWatched={() => onWatched?.(item)}
+          onSkip={() => onSkip?.(item)}
+          onViewDetails={() => onViewDetails?.(item)}
         />
-      </Animated.View>
+      );
+    };
 
-      <GestureDetector gesture={panGesture}>
-        <View
-          style={[
-            styles.carouselArea,
-            activeExpandedIndex !== null && styles.expandedCarouselArea,
-          ]}
-          collapsable={false}
-        >
-          <View
-            style={[styles.track, { paddingHorizontal: containerOffset }]}
-            collapsable={false}
-          >
-            {movies.map((movie, i) => (
-              <CardSlot
-                key={movie.movie_id}
-                movie={movie}
-                index={i}
-                scrollX={scrollX}
-                containerOffset={containerOffset}
-                isCenter={i === currentIndex}
-                isExpanded={activeExpandedIndex === i}
-                onPress={() => handleCardPress(i)}
-                onReveal={() => handleReveal(movie)}
+    return (
+      <View style={styles.container}>
+        <Animated.FlatList
+          ref={flatListRef}
+          data={movies}
+          keyExtractor={(item) => item.movie_id.toString()}
+          renderItem={renderItem}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={ITEM_W}
+          decelerationRate="fast"
+          bounces={false}
+          contentContainerStyle={styles.listContent}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+        />
+
+        <View style={styles.pagerContainer}>
+          {movies.map((m, i) => {
+            const isActive = i === currentIndex;
+            return (
+              <Pressable
+                key={m.movie_id}
+                onPress={() => scrollToIndex(i)}
+                style={({ pressed }) => [
+                  styles.pagerDot,
+                  isActive
+                    ? [styles.pagerDotActive, { backgroundColor: theme.colors.primary }]
+                    : [styles.pagerDotInactive],
+                  pressed && { opacity: 0.7 },
+                ]}
+                accessibilityLabel={`Go to Reel ${i + 1}`}
               />
-            ))}
-          </View>
+            );
+          })}
         </View>
-      </GestureDetector>
-
-      <View style={styles.dots}>
-        {movies.map((_, i) => (
-          <View
-            key={i}
-            style={[styles.dot, i === currentIndex && styles.dotActive]}
-          />
-        ))}
       </View>
-    </View>
-  );
-}
+    );
+  },
+);
+
+export default CoverflowCarousel;
 
 function CardSlot({
   movie,
   index,
+  total,
   scrollX,
-  containerOffset,
   isCenter,
-  isExpanded,
-  onPress,
+  hasTodayPick,
+  onPressAdjacent,
   onReveal,
+  onPickTonight,
+  onWatched,
+  onSkip,
+  onViewDetails,
 }: {
   movie: GridMovie;
   index: number;
+  total: number;
   scrollX: SharedValue<number>;
-  containerOffset: number;
   isCenter: boolean;
-  isExpanded: boolean;
-  onPress: () => void;
+  hasTodayPick: boolean;
+  onPressAdjacent: () => void;
   onReveal: () => void;
+  onPickTonight: () => void;
+  onWatched: () => void;
+  onSkip: () => void;
+  onViewDetails: () => void;
 }) {
+  const isMarked =
+    movie.action === "watched" ||
+    movie.action === "skipped" ||
+    movie.action === "pick_tonight" ||
+    movie.action === "watchlist_add" ||
+    movie.action === "locked_in";
+  const isRevealed = Boolean(movie.is_revealed) || movie.action === "revealed" || isMarked;
+  const isLockedSealed = Boolean(hasTodayPick && !isRevealed);
+
   const animatedStyle = useAnimatedStyle(() => {
-    const baseLeft = index * ITEM_W + containerOffset;
-    const position = scrollX.get() + baseLeft;
-    const diff = position - containerOffset;
-    const absPos = diff < 0 ? -diff : diff;
-    const maxDist = ITEM_W;
+    const centerOffset = index * ITEM_W;
+    const distance = scrollX.value - centerOffset;
+    const absDist = Math.abs(distance);
 
     const scale = interpolate(
-      absPos,
-      [0, maxDist * 0.6, maxDist],
-      [1, 0.92, 0.85],
+      absDist,
+      [0, ITEM_W * 0.9, ITEM_W * 1.8],
+      [1, 0.92, 0.88],
       Extrapolation.CLAMP,
     );
 
     const opacity = interpolate(
-      absPos,
-      [0, maxDist * 0.5, maxDist],
-      [1, 0.7, 0.35],
+      absDist,
+      [0, ITEM_W * 0.8, ITEM_W * 1.8],
+      [1, 0.65, 0.4],
       Extrapolation.CLAMP,
     );
 
-    const zIndex = absPos < ITEM_W * 0.3 ? 10 : 1;
-
     return {
-      transform: [{ translateX: position }, { scale }],
+      transform: [{ scale }],
       opacity,
-      zIndex: isExpanded ? 60 : zIndex,
+      zIndex: isCenter ? 20 : 1,
     };
-  }, [containerOffset, index, isExpanded]);
+  });
 
   return (
     <Animated.View style={[styles.cardSlot, animatedStyle]}>
-      <MysteryCard
-        movie={movie}
-        index={index}
-        isCenter={isCenter}
-        isExpanded={isExpanded}
-        onPress={onPress}
-        onReveal={onReveal}
-      />
+      {isCenter ? (
+        <MysteryCard
+          movie={movie}
+          index={index}
+          total={total}
+          isCenter={isCenter}
+          hasTodayPick={hasTodayPick}
+          isLockedSealed={isLockedSealed}
+          onReveal={onReveal}
+          onPickTonight={onPickTonight}
+          onWatched={onWatched}
+          onSkip={onSkip}
+          onViewDetails={onViewDetails}
+        />
+      ) : (
+        <Pressable onPress={onPressAdjacent} style={styles.adjacentPressable}>
+          <MysteryCard
+            movie={movie}
+            index={index}
+            total={total}
+            isCenter={isCenter}
+            hasTodayPick={hasTodayPick}
+            isLockedSealed={isLockedSealed}
+            onReveal={onReveal}
+            onPickTonight={onPickTonight}
+            onWatched={onWatched}
+            onSkip={onSkip}
+            onViewDetails={onViewDetails}
+          />
+        </Pressable>
+      )}
     </Animated.View>
   );
 }
@@ -312,48 +258,36 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-  carouselArea: {
-    width: "100%",
-    height: CARD_H,
-  },
-  expandedCarouselArea: {
-    zIndex: 40,
-  },
-  track: {
-    flex: 1,
-    flexDirection: "row",
+  listContent: {
+    paddingHorizontal: INSET,
+    paddingTop: 10,
+    paddingBottom: 16,
   },
   cardSlot: {
-    position: "absolute",
-    top: 0,
-    left: 0,
     width: CARD_W,
     height: CARD_H,
+    marginRight: SPACING,
   },
-  expandOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0,0,0,0.28)",
-    zIndex: 20,
-    top: -100,
-    bottom: -100,
+  adjacentPressable: {
+    flex: 1,
   },
-  dots: {
+  pagerContainer: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 20,
     alignItems: "center",
     justifyContent: "center",
+    gap: 6,
+    marginTop: 6,
+    marginBottom: 8,
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "rgba(255,255,255,0.2)",
+  pagerDot: {
+    height: 4,
+    borderRadius: 2,
   },
-  dotActive: {
-    backgroundColor: "#E50914",
+  pagerDotActive: {
     width: 20,
-    height: 6,
-    borderRadius: 3,
+  },
+  pagerDotInactive: {
+    width: 5,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
 });

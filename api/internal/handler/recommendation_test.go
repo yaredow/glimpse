@@ -38,6 +38,12 @@ func (m *mockGridService) SyncGrid(ctx context.Context, userID int64, mood strin
 	return grid, args.Int(1), args.Error(2)
 }
 
+func (m *mockGridService) GetHistory(ctx context.Context, userID int64, action string) ([]domain.HistoryMovie, error) {
+	args := m.Called(ctx, userID, action)
+	history, _ := args.Get(0).([]domain.HistoryMovie)
+	return history, args.Error(1)
+}
+
 func newRecHandlerTest(t *testing.T) (*mockGridService, *handler.RecommendationHandler, *echo.Echo) {
 	t.Helper()
 	mockSvc := &mockGridService{}
@@ -290,5 +296,42 @@ func TestRecommendationHandler_SyncGrid(t *testing.T) {
 		err := h.SyncGrid(c)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+}
+
+func TestRecommendationHandler_GetHistory(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		history := []domain.HistoryMovie{
+			{
+				MovieID: 42,
+				Action:  "watched",
+				Title:   "Inception",
+			},
+		}
+
+		mockSvc.On("GetHistory", mock.Anything, int64(1), "watched").Return(history, nil)
+
+		req := httptest.NewRequest(http.MethodGet, "/v1/me/history?action=watched", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.GetHistory(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, rec.Code)
+
+		var resp struct {
+			History []domain.HistoryMovie `json:"history"`
+		}
+		err = json.Unmarshal(rec.Body.Bytes(), &resp)
+		require.NoError(t, err)
+		require.Len(t, resp.History, 1)
+		require.Equal(t, "Inception", resp.History[0].Title)
 	})
 }

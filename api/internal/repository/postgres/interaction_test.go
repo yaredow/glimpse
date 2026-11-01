@@ -125,3 +125,49 @@ func TestInteractionRepository_Insert(t *testing.T) {
 		require.NoError(t, mock.ExpectationsWereMet())
 	})
 }
+
+func TestInteractionRepository_GetHistory(t *testing.T) {
+	t.Parallel()
+
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	repo := postgres.NewInteractionRepository(&postgres.DB{Pool: mock})
+
+	now := time.Now()
+	poster := "/poster.jpg"
+	backdrop := "/backdrop.jpg"
+	tagline := "Your mind is the scene of the crime."
+	synopsis := "A thief who steals corporate secrets..."
+	director := "Christopher Nolan"
+	runtime := 148
+	cast := []byte(`[{"name":"Leonardo DiCaprio"}]`)
+	trailer := "YoHD9XEInc0"
+
+	rows := pgxmock.NewRows([]string{
+		"movie_id", "action", "acted_at",
+		"title", "poster_path", "backdrop_path", "genres",
+		"release_date", "vote_average", "runtime",
+		"vague_description", "full_synopsis", "tagline",
+		"director", "cast_members", "trailer_key",
+	}).AddRow(
+		int64(42), "watched", now,
+		"Inception", &poster, &backdrop, []string{"Action", "Sci-Fi"},
+		now, 8.8, &runtime,
+		"Dream theft thriller", &synopsis, &tagline,
+		&director, cast, &trailer,
+	)
+
+	mock.ExpectQuery(`WITH ranked_history AS`).
+		WithArgs(int64(1), "watched").
+		WillReturnRows(rows)
+
+	history, err := repo.GetHistory(context.Background(), 1, "watched")
+	require.NoError(t, err)
+	require.Len(t, history, 1)
+	require.Equal(t, int64(42), history[0].MovieID)
+	require.Equal(t, "Inception", history[0].Title)
+	require.Equal(t, "watched", history[0].Action)
+	require.NoError(t, mock.ExpectationsWereMet())
+}

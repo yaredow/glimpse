@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { StyleSheet, ScrollView, View, Pressable } from "react-native";
-import { Text, useTheme } from "react-native-paper";
+import { Text } from "react-native-paper";
 import { Button } from "@/components/ui/button";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";

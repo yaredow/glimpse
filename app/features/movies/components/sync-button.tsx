@@ -5,6 +5,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useAppTheme } from "@/lib/theme";
 
 interface SyncButtonProps {
   onSync: () => void;
@@ -17,6 +18,7 @@ export default function SyncButton({
   syncsRemaining = 3,
   isSyncing = false,
 }: SyncButtonProps) {
+  const theme = useAppTheme();
   const rotation = useSharedValue(0);
   const isDisabled = syncsRemaining <= 0 || isSyncing;
 
@@ -37,26 +39,34 @@ export default function SyncButton({
   return (
     <View style={styles.container}>
       <Pressable
-        style={[styles.button, isDisabled && styles.buttonDisabled]}
+        style={({ pressed }) => [
+          styles.button,
+          {
+            backgroundColor: theme.colors.elevation.level1,
+            borderColor: isDisabled ? "rgba(255, 255, 255, 0.08)" : theme.colors.outlineVariant,
+          },
+          isDisabled && styles.buttonDisabled,
+          pressed && { opacity: 0.8 },
+        ]}
         disabled={isDisabled}
         onPress={handlePress}
       >
         <Animated.View style={animatedStyle}>
           <MaterialCommunityIcons
             name="sync"
-            size={18}
-            color={isDisabled ? "#666" : "#E50914"}
+            size={16}
+            color={isDisabled ? theme.colors.textMuted : theme.colors.primary}
           />
         </Animated.View>
-        <Text style={[styles.label, isDisabled && styles.labelDisabled]}>
-          {isSyncing ? "Syncing..." : "Sync Selection"}
+        <Text
+          style={[
+            styles.label,
+            { color: isDisabled ? theme.colors.textMuted : theme.colors.textPrimary },
+          ]}
+        >
+          {isSyncing ? "Syncing..." : `Sync Reel (${syncsRemaining} left)`}
         </Text>
       </Pressable>
-      <Text style={styles.count}>
-        {syncsRemaining <= 0
-          ? "No syncs remaining today"
-          : `${syncsRemaining} ${syncsRemaining === 1 ? "sync" : "syncs"} remaining today`}
-      </Text>
     </View>
   );
 }
@@ -64,36 +74,22 @@ export default function SyncButton({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    gap: 4,
   },
   button: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 999,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#E50914",
   },
   buttonDisabled: {
-    borderColor: "rgba(255, 255, 255, 0.15)",
-    backgroundColor: "transparent",
-    opacity: 0.6,
+    opacity: 0.5,
   },
   label: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    letterSpacing: 2,
-    color: "#E50914",
-    textTransform: "uppercase",
-  },
-  labelDisabled: {
-    color: "#777",
-  },
-  count: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
-    color: "#666",
+    fontSize: 12,
+    letterSpacing: 0.4,
   },
 });

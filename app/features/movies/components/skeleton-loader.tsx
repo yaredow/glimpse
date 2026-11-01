@@ -10,8 +10,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 const { width: SW } = Dimensions.get("window");
-const CARD_W = SW - 64;
-const CARD_H = CARD_W * 1.25;
+const CARD_W = Math.round(SW * 0.78);
+const CARD_H = Math.round(CARD_W * 1.54);
 
 export default function SkeletonLoader({ count }: { count: number }) {
   const shimmer = useSharedValue(0);
@@ -58,16 +58,16 @@ const styles = StyleSheet.create({
   container: {
     width: SW,
     alignItems: "center",
-    paddingTop: 8,
+    paddingTop: 10,
   },
   card: {
     width: CARD_W,
     height: CARD_H,
-    borderRadius: 14,
-    backgroundColor: "#1A1A1A",
+    borderRadius: 28,
+    backgroundColor: "#161618",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   shimmerClip: {
     ...StyleSheet.absoluteFill,
@@ -92,39 +92,39 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#222",
+    backgroundColor: "#202024",
     marginBottom: 12,
   },
   numberBar: {
     width: 40,
     height: 48,
     borderRadius: 6,
-    backgroundColor: "#222",
+    backgroundColor: "#202024",
     marginBottom: 12,
   },
   hintBar: {
     width: 100,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#222",
+    backgroundColor: "#202024",
   },
   dots: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 20,
+    gap: 6,
+    marginTop: 18,
     alignItems: "center",
     justifyContent: "center",
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 5,
+    height: 4,
+    borderRadius: 2,
     backgroundColor: "rgba(255,255,255,0.1)",
   },
   dotActive: {
-    backgroundColor: "rgba(229,9,20,0.3)",
+    backgroundColor: "rgba(229,9,20,0.5)",
     width: 20,
-    height: 6,
-    borderRadius: 3,
+    height: 4,
+    borderRadius: 2,
   },
 });

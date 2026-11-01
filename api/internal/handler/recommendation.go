@@ -14,6 +14,7 @@ type GridService interface {
 	GenerateGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, uuid.UUID, error)
 	RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs *int) error
 	SyncGrid(ctx context.Context, userID int64, mood string) ([]domain.GridSlotResponse, int, error)
+	GetHistory(ctx context.Context, userID int64, action string) ([]domain.HistoryMovie, error)
 }
 
 type RecommendationHandler struct {
@@ -84,4 +85,16 @@ func (rh *RecommendationHandler) SyncGrid(c *echo.Context) error {
 		"grid":            grid,
 		"syncs_remaining": syncsRemaining,
 	})
+}
+
+func (rh *RecommendationHandler) GetHistory(c *echo.Context) error {
+	user := c.Get("user").(*domain.User)
+	action := c.QueryParam("action")
+
+	history, err := rh.svc.GetHistory(c.Request().Context(), user.ID, action)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, envelope{"history": history})
 }

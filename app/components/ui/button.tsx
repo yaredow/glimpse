@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { Button as PaperButton, useTheme } from "react-native-paper";
+import { Button as PaperButton } from "react-native-paper";
 import * as Haptics from "expo-haptics";
 import type { ComponentProps } from "react";
 
@@ -20,8 +20,6 @@ export const Button = ({
   children,
   ...props
 }: ButtonProps) => {
-  const { colors } = useTheme();
-
   const handlePress = (e: any) => {
     if (haptic !== "none") {
       switch (haptic) {

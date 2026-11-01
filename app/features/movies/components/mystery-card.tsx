@@ -3,543 +3,542 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import Toast from "react-native-toast-message";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withTiming,
   interpolate,
 } from "react-native-reanimated";
+import { useAppTheme } from "@/lib/theme";
 import { tmdbImage } from "../consants/images";
 import type { GridMovie } from "../types/movies.type";
 
 interface MysteryCardProps {
   movie: GridMovie;
   index: number;
+  total?: number;
   isCenter: boolean;
-  isExpanded: boolean;
-  onPress: () => void;
+  hasTodayPick?: boolean;
+  isLockedSealed?: boolean;
   onReveal: () => void;
+  onViewDetails?: () => void;
+  onPickTonight?: () => void;
+  onWatched?: () => void;
+  onSkip?: () => void;
 }
 
 export default function MysteryCard({
   movie,
   index,
+  total = 5,
   isCenter,
-  isExpanded,
-  onPress,
+  hasTodayPick = false,
+  isLockedSealed = false,
   onReveal,
+  onViewDetails,
+  onPickTonight,
+  onWatched,
+  onSkip,
 }: MysteryCardProps) {
-  const isRevealed = Boolean(movie.is_revealed) || Boolean(movie.action);
+  const theme = useAppTheme();
   const action = movie.action;
-  const isActioned =
-    action === "watched" ||
-    action === "skipped" ||
-    action === "watchlist_add" ||
+  const isPicked =
     action === "pick_tonight" ||
+    action === "watchlist_add" ||
     action === "locked_in";
+  const isWatched = action === "watched";
+  const isSkipped = action === "skipped";
+  const isMarked = isPicked || isWatched || isSkipped;
+  const isRevealed = Boolean(movie.is_revealed) || action === "revealed" || isMarked;
+  const isLocked = isWatched || isSkipped;
 
-  const expanded = useSharedValue(0);
-  const contentPhase = useSharedValue(0);
   const [posterFailed, setPosterFailed] = useState(false);
-
-  // The Daily Five uses the poster artwork, with backdrop fallback if poster missing.
   const posterSrc = tmdbImage(movie.poster_path || movie.backdrop_path, "w500");
 
+  const flipProgress = useSharedValue(isRevealed ? 1 : 0);
+
   useEffect(() => {
-    if (isRevealed) return;
+    flipProgress.value = withSpring(isRevealed ? 1 : 0, {
+      stiffness: 120,
+      damping: 16,
+      mass: 0.7,
+    });
+  }, [flipProgress, isRevealed]);
 
-    if (isExpanded) {
-      expanded.set(
-        withSpring(1, {
-          stiffness: 160,
-          damping: 20,
-          mass: 0.8,
-        }),
-      );
-      contentPhase.set(withTiming(1, { duration: 350 }));
+  const frontAnimatedStyle = useAnimatedStyle(() => {
+    const rotateValue = interpolate(flipProgress.value, [0, 1], [0, 180]);
+    const opacity = interpolate(
+      flipProgress.value,
+      [0, 0.48, 0.52, 1],
+      [1, 1, 0, 0],
+    );
+    return {
+      transform: [{ perspective: 1200 }, { rotateY: `${rotateValue}deg` }],
+      opacity,
+    };
+  });
+
+  const backAnimatedStyle = useAnimatedStyle(() => {
+    const rotateValue = interpolate(flipProgress.value, [0, 1], [180, 360]);
+    const opacity = interpolate(
+      flipProgress.value,
+      [0, 0.48, 0.52, 1],
+      [0, 0, 1, 1],
+    );
+    return {
+      transform: [{ perspective: 1200 }, { rotateY: `${rotateValue}deg` }],
+      opacity,
+    };
+  });
+
+  const handleCardPress = () => {
+    if (!isRevealed) {
+      if (isLockedSealed) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        Toast.show({
+          type: "info",
+          text1: "Deck Locked",
+          text2: "You have already chosen your film for tonight.",
+        });
+        return;
+      }
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      onReveal();
     } else {
-      expanded.set(withTiming(0, { duration: 250 }));
-      contentPhase.set(withTiming(0, { duration: 180 }));
+      if (isLocked) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Toast.show({
+          type: "info",
+          text1: "Reel Locked",
+          text2: isSkipped
+            ? "This movie was skipped and cannot be opened."
+            : "This movie was marked as watched and cannot be opened.",
+        });
+        return;
+      }
+      onViewDetails?.();
     }
-  }, [contentPhase, expanded, isExpanded, isRevealed]);
+  };
 
-  const veilStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(expanded.value, [0, 0.4, 1], [0.25, 0.05, 0]),
-  }));
+  const handleTogglePick = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onPickTonight?.();
+  };
 
-  const badgeStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(expanded.value, [0, 0.4], [1, 0]),
-    transform: [{ translateY: interpolate(expanded.value, [0, 1], [0, -10]) }],
-  }));
+  const handleToggleWatched = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onWatched?.();
+  };
 
-  const contentStyle = useAnimatedStyle(() => ({
-    opacity: contentPhase.value,
-    transform: [
-      { translateY: interpolate(contentPhase.value, [0, 1], [20, 0]) },
-    ],
-  }));
+  const handleToggleSkip = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onSkip?.();
+  };
 
-  const showPoster = Boolean(posterSrc && !posterFailed);
-  const isInteractive = action !== "skipped" && action !== "watched";
-  const CardContainer = isInteractive ? Pressable : View;
+  const releaseYear = movie.release_date
+    ? new Date(movie.release_date).getFullYear()
+    : null;
+
+  const metaParts: string[] = [];
+  if (releaseYear) metaParts.push(String(releaseYear));
+  if (movie.genres?.length > 0) metaParts.push(movie.genres[0]);
+  if (movie.vote_average > 0) metaParts.push(`★ ${movie.vote_average.toFixed(1)}`);
+  const metaLine = metaParts.join("  ·  ");
 
   return (
-    <Animated.View
+    <View
       style={[
-        styles.card,
-        (action === "watchlist_add" ||
-          action === "pick_tonight" ||
-          action === "locked_in") &&
-          styles.cardPick,
-        action === "watched" && styles.cardWatched,
-        action === "skipped" && styles.cardSkipped,
+        styles.cardOuter,
+        isPicked && {
+          borderColor: theme.colors.gold,
+          borderWidth: 1.5,
+        },
       ]}
     >
-      <CardContainer
-        {...(isInteractive
-          ? {
-              onPress: isRevealed ? onReveal : onPress,
-              style: styles.pressable,
-            }
-          : { style: styles.pressable })}
+      <Animated.View
+        style={[styles.face, styles.frontFace, frontAnimatedStyle]}
+        pointerEvents={isRevealed ? "none" : "auto"}
       >
-        {showPoster && posterSrc ? (
-          <Image
-            source={{ uri: posterSrc }}
-            style={[
-              styles.poster,
-              action === "skipped" && styles.posterSkipped,
-            ]}
-            contentFit="cover"
-            blurRadius={isRevealed ? 0 : 24}
-            transition={300}
-            cachePolicy="memory-disk"
-            onError={() => setPosterFailed(true)}
+        <Pressable onPress={handleCardPress} style={styles.pressableFace}>
+          <LinearGradient
+            colors={["#1e1e22", "#141416", "#0e0e10"]}
+            style={StyleSheet.absoluteFill}
           />
-        ) : (
-          <View style={styles.placeholder}>
-            <LinearGradient
-              colors={["#1A1625", "#0D0D0D"]}
-              style={StyleSheet.absoluteFill}
-            />
-            <Text style={styles.placeholderTitle} numberOfLines={2}>
-              {movie.title}
+
+          <View style={styles.mysteryHeader}>
+            <Text style={styles.reelIndexText}>
+              REEL {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
             </Text>
-            {movie.genres.length > 0 ? (
-              <Text style={styles.placeholderGenres} numberOfLines={1}>
-                {movie.genres.slice(0, 3).join("  \u00B7  ")}
-              </Text>
+            <View style={styles.mysteryIconBadge}>
+              <MaterialCommunityIcons
+                name={isLockedSealed ? "lock" : "lock-outline"}
+                size={14}
+                color={isLockedSealed ? theme.colors.textMuted : theme.colors.primary}
+              />
+            </View>
+          </View>
+
+          <View style={styles.mysteryBody}>
+            <Text style={styles.mysteryTagline} numberOfLines={4}>
+              {movie.tagline ||
+                movie.vague_description ||
+                "A captivating mystery lies within this reel."}
+            </Text>
+
+            {movie.genres?.length > 0 ? (
+              <View style={styles.genreRow}>
+                {movie.genres.slice(0, 2).map((genre) => (
+                  <View key={genre} style={styles.genreChip}>
+                    <Text style={styles.genreChipText}>{genre}</Text>
+                  </View>
+                ))}
+              </View>
             ) : null}
           </View>
-        )}
 
-        {/* Veil: only shown when movie is locked */}
-        {!isRevealed ? (
-          <Animated.View style={[styles.veil, veilStyle]} pointerEvents="none">
-            <LinearGradient
-              colors={["rgba(0,0,0,0.08)", "transparent", "rgba(0,0,0,0.28)"]}
-              locations={[0, 0.42, 1]}
-              style={StyleSheet.absoluteFill}
-            />
-          </Animated.View>
-        ) : null}
-
-        {/* Top Status Badge */}
-        {isRevealed ? (
-          <View style={styles.badge} pointerEvents="none">
-            {action === "locked_in" ? (
-              <View style={[styles.statusChip, styles.pickChip]}>
+          <View style={styles.mysteryFooter}>
+            {isLockedSealed ? (
+              <View style={styles.unveilPrompt}>
                 <MaterialCommunityIcons
-                  name="play-circle"
-                  size={13}
-                  color="#f59e0b"
+                  name="lock"
+                  size={14}
+                  color={theme.colors.textMuted}
                 />
-                <Text style={styles.pickLabel}>NOW WATCHING</Text>
-              </View>
-            ) : action === "pick_tonight" || action === "watchlist_add" ? (
-              <View style={[styles.statusChip, styles.pickChip]}>
-                <MaterialCommunityIcons name="star" size={13} color="#f59e0b" />
-                <Text style={styles.pickLabel}>TODAY&apos;S PICK</Text>
-              </View>
-            ) : action === "watched" ? (
-              <View style={[styles.statusChip, styles.watchedChip]}>
-                <MaterialCommunityIcons
-                  name="check-circle"
-                  size={13}
-                  color="#22c55e"
-                />
-                <Text style={styles.watchedLabel}>WATCHED</Text>
-              </View>
-            ) : action === "skipped" ? (
-              <View style={[styles.statusChip, styles.skippedChip]}>
-                <MaterialCommunityIcons
-                  name="close-circle"
-                  size={13}
-                  color="#ef4444"
-                />
-                <Text style={styles.skippedLabel}>SKIPPED</Text>
+                <Text style={[styles.unveilText, { color: theme.colors.textMuted }]}>
+                  Locked · Selection chosen
+                </Text>
               </View>
             ) : (
-              <View style={[styles.statusChip, styles.unlockedChip]}>
+              <View style={styles.unveilPrompt}>
                 <MaterialCommunityIcons
                   name="eye-outline"
-                  size={13}
-                  color="#38bdf8"
+                  size={15}
+                  color={theme.colors.primary}
                 />
-                <Text style={styles.unlockedLabel}>UNLOCKED</Text>
+                <Text style={[styles.unveilText, { color: theme.colors.textPrimary }]}>
+                  Tap to unveil
+                </Text>
               </View>
             )}
           </View>
-        ) : (
-          <Animated.View style={[styles.badge, badgeStyle]} pointerEvents="none">
-            <View style={styles.lockChip}>
+        </Pressable>
+      </Animated.View>
+
+      <Animated.View
+        style={[styles.face, styles.backFace, backAnimatedStyle]}
+        pointerEvents={isRevealed ? "auto" : "none"}
+      >
+        <Pressable onPress={handleCardPress} style={styles.pressableFace}>
+          {posterSrc && !posterFailed ? (
+            <Image
+              source={{ uri: posterSrc }}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              transition={250}
+              cachePolicy="memory-disk"
+              onError={() => setPosterFailed(true)}
+            />
+          ) : (
+            <View style={[styles.fallbackPoster, { backgroundColor: "#1c1c1f" }]}>
               <MaterialCommunityIcons
-                name="lock-outline"
-                size={13}
-                color="#E50914"
+                name="filmstrip"
+                size={48}
+                color={theme.colors.textMuted}
               />
-              <Text style={styles.lockLabel}>{index + 1}</Text>
+              <Text style={styles.fallbackTitle}>{movie.title}</Text>
             </View>
-          </Animated.View>
-        )}
+          )}
 
-        {/* Bottom Details Drawer */}
-        {isRevealed ? (
-          <View style={styles.revealPanel} pointerEvents="box-none">
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.65)", "rgba(0,0,0,0.95)"]}
-              locations={[0, 0.35, 1]}
-              style={styles.revealGradient}
-              pointerEvents="box-none"
-            >
-              <View style={styles.revealInner} pointerEvents="box-none">
-                <Text style={styles.movieTitle} numberOfLines={2}>
-                  {movie.title}
+          {isSkipped ? (
+            <View style={[StyleSheet.absoluteFill, styles.skippedDimOverlay]} />
+          ) : null}
+
+          {isWatched || isSkipped ? (
+            <View style={styles.cornerRibbonContainer} pointerEvents="none">
+              <View style={styles.cornerRibbon}>
+                <Text style={styles.cornerRibbonText}>
+                  {isWatched ? "WATCHED" : "SKIPPED"}
                 </Text>
-                <View style={styles.metaRow}>
-                  {movie.vote_average > 0 ? (
-                    <View style={styles.ratingBadge}>
-                      <MaterialCommunityIcons
-                        name="star"
-                        size={12}
-                        color="#FFD700"
-                      />
-                      <Text style={styles.ratingText}>
-                        {movie.vote_average.toFixed(1)}
-                      </Text>
-                    </View>
-                  ) : null}
-                  {movie.release_date ? (
-                    <Text style={styles.yearText}>
-                      {new Date(movie.release_date).getFullYear()}
-                    </Text>
-                  ) : null}
-                </View>
-                {movie.tagline ? (
-                  <Text style={styles.tagline} numberOfLines={2}>
-                    &ldquo;{movie.tagline}&rdquo;
-                  </Text>
-                ) : null}
+              </View>
+            </View>
+          ) : null}
 
-                <View style={styles.genreRow}>
-                  {movie.genres.slice(0, 3).map((g) => (
-                    <View key={g} style={styles.genreChip}>
-                      <Text style={styles.genreText}>{g}</Text>
-                    </View>
-                  ))}
-                </View>
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.45)", "rgba(0,0,0,0.92)"]}
+            locations={[0, 0.42, 1]}
+            style={styles.scrim}
+          >
+            <Text style={styles.movieTitle} numberOfLines={2}>
+              {movie.title}
+            </Text>
+            {metaLine.length > 0 ? (
+              <Text style={styles.metaLine} numberOfLines={1}>
+                {metaLine}
+              </Text>
+            ) : null}
+          </LinearGradient>
 
-                {action === "skipped" || action === "watched" ? null : (
+          <View style={styles.topActionsRow}>
+            {!isMarked ? (
+              <>
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleToggleSkip();
+                  }}
+                  style={({ pressed }) => [
+                    styles.actionCircleBtn,
+                    pressed && { opacity: 0.7 },
+                  ]}
+                  accessibilityLabel="Skip movie"
+                >
+                  <MaterialCommunityIcons name="close" size={17} color="#FFFFFF" />
+                </Pressable>
+
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleToggleWatched();
+                  }}
+                  style={({ pressed }) => [
+                    styles.actionCircleBtn,
+                    pressed && { opacity: 0.7 },
+                  ]}
+                  accessibilityLabel="Mark as watched"
+                >
+                  <MaterialCommunityIcons name="check" size={17} color="#FFFFFF" />
+                </Pressable>
+
+                {!hasTodayPick ? (
                   <Pressable
-                    style={[
-                      styles.revealButton,
-                      isActioned && styles.actionedButton,
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleTogglePick();
+                    }}
+                    style={({ pressed }) => [
+                      styles.actionCircleBtn,
+                      pressed && { opacity: 0.7 },
                     ]}
-                    onPress={onReveal}
+                    accessibilityLabel="Make tonight's pick"
                   >
                     <MaterialCommunityIcons
-                      name={
-                        isActioned
-                          ? "information-outline"
-                          : "arrow-right"
-                      }
-                      size={14}
-                      color="white"
-                      style={{ marginRight: 5 }}
+                      name="star-outline"
+                      size={17}
+                      color="#FFFFFF"
                     />
-                    <Text style={styles.revealLabel}>
-                      {isActioned ? "VIEW DETAILS" : "MAKE DECISION"}
-                    </Text>
                   </Pressable>
-                )}
-              </View>
-            </LinearGradient>
+                ) : null}
+              </>
+            ) : isPicked ? (
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleTogglePick();
+                }}
+                style={({ pressed }) => [
+                  styles.actionCircleBtn,
+                  { backgroundColor: theme.colors.gold },
+                  pressed && { opacity: 0.8 },
+                ]}
+                accessibilityLabel="Tonight's Pick"
+              >
+                <MaterialCommunityIcons name="star" size={18} color="#121212" />
+              </Pressable>
+            ) : null}
           </View>
-        ) : (
-          <Animated.View
-            style={[styles.revealPanel, contentStyle]}
-            pointerEvents={isExpanded ? "auto" : "none"}
-          >
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.18)", "rgba(0,0,0,0.78)"]}
-              locations={[0, 0.45, 1]}
-              style={styles.revealGradient}
-            >
-              <View style={styles.revealInner}>
-                <Text style={styles.tagline} numberOfLines={2}>
-                  {movie.tagline || movie.vague_description}
-                </Text>
-
-                <View style={styles.genreRow}>
-                  {movie.genres.slice(0, 3).map((g) => (
-                    <View key={g} style={styles.genreChip}>
-                      <Text style={styles.genreText}>{g}</Text>
-                    </View>
-                  ))}
-                </View>
-
-                <Pressable style={styles.revealButton} onPress={onReveal}>
-                  <MaterialCommunityIcons
-                    name="eye-outline"
-                    size={14}
-                    color="white"
-                    style={{ marginRight: 5 }}
-                  />
-                  <Text style={styles.revealLabel}>REVEAL MOVIE</Text>
-                </Pressable>
-              </View>
-            </LinearGradient>
-          </Animated.View>
-        )}
-      </CardContainer>
-    </Animated.View>
+        </Pressable>
+      </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
+  cardOuter: {
     width: "100%",
     height: "100%",
-    borderRadius: 14,
-    overflow: "hidden",
-    backgroundColor: "#111",
+    borderRadius: 28,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "#161618",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.45,
+    shadowRadius: 20,
+    elevation: 8,
   },
-  cardPick: {
-    borderColor: "#f59e0b",
-    borderWidth: 2,
-  },
-  cardWatched: {
-    borderColor: "#22c55e",
-    borderWidth: 1.5,
-  },
-  cardSkipped: {
-    borderColor: "rgba(255,255,255,0.08)",
-    opacity: 0.6,
-  },
-  pressable: { flex: 1 },
-  poster: { ...StyleSheet.absoluteFill },
-  posterSkipped: {
-    opacity: 0.45,
-  },
-
-  placeholder: {
+  face: {
     ...StyleSheet.absoluteFill,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 28,
-    gap: 12,
+    borderRadius: 27,
+    overflow: "hidden",
   },
-  placeholderTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 18,
-    color: "#555",
-    textAlign: "center",
+  frontFace: {},
+  backFace: {},
+  pressableFace: {
+    flex: 1,
   },
-  placeholderGenres: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    color: "#E50914",
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
-  },
-
-  veil: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(8,8,8,0.25)",
-  },
-
-  badge: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-  },
-  lockChip: {
+  mysteryHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "space-between",
+    paddingHorizontal: 22,
+    paddingTop: 22,
+  },
+  reelIndexText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 11,
+    letterSpacing: 1.5,
+    color: "rgba(255, 255, 255, 0.4)",
+  },
+  mysteryIconBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mysteryBody: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  mysteryTagline: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#FFFFFF",
+    letterSpacing: -0.2,
+  },
+  genreRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 16,
+  },
+  genreChip: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
     borderWidth: 1,
-    borderColor: "rgba(229,9,20,0.3)",
+    borderColor: "rgba(255, 255, 255, 0.08)",
   },
-  lockLabel: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 13,
-    color: "#E50914",
+  genreChipText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.7)",
+    letterSpacing: 0.3,
   },
-
-  revealPanel: {
-    ...StyleSheet.absoluteFill,
+  mysteryFooter: {
+    paddingHorizontal: 22,
+    paddingBottom: 22,
   },
-  revealGradient: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  revealInner: {
-    padding: 14,
-    paddingBottom: 16,
+  unveilPrompt: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
-
-  metaRow: {
+  unveilText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    letterSpacing: 0.3,
+  },
+  fallbackPoster: {
+    ...StyleSheet.absoluteFill,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  fallbackTitle: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 18,
+    color: "#FFFFFF",
+    textAlign: "center",
+    marginTop: 12,
+  },
+  scrim: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 22,
+    paddingTop: 48,
+    paddingBottom: 22,
+    justifyContent: "flex-end",
+  },
+  movieTitle: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 22,
+    lineHeight: 28,
+    color: "#FFFFFF",
+    letterSpacing: -0.4,
+  },
+  metaLine: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    color: "rgba(255, 255, 255, 0.7)",
+    marginTop: 6,
+    letterSpacing: 0.2,
+  },
+  cornerRibbonContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 88,
+    height: 88,
+    overflow: "hidden",
+    borderTopLeftRadius: 27,
+    zIndex: 25,
+  },
+  cornerRibbon: {
+    position: "absolute",
+    top: 18,
+    left: -28,
+    width: 114,
+    height: 22,
+    transform: [{ rotate: "-45deg" }],
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  cornerRibbonText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 9.5,
+    letterSpacing: 1.2,
+    color: "#121212",
+    textAlign: "center",
+  },
+  skippedDimOverlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    zIndex: 10,
+  },
+  topActionsRow: {
+    position: "absolute",
+    top: 16,
+    right: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    zIndex: 30,
   },
-  yearText: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 12,
-    color: "#aaa",
-  },
-  ratingBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  ratingText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    color: "#FFD700",
-  },
-
-  movieTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 20,
-    color: "white",
-    letterSpacing: -0.4,
-  },
-
-  tagline: {
-    fontFamily: "Inter_400Regular",
-    fontStyle: "italic",
-    fontSize: 12,
-    color: "#bbb",
-    lineHeight: 16,
-  },
-
-  desc: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-    color: "#999",
-    lineHeight: 16,
-  },
-
-  genreRow: {
-    flexDirection: "row",
-    gap: 5,
-    flexWrap: "wrap",
-  },
-  genreChip: {
-    backgroundColor: "rgba(229,9,20,0.12)",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
+  actionCircleBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
     borderWidth: 1,
-    borderColor: "rgba(229,9,20,0.2)",
-  },
-  genreText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 10,
-    color: "#E50914",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-
-  statusChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  watchedChip: {
-    backgroundColor: "rgba(0,0,0,0.8)",
-    borderColor: "rgba(34,197,94,0.4)",
-  },
-  watchedLabel: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 11,
-    color: "#22c55e",
-    letterSpacing: 0.5,
-  },
-  skippedChip: {
-    backgroundColor: "rgba(0,0,0,0.8)",
-    borderColor: "rgba(239,68,68,0.4)",
-  },
-  skippedLabel: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 11,
-    color: "#ef4444",
-    letterSpacing: 0.5,
-  },
-  pickChip: {
-    backgroundColor: "rgba(0,0,0,0.85)",
-    borderColor: "rgba(245,158,11,0.5)",
-  },
-  pickLabel: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 11,
-    color: "#f59e0b",
-    letterSpacing: 0.5,
-  },
-  unlockedChip: {
-    backgroundColor: "rgba(0,0,0,0.8)",
-    borderColor: "rgba(56,189,248,0.4)",
-  },
-  unlockedLabel: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 11,
-    color: "#38bdf8",
-    letterSpacing: 0.5,
-  },
-  actionedButton: {
-    backgroundColor: "#2a2a2a",
-  },
-  revealButton: {
-    flexDirection: "row",
+    borderColor: "rgba(255, 255, 255, 0.18)",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#E50914",
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginTop: 4,
-  },
-  revealLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    letterSpacing: 1.5,
-    color: "white",
-    textTransform: "uppercase",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
 });

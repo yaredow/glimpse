@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { Button, Surface, Text, useTheme } from "react-native-paper";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Button, Dialog, Portal, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAppTheme } from "@/lib/theme";
 
 export type ConfirmableAction =
   | "pick_tonight"
@@ -76,6 +76,7 @@ interface ActionConfirmModalProps {
 
 interface ActionModalConfig {
   icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  iconColor: string;
   title: string;
   confirmText: string;
   cancelText: string;
@@ -84,71 +85,69 @@ interface ActionModalConfig {
 
 const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
   pick_tonight: {
-    icon: "star-outline",
+    icon: "star",
+    iconColor: "#F59E0B",
     title: "Make this Today's Pick?",
-    confirmText: "Confirm Today's Pick",
+    confirmText: "Select as Pick",
     cancelText: "Keep Browsing",
-    renderDescription: (title, syncs = 3) => (
-      <Text variant="bodyMedium" style={styles.description}>
+    renderDescription: (title) => (
+      <Text style={styles.description}>
         <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
-        selected as your movie for today. You will have{" "}
-        <Text style={styles.highlightText}>
-          {syncs} {syncs === 1 ? "sync" : "syncs"}
-        </Text>{" "}
-        remaining if you decide to sync a fresh batch.
+        selected as your feature film for tonight. You can lock it in when ready.
       </Text>
     ),
   },
   locked_in: {
-    icon: "play-circle-outline",
+    icon: "movie-play-outline",
+    iconColor: "#E50914",
     title: "Lock In Today's Movie?",
     confirmText: "Lock In Selection",
     cancelText: "Not Yet",
     renderDescription: (title) => (
-      <Text variant="bodyMedium" style={styles.description}>
+      <Text style={styles.description}>
         <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
         permanently locked as your movie for today. Once locked, your daily
-        selection is final and you won&apos;t be able to sync or change it.
+        selection is final.
       </Text>
     ),
   },
   watched: {
-    icon: "check-circle-outline",
+    icon: "check-circle",
+    iconColor: "#10B981",
     title: "Mark as Watched?",
-    confirmText: "Mark as Watched",
+    confirmText: "Mark Watched",
     cancelText: "Cancel",
     renderDescription: (title) => (
-      <Text variant="bodyMedium" style={styles.description}>
+      <Text style={styles.description}>
         <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
-        permanently recorded in your watched history and locked for today. It
-        will help tailor your future recommendations.
+        recorded in your watched history and locked for today. It unlocks the next reel.
       </Text>
     ),
   },
   skipped: {
-    icon: "close-circle-outline",
+    icon: "close-circle",
+    iconColor: "#A1A1AA",
     title: "Skip This Movie?",
     confirmText: "Skip Movie",
     cancelText: "Keep Browsing",
     renderDescription: (title) => (
-      <Text variant="bodyMedium" style={styles.description}>
+      <Text style={styles.description}>
         <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
-        skipped and locked for today. You won&apos;t be able to open its details
-        or undo this skip until tomorrow&apos;s batch.
+        skipped and locked for today. You will not be able to open its details.
       </Text>
     ),
   },
   sync: {
     icon: "sync",
+    iconColor: "#E50914",
     title: "Sync a Fresh Batch?",
-    confirmText: "Sync Fresh Batch",
-    cancelText: "Keep Current Movies",
+    confirmText: "Sync Fresh Reel",
+    cancelText: "Keep Current",
     renderDescription: (_title, syncs = 3) => {
       const remainingAfter = Math.max(0, syncs - 1);
       return (
-        <Text variant="bodyMedium" style={styles.description}>
-          This will eliminate your current selection and draw 5 fresh mystery
-          movies. You will have{" "}
+        <Text style={styles.description}>
+          This will draw 5 fresh mystery picks tailored to your mood. You will have{" "}
           <Text style={styles.highlightText}>
             {remainingAfter} {remainingAfter === 1 ? "sync" : "syncs"}
           </Text>{" "}
@@ -167,8 +166,7 @@ export default function ActionConfirmModal({
   onConfirm,
   onCancel,
 }: ActionConfirmModalProps) {
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
   const [selectedMood, setSelectedMood] = useState<SyncMood>("surprise");
   const [prevVisible, setPrevVisible] = useState(visible);
 
@@ -184,82 +182,58 @@ export default function ActionConfirmModal({
   const config = ACTION_CONFIGS[action];
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onCancel}
-      statusBarTranslucent
-    >
-      <View style={styles.modalOverlay}>
-        {/* Backdrop tap to dismiss */}
-        <Pressable
-          style={StyleSheet.absoluteFill}
-          onPress={onCancel}
-          accessibilityRole="button"
-          accessibilityLabel="Dismiss confirmation drawer"
-        />
-
-        {/* Bottom Drawer Surface */}
-        <Surface
-          elevation={3}
-          style={[
-            styles.drawerSurface,
-            {
-              backgroundColor: theme.colors.elevation.level2,
-              paddingBottom: Math.max(insets.bottom + 12, 28),
-            },
-          ]}
-        >
-          <View style={styles.dragHandleContainer}>
-            <View style={styles.dragHandle} />
-          </View>
-
-          <View style={styles.iconContainer}>
+    <Portal>
+      <Dialog
+        visible={visible}
+        onDismiss={onCancel}
+        style={[
+          styles.dialog,
+          {
+            backgroundColor: "#18181B",
+            borderColor: "rgba(255, 255, 255, 0.1)",
+          },
+        ]}
+      >
+        <View style={styles.iconContainer}>
+          <View
+            style={[
+              styles.iconCircle,
+              { backgroundColor: `${config.iconColor}18` },
+            ]}
+          >
             <MaterialCommunityIcons
               name={config.icon}
-              size={26}
-              color="#FFFFFF"
+              size={28}
+              color={config.iconColor}
             />
           </View>
+        </View>
 
-          <Text variant="titleLarge" style={styles.title}>
-            {config.title}
-          </Text>
+        <Dialog.Title style={styles.title}>{config.title}</Dialog.Title>
 
+        <Dialog.Content style={styles.content}>
           {action === "sync" ? (
             <>
               {(() => {
-                const remainingAfter = Math.max(0, (syncsRemaining ?? 3) - 1);
                 const activeMood =
                   MOOD_OPTIONS.find((m) => m.id === selectedMood) ??
                   MOOD_OPTIONS[0];
 
                 return (
                   <View style={styles.syncDescriptionContainer}>
-                    <Text variant="bodyMedium" style={styles.description}>
+                    <Text style={styles.description}>
                       Draw 5 fresh mystery picks:{" "}
                       <Text style={styles.highlightText}>
                         {activeMood.description}
                       </Text>
                       .
                     </Text>
-                    <Text variant="bodySmall" style={styles.syncRemainingText}>
-                      You will have{" "}
-                      <Text style={styles.highlightText}>
-                        {remainingAfter}{" "}
-                        {remainingAfter === 1 ? "sync" : "syncs"}
-                      </Text>{" "}
-                      remaining today.
-                    </Text>
                   </View>
                 );
               })()}
 
               <View style={styles.moodSection}>
-                <Text variant="labelSmall" style={styles.moodHeader}>
-                  CHOOSE A VIBE
-                </Text>
+                <Text style={styles.moodHeader}>CHOOSE A VIBE</Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -283,12 +257,11 @@ export default function ActionConfirmModal({
                       >
                         <MaterialCommunityIcons
                           name={mood.icon}
-                          size={18}
+                          size={16}
                           color={isSelected ? "#121212" : "#A1A1AA"}
                           style={styles.moodIcon}
                         />
                         <Text
-                          variant="labelMedium"
                           style={[
                             styles.moodLabel,
                             isSelected
@@ -307,85 +280,75 @@ export default function ActionConfirmModal({
           ) : (
             config.renderDescription(movieTitle, syncsRemaining)
           )}
+        </Dialog.Content>
 
-          <View style={styles.buttonStack}>
-            <Button
-              mode="contained"
-              onPress={() =>
-                onConfirm(action === "sync" ? selectedMood : undefined)
-              }
-              buttonColor="#FFFFFF"
-              textColor="#121212"
-              style={styles.confirmBtn}
-              contentStyle={styles.btnContent}
-              labelStyle={styles.confirmBtnLabel}
-            >
-              {config.confirmText}
-            </Button>
-
-            <Button
-              mode="text"
-              onPress={onCancel}
-              textColor="#A1A1AA"
-              style={styles.cancelBtn}
-              contentStyle={styles.btnContent}
-              labelStyle={styles.cancelBtnLabel}
-            >
-              {config.cancelText}
-            </Button>
-          </View>
-        </Surface>
-      </View>
-    </Modal>
+        <Dialog.Actions style={styles.actions}>
+          <Button
+            mode="text"
+            onPress={onCancel}
+            textColor={theme.colors.textSecondary}
+            labelStyle={styles.cancelBtnLabel}
+          >
+            {config.cancelText}
+          </Button>
+          <Button
+            mode="contained"
+            onPress={() =>
+              onConfirm(action === "sync" ? selectedMood : undefined)
+            }
+            buttonColor={
+              action === "watched"
+                ? theme.colors.success
+                : action === "pick_tonight"
+                  ? theme.colors.gold
+                  : theme.colors.primary
+            }
+            textColor={action === "pick_tonight" ? "#121212" : "#FFFFFF"}
+            style={styles.confirmBtn}
+            labelStyle={styles.confirmBtnLabel}
+          >
+            {config.confirmText}
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.65)",
-  },
-  drawerSurface: {
-    width: "100%",
-    borderTopStartRadius: 28,
-    borderTopEndRadius: 28,
+  dialog: {
+    borderRadius: 24,
     borderWidth: 1,
-    borderBottomWidth: 0,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    paddingHorizontal: 24,
     paddingTop: 8,
-    alignItems: "center",
-  },
-  dragHandleContainer: {
-    width: "100%",
-    alignItems: "center",
-    paddingVertical: 10,
-  },
-  dragHandle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingBottom: 4,
+    maxWidth: 380,
+    alignSelf: "center",
+    width: "92%",
   },
   iconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.12)",
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16,
-    marginTop: 4,
   },
   title: {
     color: "#FFFFFF",
     fontFamily: "Inter_700Bold",
     fontSize: 20,
     textAlign: "center",
-    marginBottom: 10,
+    paddingHorizontal: 12,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  content: {
+    paddingHorizontal: 20,
+    paddingBottom: 8,
   },
   description: {
     color: "#A1A1AA",
@@ -393,8 +356,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     textAlign: "center",
-    marginBottom: 24,
-    paddingHorizontal: 8,
   },
   highlightText: {
     color: "#FFFFFF",
@@ -402,46 +363,36 @@ const styles = StyleSheet.create({
   },
   syncDescriptionContainer: {
     alignItems: "center",
-    marginBottom: 4,
-  },
-  syncRemainingText: {
-    color: "#71717A",
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    textAlign: "center",
-    marginTop: -16,
-    marginBottom: 8,
-    lineHeight: 18,
+    marginBottom: 10,
   },
   moodSection: {
     width: "100%",
-    marginTop: 10,
-    marginBottom: 24,
+    marginTop: 6,
+    marginBottom: 4,
   },
   moodHeader: {
     color: "#71717A",
     fontFamily: "Inter_600SemiBold",
     letterSpacing: 1.2,
     fontSize: 11,
-    marginBottom: 10,
-    paddingHorizontal: 4,
+    marginBottom: 8,
+    paddingHorizontal: 2,
     textTransform: "uppercase",
   },
   moodScrollContent: {
     flexDirection: "row",
     gap: 8,
-    paddingVertical: 2,
-    paddingHorizontal: 2,
+    paddingVertical: 4,
   },
   moodChip: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 16,
   },
   moodChipUnselected: {
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#222225",
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.08)",
   },
@@ -455,7 +406,7 @@ const styles = StyleSheet.create({
   },
   moodLabel: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
+    fontSize: 12.5,
   },
   moodLabelUnselected: {
     color: "#A1A1AA",
@@ -463,28 +414,24 @@ const styles = StyleSheet.create({
   moodLabelSelected: {
     color: "#121212",
   },
-  buttonStack: {
-    width: "100%",
-    gap: 4,
-  },
-  confirmBtn: {
-    borderRadius: 12,
-    width: "100%",
-  },
-  cancelBtn: {
-    borderRadius: 12,
-    width: "100%",
-  },
-  btnContent: {
-    paddingVertical: 6,
-  },
-  confirmBtnLabel: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 15,
-    letterSpacing: 0.2,
+  actions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
   cancelBtnLabel: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
+    fontSize: 13,
+  },
+  confirmBtn: {
+    borderRadius: 12,
+    paddingHorizontal: 4,
+  },
+  confirmBtnLabel: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 13,
+    letterSpacing: 0.3,
   },
 });

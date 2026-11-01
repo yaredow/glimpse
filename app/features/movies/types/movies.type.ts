@@ -87,3 +87,26 @@ export interface PaginatedResponse<T> {
   };
   movies: T[];
 }
+
+export interface HistoryMovie {
+  movie_id: number;
+  action: "watched" | "watchlist_add" | string;
+  acted_at: string;
+  title: string;
+  poster_path?: string;
+  backdrop_path?: string;
+  genres: string[];
+  release_date: string;
+  vote_average: number;
+  runtime?: number;
+  vague_description: string;
+  full_synopsis?: string;
+  tagline?: string;
+  director?: string;
+  cast_members?: CastMember[];
+  trailer_key?: string;
+}
+
+export interface HistoryResponse {
+  history: HistoryMovie[];
+}

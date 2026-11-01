@@ -1,7 +1,11 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, useTheme } from "react-native-paper";
+import { Button, Switch } from "react-native-paper";
+import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { useAppTheme } from "@/lib/theme";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
 import { useLogout } from "@/features/auth/hooks/mutations/use-logout";
@@ -36,43 +40,80 @@ function genreName(id: number): string {
 }
 
 export default function Profile() {
-  const { colors } = useTheme();
+  const theme = useAppTheme();
   const { data: profileData, isPending: profileLoading } = useProfile(true);
   const { data: prefData, isPending: prefLoading } = useGetPreferences(true);
   const { mutate: logout, isPending: logoutPending } = useLogout();
 
+  const [morningReminder, setMorningReminder] = useState(true);
+  const [eveningReminder, setEveningReminder] = useState(true);
+
   const user = profileData?.user;
   const pref = prefData?.preference;
+  const syncsRemaining = user?.syncs_remaining ?? 3;
+
+  const toggleMorning = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setMorningReminder((prev) => !prev);
+  };
+
+  const toggleEvening = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setEveningReminder((prev) => !prev);
+  };
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      edges={["top"]}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Avatar + User Info */}
         <View style={styles.avatarSection}>
-          <View style={styles.avatar}>
+          <View
+            style={[
+              styles.avatar,
+              {
+                backgroundColor: theme.colors.primary,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
             <Text style={styles.avatarText}>
               {user ? getInitials(user.name) : "?"}
             </Text>
           </View>
 
           {profileLoading ? (
-            <View style={styles.skeletonName} />
+            <View
+              style={[
+                styles.skeletonName,
+                { backgroundColor: theme.colors.elevation.level2 },
+              ]}
+            />
           ) : (
             <>
-              <Text style={styles.userName}>{user?.name}</Text>
-              <Text style={styles.userEmail}>{user?.email}</Text>
+              <Text
+                style={[styles.userName, { color: theme.colors.textPrimary }]}
+              >
+                {user?.name}
+              </Text>
+              <Text
+                style={[styles.userEmail, { color: theme.colors.textSecondary }]}
+              >
+                {user?.email}
+              </Text>
               {user?.created_at ? (
-                <Text style={styles.memberSince}>
+                <Text
+                  style={[styles.memberSince, { color: theme.colors.textMuted }]}
+                >
                   <MaterialCommunityIcons
                     name="calendar-blank-outline"
                     size={12}
-                    color="#666"
-                    style={{ marginRight: 4 }}
+                    color={theme.colors.textMuted}
+                    style={styles.calendarIcon}
                   />
                   Member since {formatDate(user.created_at)}
                 </Text>
@@ -81,23 +122,149 @@ export default function Profile() {
           )}
         </View>
 
-        {/* Preferences Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Preferences</Text>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.elevation.level1,
+              borderColor: theme.colors.outlineVariant,
+            },
+          ]}
+        >
+          <View style={styles.cardHeaderRow}>
+            <View style={styles.cardHeaderTitle}>
+              <MaterialCommunityIcons
+                name="lightning-bolt"
+                size={18}
+                color={theme.colors.gold}
+              />
+              <Text
+                style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
+              >
+                Daily Sync Allowance
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.syncBadge,
+                {
+                  backgroundColor:
+                    syncsRemaining > 0
+                      ? theme.colors.elevation.level3
+                      : theme.colors.elevation.level2,
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.syncBadgeText,
+                  {
+                    color:
+                      syncsRemaining > 0
+                        ? theme.colors.gold
+                        : theme.colors.textMuted,
+                  },
+                ]}
+              >
+                {syncsRemaining} of 3 Available
+              </Text>
+            </View>
+          </View>
+
+          <Text
+            style={[styles.syncSubtext, { color: theme.colors.textSecondary }]}
+          >
+            Your Daily Five resets at midnight. Syncs refresh automatically each day.
+          </Text>
+        </View>
+
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.elevation.level1,
+              borderColor: theme.colors.outlineVariant,
+            },
+          ]}
+        >
+          <View style={styles.cardHeaderRow}>
+            <View style={styles.cardHeaderTitle}>
+              <MaterialCommunityIcons
+                name="dna"
+                size={18}
+                color={theme.colors.primary}
+              />
+              <Text
+                style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
+              >
+                Taste DNA
+              </Text>
+            </View>
+            <Pressable
+              onPress={() => router.push("/(onboarding)")}
+              style={[
+                styles.editBtn,
+                {
+                  backgroundColor: theme.colors.elevation.level2,
+                  borderColor: theme.colors.outlineVariant,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="pencil-outline"
+                size={13}
+                color={theme.colors.textSecondary}
+              />
+              <Text
+                style={[styles.editBtnText, { color: theme.colors.textSecondary }]}
+              >
+                Edit
+              </Text>
+            </Pressable>
+          </View>
 
           {prefLoading ? (
-            <Text style={styles.emptyText}>Loading...</Text>
+            <Text
+              style={[styles.emptyText, { color: theme.colors.textMuted }]}
+            >
+              Loading taste profile...
+            </Text>
           ) : !pref ? (
-            <Text style={styles.emptyText}>Not set yet</Text>
+            <Text
+              style={[styles.emptyText, { color: theme.colors.textMuted }]}
+            >
+              No taste preferences set yet.
+            </Text>
           ) : (
             <View style={styles.prefContent}>
               {pref.favorite_genres.length > 0 && (
                 <View style={styles.prefRow}>
-                  <Text style={styles.label}>FAVORITE GENRES</Text>
+                  <Text
+                    style={[styles.label, { color: theme.colors.primary }]}
+                  >
+                    FAVORITE GENRES
+                  </Text>
                   <View style={styles.chipRow}>
                     {pref.favorite_genres.map((id) => (
-                      <View key={id} style={styles.chip}>
-                        <Text style={styles.chipText}>{genreName(id)}</Text>
+                      <View
+                        key={id}
+                        style={[
+                          styles.chip,
+                          {
+                            backgroundColor: theme.colors.cinemaRedMuted,
+                            borderColor: "rgba(229, 9, 20, 0.3)",
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.chipText,
+                            { color: theme.colors.primary },
+                          ]}
+                        >
+                          {genreName(id)}
+                        </Text>
                       </View>
                     ))}
                   </View>
@@ -106,11 +273,29 @@ export default function Profile() {
 
               {pref.excluded_genres.length > 0 && (
                 <View style={styles.prefRow}>
-                  <Text style={styles.label}>EXCLUDED GENRES</Text>
+                  <Text
+                    style={[styles.label, { color: theme.colors.textMuted }]}
+                  >
+                    EXCLUDED GENRES
+                  </Text>
                   <View style={styles.chipRow}>
                     {pref.excluded_genres.map((id) => (
-                      <View key={id} style={[styles.chip, styles.chipExcluded]}>
-                        <Text style={[styles.chipText, styles.chipTextExcluded]}>
+                      <View
+                        key={id}
+                        style={[
+                          styles.chip,
+                          {
+                            backgroundColor: theme.colors.elevation.level2,
+                            borderColor: theme.colors.outlineVariant,
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.chipText,
+                            { color: theme.colors.textSecondary },
+                          ]}
+                        >
                           {genreName(id)}
                         </Text>
                       </View>
@@ -121,8 +306,14 @@ export default function Profile() {
 
               {pref.languages.length > 0 && (
                 <View style={styles.prefRow}>
-                  <Text style={styles.label}>LANGUAGES</Text>
-                  <Text style={styles.value}>
+                  <Text
+                    style={[styles.label, { color: theme.colors.textMuted }]}
+                  >
+                    LANGUAGES
+                  </Text>
+                  <Text
+                    style={[styles.value, { color: theme.colors.textPrimary }]}
+                  >
                     {pref.languages.join("  \u00B7  ")}
                   </Text>
                 </View>
@@ -130,8 +321,14 @@ export default function Profile() {
 
               {(pref.min_year > 1888 || pref.max_year < 2100) && (
                 <View style={styles.prefRow}>
-                  <Text style={styles.label}>YEAR RANGE</Text>
-                  <Text style={styles.value}>
+                  <Text
+                    style={[styles.label, { color: theme.colors.textMuted }]}
+                  >
+                    YEAR RANGE
+                  </Text>
+                  <Text
+                    style={[styles.value, { color: theme.colors.textPrimary }]}
+                  >
                     {pref.min_year} – {pref.max_year}
                   </Text>
                 </View>
@@ -139,14 +336,20 @@ export default function Profile() {
 
               {pref.min_rating > 0 && (
                 <View style={styles.prefRow}>
-                  <Text style={styles.label}>MINIMUM RATING</Text>
+                  <Text
+                    style={[styles.label, { color: theme.colors.textMuted }]}
+                  >
+                    MINIMUM RATING
+                  </Text>
                   <View style={styles.ratingRow}>
                     <MaterialCommunityIcons
                       name="star"
                       size={14}
-                      color="#FFD700"
+                      color={theme.colors.gold}
                     />
-                    <Text style={styles.value}>
+                    <Text
+                      style={[styles.value, { color: theme.colors.textPrimary }]}
+                    >
                       {pref.min_rating.toFixed(1)} and above
                     </Text>
                   </View>
@@ -156,33 +359,154 @@ export default function Profile() {
           )}
         </View>
 
-        {/* Account Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Account</Text>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.elevation.level1,
+              borderColor: theme.colors.outlineVariant,
+            },
+          ]}
+        >
+          <View style={styles.cardHeaderTitle}>
+            <MaterialCommunityIcons
+              name="bell-ring-outline"
+              size={18}
+              color={theme.colors.textPrimary}
+            />
+            <Text
+              style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
+            >
+              Ritual Reminders
+            </Text>
+          </View>
+
+          <View style={styles.reminderRow}>
+            <View style={styles.reminderTextContainer}>
+              <Text
+                style={[
+                  styles.reminderTitle,
+                  { color: theme.colors.textPrimary },
+                ]}
+              >
+                Daily Mystery Arrival
+              </Text>
+              <Text
+                style={[
+                  styles.reminderSubtitle,
+                  { color: theme.colors.textMuted },
+                ]}
+              >
+                9:00 AM · When your 5 fresh envelopes are drawn
+              </Text>
+            </View>
+            <Switch
+              value={morningReminder}
+              onValueChange={toggleMorning}
+              color={theme.colors.primary}
+            />
+          </View>
+
+          <View
+            style={[
+              styles.separator,
+              { backgroundColor: theme.colors.outlineVariant },
+            ]}
+          />
+
+          <View style={styles.reminderRow}>
+            <View style={styles.reminderTextContainer}>
+              <Text
+                style={[
+                  styles.reminderTitle,
+                  { color: theme.colors.textPrimary },
+                ]}
+              >
+                Evening Showtime Pick
+              </Text>
+              <Text
+                style={[
+                  styles.reminderSubtitle,
+                  { color: theme.colors.textMuted },
+                ]}
+              >
+                8:00 PM · Nudge to select your film for the night
+              </Text>
+            </View>
+            <Switch
+              value={eveningReminder}
+              onValueChange={toggleEvening}
+              color={theme.colors.primary}
+            />
+          </View>
+        </View>
+
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.elevation.level1,
+              borderColor: theme.colors.outlineVariant,
+            },
+          ]}
+        >
+          <Text
+            style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
+          >
+            Account & Session
+          </Text>
 
           <View style={styles.accountRow}>
             <MaterialCommunityIcons
               name="email-outline"
               size={18}
-              color="#999"
+              color={theme.colors.textMuted}
             />
-            <Text style={styles.accountValue}>{user?.email}</Text>
+            <Text
+              style={[
+                styles.accountValue,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              {user?.email}
+            </Text>
           </View>
 
-          <View style={styles.separator} />
+          <View style={styles.accountRow}>
+            <MaterialCommunityIcons
+              name="information-outline"
+              size={18}
+              color={theme.colors.textMuted}
+            />
+            <Text
+              style={[
+                styles.accountValue,
+                { color: theme.colors.textMuted },
+              ]}
+            >
+              Glimpse Cinema v1.0.0
+            </Text>
+          </View>
+
+          <View
+            style={[
+              styles.separator,
+              { backgroundColor: theme.colors.outlineVariant },
+            ]}
+          />
 
           <Button
             mode="contained"
             onPress={() => logout()}
-            buttonColor="#E50914"
-            textColor="white"
+            buttonColor={theme.colors.primary}
+            textColor="#FFFFFF"
             style={styles.logoutButton}
             contentStyle={styles.logoutContent}
             labelStyle={styles.logoutLabel}
             disabled={logoutPending}
             loading={logoutPending}
           >
-            LOGOUT
+            SIGN OUT
           </Button>
         </View>
       </ScrollView>
@@ -196,96 +520,125 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingHorizontal: 16,
+    paddingTop: 16,
     paddingBottom: 40,
-    gap: 20,
+    gap: 16,
   },
-
   avatarSection: {
     alignItems: "center",
-    paddingBottom: 8,
+    paddingVertical: 12,
   },
   avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: "#E50914",
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   avatarText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 24,
-    color: "white",
+    fontSize: 22,
+    color: "#FFFFFF",
   },
   userName: {
     fontFamily: "Inter_700Bold",
-    fontSize: 24,
-    color: "white",
-    letterSpacing: -0.4,
+    fontSize: 20,
+    letterSpacing: -0.3,
     textAlign: "center",
   },
   userEmail: {
     fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    color: "#999",
-    marginTop: 4,
+    fontSize: 13,
+    marginTop: 2,
     textAlign: "center",
   },
   memberSince: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,
-    color: "#666",
-    marginTop: 10,
+    marginTop: 8,
+    alignItems: "center",
+  },
+  calendarIcon: {
+    marginRight: 4,
   },
   skeletonName: {
     width: 120,
     height: 24,
-    backgroundColor: "#1A1A1A",
     borderRadius: 6,
     marginTop: 8,
   },
-
   card: {
-    backgroundColor: "#1A1A1A",
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-    padding: 20,
+    padding: 18,
+  },
+  cardHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  cardHeaderTitle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   cardTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: "Inter_700Bold",
     fontSize: 14,
-    color: "white",
-    letterSpacing: 0.5,
-    marginBottom: 16,
+    letterSpacing: 0.3,
+  },
+  syncBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  syncBadgeText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 11,
+  },
+  syncSubtext: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  editBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  editBtnText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12,
   },
   emptyText: {
     fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    color: "#666",
+    fontSize: 13,
     fontStyle: "italic",
   },
-
   prefContent: {
-    gap: 16,
+    gap: 14,
   },
   prefRow: {
     gap: 6,
   },
   label: {
-    fontFamily: "Inter_900Black",
-    fontSize: 11,
-    color: "#E50914",
-    letterSpacing: 1.5,
+    fontFamily: "Inter_700Bold",
+    fontSize: 10,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
   },
   value: {
     fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    color: "white",
+    fontSize: 13,
     textTransform: "uppercase",
   },
   chipRow: {
@@ -294,58 +647,66 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   chip: {
-    backgroundColor: "rgba(229,9,20,0.12)",
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: "rgba(229,9,20,0.2)",
   },
   chipText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 11,
-    color: "#E50914",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  chipExcluded: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  chipTextExcluded: {
-    color: "#999",
+    letterSpacing: 0.4,
   },
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
   },
-
+  reminderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 4,
+  },
+  reminderTextContainer: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  reminderTitle: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    marginBottom: 2,
+  },
+  reminderSubtitle: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    lineHeight: 15,
+  },
   accountRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    paddingVertical: 4,
+    paddingVertical: 6,
   },
   accountValue: {
     fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    color: "#999",
+    fontSize: 13,
   },
   separator: {
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    marginVertical: 16,
+    marginVertical: 12,
   },
   logoutButton: {
-    borderRadius: 8,
+    borderRadius: 10,
+    marginTop: 4,
   },
   logoutContent: {
-    height: 48,
+    height: 44,
   },
   logoutLabel: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Inter_700Bold",
     fontSize: 13,
-    letterSpacing: 1.5,
+    letterSpacing: 1,
   },
 });
