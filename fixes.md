@@ -89,8 +89,9 @@
 
 ### F-07 · Error mapping returns 500 for client errors
 
+- **Status:** Done — wrapped domain errors map correctly, and handler validation errors use the same `{ "error": "..." }` envelope.
 - **Area:** Backend API contract
-- **Files:** `api/internal/handler/errors.go:10-29`, `api/internal/domain/errors.go`
+- **Files:** `api/internal/handler/errors.go`, `api/internal/handler/errors_test.go`, handler files
 - **Problem:** Only a handful of errors are mapped. `ErrNotEnoughCandidates`, `ErrMissingGridSessionID`, `ErrDuplicateEmail`, `ErrInvalidEmail`, `ErrPasswordTooShort`, `ErrEditConflict`, `ErrBadParamInput`, and `ErrInvalidAction` all become **500**. Handlers also return `{message: ...}` while middleware returns `{error: ...}`.
 - **Fix:** Map domain errors to 400/401/404/409/422. Unify the error envelope, e.g. `{ "error": { "code": "...", "message": "..." } }`. Update the client `getErrorMessage` helper accordingly.
 - **Done when:** A duplicate email returns 409, a bad login returns 401, invalid input returns 422, and the client toast shows the server message.
@@ -98,8 +99,9 @@
 
 ### F-08 · Concurrent 401s can revoke the refresh-token family
 
+- **Status:** Done — refresh calls share one in-flight promise, so concurrent 401s rotate the token once.
 - **Area:** Auth / client
-- **Files:** `app/lib/api.ts:20-37`, `app/features/auth/services/token.service.ts:26-49`, `api/internal/service/user.go:265-293`
+- **Files:** `app/lib/api.ts`, `app/features/auth/services/token.service.ts`, `api/internal/service/user.go`
 - **Problem:** Multiple requests can receive 401 at the same time. Each calls `refreshAccessToken()` with the same refresh token. The first rotates it; the second sees a revoked token with `replaced_by` and calls `RevokeByFamily`, logging the user out.
 - **Fix:** Single-flight the refresh in the client: keep one in-flight promise and let all callers await it. Optionally add a small "refresh in progress" lock in `token.service.ts`. Add a test or a manual two-request reproduction.
 - **Done when:** Two simultaneous expired-token requests both succeed with one refresh.

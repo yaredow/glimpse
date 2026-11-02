@@ -8,6 +8,8 @@ import { jwtDecode } from "jwt-decode";
 
 const TOKEN_EXPIRY_BUFFER_MS = 60 * 1000;
 
+let refreshInFlight: Promise<string | null> | null = null;
+
 export const getValidAccessToken = async (): Promise<string | null> => {
   const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
 
@@ -24,6 +26,20 @@ export const getValidAccessToken = async (): Promise<string | null> => {
 };
 
 export async function refreshAccessToken(): Promise<string | null> {
+  if (refreshInFlight) {
+    return refreshInFlight;
+  }
+
+  refreshInFlight = performRefresh();
+
+  try {
+    return await refreshInFlight;
+  } finally {
+    refreshInFlight = null;
+  }
+}
+
+async function performRefresh(): Promise<string | null> {
   const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 
   if (!refreshToken) return null;
