@@ -580,6 +580,61 @@ func TestUserHandler_RequestPasswordReset(t *testing.T) {
 	})
 }
 
+func TestUserHandler_GetMe(t *testing.T) {
+	t.Parallel()
+
+	t.Run("refreshes daily syncs", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, e := setupTest(t)
+		jwtMgr := auth.NewManager([]byte("test-secret"))
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+
+		mockSvc.EXPECT().
+			ResetDailySyncsIfDue(mock.Anything, int64(1)).
+			Return(nil)
+		mockSvc.EXPECT().
+			GetByID(mock.Anything, int64(1)).
+			Return(&domain.User{ID: 1, Name: "John", SyncsRemaining: 3}, nil)
+
+		req := httptest.NewRequest(http.MethodGet, "/v1/me", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.GetMe(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, rec.Code)
+
+		var resp struct {
+			User domain.User `json:"user"`
+		}
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+		require.Equal(t, 3, resp.User.SyncsRemaining)
+	})
+
+	t.Run("reset error", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, e := setupTest(t)
+		jwtMgr := auth.NewManager([]byte("test-secret"))
+		h := handler.NewUserHandler(mockSvc, jwtMgr, mailer.Mailer{}, worker.New())
+
+		mockSvc.EXPECT().
+			ResetDailySyncsIfDue(mock.Anything, int64(1)).
+			Return(domain.ErrInternalServerError)
+
+		req := httptest.NewRequest(http.MethodGet, "/v1/me", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.GetMe(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusInternalServerError, rec.Code)
+	})
+}
+
 func TestUserHandler_ResetPassword(t *testing.T) {
 	t.Parallel()
 

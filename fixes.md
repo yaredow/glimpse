@@ -15,7 +15,7 @@
 - [x] **F-01** Daily deck never resets and `locked_in` is permanent
 - [x] **F-02** Grid/sync requests block on TMDB detail calls
 - [x] **F-03** Verdict rating is discarded
-- [ ] **F-04** Profile sync badge can show yesterday's allowance
+- [x] **F-04** Profile sync badge can show yesterday's allowance
 - [ ] **F-05** Torrent/magnet UI is a presentation risk
 - [ ] **F-06** Dirty tree / no clean commit or demo state
 
@@ -55,8 +55,9 @@
 
 ### F-04 · Profile sync badge can show yesterday's allowance
 
+- **Status:** Done — `/v1/me` resets due counters before returning the user; profile cache is shorter-lived.
 - **Area:** Backend / client consistency
-- **Files:** `api/internal/handler/user.go:199-202`, `api/internal/repository/postgres/user.go:272-284`, `app/features/profile/hooks/use-profile.ts:9-16`
+- **Files:** `api/internal/handler/user.go`, `api/internal/service/user.go`, `api/internal/repository/postgres/user.go`, `app/features/profile/hooks/use-profile.ts`
 - **Problem:** `ResetDailySyncsIfDue` is only called from `GenerateGrid` and `SyncGrid`. `GET /v1/me` returns the user as loaded by the auth middleware, before any reset. If the profile query resolves first, the badge shows stale syncs. `staleTime: 5 * 60 * 1000` makes it worse.
 - **Fix:** Call `ResetDailySyncsIfDue` in `GetMe` (or the auth middleware) before returning the user. Invalidate the profile query after grid generation/sync. Consider lowering the stale time for the sync count.
 - **Done when:** Opening the app on a new day shows the correct sync count immediately.

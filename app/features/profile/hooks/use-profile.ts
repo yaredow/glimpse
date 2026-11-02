@@ -12,6 +12,6 @@ export const useProfile = (enabled?: boolean) => {
     queryFn: () => getProfile(),
     retry: 2,
     enabled,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
   });
 };

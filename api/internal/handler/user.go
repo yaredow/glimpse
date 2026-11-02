@@ -24,6 +24,7 @@ type envelope map[string]any
 type UserService interface {
 	Create(ctx context.Context, user *domain.User) (*domain.Token, error)
 	GetByID(ctx context.Context, id int64) (*domain.User, error)
+	ResetDailySyncsIfDue(ctx context.Context, userID int64) error
 	Authenticate(ctx context.Context, email, password string) (*domain.User, *domain.RefreshToken, error)
 	Activate(ctx context.Context, tokenPlainText string) (*domain.User, error)
 	RequestPasswordReset(ctx context.Context, email string) (*domain.Token, error)
@@ -198,7 +199,18 @@ func (uh *UserHandler) ResetPassword(c *echo.Context) error {
 
 func (uh *UserHandler) GetMe(c *echo.Context) error {
 	user := c.Get("user").(*domain.User)
-	return c.JSON(http.StatusOK, envelope{"user": user})
+	ctx := c.Request().Context()
+
+	if err := uh.svc.ResetDailySyncsIfDue(ctx, user.ID); err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	refreshed, err := uh.svc.GetByID(ctx, user.ID)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, envelope{"user": refreshed})
 }
 
 func (uh *UserHandler) RefreshToken(c *echo.Context) error {

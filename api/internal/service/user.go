@@ -19,6 +19,7 @@ type UserRepository interface {
 	GetByToken(ctx context.Context, tokenPlainText string, scope string) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) error
 	UpdateOnboarded(ctx context.Context, userID int64, onboarded bool) error
+	ResetDailySyncsIfDue(ctx context.Context, userID int64) error
 }
 
 type TokenRepository interface {
@@ -94,6 +95,10 @@ func (us *UserService) GetByID(ctx context.Context, id int64) (*domain.User, err
 	}
 
 	return user, nil
+}
+
+func (us *UserService) ResetDailySyncsIfDue(ctx context.Context, userID int64) error {
+	return us.repo.ResetDailySyncsIfDue(ctx, userID)
 }
 
 func (us *UserService) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
