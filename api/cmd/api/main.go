@@ -98,9 +98,13 @@ func main() {
 		wp,
 	)
 
-	ytsClient := torrent.NewYTSClient()
-	movieSvc := service.NewMovieService(movieRepo, interactionRepo, syncWorker.SyncMovieDetail).
-		WithSources(tmdbClient, ytsClient)
+	torrentsEnabled, _ := strconv.ParseBool(os.Getenv("FEATURE_TORRENTS"))
+	movieSvc := service.NewMovieService(movieRepo, interactionRepo, syncWorker.SyncMovieDetail)
+	if torrentsEnabled {
+		movieSvc.WithSources(tmdbClient, torrent.NewYTSClient())
+	} else {
+		movieSvc.WithSources(tmdbClient, nil)
+	}
 
 	// Middleware
 	e.Use(middleware.Authenticate(jwtMgr, userService))

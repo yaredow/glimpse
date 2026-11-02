@@ -14,6 +14,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { useAppTheme } from "@/lib/theme";
 import { useMovieSources } from "../hooks/query/use-movie-sources";
+import { SHOW_TORRENTS } from "../consants/movies.constants";
 import { tmdbImage } from "../consants/images";
 import type { TorrentSource, WatchProvider } from "../types/movies.type";
 
@@ -187,11 +188,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             color={theme.colors.textMuted}
           />
           <Text style={[styles.noticeText, { color: theme.colors.textMuted }]}>
-            Not currently streaming on major US subscription platforms. Check torrents or web search below.
+            Not currently available on major subscription platforms. Try the search links below.
           </Text>
         </View>
       )}
 
+      {SHOW_TORRENTS ? (
       <View style={styles.subSection}>
         <View style={styles.subLabelRow}>
           <Text style={[styles.subLabel, { color: theme.colors.textSecondary }]}>
@@ -303,6 +305,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
           </View>
         )}
       </View>
+      ) : null}
 
       {searchLinks ? (
         <View style={styles.subSection}>

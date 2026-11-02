@@ -20,3 +20,7 @@ export const GENRES = [
 ] as const;
 
 export const DETAIL_TABS = ["CAST", "DETAILS"] as const;
+
+// Torrent sources are opt-in so demos and public builds stay focused on legal availability.
+export const SHOW_TORRENTS =
+  process.env.EXPO_PUBLIC_SHOW_TORRENTS === "true";
