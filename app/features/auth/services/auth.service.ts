@@ -24,6 +24,24 @@ export const activateAccount = async (token: string) => {
     .json();
 };
 
+export const requestPasswordReset = async (email: string) => {
+  return api
+    .post("v1/tokens/password-reset", {
+      json: { email: email.trim().toLowerCase() },
+      context: { auth: false },
+    })
+    .json();
+};
+
+export const resetPassword = async (token: string, newPassword: string) => {
+  return api
+    .put("v1/users/password", {
+      json: { token: token.trim(), newPassword },
+      context: { auth: false },
+    })
+    .json();
+};
+
 export const logout = async () => {
   const refreshToken = useAuthStore.getState().refreshToken;
 

@@ -1,130 +1,145 @@
-import { StyleSheet, View } from "react-native";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import { useRef, useState, type ComponentRef } from "react";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { useForm } from "@tanstack/react-form";
 import { router } from "expo-router";
+import { useAppTheme } from "@/lib/theme";
+import { getErrorMessage } from "@/lib/error";
 import { loginSchema, type LoginFormData } from "../schemas/auth.schema";
+import { firstFieldError } from "../utils/form-error";
 import { useLogin } from "../hooks/mutations/use-login";
+import AuthField from "./auth-field";
+import {
+  AuthErrorBanner,
+  AuthPrimaryButton,
+  AuthTextLink,
+} from "./auth-actions";
 
 export const LoginForm = () => {
-  const { colors } = useTheme();
-  const { mutate: loginUser, isPending } = useLogin();
+  const theme = useAppTheme();
+  const loginMutation = useLogin();
+  const passwordRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const [serverError, setServerError] = useState<string>();
 
   const form = useForm({
     defaultValues: {
       email: "",
       password: "",
     } as LoginFormData,
-    onSubmit: async ({ value }) => {
-      loginUser(value);
-    },
     validators: {
+      onBlur: loginSchema,
       onSubmit: loginSchema,
+    },
+    onSubmit: async ({ value }) => {
+      setServerError(undefined);
+      loginMutation.mutate(value, {
+        onError: async (error) => {
+          setServerError(await getErrorMessage(error));
+        },
+      });
     },
   });
 
   return (
     <View>
-      <Text variant="headlineLarge" style={styles.title}>
-        Login
-      </Text>
-
       <form.Field name="email">
         {(field) => (
-          <View style={styles.field}>
-            <TextInput
-              label="Email"
-              mode="outlined"
-              value={field.state.value}
-              onChangeText={field.handleChange}
-              onBlur={field.handleBlur}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            {field.state.meta.errors ? (
-              <Text
-                variant="bodySmall"
-                style={{ color: colors.error, marginLeft: 12 }}
-              >
-                {(field.state.meta.errors as { message: string }[])
-                  .map((e) => e.message)
-                  .join(", ")}
-              </Text>
-            ) : null}
-          </View>
+          <AuthField
+            label="Email"
+            value={field.state.value}
+            onChangeText={(value) => {
+              field.handleChange(value);
+              if (serverError) setServerError(undefined);
+            }}
+            onBlur={field.handleBlur}
+            error={firstFieldError(field.state.meta.errors)}
+            icon="email-outline"
+            keyboardType="email-address"
+            autoComplete="username"
+            textContentType="username"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+            accessibilityLabel="Email address"
+          />
         )}
       </form.Field>
 
       <form.Field name="password">
         {(field) => (
-          <View style={styles.field}>
-            <TextInput
-              label="Password"
-              mode="outlined"
-              value={field.state.value}
-              onChangeText={field.handleChange}
-              onBlur={field.handleBlur}
-              secureTextEntry
-            />
-            {field.state.meta.errors ? (
-              <Text
-                variant="bodySmall"
-                style={{ color: colors.error, marginLeft: 12 }}
-              >
-                {(field.state.meta.errors as { message: string }[])
-                  .map((e) => e.message)
-                  .join(", ")}
-              </Text>
-            ) : null}
-          </View>
+          <AuthField
+            label="Password"
+            value={field.state.value}
+            onChangeText={(value) => {
+              field.handleChange(value);
+              if (serverError) setServerError(undefined);
+            }}
+            onBlur={field.handleBlur}
+            error={firstFieldError(field.state.meta.errors)}
+            icon="lock-outline"
+            secure
+            inputRef={passwordRef}
+            autoComplete="current-password"
+            textContentType="password"
+            returnKeyType="go"
+            onSubmitEditing={() => form.handleSubmit()}
+            accessibilityLabel="Password"
+          />
         )}
       </form.Field>
 
-      <Button
-        mode="contained"
+      <View style={styles.forgotRow}>
+        <AuthTextLink
+          label="Forgot password?"
+          align="flex-end"
+          onPress={() => router.push("/(auth)/forgot-password")}
+        />
+      </View>
+
+      {serverError ? <AuthErrorBanner message={serverError} /> : null}
+      {serverError?.toLowerCase().includes("activ") ? (
+        <AuthTextLink
+          label="Activate your account"
+          align="flex-start"
+          onPress={() => router.push("/(auth)/activate")}
+        />
+      ) : null}
+
+      <AuthPrimaryButton
+        label="Sign in"
+        loading={loginMutation.isPending}
         onPress={() => form.handleSubmit()}
-        style={styles.button}
-        loading={isPending}
-        disabled={isPending}
-      >
-        Sign In
-      </Button>
+      />
 
       <View style={styles.footer}>
-        <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant }}>
-          Don&apos;t have an account?{" "}
+        <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>
+          New to Glimpse?
         </Text>
-        <Button
-          mode="text"
-          compact
+        <AuthTextLink
+          label="Create an account"
           onPress={() => router.push("/(auth)/register")}
-          labelStyle={styles.linkLabel}
-        >
-          Sign Up
-        </Button>
+        />
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  title: {
-    textAlign: "center",
-    marginBottom: 32,
-  },
-  field: {
-    marginBottom: 20,
-  },
-  button: {
-    marginTop: 8,
+  forgotRow: {
+    alignItems: "flex-end",
+    marginTop: -4,
+    marginBottom: 12,
   },
   footer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 24,
+    gap: 4,
+    marginTop: 18,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.07)",
   },
-  linkLabel: {
-    fontSize: 14,
-    lineHeight: 20,
+  footerText: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
   },
 });

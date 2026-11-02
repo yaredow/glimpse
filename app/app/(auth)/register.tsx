@@ -1,20 +1,13 @@
-import { View, StyleSheet } from "react-native";
-import { useTheme } from "react-native-paper";
-import { RegisterForm } from "../../features/auth/components/register-form";
+import { RegisterForm } from "@/features/auth/components/register-form";
+import AuthShell from "@/features/auth/components/auth-shell";
 
 export default function Register() {
-  const { colors } = useTheme();
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <AuthShell
+      title="Start your ritual."
+      subtitle="Create an account and get five handpicked films every night."
+    >
       <RegisterForm />
-    </View>
+    </AuthShell>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-});

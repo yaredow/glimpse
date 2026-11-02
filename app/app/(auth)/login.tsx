@@ -1,19 +1,13 @@
 import { LoginForm } from "@/features/auth/components/login-form";
-import { StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import AuthShell from "@/features/auth/components/auth-shell";
 
 export default function Login() {
   return (
-    <SafeAreaView style={styles.container}>
+    <AuthShell
+      title="Welcome back."
+      subtitle="Your nightly five are waiting."
+    >
       <LoginForm />
-    </SafeAreaView>
+    </AuthShell>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-});
