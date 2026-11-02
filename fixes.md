@@ -168,8 +168,9 @@
 
 ### F-15 · Candidate pool is the top 200 popular movies, then scored
 
+- **Status:** Done — candidate pool raised to 1,000 before scoring.
 - **Area:** Recommendation quality
-- **Files:** `api/internal/repository/postgres/movie.go:144-181`
+- **Files:** `api/internal/service/recommendation.go`
 - **Problem:** `ORDER BY m.popularity DESC LIMIT $2` runs before the scorer. The engine only ranks the 200 most popular movies that pass filters. Niche tastes can never surface. This weakens the "personalized" claim.
 - **Fix:** Increase the candidate limit substantially (e.g. 2,000), or do two-stage generation: SQL prefilter by affinity dimensions and a broader popularity cutoff, then score in Go. Add a candidate-count metric so you can see when a user's filters are too narrow.
 - **Done when:** A user with a narrow but valid taste profile gets candidates that are not all mainstream popular titles.
@@ -177,8 +178,9 @@
 
 ### F-16 · History/exclusion rules are wrong for watched and unrevealed movies
 
+- **Status:** Done — history is written on interaction instead of generation, and watched/seen movies are excluded from candidates permanently.
 - **Area:** Recommendation quality
-- **Files:** `api/internal/service/recommendation.go:234-239`, `api/internal/repository/postgres/grid_history.go:50-54`, `api/internal/repository/postgres/movie.go:154-156`
+- **Files:** `api/internal/service/recommendation.go`, `api/internal/repository/postgres/movie.go`
 - **Problem:** All five generated movies go into `user_grid_history`, even if never revealed, so they are excluded for 30 days. Meanwhile, a `watched` movie can reappear after the 30-day cleanup because the candidate query does not exclude watched/seen movies permanently.
 - **Fix:** Record history on reveal/resolve, not on generation. Treat unrevealed cards as still available. Permanently exclude watched/seen movies (`NOT EXISTS` against interactions). Use different cooldowns for passed vs unseen.
 - **Done when:** Unrevealed cards can return in a future deck, and watched movies never do.
@@ -186,8 +188,9 @@
 
 ### F-17 · Fake notifications and reminder toggles
 
+- **Status:** Done — header bell, notification dropdown, and local-only reminder switches removed.
 - **Area:** Client credibility
-- **Files:** `app/features/movies/components/notifications-dropdown.tsx:42-72`, `app/app/(app)/(tabs)/profile.tsx:48-49`, `403-441`
+- **Files:** `app/features/movies/components/explore-header.tsx`, `app/app/(app)/(tabs)/profile.tsx`, deleted `app/features/movies/components/notifications-dropdown.tsx`
 - **Problem:** The bell opens hardcoded notifications ("Today's Daily Five is Ready") that do not reflect real state. The profile reminder switches only change local state and reset on remount. "Mark all read" is local only. If an interviewer taps these, credibility drops.
 - **Fix:** Remove the bell and the reminder card for now, or label them "Coming soon" and disable them. Do not ship fake state in a portfolio demo.
 - **Done when:** Every visible control either works or is clearly marked as future work.
@@ -240,8 +243,9 @@
 
 ### F-23 · Fake runtime fallback in the showtime hub
 
+- **Status:** Done — the feature screen shows “Runtime unavailable” instead of inventing 118 minutes.
 - **Area:** Client correctness
-- **Files:** `app/features/movies/components/showtime-hub.tsx:46`
+- **Files:** `app/features/movies/components/showtime-hub.tsx`, `app/features/movies/components/pre-show-brief.tsx`
 - **Problem:** `const runtime = movieDetails?.runtime ?? 118` invents a 1h58m runtime when the API has no runtime. It looks like real data.
 - **Fix:** Only show runtime when known. Use a neutral "Runtime unavailable" or omit the meta item.
 - **Done when:** No invented metadata appears in the feature screen.

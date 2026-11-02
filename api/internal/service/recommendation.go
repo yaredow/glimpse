@@ -57,6 +57,8 @@ type TaskRunner interface {
 
 type DetailSyncer func(ctx context.Context, tmdbID int) error
 
+const candidatePoolSize = 1000
+
 type RecommendationService struct {
 	movies       RecMovieRepository
 	affinities   RecAffinityRepository
@@ -193,7 +195,7 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 		affinities[i] = *a
 	}
 
-	candidates, err := rs.movies.GetCandidateMovies(ctx, userID, 200, nil)
+	candidates, err := rs.movies.GetCandidateMovies(ctx, userID, candidatePoolSize, nil)
 	if err != nil {
 		return nil, uuid.Nil, fmt.Errorf("get candidates: %w", err)
 	}
@@ -238,13 +240,6 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 		for i, movieID := range movieIDs {
 			if err := gtx.Insert(ctx, userID, movieID, sessionID, i+1); err != nil {
 				return fmt.Errorf("insert slot %d: %w", i+1, err)
-			}
-		}
-
-		ghtx := postgres.NewGridHistoryRepository(txDB)
-		for _, movieID := range movieIDs {
-			if err := ghtx.Insert(ctx, userID, movieID); err != nil {
-				return fmt.Errorf("insert grid history: %w", err)
 			}
 		}
 
@@ -294,7 +289,7 @@ func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64, moo
 	}
 
 	filter := GetMoodFilter(mood)
-	candidates, err := rs.movies.GetCandidateMovies(ctx, userID, 200, filter)
+	candidates, err := rs.movies.GetCandidateMovies(ctx, userID, candidatePoolSize, filter)
 	if err != nil {
 		return nil, 0, fmt.Errorf("get candidates: %w", err)
 	}
@@ -335,13 +330,6 @@ func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64, moo
 		for i, movieID := range movieIDs {
 			if err := gtx.Insert(ctx, userID, movieID, sessionID, i+1); err != nil {
 				return fmt.Errorf("insert slot %d: %w", i+1, err)
-			}
-		}
-
-		ghtx := postgres.NewGridHistoryRepository(txDB)
-		for _, movieID := range movieIDs {
-			if err := ghtx.Insert(ctx, userID, movieID); err != nil {
-				return fmt.Errorf("insert grid history: %w", err)
 			}
 		}
 
@@ -408,6 +396,11 @@ func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, 
 			Rating:           rating,
 		}); err != nil {
 			return fmt.Errorf("insert interaction: %w", err)
+		}
+
+		ghtx := postgres.NewGridHistoryRepository(txDB)
+		if err := ghtx.Insert(ctx, userID, movieID); err != nil {
+			return fmt.Errorf("insert grid history: %w", err)
 		}
 
 		gtx := postgres.NewGridRepository(txDB)

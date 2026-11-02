@@ -154,6 +154,13 @@ func (mr *MovieRepository) GetCandidateMovies(ctx context.Context, userID int64,
 		WHERE m.id NOT IN (
 			SELECT movie_id FROM user_grid_history WHERE user_id = $1
 		)
+		AND NOT EXISTS (
+			SELECT 1
+			FROM user_interactions ui
+			WHERE ui.user_id = $1
+			  AND ui.movie_id = m.id
+			  AND ui.action IN ('watched', 'seen_before')
+		)
 		AND m.original_language = ANY(up.languages)
 		AND m.vote_average >= up.min_rating
 		AND (
