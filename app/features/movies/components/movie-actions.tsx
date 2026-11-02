@@ -214,7 +214,7 @@ export default function MovieActions({
                       { color: theme.colors.textPrimary },
                     ]}
                   >
-                    Seen It
+                    Seen
                   </Text>
                 </>
               )}

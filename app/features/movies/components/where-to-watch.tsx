@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   Share,
   StyleSheet,
   Text,
@@ -33,6 +34,23 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
   const rent = providers?.rent ?? [];
   const torrents = sources?.torrents ?? [];
   const searchLinks = sources?.search_links;
+
+  const activeProviders = flatrate.length > 0 ? flatrate : rent;
+  const providerLabel = flatrate.length > 0 ? "STREAMING NOW" : "AVAILABLE TO RENT";
+
+  const cleanProviders = useMemo(() => {
+    const seen = new Set<string>();
+    return activeProviders.filter((prov) => {
+      // Normalize base service name (e.g. "HBO Max Amazon Channel" -> "HBO Max")
+      const base = prov.name
+        .replace(/\s+(Amazon|Apple\s*TV|Roku)\s+Channel.*/i, "")
+        .trim();
+      const key = base.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [activeProviders]);
 
   const handleOpenLink = async (url: string) => {
     if (!url) return;
@@ -101,9 +119,6 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
     );
   }
 
-  const activeProviders = flatrate.length > 0 ? flatrate : rent;
-  const providerLabel = flatrate.length > 0 ? "STREAMING NOW" : "AVAILABLE TO RENT";
-
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
@@ -117,13 +132,17 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
         </Text>
       </View>
 
-      {activeProviders.length > 0 ? (
+      {cleanProviders.length > 0 ? (
         <View style={styles.subSection}>
           <Text style={[styles.subLabel, { color: theme.colors.textSecondary }]}>
             {providerLabel}
           </Text>
-          <View style={styles.providerGrid}>
-            {activeProviders.map((prov: WatchProvider) => {
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.providerScroll}
+          >
+            {cleanProviders.map((prov: WatchProvider) => {
               const logoUri = tmdbImage(prov.logo_path, "w185");
               return (
                 <Pressable
@@ -161,16 +180,26 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                       />
                     </View>
                   )}
-                  <Text
-                    style={[styles.providerName, { color: theme.colors.textPrimary }]}
-                    numberOfLines={1}
-                  >
-                    {prov.name}
-                  </Text>
+                  <View style={styles.providerInfo}>
+                    <Text
+                      style={[styles.providerName, { color: theme.colors.textPrimary }]}
+                      numberOfLines={1}
+                    >
+                      {prov.name}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.providerActionText,
+                        { color: theme.colors.textSecondary },
+                      ]}
+                    >
+                      {providerLabel === "STREAMING NOW" ? "Stream" : "Rent"}
+                    </Text>
+                  </View>
                 </Pressable>
               );
             })}
-          </View>
+          </ScrollView>
         </View>
       ) : (
         <View
@@ -312,7 +341,11 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
           <Text style={[styles.subLabel, { color: theme.colors.textSecondary }]}>
             UNIVERSAL SEARCH
           </Text>
-          <View style={styles.searchPillsRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.searchPillsRow}
+          >
             {searchLinks.google ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.google)}
@@ -325,7 +358,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   pressed && { opacity: 0.75 },
                 ]}
               >
-                <MaterialCommunityIcons name="google" size={14} color="#FFFFFF" />
+                <MaterialCommunityIcons name="google" size={15} color="#FFFFFF" />
                 <Text style={styles.searchPillText}>Google</Text>
               </Pressable>
             ) : null}
@@ -342,7 +375,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   pressed && { opacity: 0.75 },
                 ]}
               >
-                <MaterialCommunityIcons name="play-box-outline" size={14} color="#F59E0B" />
+                <MaterialCommunityIcons name="play-box-outline" size={15} color="#F59E0B" />
                 <Text style={styles.searchPillText}>JustWatch</Text>
               </Pressable>
             ) : null}
@@ -359,7 +392,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   pressed && { opacity: 0.75 },
                 ]}
               >
-                <MaterialCommunityIcons name="filmstrip" size={14} color="#10B981" />
+                <MaterialCommunityIcons name="filmstrip" size={15} color="#10B981" />
                 <Text style={styles.searchPillText}>Letterboxd</Text>
               </Pressable>
             ) : null}
@@ -376,7 +409,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   pressed && { opacity: 0.75 },
                 ]}
               >
-                <MaterialCommunityIcons name="star-outline" size={14} color="#F59E0B" />
+                <MaterialCommunityIcons name="star-outline" size={15} color="#F59E0B" />
                 <Text style={styles.searchPillText}>IMDb</Text>
               </Pressable>
             ) : null}
@@ -393,11 +426,11 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   pressed && { opacity: 0.75 },
                 ]}
               >
-                <MaterialCommunityIcons name="netflix" size={14} color="#E50914" />
+                <MaterialCommunityIcons name="netflix" size={15} color="#E50914" />
                 <Text style={styles.searchPillText}>Netflix</Text>
               </Pressable>
             ) : null}
-          </View>
+          </ScrollView>
         </View>
       ) : null}
     </View>
@@ -422,18 +455,19 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   subSection: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   subLabelRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   subLabel: {
     fontFamily: "Inter_700Bold",
     fontSize: 11,
     letterSpacing: 1.2,
+    marginBottom: 12,
   },
   livePill: {
     flexDirection: "row",
@@ -456,37 +490,46 @@ const styles = StyleSheet.create({
     color: "#10B981",
     letterSpacing: 0.3,
   },
-  providerGrid: {
+  providerScroll: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
+    gap: 12,
+    paddingRight: 20,
+    paddingBottom: 4,
   },
   providerCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 14,
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    minWidth: 130,
   },
   providerLogo: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
   },
   providerLogoFallback: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  providerInfo: {
     justifyContent: "center",
   },
   providerName: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-    flex: 1,
+    fontSize: 13.5,
+    letterSpacing: 0.1,
+  },
+  providerActionText: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 11,
+    marginTop: 2,
+    letterSpacing: 0.2,
   },
   noticeCard: {
     flexDirection: "row",
@@ -579,22 +622,25 @@ const styles = StyleSheet.create({
   },
   searchPillsRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
+    alignItems: "center",
+    gap: 10,
+    paddingRight: 20,
+    paddingBottom: 4,
   },
   searchPill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
+    gap: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 22,
     borderWidth: 1,
   },
   searchPillText: {
     color: "#FFFFFF",
     fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
+    fontSize: 12.5,
+    letterSpacing: 0.2,
   },
   loadingBox: {
     paddingVertical: 28,

@@ -34,7 +34,7 @@ export default function CheckEmail() {
           <MaterialCommunityIcons
             name="email-fast-outline"
             size={30}
-            color={theme.colors.gold}
+            color={theme.colors.primary}
           />
         </View>
 

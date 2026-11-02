@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -17,8 +16,7 @@ import { useSyncGrid } from "@/features/movies/hooks/mutations/use-sync-grid";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import type { GridMovie } from "@/features/movies/types/movies.type";
 import ExploreHeader from "@/features/movies/components/explore-header";
-import CoverflowCarousel from "@/features/movies/components/coverflow-carousel";
-import SyncButton from "@/features/movies/components/sync-button";
+import DeckStack from "@/features/movies/components/deck-stack";
 import SkeletonLoader from "@/features/movies/components/skeleton-loader";
 import ActionConfirmModal, {
   ConfirmableAction,
@@ -66,7 +64,6 @@ export default function TodayTab() {
     )[0];
   const tonightPick = lockedPick ?? latestPick;
   const currentPickId = tonightPick?.movie_id;
-  const hasTodayPick = Boolean(tonightPick);
   const isShowtimeMode =
     Boolean(tonightPick?.is_locked_in) || tonightPick?.action === "locked_in";
 
@@ -264,15 +261,6 @@ export default function TodayTab() {
     setConfirmDialog({ visible: true, action: "sync", movie: null });
   }, [syncsRemaining, syncMutation.isPending]);
 
-  const handleNotTonight = useCallback(() => {
-    Toast.show({
-      type: "info",
-      text1: "No feature tonight",
-      text2: "Your deck will reset tomorrow.",
-    });
-    router.push("/(app)/(tabs)/journal");
-  }, []);
-
   const handleConfirmDialogAction = useCallback(
     (mood?: SyncMood) => {
       const { action, movie } = confirmDialog;
@@ -354,28 +342,17 @@ export default function TodayTab() {
       <ExploreHeader
         syncsRemaining={syncsRemaining}
         onSyncPress={handlePromptSync}
+        isSyncing={syncMutation.isPending}
       />
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.headerBlock}>
-          <Text style={[styles.screenHeading, { color: theme.colors.textPrimary }]}>
-            Today&apos;s Reel
-          </Text>
-          <Text style={[styles.screenSubheading, { color: theme.colors.textSecondary }]}>
-            {hasTodayPick
-              ? `Tonight's Feature: ${tonightPick?.title}`
-              : "Five films handpicked for your evening"}
-          </Text>
-        </View>
-
+      <View style={styles.mainContent}>
         {isPending ? (
-          <SkeletonLoader count={5} />
+          <View style={styles.deckContainer}>
+            <SkeletonLoader count={5} />
+          </View>
         ) : (
-          <>
-            <CoverflowCarousel
+          <View style={styles.deckContainer}>
+            <DeckStack
               movies={movies}
               currentPickId={currentPickId}
               onReveal={handleReveal}
@@ -384,79 +361,57 @@ export default function TodayTab() {
               onSkip={handleSkip}
               onViewDetails={handleViewMovie}
             />
-
-            <View style={styles.bottomDock}>
-              {tonightPick && tonightPick.action !== "locked_in" ? (
-                <Pressable
-                  onPress={handlePromptLockIn}
-                  style={({ pressed }) => [
-                    styles.lockInPill,
-                    { backgroundColor: theme.colors.primary },
-                    pressed && { opacity: 0.85 },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name="movie-play-outline"
-                    size={17}
-                    color="#FFFFFF"
-                  />
-                  <Text style={styles.lockInPillText} numberOfLines={1}>
-                    LOCK IN &quot;{tonightPick.title.toUpperCase()}&quot;
-                  </Text>
-                </Pressable>
-              ) : tonightPick?.action === "locked_in" ? (
-                <View
-                  style={[
-                    styles.lockedStatusPill,
-                    {
-                      backgroundColor: theme.colors.elevation.level2,
-                      borderColor: theme.colors.outlineVariant,
-                    },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name="check-circle"
-                    size={16}
-                    color={theme.colors.success}
-                  />
-                  <Text
-                    style={[
-                      styles.lockedStatusText,
-                      { color: theme.colors.textPrimary },
-                    ]}
-                  >
-                    Locked in for tonight
-                  </Text>
-                </View>
-              ) : (
-                <View style={styles.dockStack}>
-                  <SyncButton
-                    onSync={handlePromptSync}
-                    syncsRemaining={syncsRemaining}
-                    isSyncing={syncMutation.isPending}
-                  />
-                  <Pressable
-                    onPress={handleNotTonight}
-                    style={({ pressed }) => [
-                      styles.notTonightBtn,
-                      pressed && { opacity: 0.7 },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.notTonightText,
-                        { color: theme.colors.textMuted },
-                      ]}
-                    >
-                      Not tonight
-                    </Text>
-                  </Pressable>
-                </View>
-              )}
-            </View>
-          </>
+          </View>
         )}
-      </ScrollView>
+
+        {tonightPick ? (
+          <View style={styles.bottomDock}>
+            {tonightPick.action !== "locked_in" ? (
+              <Pressable
+                onPress={handlePromptLockIn}
+                style={({ pressed }) => [
+                  styles.lockInPill,
+                  { backgroundColor: theme.colors.primary },
+                  pressed && { opacity: 0.85 },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="movie-play-outline"
+                  size={17}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.lockInPillText} numberOfLines={1}>
+                  LOCK IN &quot;{tonightPick.title.toUpperCase()}&quot;
+                </Text>
+              </Pressable>
+            ) : (
+              <View
+                style={[
+                  styles.lockedStatusPill,
+                  {
+                    backgroundColor: theme.colors.elevation.level2,
+                    borderColor: theme.colors.outlineVariant,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={16}
+                  color={theme.colors.success}
+                />
+                <Text
+                  style={[
+                    styles.lockedStatusText,
+                    { color: theme.colors.textPrimary },
+                  ]}
+                >
+                  Locked in for tonight
+                </Text>
+              </View>
+            )}
+          </View>
+        ) : null}
+      </View>
 
       <ActionConfirmModal
         visible={confirmDialog.visible}
@@ -476,43 +431,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 40,
+  mainContent: {
+    flex: 1,
+    justifyContent: "space-between",
+    paddingBottom: 8,
   },
-  headerBlock: {
-    paddingHorizontal: 24,
-    paddingTop: 6,
-    paddingBottom: 10,
-  },
-  screenHeading: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 24,
-    letterSpacing: -0.4,
-  },
-  screenSubheading: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    marginTop: 3,
-    letterSpacing: 0.1,
+  deckContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   bottomDock: {
-    marginTop: 12,
     alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 24,
-  },
-  dockStack: {
-    alignItems: "center",
-    gap: 10,
-  },
-  notTonightBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  notTonightText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    letterSpacing: 0.2,
+    minHeight: 48,
+    marginBottom: 6,
   },
   lockInPill: {
     flexDirection: "row",

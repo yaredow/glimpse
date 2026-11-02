@@ -67,7 +67,7 @@ export default function AuthField({
   const borderColor = error
     ? theme.colors.error
     : focused
-      ? theme.colors.gold
+      ? theme.colors.primary
       : theme.colors.glassBorder;
 
   return (
@@ -80,7 +80,7 @@ export default function AuthField({
         style={[
           styles.inputRow,
           {
-            backgroundColor: "#151517",
+            backgroundColor: "#181818",
             borderColor,
           },
         ]}
@@ -89,7 +89,7 @@ export default function AuthField({
           <MaterialCommunityIcons
             name={icon}
             size={18}
-            color={focused ? theme.colors.gold : theme.colors.textMuted}
+            color={focused ? theme.colors.primary : theme.colors.textMuted}
           />
         ) : null}
 

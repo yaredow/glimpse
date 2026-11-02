@@ -31,7 +31,7 @@ export default function AuthShell({
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <LinearGradient
-        colors={["#0A0A0C", "#0B0A09", "#171006"]}
+        colors={[theme.colors.background, theme.colors.surface, "#1a1214"]}
         locations={[0, 0.55, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -63,7 +63,7 @@ export default function AuthShell({
               },
             ]}
           >
-            <View style={[styles.accent, { backgroundColor: theme.colors.gold }]} />
+            <View style={[styles.accent, { backgroundColor: theme.colors.primary }]} />
             <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
               {title}
             </Text>
@@ -91,7 +91,7 @@ export default function AuthShell({
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#0A0A0C",
+    backgroundColor: "#121212",
   },
   flex: {
     flex: 1,

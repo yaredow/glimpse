@@ -61,7 +61,7 @@ export default function ForgotPassword() {
             <MaterialCommunityIcons
               name="email-outline"
               size={30}
-              color={theme.colors.gold}
+              color={theme.colors.primary}
             />
           </View>
           <Text style={[styles.successText, { color: theme.colors.textSecondary }]}>

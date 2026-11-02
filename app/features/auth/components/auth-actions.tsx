@@ -40,7 +40,7 @@ export function AuthPrimaryButton({
       ]}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={palette.obsidian} />
+        <ActivityIndicator size="small" color="#FFFFFF" />
       ) : (
         <Text style={styles.primaryLabel}>{label}</Text>
       )}
@@ -72,7 +72,7 @@ export function AuthTextLink({
         pressed && { opacity: 0.7 },
       ]}
     >
-      <Text style={[styles.textLinkLabel, { color: theme.colors.gold }]}>
+      <Text style={[styles.textLinkLabel, { color: theme.colors.primary }]}>
         {label}
       </Text>
     </Pressable>
@@ -102,15 +102,15 @@ export function AuthErrorBanner({ message }: { message: string }) {
 
 const styles = StyleSheet.create({
   primaryButton: {
-    height: 54,
+    height: 52,
     borderRadius: 14,
-    backgroundColor: palette.offWhite,
+    backgroundColor: palette.cinemaRed,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 6,
   },
   primaryLabel: {
-    color: palette.obsidian,
+    color: "#FFFFFF",
     fontFamily: "Inter_700Bold",
     fontSize: 14,
     letterSpacing: 0.4,
