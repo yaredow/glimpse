@@ -11,6 +11,7 @@ import (
 
 type MovieService interface {
 	GetByID(ctx context.Context, userID, movieID int64) (*domain.Movie, error)
+	GetSources(ctx context.Context, movieID int64) (*domain.MovieSourcesResponse, error)
 }
 
 type MovieHandler struct {
@@ -35,4 +36,18 @@ func (mh *MovieHandler) GetMovie(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, envelope{"movie": movie})
+}
+
+func (mh *MovieHandler) GetMovieSources(c *echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: "invalid movie id"})
+	}
+
+	sources, err := mh.svc.GetSources(c.Request().Context(), id)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, envelope{"sources": sources})
 }

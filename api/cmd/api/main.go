@@ -17,6 +17,7 @@ import (
 	"github.com/yaredow/glimpse-api/internal/repository/postgres"
 	"github.com/yaredow/glimpse-api/internal/service"
 	"github.com/yaredow/glimpse-api/internal/tmdb"
+	"github.com/yaredow/glimpse-api/internal/torrent"
 	"github.com/yaredow/glimpse-api/internal/worker"
 )
 
@@ -97,7 +98,9 @@ func main() {
 		wp,
 	)
 
-	movieSvc := service.NewMovieService(movieRepo, interactionRepo, syncWorker.SyncMovieDetail)
+	ytsClient := torrent.NewYTSClient()
+	movieSvc := service.NewMovieService(movieRepo, interactionRepo, syncWorker.SyncMovieDetail).
+		WithSources(tmdbClient, ytsClient)
 
 	// Middleware
 	e.Use(middleware.Authenticate(jwtMgr, userService))

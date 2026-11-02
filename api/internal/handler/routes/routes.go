@@ -49,4 +49,5 @@ func Register(
 
 	movieH := handler.NewMovieHandler(movieSvc)
 	e.GET("/v1/movies/:id", movieH.GetMovie, middleware.RequireAuthenticatedUser())
+	e.GET("/v1/movies/:id/sources", movieH.GetMovieSources, middleware.RequireAuthenticatedUser())
 }
