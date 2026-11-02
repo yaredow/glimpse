@@ -1,10 +1,9 @@
 import { useFonts } from "expo-font";
-import { Stack, router, useSegments } from "expo-router";
+import { Stack, router, useSegments, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryProvider } from "@/lib/query-provider";
 import { useOnlineManager } from "@/hooks/use-online-manager";
-import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { PaperProvider } from "react-native-paper";
 import { ThemeProvider } from "@react-navigation/native";
@@ -12,6 +11,7 @@ import { glimpseDarkTheme, glimpseNavigationTheme, toastConfig } from "@/lib/the
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
+import AnimatedSplashScreen from "@/components/ui/animated-splash-screen";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,22 +30,15 @@ export default function RootLayout() {
     restoreToken();
   }, [restoreToken]);
 
-  useEffect(() => {
-    if (!isRestoring && (loaded || error)) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, error, isRestoring]);
-
-  if ((!loaded && !error) || isRestoring) {
-    return null;
-  }
+  const isReady = !isRestoring && (loaded || !!error);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#0C0C0E" }}>
       <QueryProvider>
         <PaperProvider theme={glimpseDarkTheme}>
           <ThemeProvider value={glimpseNavigationTheme}>
-            <RootNavigator isAuthenticated={isAuthenticated} />
+            {isReady ? <RootNavigator isAuthenticated={isAuthenticated} /> : null}
+            <AnimatedSplashScreen isReady={isReady} />
             <Toast config={toastConfig} />
           </ThemeProvider>
         </PaperProvider>

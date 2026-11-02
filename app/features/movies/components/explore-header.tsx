@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
+import GlimpseLogo from "@/components/ui/glimpse-logo";
 import NotificationsDropdown from "./notifications-dropdown";
 
 interface ExploreHeaderProps {
@@ -39,14 +40,7 @@ export default function ExploreHeader({
     <>
       <View style={styles.container}>
         <View style={styles.brandContainer}>
-          <View style={styles.titleRow}>
-            <Text style={[styles.brandTitle, { color: theme.colors.textPrimary }]}>
-              GLIMPSE
-            </Text>
-            <View
-              style={[styles.brandDot, { backgroundColor: theme.colors.primary }]}
-            />
-          </View>
+          <GlimpseLogo size="medium" />
           <Text style={[styles.dateText, { color: theme.colors.textSecondary }]}>
             {todayDate}
           </Text>
@@ -141,27 +135,11 @@ const styles = StyleSheet.create({
   brandContainer: {
     justifyContent: "center",
   },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 3,
-  },
-  brandTitle: {
-    fontFamily: "Inter_900Black",
-    fontSize: 22,
-    letterSpacing: 2,
-  },
-  brandDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    marginBottom: 2,
-  },
   dateText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 11,
     letterSpacing: 1,
-    marginTop: 2,
+    marginTop: 3,
   },
   rightActions: {
     flexDirection: "row",

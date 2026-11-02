@@ -182,9 +182,7 @@ export default function MysteryCard({
 
           <View style={styles.mysteryBody}>
             <Text style={styles.mysteryTagline} numberOfLines={4}>
-              {movie.tagline ||
-                movie.vague_description ||
-                "A captivating mystery lies within this reel."}
+              {movie.tagline || "A captivating mystery lies within this reel."}
             </Text>
 
             {movie.genres?.length > 0 ? (

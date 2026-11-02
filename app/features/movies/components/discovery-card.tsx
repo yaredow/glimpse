@@ -36,7 +36,6 @@ export const DiscoveryCard = ({
           numberOfLines={isLarge ? 4 : 3}
         >
           {movie.tagline ||
-            movie.vague_description ||
             "A mysterious journey awaits in this cinematic experience..."}
         </Text>
         <View style={[styles.badge, { backgroundColor: colors.primary }]}>
