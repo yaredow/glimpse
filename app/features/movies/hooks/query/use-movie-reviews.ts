@@ -10,3 +10,4 @@ export const useMovieReviews = (id: number, enabled = true) => {
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 };
+

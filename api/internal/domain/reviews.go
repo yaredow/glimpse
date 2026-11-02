@@ -13,3 +13,4 @@ type MovieReviewsResponse struct {
 	MovieID int64         `json:"movie_id"`
 	Reviews []MovieReview `json:"reviews"`
 }
+

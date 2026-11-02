@@ -101,7 +101,7 @@ export default function MovieActions({
           : "check-decagram";
 
   const finalizedIconColor = isLocked || isPick
-    ? theme.colors.gold
+    ? theme.colors.primary
     : isWatched
       ? theme.colors.success
       : theme.colors.textMuted;
@@ -135,7 +135,7 @@ export default function MovieActions({
             {
               backgroundColor: theme.colors.elevation.level1,
               borderColor: isLocked || isPick
-                ? theme.colors.gold
+                ? theme.colors.primary
                 : isWatched
                   ? theme.colors.success
                   : theme.colors.outlineVariant,
@@ -164,96 +164,98 @@ export default function MovieActions({
           </View>
         </View>
       ) : (
-        <View style={styles.actionsContainer}>
+        <View style={styles.actionsRow}>
+          {/* Pass */}
           <Pressable
-            onPress={() => handleAction("pick_tonight")}
+            onPress={() => handleAction("skipped")}
             disabled={!!loadingAction}
             style={({ pressed }) => [
-              styles.heroPickBtn,
-              { backgroundColor: theme.colors.gold },
-              pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
-              loadingAction === "pick_tonight" && styles.btnDisabled,
+              styles.actionBtn,
+              styles.neutralBtn,
+              pressed && { opacity: 0.75 },
+              loadingAction === "skipped" && styles.btnDisabled,
             ]}
+            accessibilityRole="button"
+            accessibilityLabel="Pass this film for today"
           >
-            {loadingAction === "pick_tonight" ? (
-              <ActivityIndicator size="small" color="#121212" />
+            {loadingAction === "skipped" ? (
+              <ActivityIndicator size="small" color={theme.colors.textMuted} />
             ) : (
               <>
-                <MaterialCommunityIcons name="star" size={19} color="#121212" />
-                <Text style={styles.heroPickBtnText}>PICK FOR TONIGHT</Text>
+                <MaterialCommunityIcons
+                  name="close"
+                  size={17}
+                  color={theme.colors.textMuted}
+                />
+                <Text
+                  style={[
+                    styles.actionBtnText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  Pass
+                </Text>
               </>
             )}
           </Pressable>
 
-          <View style={styles.secondaryRow}>
-            <Pressable
-              onPress={() => handleAction("seen_before")}
-              disabled={!!loadingAction}
-              style={({ pressed }) => [
-                styles.secondaryBtn,
-                {
-                  backgroundColor: theme.colors.elevation.level1,
-                  borderColor: theme.colors.outlineVariant,
-                },
-                pressed && { opacity: 0.8 },
-                loadingAction === "seen_before" && styles.btnDisabled,
-              ]}
-            >
-              {loadingAction === "seen_before" ? (
-                <ActivityIndicator size="small" color={theme.colors.textPrimary} />
-              ) : (
-                <>
-                  <MaterialCommunityIcons
-                    name="eye-outline"
-                    size={18}
-                    color={theme.colors.textPrimary}
-                  />
-                  <Text
-                    style={[
-                      styles.secondaryBtnText,
-                      { color: theme.colors.textPrimary },
-                    ]}
-                  >
-                    Seen
-                  </Text>
-                </>
-              )}
-            </Pressable>
+          {/* Seen */}
+          <Pressable
+            onPress={() => handleAction("seen_before")}
+            disabled={!!loadingAction}
+            style={({ pressed }) => [
+              styles.actionBtn,
+              styles.neutralBtn,
+              pressed && { opacity: 0.75 },
+              loadingAction === "seen_before" && styles.btnDisabled,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Mark film as already seen"
+          >
+            {loadingAction === "seen_before" ? (
+              <ActivityIndicator size="small" color={theme.colors.textPrimary} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="eye-outline"
+                  size={17}
+                  color={theme.colors.textPrimary}
+                />
+                <Text
+                  style={[
+                    styles.actionBtnText,
+                    { color: theme.colors.textPrimary },
+                  ]}
+                >
+                  Seen
+                </Text>
+              </>
+            )}
+          </Pressable>
 
-            <Pressable
-              onPress={() => handleAction("skipped")}
-              disabled={!!loadingAction}
-              style={({ pressed }) => [
-                styles.secondaryBtn,
-                {
-                  backgroundColor: theme.colors.elevation.level1,
-                  borderColor: theme.colors.outlineVariant,
-                },
-                pressed && { opacity: 0.8 },
-                loadingAction === "skipped" && styles.btnDisabled,
-              ]}
-            >
-              {loadingAction === "skipped" ? (
-                <ActivityIndicator size="small" color={theme.colors.textMuted} />
-              ) : (
-                <>
-                  <MaterialCommunityIcons
-                    name="close-circle-outline"
-                    size={18}
-                    color={theme.colors.textMuted}
-                  />
-                  <Text
-                    style={[
-                      styles.secondaryBtnText,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    Pass
-                  </Text>
-                </>
-              )}
-            </Pressable>
-          </View>
+          {/* Pick */}
+          <Pressable
+            onPress={() => handleAction("pick_tonight")}
+            disabled={!!loadingAction}
+            style={({ pressed }) => [
+              styles.actionBtn,
+              styles.pickBtn,
+              { backgroundColor: theme.colors.primary },
+              pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+              loadingAction === "pick_tonight" && styles.btnDisabled,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Pick film for tonight"
+          >
+            {loadingAction === "pick_tonight" ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <MaterialCommunityIcons name="star" size={17} color="#FFFFFF" />
+                <Text style={styles.pickBtnText}>Pick</Text>
+              </>
+            )}
+          </Pressable>
         </View>
       )}
     </View>
@@ -263,47 +265,41 @@ export default function MovieActions({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
-  actionsContainer: {
+  actionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 10,
+    width: "100%",
   },
-  heroPickBtn: {
+  actionBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 24,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
+    gap: 6,
+    height: 44,
+    borderRadius: 12,
   },
-  heroPickBtnText: {
-    color: "#121212",
-    fontFamily: "Inter_700Bold",
-    fontSize: 13,
-    letterSpacing: 0.6,
-  },
-  secondaryRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  secondaryBtn: {
+  neutralBtn: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    paddingVertical: 12,
-    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
-  secondaryBtnText: {
-    fontFamily: "Inter_600SemiBold",
+  pickBtn: {
+    flex: 1.4,
+  },
+  actionBtnText: {
     fontSize: 13,
+    fontWeight: "600",
+  },
+  pickBtnText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.4,
   },
   btnDisabled: {
     opacity: 0.55,
@@ -312,20 +308,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
   },
   finalizedTextContainer: {
     flex: 1,
   },
   finalizedTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 14,
+    fontSize: 13.5,
+    fontWeight: "700",
   },
   finalizedSubtitle: {
-    fontFamily: "Inter_400Regular",
     fontSize: 12,
     marginTop: 2,
     lineHeight: 16,
