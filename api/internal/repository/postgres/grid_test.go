@@ -105,14 +105,15 @@ func TestGridRepository_GetByID(t *testing.T) {
 		posterPath := "/poster.jpg"
 		backdropPath := "/backdrop.jpg"
 
+		runtime := 148
 		rows := pgxmock.NewRows([]string{
 			"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
 			"tagline", "genres", "title", "poster_path", "backdrop_path",
-			"vote_average", "release_date", "grid_session_id", "action", "action_at", "is_locked_in",
+			"vote_average", "release_date", "runtime", "grid_session_id", "action", "action_at", "is_locked_in",
 		}).AddRow(
 			int64(10), 550, 1, false, "A mysterious journey",
 			&tagline, []string{"Drama", "Action"}, "Inception", &posterPath, &backdropPath,
-			8.5, releaseDate, sessionID, nil, nil, false,
+			8.5, releaseDate, &runtime, sessionID, nil, nil, false,
 		)
 
 		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 AND d.pool_date = CURRENT_DATE ORDER BY d.slot_number`).
@@ -132,6 +133,7 @@ func TestGridRepository_GetByID(t *testing.T) {
 		require.Equal(t, []string{"Drama", "Action"}, slots[0].Genres)
 		require.Equal(t, "Inception", slots[0].Title)
 		require.Equal(t, sessionID, slots[0].GridSessionID)
+		require.Equal(t, &runtime, slots[0].Runtime)
 		require.NoError(t, mock.ExpectationsWereMet())
 	})
 
@@ -150,11 +152,11 @@ func TestGridRepository_GetByID(t *testing.T) {
 		rows := pgxmock.NewRows([]string{
 			"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
 			"tagline", "genres", "title", "poster_path", "backdrop_path",
-			"vote_average", "release_date", "grid_session_id", "action", "action_at", "is_locked_in",
+			"vote_average", "release_date", "runtime", "grid_session_id", "action", "action_at", "is_locked_in",
 		}).AddRow(
 			int64(10), 550, 1, false, "A mysterious journey",
 			nil, []string{"Drama"}, "Inception", nil, nil,
-			8.5, releaseDate, sessionID, &action, &actionAt, true,
+			8.5, releaseDate, nil, sessionID, &action, &actionAt, true,
 		)
 
 		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 AND d.pool_date = CURRENT_DATE ORDER BY d.slot_number`).
@@ -183,7 +185,7 @@ func TestGridRepository_GetByID(t *testing.T) {
 			WillReturnRows(pgxmock.NewRows([]string{
 				"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
 				"tagline", "genres", "title", "poster_path", "backdrop_path",
-				"vote_average", "release_date", "grid_session_id", "action",
+				"vote_average", "release_date", "runtime", "grid_session_id", "action",
 			}))
 
 		slots, err := repo.GetByID(context.Background(), 1)

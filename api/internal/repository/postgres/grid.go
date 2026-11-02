@@ -31,6 +31,7 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			m.backdrop_path,
 			m.vote_average,
 			m.release_date,
+			m.runtime,
 			d.grid_session_id,
 			(
 				SELECT ui.action
@@ -86,6 +87,7 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			&s.BackdropPath,
 			&s.VoteAverage,
 			&s.ReleaseDate,
+			&s.Runtime,
 			&s.GridSessionID,
 			&s.Action,
 			&s.ActionAt,

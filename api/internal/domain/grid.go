@@ -22,6 +22,7 @@ type GridSlotResponse struct {
 	BackdropPath     *string     `json:"backdrop_path,omitempty"`
 	VoteAverage      float64     `json:"vote_average"`
 	ReleaseDate      time.Time   `json:"release_date"`
+	Runtime          *int        `json:"runtime,omitempty"`
 	GridSessionID    uuid.UUID   `json:"grid_session_id"`
 }
 
