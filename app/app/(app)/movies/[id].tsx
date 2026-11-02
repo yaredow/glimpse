@@ -22,6 +22,9 @@ import MovieActions from "@/features/movies/components/movie-actions";
 import MovieSynopsis from "@/features/movies/components/movie-synopsis";
 import MovieCast from "@/features/movies/components/movie-cast";
 import MovieDetailTabs from "@/features/movies/components/movie-detail-tabs";
+import DecisionVitalsStrip from "@/features/movies/components/decision-vitals-strip";
+import CuratorPitchCard from "@/features/movies/components/curator-pitch-card";
+import WhereToWatch from "@/features/movies/components/where-to-watch";
 
 const HEADER_THRESHOLD = 300;
 
@@ -123,9 +126,15 @@ export default function MovieDetail() {
       <Animated.ScrollView
         onScroll={scrollHandler}
         scrollEventThrottle={16}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 48 },
+        ]}
       >
         <MovieTrailer movie={movie} />
+
+        <DecisionVitalsStrip movie={movie} />
+
         <MovieActions
           movie={movie}
           sessionId={sessionId}
@@ -133,6 +142,11 @@ export default function MovieDetail() {
           initialAction={action as MovieInteractionAction | undefined}
           onActionComplete={() => router.back()}
         />
+
+        <CuratorPitchCard movie={movie} />
+
+        <WhereToWatch movieId={movie.id} movieTitle={movie.title} />
+
         {movie.full_synopsis ? (
           <MovieSynopsis synopsis={movie.full_synopsis} />
         ) : null}
@@ -143,6 +157,12 @@ export default function MovieDetail() {
           ) : null}
           {activeTab === "DETAILS" && (
             <View style={styles.detailsSection}>
+              {movie.original_title && movie.original_title !== movie.title ? (
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>ORIGINAL TITLE</Text>
+                  <Text style={styles.detailValue}>{movie.original_title}</Text>
+                </View>
+              ) : null}
               {movie.tagline ? (
                 <View style={styles.detailItem}>
                   <Text style={styles.detailLabel}>TAGLINE</Text>
@@ -168,10 +188,9 @@ export default function MovieDetail() {
               ) : null}
               {movie.vote_count ? (
                 <View style={styles.detailItem}>
-                  <Text style={styles.detailLabel}>RATING</Text>
+                  <Text style={styles.detailLabel}>COMMUNITY CONSENSUS</Text>
                   <Text style={styles.detailValue}>
-                    {movie.vote_average.toFixed(1)} / 10 (
-                    {movie.vote_count.toLocaleString()} votes)
+                    {movie.vote_average.toFixed(1)} / 10 ({movie.vote_count.toLocaleString()} registered ratings)
                   </Text>
                 </View>
               ) : null}
@@ -228,7 +247,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   backPressable: {
-    padding: 5,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   errorText: {
     color: "white",

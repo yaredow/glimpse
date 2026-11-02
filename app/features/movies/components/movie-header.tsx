@@ -37,45 +37,54 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
         <View style={[styles.backdrop, styles.backdropFallback]} />
       )}
       <LinearGradient
-        colors={["transparent", "rgba(20, 20, 20, 0.95)"]}
+        colors={["transparent", "rgba(20, 20, 20, 0.65)", "#141414"]}
+        locations={[0, 0.6, 1]}
         style={styles.gradient}
         pointerEvents="none"
       />
 
       <View style={styles.content}>
         <View style={styles.details}>
+          {movie.genres && movie.genres.length > 0 ? (
+            <View style={styles.genreRow}>
+              {movie.genres.slice(0, 2).map((genre) => (
+                <View key={genre} style={styles.genreBadge}>
+                  <Text style={styles.genreText}>{genre}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+
           <Text style={styles.title} numberOfLines={2}>
             {movie.title}
           </Text>
 
-          {movie.director ? (
-            <>
-              <Text style={styles.directorLabel}>DIRECTED BY</Text>
-              <Text style={styles.directorName}>{movie.director}</Text>
-            </>
-          ) : null}
-
-          <View style={styles.meta}>
+          <View style={styles.metaRow}>
             {year ? <Text style={styles.metaText}>{year}</Text> : null}
-            {year && movie.runtime ? (
+            {year && movie.director ? (
               <Text style={styles.metaDot}>•</Text>
             ) : null}
-            {movie.runtime ? (
-              <Text style={styles.metaText}>{movie.runtime} min</Text>
-            ) : null}
-
-            {movie.trailer_key ? (
-              <Pressable
-                style={styles.trailerButton}
-                onPress={onTrailerPress}
-                accessibilityRole="button"
-                accessibilityLabel="Watch trailer"
-              >
-                <MaterialCommunityIcons name="play" size={14} color="white" />
-                <Text style={styles.trailerText}>TRAILER</Text>
-              </Pressable>
+            {movie.director ? (
+              <Text style={styles.directorText} numberOfLines={1}>
+                Dir. {movie.director}
+              </Text>
             ) : null}
           </View>
+
+          {movie.trailer_key ? (
+            <Pressable
+              style={({ pressed }) => [
+                styles.trailerButton,
+                pressed && { opacity: 0.8 },
+              ]}
+              onPress={onTrailerPress}
+              accessibilityRole="button"
+              accessibilityLabel="Watch trailer"
+            >
+              <MaterialCommunityIcons name="play" size={14} color="#FFFFFF" />
+              <Text style={styles.trailerText}>TRAILER</Text>
+            </Pressable>
+          ) : null}
         </View>
 
         {posterSrc ? (
@@ -110,68 +119,87 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     flexDirection: "row",
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
     paddingTop: 80,
     alignItems: "flex-end",
   },
   details: {
     flex: 1,
     justifyContent: "flex-end",
-    marginRight: 10,
+    marginRight: 14,
+  },
+  genreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 8,
+  },
+  genreBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.12)",
+  },
+  genreText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#E4E4E7",
+    letterSpacing: 0.3,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: "white",
-    marginBottom: 8,
+    marginBottom: 6,
+    lineHeight: 29,
   },
-  directorLabel: {
-    fontSize: 12,
-    color: "#E50914",
-    marginBottom: 2,
-  },
-  directorName: {
-    fontSize: 14,
-    color: "white",
-    fontWeight: "500",
-    marginBottom: 8,
-  },
-  meta: {
+  metaRow: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "nowrap",
+    marginBottom: 10,
   },
   metaText: {
-    fontSize: 14,
-    color: "white",
-    fontWeight: "bold",
+    fontSize: 13,
+    color: "#D4D4D8",
+    fontWeight: "600",
+  },
+  directorText: {
+    fontSize: 13,
+    color: "#A1A1AA",
+    fontWeight: "500",
+    flexShrink: 1,
   },
   metaDot: {
-    fontSize: 14,
-    color: "white",
-    marginHorizontal: 8,
+    fontSize: 13,
+    color: "#71717A",
+    marginHorizontal: 6,
   },
   trailerButton: {
+    alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "white",
-    borderRadius: 20,
+    backgroundColor: "rgba(229, 9, 20, 0.9)",
+    borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    marginLeft: 8,
-    gap: 4,
+    gap: 5,
   },
   trailerText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "white",
-    fontWeight: "bold",
+    fontWeight: "700",
+    letterSpacing: 0.6,
   },
   poster: {
-    width: 100,
-    height: 150,
+    width: 96,
+    height: 144,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "white",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   backdropFallback: {
     backgroundColor: "#1F1F1F",

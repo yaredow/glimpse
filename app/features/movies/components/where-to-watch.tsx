@@ -103,7 +103,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
       <View style={styles.loadingBox}>
         <ActivityIndicator size="small" color={theme.colors.primary} />
         <Text style={[styles.loadingText, { color: theme.colors.textMuted }]}>
-          Searching streaming providers and torrents...
+          Checking streaming availability...
         </Text>
       </View>
     );
