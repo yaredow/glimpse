@@ -34,6 +34,13 @@ db/migration/down:
 	@echo "Running down migrations..."
 	migrate -path ./migrations -database ${DB_DSN} down 1
 
+## demo/reset: clear nightly state for a demo user (e.g. make demo/reset email=demo@example.com)
+.PHONY: demo/reset
+demo/reset:
+	@test -n "${email}" || (echo "usage: make demo/reset email=demo@example.com" && exit 1)
+	@echo "Resetting demo state for ${email}..."
+	psql "${DB_DSN}" -v ON_ERROR_STOP=1 -v email="${email}" -f ./scripts/reset_demo_state.sql
+
 ## tidy: format code and tidy/verify Go modules
 .PHONY: tidy
 tidy:

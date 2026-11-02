@@ -16,8 +16,8 @@
 - [x] **F-02** Grid/sync requests block on TMDB detail calls
 - [x] **F-03** Verdict rating is discarded
 - [x] **F-04** Profile sync badge can show yesterday's allowance
-- [ ] **F-05** Torrent/magnet UI is a presentation risk
-- [ ] **F-06** Dirty tree / no clean commit or demo state
+- [x] **F-05** Torrent/magnet UI is a presentation risk
+- [x] **F-06** Dirty tree / no clean commit or demo state
 
 ---
 
@@ -65,8 +65,9 @@
 
 ### F-05 · Torrent/magnet UI is a presentation risk
 
+- **Status:** Done — torrents are disabled by default in both API and client; enable with `FEATURE_TORRENTS=true` and `EXPO_PUBLIC_SHOW_TORRENTS=true`.
 - **Area:** Product / interview risk
-- **Files:** `api/internal/service/movie.go:98-102`, `api/internal/torrent/yts.go`, `app/features/movies/components/where-to-watch.tsx:195-305`
+- **Files:** `api/cmd/api/main.go`, `api/.env.example`, `app/.env.example`, `app/features/movies/consants/movies.constants.ts`, `app/features/movies/components/where-to-watch.tsx`
 - **Problem:** The Where to Watch section promotes YTS torrents and magnet links. Technically fine, but in an interview it is a legal/policy distraction and it is not part of the recommendation story.
 - **Fix:** Put torrent sources behind a `FEATURE_TORRENTS=false` flag and hide the section for the demo. Keep the legal streaming providers, JustWatch link, and universal search links. Do not remove the code; just do not surface it.
 - **Done when:** The demo shows streaming availability and search links only.
@@ -74,8 +75,9 @@
 
 ### F-06 · Dirty tree / no clean commit or demo state
 
+- **Status:** Done — work is committed in logical commits, `demo/reset` resets nightly state, and `demo-v1` tags the checkpoint.
 - **Area:** Process / demo hygiene
-- **Files:** repository-wide
+- **Files:** `api/Makefile`, `api/scripts/reset_demo_state.sql`
 - **Problem:** ~26 files are modified but uncommitted, including the blocking TMDB change and several UI rewrites. There is no clean tag to demo from, and the demo DB may contain a stale or locked grid from previous testing.
 - **Fix:** Commit or stash the current work, fix P0 first, then create a clean commit/tag (`git tag demo-v1`). Reset or seed the demo database with a known-good user, preferences, and a fresh daily pool.
 - **Done when:** `git status` is clean before the demo and a fresh demo account produces the intended first-run flow.
