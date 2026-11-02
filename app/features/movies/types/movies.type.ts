@@ -47,6 +47,7 @@ export interface RecordInteractionPayload {
   grid_session_id: string;
   grid_position?: number;
   reveal_action_ms?: number;
+  rating?: number;
 }
 
 export interface GridMovie {
@@ -93,6 +94,7 @@ export interface HistoryMovie {
   movie_id: number;
   action: "watched" | "watchlist_add" | string;
   acted_at: string;
+  rating?: number | null;
   title: string;
   poster_path?: string;
   backdrop_path?: string;

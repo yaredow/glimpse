@@ -27,8 +27,8 @@ func (m *mockGridService) GenerateGrid(ctx context.Context, userID int64) ([]dom
 	return grid, sid, args.Error(2)
 }
 
-func (m *mockGridService) RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs *int) error {
-	args := m.Called(ctx, userID, movieID, action, sessionID, gridPosition, revealActionMs)
+func (m *mockGridService) RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs, rating *int) error {
+	args := m.Called(ctx, userID, movieID, action, sessionID, gridPosition, revealActionMs, rating)
 	return args.Error(0)
 }
 
@@ -117,7 +117,7 @@ func TestRecommendationHandler_RecordInteraction(t *testing.T) {
 		mockSvc, h, e := newRecHandlerTest(t)
 		sessionID := uuid.New()
 
-		mockSvc.On("RecordInteraction", mock.Anything, int64(1), int64(10), "revealed", sessionID, mock.Anything, (*int)(nil)).
+		mockSvc.On("RecordInteraction", mock.Anything, int64(1), int64(10), "revealed", sessionID, mock.Anything, (*int)(nil), (*int)(nil)).
 			Return(nil)
 
 		body := `{"movie_id":10,"action":"revealed","grid_session_id":"` + sessionID.String() + `","grid_position":3}`
@@ -135,6 +135,54 @@ func TestRecommendationHandler_RecordInteraction(t *testing.T) {
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
 		require.NoError(t, err)
 		require.Equal(t, "interaction recorded", resp["message"])
+	})
+
+	t.Run("watched with rating", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+		sessionID := uuid.New()
+
+		mockSvc.On(
+			"RecordInteraction",
+			mock.Anything,
+			int64(1),
+			int64(10),
+			"watched",
+			sessionID,
+			(*int)(nil),
+			(*int)(nil),
+			mock.MatchedBy(func(rating *int) bool { return rating != nil && *rating == 5 }),
+		).Return(nil)
+
+		body := `{"movie_id":10,"action":"watched","grid_session_id":"` + sessionID.String() + `","rating":5}`
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/interactions", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.RecordInteraction(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, rec.Code)
+	})
+
+	t.Run("rating outside watched action", func(t *testing.T) {
+		t.Parallel()
+
+		_, h, e := newRecHandlerTest(t)
+		sessionID := uuid.New()
+
+		body := `{"movie_id":10,"action":"revealed","grid_session_id":"` + sessionID.String() + `","rating":5}`
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/interactions", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.RecordInteraction(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusBadRequest, rec.Code)
 	})
 
 	t.Run("invalid request body", func(t *testing.T) {
@@ -177,7 +225,7 @@ func TestRecommendationHandler_RecordInteraction(t *testing.T) {
 		mockSvc, h, e := newRecHandlerTest(t)
 		sessionID := uuid.New()
 
-		mockSvc.On("RecordInteraction", mock.Anything, int64(1), int64(10), "watched", sessionID, (*int)(nil), (*int)(nil)).
+		mockSvc.On("RecordInteraction", mock.Anything, int64(1), int64(10), "watched", sessionID, (*int)(nil), (*int)(nil), (*int)(nil)).
 			Return(domain.ErrInternalServerError)
 
 		body := `{"movie_id":10,"action":"watched","grid_session_id":"` + sessionID.String() + `"}`

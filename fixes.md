@@ -14,7 +14,7 @@
 
 - [x] **F-01** Daily deck never resets and `locked_in` is permanent
 - [x] **F-02** Grid/sync requests block on TMDB detail calls
-- [ ] **F-03** Verdict rating is discarded
+- [x] **F-03** Verdict rating is discarded
 - [ ] **F-04** Profile sync badge can show yesterday's allowance
 - [ ] **F-05** Torrent/magnet UI is a presentation risk
 - [ ] **F-06** Dirty tree / no clean commit or demo state
@@ -45,8 +45,9 @@
 
 ### F-03 · Verdict rating is discarded
 
+- **Status:** Code done — rating is stored on watched interactions and shown in the Journal. Run `make db/migration/up` to apply migration `000010`.
 - **Area:** Data integrity / client
-- **Files:** `app/app/(app)/(tabs)/index.tsx:144-173`, `267-291`, `app/features/movies/components/verdict-modal.tsx:29-32`, `api/internal/domain/interaction.go:26-35`
+- **Files:** `api/migrations/000010_add_rating_to_user_interactions.up.sql`, `api/internal/domain/interaction.go`, `api/internal/repository/postgres/interaction.go`, `api/internal/handler/recommendation.go`, `app/app/(app)/(tabs)/index.tsx`, `app/app/(app)/(tabs)/journal.tsx`
 - **Problem:** `VerdictModal` collects a 1–5 star rating, `handleLogWatched(movie, rating)` receives it, shows "Rated X ★", then sends only `{ action: "watched" }`. The rating is never stored anywhere. The Journal cannot show it and the scorer never learns from it.
 - **Fix:** Add `rating SMALLINT NULL` to `user_interactions` (or a `movie_verdicts` table keyed by user + movie + interaction). Extend `RecordInteractionPayload` and the handler. Send the rating with the `watched` action. Show it in the Journal.
 - **Done when:** A 5-star verdict is visible in the database and in the Journal after a reload.

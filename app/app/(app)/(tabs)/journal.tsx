@@ -176,6 +176,20 @@ export default function Journal() {
           >
             {item.title}
           </Text>
+          {item.rating ? (
+            <View style={styles.userRatingRow}>
+              <MaterialCommunityIcons
+                name="star"
+                size={9}
+                color={theme.colors.gold}
+              />
+              <Text
+                style={[styles.userRatingText, { color: theme.colors.gold }]}
+              >
+                {item.rating}/5
+              </Text>
+            </View>
+          ) : null}
         </View>
       </Pressable>
     );
@@ -540,6 +554,16 @@ const styles = StyleSheet.create({
   movieTitle: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 11,
+  },
+  userRatingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginTop: 3,
+  },
+  userRatingText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 9,
   },
   centered: {
     flex: 1,

@@ -150,6 +150,7 @@ export default function TodayTab() {
           action: "watched",
           grid_session_id: movie.grid_session_id,
           grid_position: movie.slot_number,
+          rating,
         },
         {
           onSuccess: () => {

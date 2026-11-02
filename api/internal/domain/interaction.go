@@ -31,6 +31,7 @@ type Interaction struct {
 	GridSessionID    uuid.UUID  `json:"grid_session_id"`
 	GridPosition     *int       `json:"grid_position,omitempty"`
 	RevealToActionMS *int       `json:"reveal_to_action_ms,omitempty"`
+	Rating           *int       `json:"rating,omitempty"`
 	ActedAt          time.Time  `json:"acted_at"`
 }
 
@@ -38,6 +39,7 @@ type HistoryMovie struct {
 	MovieID          int64           `json:"movie_id"`
 	Action           string          `json:"action"`
 	ActedAt          time.Time       `json:"acted_at"`
+	Rating           *int            `json:"rating,omitempty"`
 	Title            string          `json:"title"`
 	PosterPath       *string         `json:"poster_path,omitempty"`
 	BackdropPath     *string         `json:"backdrop_path,omitempty"`

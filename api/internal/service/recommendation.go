@@ -367,7 +367,7 @@ func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64, moo
 	return grid, remainingSyncs, nil
 }
 
-func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs *int) error {
+func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs, rating *int) error {
 	weight, ok := getActionWeight(action)
 	if !ok {
 		return domain.ErrInvalidAction
@@ -403,6 +403,7 @@ func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, 
 			GridSessionID:    sessionID,
 			GridPosition:     gridPosition,
 			RevealToActionMS: revealActionMs,
+			Rating:           rating,
 		}); err != nil {
 			return fmt.Errorf("insert interaction: %w", err)
 		}
