@@ -18,6 +18,7 @@ func TestValidActions(t *testing.T) {
 	require.Contains(t, valid, string(domain.ActionWatchlistAdd))
 	require.Contains(t, valid, string(domain.ActionPickTonight))
 	require.Contains(t, valid, string(domain.ActionLockedIn))
+	require.Contains(t, valid, string(domain.ActionSeenBefore))
 
 	// Verify weights
 	wPick, ok := service.ActionWeights[string(domain.ActionPickTonight)]
@@ -29,5 +30,9 @@ func TestValidActions(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, 3.0, wLock.Delta)
 	require.True(t, wLock.AffectExploration)
-}
 
+	wSeen, ok := service.ActionWeights[string(domain.ActionSeenBefore)]
+	require.True(t, ok)
+	require.Equal(t, 0.0, wSeen.Delta)
+	require.False(t, wSeen.AffectExploration)
+}

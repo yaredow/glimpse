@@ -41,6 +41,15 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 				ORDER BY ui.acted_at DESC
 				LIMIT 1
 			) AS action,
+			(
+				SELECT ui.acted_at
+				FROM user_interactions ui
+				WHERE ui.user_id = d.user_id
+				  AND ui.movie_id = d.movie_id
+				  AND ui.grid_session_id = d.grid_session_id
+				ORDER BY ui.acted_at DESC
+				LIMIT 1
+			) AS action_at,
 			EXISTS (
 				SELECT 1
 				FROM user_interactions ui
@@ -79,6 +88,7 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			&s.ReleaseDate,
 			&s.GridSessionID,
 			&s.Action,
+			&s.ActionAt,
 			&s.IsLockedIn,
 		); err != nil {
 			return nil, err

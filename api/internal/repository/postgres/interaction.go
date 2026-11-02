@@ -82,7 +82,7 @@ func (ir *InteractionRepository) GetHistory(ctx context.Context, userID int64, a
 			JOIN movies m ON m.id = ui.movie_id
 			WHERE ui.user_id = $1
 			  AND ($2 = '' OR ui.action::text = $2)
-			  AND ui.action IN ('watched', 'watchlist_add')
+			  AND ui.action IN ('watched', 'watchlist_add', 'pick_tonight')
 		)
 		SELECT 
 			movie_id, action, acted_at, rating,

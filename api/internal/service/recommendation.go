@@ -389,9 +389,11 @@ func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, 
 		txDB := postgres.NewDBFromTx(tx)
 
 		atx := postgres.NewAffinityRepository(txDB)
-		for _, dim := range dims {
-			if err := atx.Upsert(ctx, userID, dim.Name, dim.Value, weight.Delta); err != nil {
-				return fmt.Errorf("upsert affinity: %w", err)
+		if weight.Delta != 0 {
+			for _, dim := range dims {
+				if err := atx.Upsert(ctx, userID, dim.Name, dim.Value, weight.Delta); err != nil {
+					return fmt.Errorf("upsert affinity: %w", err)
+				}
 			}
 		}
 
