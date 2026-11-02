@@ -49,12 +49,12 @@ func (rh *RecommendationHandler) RecordInteraction(c *echo.Context) error {
 	}
 
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return c.JSON(http.StatusUnprocessableEntity, ResponseError{Message: err.Error()})
 	}
 
 	v := validator.New()
 	if err := v.Struct(input); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 	}
 
 	if input.Rating != nil && input.Action != string(domain.ActionWatched) {

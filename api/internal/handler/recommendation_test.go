@@ -326,7 +326,7 @@ func TestRecommendationHandler_SyncGrid(t *testing.T) {
 
 		err := h.SyncGrid(c)
 		require.NoError(t, err)
-		require.Equal(t, http.StatusBadRequest, rec.Code)
+		require.Equal(t, http.StatusConflict, rec.Code)
 	})
 
 	t.Run("selection locked", func(t *testing.T) {
@@ -343,7 +343,7 @@ func TestRecommendationHandler_SyncGrid(t *testing.T) {
 
 		err := h.SyncGrid(c)
 		require.NoError(t, err)
-		require.Equal(t, http.StatusBadRequest, rec.Code)
+		require.Equal(t, http.StatusConflict, rec.Code)
 	})
 }
 

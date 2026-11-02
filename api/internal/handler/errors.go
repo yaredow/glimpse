@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -13,17 +14,29 @@ func getStatusCode(err error) int {
 	}
 
 	logrus.Error(err)
-	switch err {
-	case domain.ErrInternalServerError:
+
+	switch {
+	case errors.Is(err, domain.ErrInternalServerError):
 		return http.StatusInternalServerError
-	case domain.ErrNotFound:
+	case errors.Is(err, domain.ErrNotFound):
 		return http.StatusNotFound
-	case domain.ErrConflict:
+	case errors.Is(err, domain.ErrConflict),
+		errors.Is(err, domain.ErrDuplicateEmail),
+		errors.Is(err, domain.ErrEditConflict),
+		errors.Is(err, domain.ErrNoSyncsRemaining),
+		errors.Is(err, domain.ErrSelectionLocked):
 		return http.StatusConflict
-	case domain.ErrInvalidCredentials:
+	case errors.Is(err, domain.ErrInvalidCredentials):
 		return http.StatusUnauthorized
-	case domain.ErrNoSyncsRemaining, domain.ErrSelectionLocked:
-		return http.StatusBadRequest
+	case errors.Is(err, domain.ErrInvalidEmail),
+		errors.Is(err, domain.ErrNameRequired),
+		errors.Is(err, domain.ErrPasswordTooShort),
+		errors.Is(err, domain.ErrBadParamInput),
+		errors.Is(err, domain.ErrNotEnoughCandidates),
+		errors.Is(err, domain.ErrInvalidAction):
+		return http.StatusUnprocessableEntity
+	case errors.Is(err, domain.ErrMissingGridSessionID):
+		return http.StatusInternalServerError
 	default:
 		return http.StatusInternalServerError
 	}
