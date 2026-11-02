@@ -19,8 +19,8 @@ import { useGetMovie } from "@/features/movies/hooks/query/use-get-movie";
 import type { MovieInteractionAction } from "@/features/movies/types/movies.type";
 import MovieTrailer from "@/features/movies/components/movie-trailer";
 import MovieActions from "@/features/movies/components/movie-actions";
-import MovieSynopsis from "@/features/movies/components/movie-synopsis";
 import MovieCast from "@/features/movies/components/movie-cast";
+import MovieReviews from "@/features/movies/components/movie-reviews";
 import MovieDetailTabs from "@/features/movies/components/movie-detail-tabs";
 import DecisionVitalsStrip from "@/features/movies/components/decision-vitals-strip";
 import CuratorPitchCard from "@/features/movies/components/curator-pitch-card";
@@ -147,13 +147,12 @@ export default function MovieDetail() {
 
         <WhereToWatch movieId={movie.id} movieTitle={movie.title} />
 
-        {movie.full_synopsis ? (
-          <MovieSynopsis synopsis={movie.full_synopsis} />
-        ) : null}
-
         <MovieDetailTabs activeTab={activeTab} onTabPress={setActiveTab}>
           {activeTab === "CAST" && movie.cast_members ? (
             <MovieCast cast={movie.cast_members} />
+          ) : null}
+          {activeTab === "REVIEWS" ? (
+            <MovieReviews movieId={movie.id} />
           ) : null}
           {activeTab === "DETAILS" && (
             <View style={styles.detailsSection}>

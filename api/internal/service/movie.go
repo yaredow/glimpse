@@ -24,12 +24,17 @@ type TorrentSearcher interface {
 	SearchTorrents(ctx context.Context, imdbID, movieTitle string) ([]domain.TorrentSource, error)
 }
 
+type ReviewFetcher interface {
+	GetMovieReviews(ctx context.Context, tmdbID int) ([]domain.MovieReview, error)
+}
+
 type MovieService struct {
 	movieRepo       MovieRepo
 	watcher         Watcher
 	syncer          DetailSyncer
 	providers       ProviderFetcher
 	torrentSearcher TorrentSearcher
+	reviewFetcher   ReviewFetcher
 }
 
 func NewMovieService(movieRepo MovieRepo, watcher Watcher, syncer ...DetailSyncer) *MovieService {
@@ -43,6 +48,11 @@ func NewMovieService(movieRepo MovieRepo, watcher Watcher, syncer ...DetailSynce
 func (ms *MovieService) WithSources(providers ProviderFetcher, torrents TorrentSearcher) *MovieService {
 	ms.providers = providers
 	ms.torrentSearcher = torrents
+	return ms
+}
+
+func (ms *MovieService) WithReviews(reviews ReviewFetcher) *MovieService {
+	ms.reviewFetcher = reviews
 	return ms
 }
 
@@ -98,6 +108,26 @@ func (ms *MovieService) GetSources(ctx context.Context, movieID int64) (*domain.
 	if ms.torrentSearcher != nil {
 		if torrents, err := ms.torrentSearcher.SearchTorrents(ctx, imdbID, movie.Title); err == nil {
 			res.Torrents = torrents
+		}
+	}
+
+	return res, nil
+}
+
+func (ms *MovieService) GetReviews(ctx context.Context, movieID int64) (*domain.MovieReviewsResponse, error) {
+	movie, err := ms.movieRepo.GetByID(ctx, movieID)
+	if err != nil {
+		return nil, fmt.Errorf("get movie: %w", err)
+	}
+
+	res := &domain.MovieReviewsResponse{
+		MovieID: movie.ID,
+		Reviews: []domain.MovieReview{},
+	}
+
+	if ms.reviewFetcher != nil && movie.TmdbID > 0 {
+		if revs, err := ms.reviewFetcher.GetMovieReviews(ctx, movie.TmdbID); err == nil && len(revs) > 0 {
+			res.Reviews = revs
 		}
 	}
 

@@ -158,3 +158,17 @@ export interface MovieSourcesResponse {
   torrents: TorrentSource[];
   search_links: SearchLinks;
 }
+
+export interface MovieReview {
+  id: string;
+  author: string;
+  rating?: number | null;
+  content: string;
+  created_at: string;
+  url?: string;
+}
+
+export interface MovieReviewsResponse {
+  movie_id: number;
+  reviews: MovieReview[];
+}

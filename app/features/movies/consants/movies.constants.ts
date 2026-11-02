@@ -19,7 +19,7 @@ export const GENRES = [
   "Western",
 ] as const;
 
-export const DETAIL_TABS = ["CAST", "DETAILS"] as const;
+export const DETAIL_TABS = ["CAST", "REVIEWS", "DETAILS"] as const;
 
 // Torrent sources are opt-in so demos and public builds stay focused on legal availability.
 export const SHOW_TORRENTS =

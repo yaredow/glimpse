@@ -31,6 +31,12 @@ func (m *mockMovieService) GetSources(ctx context.Context, movieID int64) (*doma
 	return res, args.Error(1)
 }
 
+func (m *mockMovieService) GetReviews(ctx context.Context, movieID int64) (*domain.MovieReviewsResponse, error) {
+	args := m.Called(ctx, movieID)
+	res, _ := args.Get(0).(*domain.MovieReviewsResponse)
+	return res, args.Error(1)
+}
+
 func TestMovieHandler_GetMovieSources(t *testing.T) {
 	mockSvc := &mockMovieService{}
 	h := handler.NewMovieHandler(mockSvc)

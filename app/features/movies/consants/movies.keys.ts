@@ -7,4 +7,5 @@ export const moviesKeys = {
   list: (filters?: MovieFilters) => ["movies", "list", filters ?? {}] as const,
   movie: (id: string | number) => ["movie", String(id)] as const,
   sources: (id: string | number) => ["movie", "sources", String(id)] as const,
+  reviews: (id: string | number) => ["movie", "reviews", String(id)] as const,
 };

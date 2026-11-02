@@ -3,6 +3,8 @@ package tmdb
 import (
 	"context"
 	"fmt"
+
+	"github.com/yaredow/glimpse-api/internal/domain"
 )
 
 type Movie struct {
@@ -125,7 +127,54 @@ type (
 		Iso31661 string `json:"iso_3166_1"`
 		Name     string `json:"name"`
 	}
+
+	ReviewAuthorDetails struct {
+		Name       string   `json:"name"`
+		Username   string   `json:"username"`
+		AvatarPath *string  `json:"avatar_path"`
+		Rating     *float64 `json:"rating"`
+	}
+
+	TMDBReview struct {
+		ID            string              `json:"id"`
+		Author        string              `json:"author"`
+		AuthorDetails ReviewAuthorDetails `json:"author_details"`
+		Content       string              `json:"content"`
+		CreatedAt     string              `json:"created_at"`
+		URL           string              `json:"url"`
+	}
+
+	TMDBReviewsResponse struct {
+		ID           int          `json:"id"`
+		Page         int          `json:"page"`
+		Results      []TMDBReview `json:"results"`
+		TotalPages   int          `json:"total_pages"`
+		TotalResults int          `json:"total_results"`
+	}
 )
+
+func (c *Client) GetMovieReviews(ctx context.Context, tmdbID int) ([]domain.MovieReview, error) {
+	var result TMDBReviewsResponse
+	path := fmt.Sprintf("/movie/%d/reviews?language=en-US&page=1", tmdbID)
+
+	if err := c.do(ctx, path, &result); err != nil {
+		return nil, err
+	}
+
+	reviews := make([]domain.MovieReview, 0, len(result.Results))
+	for _, r := range result.Results {
+		reviews = append(reviews, domain.MovieReview{
+			ID:        r.ID,
+			Author:    r.Author,
+			Rating:    r.AuthorDetails.Rating,
+			Content:   r.Content,
+			CreatedAt: r.CreatedAt,
+			URL:       r.URL,
+		})
+	}
+
+	return reviews, nil
+}
 
 func (c *Client) GetMovieDetails(ctx context.Context, tmdbID int) (*MovieDetailResponse, error) {
 	var result MovieDetailResponse

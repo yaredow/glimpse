@@ -105,6 +105,7 @@ func main() {
 	} else {
 		movieSvc.WithSources(tmdbClient, nil)
 	}
+	movieSvc.WithReviews(tmdbClient)
 
 	// Middleware
 	e.Use(middleware.Authenticate(jwtMgr, userService))
