@@ -26,6 +26,7 @@ import ActionConfirmModal, {
   ConfirmableAction,
   SyncMood,
 } from "@/features/movies/components/action-confirm-modal";
+import ShowtimeHub from "@/features/movies/components/showtime-hub";
 
 export default function TodayTab() {
   const theme = useAppTheme();
@@ -51,11 +52,14 @@ export default function TodayTab() {
 
   const tonightPick = movies.find(
     (m) =>
-      m.action === "pick_tonight" ||
+      Boolean(m.is_locked_in) ||
       m.action === "locked_in" ||
+      m.action === "pick_tonight" ||
       m.action === "watchlist_add",
   );
   const hasTodayPick = Boolean(tonightPick);
+  const isShowtimeMode =
+    Boolean(tonightPick?.is_locked_in) || tonightPick?.action === "locked_in";
 
   const unmarkedRevealedMovie = movies.find((m) => {
     const isRevealed = Boolean(m.is_revealed) || m.action === "revealed";
@@ -110,29 +114,63 @@ export default function TodayTab() {
     [hasTodayPick, movies, recordInteraction, tonightPick?.title, unmarkedRevealedMovie],
   );
 
-  const handleViewMovie = useCallback((movie: GridMovie) => {
-    if (movie.action === "skipped" || movie.action === "watched") {
-      Toast.show({
-        type: "info",
-        text1: "Reel Locked",
-        text2:
-          movie.action === "skipped"
-            ? "This movie was skipped and cannot be opened."
-            : "This movie was marked as watched and cannot be opened.",
-      });
-      return;
-    }
+  const handleViewMovie = useCallback(
+    (movie: GridMovie, allowWatched = false) => {
+      if (!allowWatched && (movie.action === "skipped" || movie.action === "watched")) {
+        Toast.show({
+          type: "info",
+          text1: "Reel Locked",
+          text2:
+            movie.action === "skipped"
+              ? "This movie was skipped and cannot be opened."
+              : "This movie was marked as watched and cannot be opened.",
+        });
+        return;
+      }
 
-    router.push({
-      pathname: "/(app)/movies/[id]",
-      params: {
-        id: movie.movie_id,
-        sessionId: movie.grid_session_id ?? "",
-        slot: movie.slot_number,
-        action: movie.action ?? "",
-      },
-    });
-  }, []);
+      router.push({
+        pathname: "/(app)/movies/[id]",
+        params: {
+          id: movie.movie_id,
+          sessionId: movie.grid_session_id ?? "",
+          slot: movie.slot_number,
+          action: movie.action ?? "",
+        },
+      });
+    },
+    [],
+  );
+
+  const handleLogWatched = useCallback(
+    (movie: GridMovie, rating: number) => {
+      if (!movie.grid_session_id) return;
+      recordInteraction.mutate(
+        {
+          movie_id: movie.movie_id,
+          action: "watched",
+          grid_session_id: movie.grid_session_id,
+          grid_position: movie.slot_number,
+        },
+        {
+          onSuccess: () => {
+            Toast.show({
+              type: "success",
+              text1: "Verdict Logged! 🍿",
+              text2: `Rated ${rating} ★ · "${movie.title}" added to your Journal.`,
+            });
+          },
+          onError: (err) => {
+            Toast.show({
+              type: "error",
+              text1: "Action failed",
+              text2: err.message,
+            });
+          },
+        },
+      );
+    },
+    [recordInteraction],
+  );
 
   const handlePromptPick = useCallback(
     (movie: GridMovie) => {
@@ -312,6 +350,21 @@ export default function TodayTab() {
   const unactedIndex = unmarkedRevealedMovie
     ? movies.findIndex((m) => m.movie_id === unmarkedRevealedMovie.movie_id)
     : -1;
+
+  if (!isPending && isShowtimeMode && tonightPick) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+        edges={["top"]}
+      >
+        <ShowtimeHub
+          movie={tonightPick}
+          onLogWatched={handleLogWatched}
+          onOpenDetails={(m) => handleViewMovie(m, true)}
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView

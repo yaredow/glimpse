@@ -3,6 +3,7 @@ import {
   GridMovie,
   HistoryResponse,
   MovieDetailResponse,
+  MovieSourcesResponse,
   RecordInteractionPayload,
 } from "../types/movies.type";
 
@@ -33,4 +34,8 @@ export const getHistory = async (action?: string) => {
   return api
     .get("v1/me/history", { searchParams })
     .json<HistoryResponse>();
+};
+
+export const getMovieSources = async (id: number): Promise<{ sources: MovieSourcesResponse }> => {
+  return api.get(`v1/movies/${id}/sources`).json<{ sources: MovieSourcesResponse }>();
 };

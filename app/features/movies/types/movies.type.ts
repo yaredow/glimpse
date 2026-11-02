@@ -53,6 +53,7 @@ export interface GridMovie {
   slot_number: number;
   is_revealed: boolean;
   action?: MovieInteractionAction | null;
+  is_locked_in?: boolean;
   movie_id: number;
   tmdb_id: number;
   vague_description: string;
@@ -109,4 +110,46 @@ export interface HistoryMovie {
 
 export interface HistoryResponse {
   history: HistoryMovie[];
+}
+
+export interface WatchProvider {
+  provider_id: number;
+  name: string;
+  logo_path: string;
+}
+
+export interface WatchProvidersResult {
+  justwatch_link?: string;
+  flatrate: WatchProvider[];
+  rent: WatchProvider[];
+  buy: WatchProvider[];
+}
+
+export interface TorrentSource {
+  quality: string;
+  type: string;
+  size: string;
+  size_bytes: number;
+  seeds: number;
+  peers: number;
+  magnet: string;
+  torrent_url?: string;
+}
+
+export interface SearchLinks {
+  google: string;
+  justwatch: string;
+  letterboxd: string;
+  imdb: string;
+  netflix: string;
+}
+
+export interface MovieSourcesResponse {
+  movie_id: number;
+  title: string;
+  imdb_id?: string;
+  tmdb_id: number;
+  providers?: WatchProvidersResult;
+  torrents: TorrentSource[];
+  search_links: SearchLinks;
 }

@@ -2,13 +2,14 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  Share,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
+import { useAppTheme } from "@/lib/theme";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useRecordInteraction } from "../hooks/mutations/use-record-interactions";
 import type { Movie, MovieInteractionAction } from "../types/movies.type";
@@ -31,6 +32,7 @@ export default function MovieActions({
   initialAction,
   onActionComplete,
 }: MovieActionsProps) {
+  const theme = useAppTheme();
   const [loadingAction, setLoadingAction] = useState<MovieInteractionAction | null>(null);
   const [pendingAction, setPendingAction] = useState<Extract<ConfirmableAction, MovieInteractionAction> | null>(null);
   const { data: profileData } = useProfile();
@@ -105,132 +107,170 @@ export default function MovieActions({
     handleAction(actionToRun);
   };
 
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: movie.imdb_id
-          ? `Check out "${movie.title}" on IMDb: https://www.imdb.com/title/${movie.imdb_id}`
-          : movie.title,
-      });
-    } catch {
-      // user cancelled
-    }
+  const promptAction = (action: Extract<ConfirmableAction, MovieInteractionAction>) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPendingAction(action);
   };
 
   return (
     <View style={styles.container}>
       {isFinalized ? (
-        <View style={styles.finalizedContainer}>
-          {initialAction === "locked_in" ? (
-            <View style={[styles.statusBanner, styles.bannerPick]}>
-              <MaterialCommunityIcons name="play-circle" size={16} color="#FFFFFF" />
-              <Text style={styles.bannerPickText}>Now Watching 🍿</Text>
-            </View>
-          ) : initialAction === "pick_tonight" || initialAction === "watchlist_add" ? (
-            <View style={[styles.statusBanner, styles.bannerPick]}>
-              <MaterialCommunityIcons name="star" size={16} color="#FFFFFF" />
-              <Text style={styles.bannerPickText}>Selected as Today&apos;s Pick</Text>
-            </View>
-          ) : initialAction === "skipped" ? (
-            <View style={[styles.statusBanner, styles.bannerSkipped]}>
-              <MaterialCommunityIcons name="close-circle" size={16} color="#71717A" />
-              <Text style={styles.bannerSkippedText}>Skipped for Today</Text>
-            </View>
-          ) : (
-            <View style={[styles.statusBanner, styles.bannerWatched]}>
-              <MaterialCommunityIcons name="check-circle" size={16} color="#FFFFFF" />
-              <Text style={styles.bannerWatchedText}>Marked as Watched</Text>
-            </View>
-          )}
-
-          <Pressable style={styles.shareIconButton} onPress={handleShare}>
-            <MaterialCommunityIcons name="share-outline" size={20} color="#999" />
-          </Pressable>
+        <View
+          style={[
+            styles.finalizedCard,
+            {
+              backgroundColor: theme.colors.elevation.level1,
+              borderColor:
+                initialAction === "locked_in" ||
+                initialAction === "pick_tonight" ||
+                initialAction === "watchlist_add"
+                  ? theme.colors.gold
+                  : initialAction === "watched" || movie.is_watched
+                  ? theme.colors.success
+                  : theme.colors.outlineVariant,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name={
+              initialAction === "locked_in"
+                ? "movie-play"
+                : initialAction === "pick_tonight" || initialAction === "watchlist_add"
+                ? "star"
+                : initialAction === "skipped"
+                ? "close-circle-outline"
+                : "check-decagram"
+            }
+            size={22}
+            color={
+              initialAction === "locked_in" ||
+              initialAction === "pick_tonight" ||
+              initialAction === "watchlist_add"
+                ? theme.colors.gold
+                : initialAction === "skipped"
+                ? theme.colors.textMuted
+                : theme.colors.success
+            }
+          />
+          <View style={styles.finalizedTextContainer}>
+            <Text
+              style={[styles.finalizedTitle, { color: theme.colors.textPrimary }]}
+            >
+              {initialAction === "locked_in"
+                ? "Locked In for Tonight"
+                : initialAction === "pick_tonight" || initialAction === "watchlist_add"
+                ? "Selected as Today's Pick"
+                : initialAction === "skipped"
+                ? "Skipped for Today"
+                : "Marked as Watched"}
+            </Text>
+            <Text
+              style={[styles.finalizedSubtitle, { color: theme.colors.textSecondary }]}
+            >
+              {initialAction === "locked_in"
+                ? "Tonight's feature film selection is locked."
+                : initialAction === "pick_tonight" || initialAction === "watchlist_add"
+                ? "Head back to lock in your feature film."
+                : initialAction === "skipped"
+                ? "Reel closed for today's rotation."
+                : "Saved to your journal and watch history."}
+            </Text>
+          </View>
         </View>
       ) : (
-        <>
-          <View style={styles.decisionRow}>
-            {/* 1. Skip Button */}
-            <Pressable
-              style={[
-                styles.actionBtn,
-                styles.skipBtn,
-                loadingAction === "skipped" && styles.btnDisabled,
-              ]}
-              disabled={!!loadingAction}
-              onPress={() => setPendingAction("skipped")}
-            >
-              {loadingAction === "skipped" ? (
-                <ActivityIndicator size="small" color="#999" />
-              ) : (
-                <>
-                  <MaterialCommunityIcons
-                    name="close-circle-outline"
-                    size={20}
-                    color="#999"
-                  />
-                  <Text style={styles.skipBtnText}>Skip</Text>
-                </>
-              )}
-            </Pressable>
+        <View style={styles.actionsContainer}>
+          <Pressable
+            onPress={() => promptAction("pick_tonight")}
+            disabled={!!loadingAction}
+            style={({ pressed }) => [
+              styles.heroPickBtn,
+              { backgroundColor: theme.colors.gold },
+              pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+              loadingAction === "pick_tonight" && styles.btnDisabled,
+            ]}
+          >
+            {loadingAction === "pick_tonight" ? (
+              <ActivityIndicator size="small" color="#121212" />
+            ) : (
+              <>
+                <MaterialCommunityIcons name="star" size={19} color="#121212" />
+                <Text style={styles.heroPickBtnText}>PICK AS TODAY&apos;S FILM</Text>
+              </>
+            )}
+          </Pressable>
 
-            {/* 2. Watched Button */}
+          <View style={styles.secondaryRow}>
             <Pressable
-              style={[
-                styles.actionBtn,
-                styles.watchedBtn,
+              onPress={() => promptAction("watched")}
+              disabled={!!loadingAction}
+              style={({ pressed }) => [
+                styles.secondaryBtn,
+                {
+                  backgroundColor: theme.colors.elevation.level1,
+                  borderColor: theme.colors.outlineVariant,
+                },
+                pressed && { opacity: 0.8 },
                 loadingAction === "watched" && styles.btnDisabled,
               ]}
-              disabled={!!loadingAction}
-              onPress={() => setPendingAction("watched")}
             >
               {loadingAction === "watched" ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <ActivityIndicator size="small" color={theme.colors.success} />
               ) : (
                 <>
                   <MaterialCommunityIcons
                     name="check-circle-outline"
-                    size={20}
-                    color="#FFFFFF"
+                    size={18}
+                    color={theme.colors.success}
                   />
-                  <Text style={styles.watchedBtnText}>Watched</Text>
+                  <Text
+                    style={[
+                      styles.secondaryBtnText,
+                      { color: theme.colors.textPrimary },
+                    ]}
+                  >
+                    Mark Watched
+                  </Text>
                 </>
               )}
             </Pressable>
 
-            {/* 3. Today's Pick Button */}
             <Pressable
-              style={[
-                styles.actionBtn,
-                styles.pickBtn,
-                loadingAction === "pick_tonight" && styles.btnDisabled,
-              ]}
+              onPress={() => promptAction("skipped")}
               disabled={!!loadingAction}
-              onPress={() => setPendingAction("pick_tonight")}
+              style={({ pressed }) => [
+                styles.secondaryBtn,
+                {
+                  backgroundColor: theme.colors.elevation.level1,
+                  borderColor: theme.colors.outlineVariant,
+                },
+                pressed && { opacity: 0.8 },
+                loadingAction === "skipped" && styles.btnDisabled,
+              ]}
             >
-              {loadingAction === "pick_tonight" ? (
-                <ActivityIndicator size="small" color="#121212" />
+              {loadingAction === "skipped" ? (
+                <ActivityIndicator size="small" color={theme.colors.textMuted} />
               ) : (
                 <>
                   <MaterialCommunityIcons
-                    name="star"
+                    name="close-circle-outline"
                     size={18}
-                    color="#121212"
+                    color={theme.colors.textMuted}
                   />
-                  <Text style={styles.pickBtnText}>Today&apos;s Pick</Text>
+                  <Text
+                    style={[
+                      styles.secondaryBtnText,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
+                    Skip Movie
+                  </Text>
                 </>
               )}
             </Pressable>
           </View>
-
-          <Pressable style={styles.secondaryShare} onPress={handleShare}>
-            <MaterialCommunityIcons name="share-variant-outline" size={16} color="#777" />
-            <Text style={styles.secondaryShareText}>Share Movie</Text>
-          </Pressable>
-        </>
+        </View>
       )}
 
-      {/* Action Confirmation Modal */}
       <ActionConfirmModal
         visible={pendingAction !== null}
         action={pendingAction}
@@ -246,115 +286,71 @@ export default function MovieActions({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
+    paddingVertical: 12,
   },
-  decisionRow: {
-    flexDirection: "row",
+  actionsContainer: {
     gap: 10,
-    alignItems: "center",
   },
-  actionBtn: {
-    flex: 1,
+  heroPickBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: "#1e1e1e",
-    borderWidth: 1,
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 24,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  btnDisabled: {
-    opacity: 0.6,
-  },
-  skipBtn: {
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-  skipBtnText: {
-    color: "#A1A1AA",
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-  watchedBtn: {
-    borderColor: "rgba(255,255,255,0.12)",
-    backgroundColor: "#1e1e1e",
-  },
-  watchedBtnText: {
-    color: "#FFFFFF",
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-  pickBtn: {
-    borderColor: "#FFFFFF",
-    backgroundColor: "#FFFFFF",
-    flex: 1.3,
-  },
-  pickBtnText: {
+  heroPickBtnText: {
     color: "#121212",
     fontFamily: "Inter_700Bold",
     fontSize: 13,
+    letterSpacing: 0.6,
   },
-  secondaryShare: {
+  secondaryRow: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 6,
+    gap: 10,
   },
-  secondaryShareText: {
-    color: "#777",
-    fontSize: 12,
-    fontFamily: "Inter_500Medium",
-  },
-  finalizedContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  statusBanner: {
+  secondaryBtn: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    justifyContent: "center",
+    gap: 7,
     paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  secondaryBtnText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+  },
+  btnDisabled: {
+    opacity: 0.55,
+  },
+  finalizedCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    borderRadius: 10,
+    borderRadius: 16,
     borderWidth: 1,
   },
-  bannerWatched: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderColor: "rgba(255,255,255,0.12)",
+  finalizedTextContainer: {
+    flex: 1,
   },
-  bannerWatchedText: {
-    color: "#FFFFFF",
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-  bannerSkipped: {
-    backgroundColor: "rgba(255,255,255,0.03)",
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-  bannerSkippedText: {
-    color: "#71717A",
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-  bannerPick: {
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderColor: "rgba(255,255,255,0.15)",
-  },
-  bannerPickText: {
-    color: "#FFFFFF",
+  finalizedTitle: {
     fontFamily: "Inter_700Bold",
-    fontSize: 13,
+    fontSize: 14,
   },
-  shareIconButton: {
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: "#1e1e1e",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+  finalizedSubtitle: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 16,
   },
 });
