@@ -43,7 +43,7 @@ export default function ShowtimeHub({
   const [countdown, setCountdown] = useState("");
 
   const trailerKey = movieDetails?.trailer_key;
-  const runtime = movieDetails?.runtime ?? 118;
+  const runtime = movieDetails?.runtime ?? null;
   const releaseYear = movie.release_date
     ? new Date(movie.release_date).getFullYear()
     : null;

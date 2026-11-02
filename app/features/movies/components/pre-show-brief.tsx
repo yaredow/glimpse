@@ -6,24 +6,31 @@ import type { GridMovie } from "../types/movies.type";
 
 interface PreShowBriefProps {
   movie: GridMovie;
-  runtime?: number;
+  runtime?: number | null;
 }
 
-export default function PreShowBrief({ movie, runtime = 120 }: PreShowBriefProps) {
+export default function PreShowBrief({ movie, runtime }: PreShowBriefProps) {
   const theme = useAppTheme();
+  const hasRuntime = typeof runtime === "number" && runtime > 0;
 
-  const hours = Math.floor(runtime / 60);
-  const minutes = runtime % 60;
-  const runtimeFormatted = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  const runtimeFormatted = hasRuntime
+    ? (() => {
+        const hours = Math.floor(runtime / 60);
+        const minutes = runtime % 60;
+        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+      })()
+    : null;
 
   const estimatedEndTime = useMemo(() => {
+    if (!hasRuntime) return null;
+
     const now = new Date();
     const finishDate = new Date(now.getTime() + runtime * 60 * 1000);
     return finishDate.toLocaleTimeString([], {
       hour: "numeric",
       minute: "2-digit",
     });
-  }, [runtime]);
+  }, [hasRuntime, runtime]);
 
   return (
     <View style={styles.container}>
@@ -47,27 +54,33 @@ export default function PreShowBrief({ movie, runtime = 120 }: PreShowBriefProps
           },
         ]}
       >
-        <View style={styles.timeRow}>
-          <View style={styles.timeStat}>
-            <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
-              RUNTIME
-            </Text>
-            <Text style={[styles.statValue, { color: theme.colors.textPrimary }]}>
-              {runtimeFormatted}
-            </Text>
-          </View>
+        {hasRuntime ? (
+          <View style={styles.timeRow}>
+            <View style={styles.timeStat}>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+                RUNTIME
+              </Text>
+              <Text style={[styles.statValue, { color: theme.colors.textPrimary }]}>
+                {runtimeFormatted}
+              </Text>
+            </View>
 
-          <View style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
+            <View style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
-          <View style={styles.timeStat}>
-            <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
-              ESTIMATED END
-            </Text>
-            <Text style={[styles.statValue, { color: theme.colors.gold }]}>
-              ~{estimatedEndTime}
-            </Text>
+            <View style={styles.timeStat}>
+              <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+                ESTIMATED END
+              </Text>
+              <Text style={[styles.statValue, { color: theme.colors.gold }]}>
+                {estimatedEndTime ? `~${estimatedEndTime}` : "—"}
+              </Text>
+            </View>
           </View>
-        </View>
+        ) : (
+          <Text style={[styles.runtimeUnavailable, { color: theme.colors.textMuted }]}>
+            Runtime unavailable
+          </Text>
+        )}
 
         {movie.tagline ? (
           <Text style={[styles.tagline, { color: theme.colors.textPrimary }]}>
@@ -148,6 +161,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontFamily: "Inter_700Bold",
     fontSize: 17,
+  },
+  runtimeUnavailable: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13,
+    textAlign: "center",
+    paddingBottom: 14,
   },
   divider: {
     width: 1,
