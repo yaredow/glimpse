@@ -109,8 +109,9 @@
 
 ### F-09 · Editing preferences re-runs onboarding, wipes selections, and re-seeds affinities
 
+- **Status:** Done — Profile hydrates the onboarding store and saves edits through `PUT /v1/me/preferences`, which does not re-seed affinities.
 - **Area:** Backend + client
-- **Files:** `app/app/(app)/(tabs)/profile.tsx:204-225`, `app/app/(onboarding)/index.tsx:12-18`, `app/features/onboarding/store/onboarding.store.ts`, `api/internal/handler/onboarding.go:103-113`, `api/internal/service/recommendation.go:443-455`
+- **Files:** `app/app/(app)/(tabs)/profile.tsx`, `app/features/onboarding/store/onboarding.store.ts`, `app/features/onboarding/services/onboarding.service.ts`, `app/features/onboarding/hooks/mutations/use-finish-onboarding.ts`
 - **Problem:** "Edit" pushes the user into the onboarding flow with an empty Zustand store, so current preferences are not prefilled. Finishing calls `SeedFromOnboarding` again, adding +1.0 genre affinity every time. Repeated edits inflate the taste profile.
 - **Fix:** Add a dedicated preferences edit screen prefilled from `GET /v1/me/preferences`, calling `PUT /v1/me/preferences`. Make seeding idempotent or first-onboarding-only. Do not re-seed on edits.
 - **Done when:** Editing a preference preserves the rest, does not change affinity scores, and returns to Profile.

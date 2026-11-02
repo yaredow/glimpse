@@ -8,6 +8,7 @@ import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
+import { useOnboardingStore } from "@/features/onboarding/store/onboarding.store";
 import { useLogout } from "@/features/auth/hooks/mutations/use-logout";
 
 const GENRE_NAMES: Record<number, string> = {
@@ -43,6 +44,10 @@ export default function Profile() {
   const theme = useAppTheme();
   const { data: profileData, isPending: profileLoading } = useProfile(true);
   const { data: prefData, isPending: prefLoading } = useGetPreferences(true);
+  const hydrateFromPreference = useOnboardingStore(
+    (s) => s.hydrateFromPreference,
+  );
+  const setMode = useOnboardingStore((s) => s.setMode);
   const { mutate: logout, isPending: logoutPending } = useLogout();
 
   const [morningReminder, setMorningReminder] = useState(true);
@@ -202,7 +207,12 @@ export default function Profile() {
               </Text>
             </View>
             <Pressable
-              onPress={() => router.push("/(onboarding)")}
+              onPress={() => {
+                if (!pref) return;
+                hydrateFromPreference(pref);
+                setMode("edit");
+                router.push("/(onboarding)");
+              }}
               style={[
                 styles.editBtn,
                 {

@@ -13,6 +13,10 @@ export const submitPreferences = (data: FinishOnboardingPayload) => {
   return api.post("v1/onboarding/finish", { json: data }).json();
 };
 
+export const updatePreferences = (data: FinishOnboardingPayload) => {
+  return api.put("v1/me/preferences", { json: data }).json();
+};
+
 export const checkPreferences = () => {
   return api.get("v1/me/preferences").json<PreferenceResponse>();
 };

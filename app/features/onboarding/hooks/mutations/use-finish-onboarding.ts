@@ -1,21 +1,34 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import Toast from "react-native-toast-message";
-import { submitPreferences } from "../../services/onboarding.service";
+import {
+  submitPreferences,
+  updatePreferences,
+} from "../../services/onboarding.service";
 import { useOnboardingStore } from "../../store/onboarding.store";
 import type { FinishOnboardingPayload } from "../../types/onboarding.type";
 import { getErrorMessage } from "@/lib/error";
 import { authKeys } from "@/features/auth/constants/auth.keys";
+import { moviesKeys } from "@/features/movies/consants/movies.keys";
 
 export const useFinishOnboarding = () => {
   const queryClient = useQueryClient();
+  const mode = useOnboardingStore((s) => s.mode);
   const reset = useOnboardingStore((s) => s.reset);
 
   return useMutation({
-    mutationFn: (data: FinishOnboardingPayload) => submitPreferences(data),
+    mutationFn: (data: FinishOnboardingPayload) =>
+      mode === "edit" ? updatePreferences(data) : submitPreferences(data),
     onSuccess: async () => {
       reset();
       await queryClient.invalidateQueries({ queryKey: authKeys.preferences() });
+      await queryClient.invalidateQueries({ queryKey: moviesKeys.todayGrid() });
+
+      if (mode === "edit") {
+        router.back();
+        return;
+      }
+
       router.replace("/(app)/(tabs)");
     },
     onError: async (error: Error) => {
