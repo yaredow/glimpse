@@ -96,6 +96,39 @@ func NewRecommendationService(
 	}
 }
 
+// enqueueDetailSync hydrates full movie details without blocking the request.
+func (rs *RecommendationService) enqueueDetailSync(movies []ScoredMovie) {
+	if rs.syncDetail == nil || rs.runner == nil {
+		return
+	}
+
+	syncDetail := rs.syncDetail
+	for _, sm := range movies {
+		tmdbID := sm.Movie.TmdbID
+		rs.runner.Background(func() {
+			_ = syncDetail(context.Background(), tmdbID)
+		})
+	}
+}
+
+// enqueueMissingTaglineSync fills in taglines for already-generated slots in the background.
+func (rs *RecommendationService) enqueueMissingTaglineSync(slots []domain.GridSlotResponse) {
+	if rs.syncDetail == nil || rs.runner == nil {
+		return
+	}
+
+	syncDetail := rs.syncDetail
+	for _, slot := range slots {
+		if slot.Tagline != nil && *slot.Tagline != "" {
+			continue
+		}
+		tmdbID := slot.TmdbID
+		rs.runner.Background(func() {
+			_ = syncDetail(context.Background(), tmdbID)
+		})
+	}
+}
+
 func GetMoodFilter(mood string) *domain.CandidateFilter {
 	switch mood {
 	case "horror", "spooky":
@@ -146,6 +179,7 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 		if existing[0].GridSessionID == uuid.Nil {
 			return nil, uuid.Nil, domain.ErrMissingGridSessionID
 		}
+		rs.enqueueMissingTaglineSync(existing)
 		return existing, existing[0].GridSessionID, nil
 	}
 
@@ -224,14 +258,7 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 		return nil, uuid.Nil, fmt.Errorf("get new grid: %w", err)
 	}
 
-	if rs.syncDetail != nil && rs.runner != nil {
-		for _, sm := range picked {
-			tmdbID := sm.Movie.TmdbID
-			rs.runner.Background(func() {
-				_ = rs.syncDetail(context.Background(), tmdbID)
-			})
-		}
-	}
+	rs.enqueueDetailSync(picked)
 
 	return grid, sessionID, nil
 }
@@ -335,14 +362,7 @@ func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64, moo
 		return nil, 0, fmt.Errorf("get new grid: %w", err)
 	}
 
-	if rs.syncDetail != nil && rs.runner != nil {
-		for _, sm := range picked {
-			tmdbID := sm.Movie.TmdbID
-			rs.runner.Background(func() {
-				_ = rs.syncDetail(context.Background(), tmdbID)
-			})
-		}
-	}
+	rs.enqueueDetailSync(picked)
 
 	return grid, remainingSyncs, nil
 }
