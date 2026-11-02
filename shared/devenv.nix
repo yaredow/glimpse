@@ -5,7 +5,6 @@
     pkgs.postgresql_16
   ];
 
-  # Shared PostgreSQL Service
   services.postgres = {
     enable = true;
     package = pkgs.postgresql_16;
