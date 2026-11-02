@@ -25,6 +25,7 @@ func TestGetStatusCode(t *testing.T) {
 		{name: "no syncs remaining", err: domain.ErrNoSyncsRemaining, want: http.StatusConflict},
 		{name: "selection locked", err: domain.ErrSelectionLocked, want: http.StatusConflict},
 		{name: "invalid credentials", err: domain.ErrInvalidCredentials, want: http.StatusUnauthorized},
+		{name: "account not activated", err: domain.ErrAccountNotActivated, want: http.StatusForbidden},
 		{name: "invalid email", err: domain.ErrInvalidEmail, want: http.StatusUnprocessableEntity},
 		{name: "name required", err: domain.ErrNameRequired, want: http.StatusUnprocessableEntity},
 		{name: "password too short", err: domain.ErrPasswordTooShort, want: http.StatusUnprocessableEntity},

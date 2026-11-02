@@ -515,9 +515,10 @@ func TestUserService_Authenticate(t *testing.T) {
 		mockRepo, _, mockRefreshTokenRepo, svc := newUserService(t)
 
 		user := &domain.User{
-			ID:    1,
-			Name:  "John",
-			Email: "john@test.com",
+			ID:        1,
+			Name:      "John",
+			Email:     "john@test.com",
+			Activated: true,
 			Password: domain.Password{
 				PlainText: "password123",
 			},
@@ -593,6 +594,28 @@ func TestUserService_Authenticate(t *testing.T) {
 		require.ErrorIs(t, err, domain.ErrInvalidCredentials)
 	})
 
+	t.Run("account not activated", func(t *testing.T) {
+		t.Parallel()
+
+		mockRepo, _, _, svc := newUserService(t)
+
+		user := &domain.User{
+			ID:        1,
+			Email:     "john@test.com",
+			Activated: false,
+		}
+		user.Password.Set("password123")
+
+		mockRepo.EXPECT().
+			GetByEmail(mock.Anything, "john@test.com").
+			Return(user, nil)
+
+		gotUser, gotToken, err := svc.Authenticate(context.Background(), "john@test.com", "password123")
+		require.Nil(t, gotUser)
+		require.Nil(t, gotToken)
+		require.ErrorIs(t, err, domain.ErrAccountNotActivated)
+	})
+
 	t.Run("repo error on get by email", func(t *testing.T) {
 		t.Parallel()
 
@@ -615,9 +638,10 @@ func TestUserService_Authenticate(t *testing.T) {
 		mockRepo, _, mockRefreshTokenRepo, svc := newUserService(t)
 
 		user := &domain.User{
-			ID:    1,
-			Name:  "John",
-			Email: "john@test.com",
+			ID:        1,
+			Name:      "John",
+			Email:     "john@test.com",
+			Activated: true,
 		}
 		user.Password.Set("password123")
 

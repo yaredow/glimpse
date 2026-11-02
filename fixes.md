@@ -198,8 +198,9 @@
 
 ### F-18 · Login/register is the weakest first impression
 
-- **Area:** Client UI
-- **Files:** `app/app/(auth)/login.tsx`, `app/app/(auth)/register.tsx`, `app/features/auth/components/login-form.tsx`, `register-form.tsx`
+- **Status:** Done — rebuilt the auth shell, login/register, recovery screens, activation flow, and email links; login now rejects unactivated accounts.
+- **Area:** Client UI + auth flow
+- **Files:** `app/app/(auth)/`, `app/features/auth/`, `api/internal/service/user.go`, `api/internal/handler/errors.go`, `api/internal/mailer/templates/`
 - **Problem:** The first screen is a bare set of Paper inputs with no logo, tagline, visual identity, or keyboard handling. It feels like a starter template, not the product.
 - **Fix:** Make auth a brand moment: logo, one-line pitch, one primary action, secondary link, subtle background, keyboard avoidance, and consistent spacing. See R-12.
 - **Done when:** The login screen alone communicates what Glimpse is.

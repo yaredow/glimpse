@@ -17,6 +17,7 @@ WHERE user_id IN (
 UPDATE users
 SET syncs_remaining = 3,
     skips_remaining = 3,
+    activated = TRUE,
     last_reset_at = NOW(),
     updated_at = NOW()
 WHERE email = :'email';

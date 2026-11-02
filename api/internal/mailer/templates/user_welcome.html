@@ -1,17 +1,17 @@
-{{define "subject"}}Welcome to Glimpse!{{end}}
+{{define "subject"}}Welcome to Glimpse{{end}}
 
 {{define "plainBody"}}
 Hi,
 
-Thanks for signing up for a Glimpse account. We're excited to have you on board!
+Your Glimpse account is ready. Activate it by opening this link on your phone:
 
-For future reference, your user ID number is {{.userID}}.
+glimpseapp://activate?token={{.activationToken}}
 
-Please send a request to the `PUT /v1/users/activates` endpoint with the following JSON body to activate your account:
+If the link doesn't open, paste this activation code into the app:
 
-{"token": "{{.activationToken}}"}
+{{.activationToken}}
 
-Please note that this is a one-time use token and it will expire in 3 days.
+This code expires in 3 days.
 
 Thanks,
 The Glimpse Team
@@ -20,21 +20,33 @@ The Glimpse Team
 {{define "htmlBody"}}
 <!doctype html>
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width" />
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    </head>
-    <body>
-        <p>Hi,</p>
-        <p>Thanks for signing up for a Glimpse account. We're excited to have you on board!</p>
-        <p>For future reference, your user ID number is {{.userID}}.</p>
-        <p>Please send a request to the <code>PUT /v1/users/activates</code> endpoint with the following JSON body to activate your account:</p>
-        <pre><code>
-{"token": "{{.activationToken}}"}
-</code></pre>
-        <p>Please note that this is a one-time use token and it will expire in 3 days.</p>
-        <p>Thanks,</p>
-        <p>The Glimpse Team</p>
-    </body>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  </head>
+  <body style="margin:0;padding:0;background:#0A0A0C;color:#F2EFE9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0A0A0C;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:480px;background:#141416;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:32px;">
+            <tr>
+              <td>
+                <p style="margin:0 0 8px;font-size:11px;letter-spacing:2px;color:#8B8B93;text-transform:uppercase;">Glimpse</p>
+                <h1 style="margin:0 0 12px;font-size:26px;line-height:32px;color:#F2EFE9;">Your account is ready.</h1>
+                <p style="margin:0 0 24px;font-size:15px;line-height:22px;color:#A1A1AA;">Activate your account to start your nightly five.</p>
+
+                <a href="glimpseapp://activate?token={{.activationToken}}" style="display:inline-block;background:#F2EFE9;color:#121212;text-decoration:none;font-weight:700;font-size:14px;padding:14px 22px;border-radius:12px;">Activate your account</a>
+
+                <p style="margin:24px 0 8px;font-size:13px;line-height:20px;color:#A1A1AA;">If the button doesn't work, paste this code into the app:</p>
+                <pre style="margin:0;padding:12px;border-radius:10px;background:#1E1E20;color:#F2EFE9;font-size:12px;white-space:pre-wrap;word-break:break-all;">{{.activationToken}}</pre>
+
+                <p style="margin:24px 0 0;font-size:12px;line-height:18px;color:#71717A;">This code expires in 3 days. If you didn't create a Glimpse account, you can ignore this email.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
 </html>
 {{end}}

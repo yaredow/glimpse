@@ -162,6 +162,10 @@ func (us *UserService) Authenticate(ctx context.Context, email, password string)
 		return nil, nil, domain.ErrInvalidCredentials
 	}
 
+	if !user.Activated {
+		return nil, nil, domain.ErrAccountNotActivated
+	}
+
 	refreshToken, err := domain.GenerateRefreshToken(user.ID, 7*24*time.Hour, "")
 	if err != nil {
 		return nil, nil, err
