@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Switch } from "react-native-paper";
+import { Button } from "react-native-paper";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
@@ -50,22 +48,9 @@ export default function Profile() {
   const setMode = useOnboardingStore((s) => s.setMode);
   const { mutate: logout, isPending: logoutPending } = useLogout();
 
-  const [morningReminder, setMorningReminder] = useState(true);
-  const [eveningReminder, setEveningReminder] = useState(true);
-
   const user = profileData?.user;
   const pref = prefData?.preference;
   const syncsRemaining = user?.syncs_remaining ?? 3;
-
-  const toggleMorning = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setMorningReminder((prev) => !prev);
-  };
-
-  const toggleEvening = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setEveningReminder((prev) => !prev);
-  };
 
   return (
     <SafeAreaView
@@ -378,88 +363,6 @@ export default function Profile() {
             },
           ]}
         >
-          <View style={styles.cardHeaderTitle}>
-            <MaterialCommunityIcons
-              name="bell-ring-outline"
-              size={18}
-              color={theme.colors.textPrimary}
-            />
-            <Text
-              style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
-            >
-              Ritual Reminders
-            </Text>
-          </View>
-
-          <View style={styles.reminderRow}>
-            <View style={styles.reminderTextContainer}>
-              <Text
-                style={[
-                  styles.reminderTitle,
-                  { color: theme.colors.textPrimary },
-                ]}
-              >
-                Daily Mystery Arrival
-              </Text>
-              <Text
-                style={[
-                  styles.reminderSubtitle,
-                  { color: theme.colors.textMuted },
-                ]}
-              >
-                9:00 AM · When your 5 fresh envelopes are drawn
-              </Text>
-            </View>
-            <Switch
-              value={morningReminder}
-              onValueChange={toggleMorning}
-              color={theme.colors.primary}
-            />
-          </View>
-
-          <View
-            style={[
-              styles.separator,
-              { backgroundColor: theme.colors.outlineVariant },
-            ]}
-          />
-
-          <View style={styles.reminderRow}>
-            <View style={styles.reminderTextContainer}>
-              <Text
-                style={[
-                  styles.reminderTitle,
-                  { color: theme.colors.textPrimary },
-                ]}
-              >
-                Evening Showtime Pick
-              </Text>
-              <Text
-                style={[
-                  styles.reminderSubtitle,
-                  { color: theme.colors.textMuted },
-                ]}
-              >
-                8:00 PM · Nudge to select your film for the night
-              </Text>
-            </View>
-            <Switch
-              value={eveningReminder}
-              onValueChange={toggleEvening}
-              color={theme.colors.primary}
-            />
-          </View>
-        </View>
-
-        <View
-          style={[
-            styles.card,
-            {
-              backgroundColor: theme.colors.elevation.level1,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
           <Text
             style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
           >
@@ -672,26 +575,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-  },
-  reminderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 4,
-  },
-  reminderTextContainer: {
-    flex: 1,
-    paddingRight: 12,
-  },
-  reminderTitle: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-    marginBottom: 2,
-  },
-  reminderSubtitle: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
-    lineHeight: 15,
   },
   accountRow: {
     flexDirection: "row",
