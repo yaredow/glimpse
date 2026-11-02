@@ -24,7 +24,7 @@ const PADDING = 16;
 const CARD_WIDTH = (SCREEN_WIDTH - PADDING * 2 - COLUMN_GAP * 2) / 3;
 const CARD_HEIGHT = CARD_WIDTH * 1.5;
 
-type FilterTab = "all" | "watched" | "watchlist_add";
+type FilterTab = "all" | "watched" | "pick_tonight";
 
 export default function Journal() {
   const theme = useAppTheme();
@@ -35,12 +35,18 @@ export default function Journal() {
 
   const filteredHistory = useMemo(() => {
     if (activeFilter === "all") return allHistory;
-    return allHistory.filter((item) => item.action === activeFilter);
+    return allHistory.filter(
+      (item) =>
+        item.action === activeFilter ||
+        (activeFilter === "pick_tonight" && item.action === "watchlist_add"),
+    );
   }, [allHistory, activeFilter]);
 
   const stats = useMemo(() => {
     const watchedCount = allHistory.filter((i) => i.action === "watched").length;
-    const picksCount = allHistory.filter((i) => i.action === "watchlist_add").length;
+    const picksCount = allHistory.filter(
+      (i) => i.action === "pick_tonight" || i.action === "watchlist_add",
+    ).length;
 
     const genreCounts: Record<string, number> = {};
     for (const item of allHistory) {
@@ -330,10 +336,10 @@ export default function Journal() {
         </Pressable>
 
         <Pressable
-          onPress={() => handleTabPress("watchlist_add")}
+          onPress={() => handleTabPress("pick_tonight")}
           style={[
             styles.filterPill,
-            activeFilter === "watchlist_add"
+            activeFilter === "pick_tonight"
               ? [styles.filterPillActive, { backgroundColor: theme.colors.textPrimary }]
               : [
                   styles.filterPillInactive,
@@ -349,7 +355,7 @@ export default function Journal() {
               styles.filterText,
               {
                 color:
-                  activeFilter === "watchlist_add"
+                  activeFilter === "pick_tonight"
                     ? theme.colors.inverseOnSurface
                     : theme.colors.textSecondary,
               },
@@ -377,7 +383,7 @@ export default function Journal() {
           <Text style={[styles.emptyTitle, { color: theme.colors.textPrimary }]}>
             {activeFilter === "watched"
               ? "No watched films yet"
-              : activeFilter === "watchlist_add"
+              : activeFilter === "pick_tonight"
               ? "No picks saved yet"
               : "Your journal is empty"}
           </Text>

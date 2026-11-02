@@ -4,12 +4,7 @@ import { Button, Dialog, Portal, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAppTheme } from "@/lib/theme";
 
-export type ConfirmableAction =
-  | "pick_tonight"
-  | "watched"
-  | "skipped"
-  | "locked_in"
-  | "sync";
+export type ConfirmableAction = "locked_in" | "sync";
 
 export type SyncMood =
   | "surprise"
@@ -84,19 +79,6 @@ interface ActionModalConfig {
 }
 
 const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
-  pick_tonight: {
-    icon: "star",
-    iconColor: "#F59E0B",
-    title: "Make this Today's Pick?",
-    confirmText: "Select as Pick",
-    cancelText: "Keep Browsing",
-    renderDescription: (title) => (
-      <Text style={styles.description}>
-        <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
-        selected as your feature film for tonight. You can lock it in when ready.
-      </Text>
-    ),
-  },
   locked_in: {
     icon: "movie-play-outline",
     iconColor: "#E50914",
@@ -108,32 +90,6 @@ const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
         <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
         permanently locked as your movie for today. Once locked, your daily
         selection is final.
-      </Text>
-    ),
-  },
-  watched: {
-    icon: "check-circle",
-    iconColor: "#10B981",
-    title: "Mark as Watched?",
-    confirmText: "Mark Watched",
-    cancelText: "Cancel",
-    renderDescription: (title) => (
-      <Text style={styles.description}>
-        <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
-        recorded in your watched history and locked for today. It unlocks the next reel.
-      </Text>
-    ),
-  },
-  skipped: {
-    icon: "close-circle",
-    iconColor: "#A1A1AA",
-    title: "Skip This Movie?",
-    confirmText: "Skip Movie",
-    cancelText: "Keep Browsing",
-    renderDescription: (title) => (
-      <Text style={styles.description}>
-        <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
-        skipped and locked for today. You will not be able to open its details.
       </Text>
     ),
   },
@@ -296,14 +252,8 @@ export default function ActionConfirmModal({
             onPress={() =>
               onConfirm(action === "sync" ? selectedMood : undefined)
             }
-            buttonColor={
-              action === "watched"
-                ? theme.colors.success
-                : action === "pick_tonight"
-                  ? theme.colors.gold
-                  : theme.colors.primary
-            }
-            textColor={action === "pick_tonight" ? "#121212" : "#FFFFFF"}
+            buttonColor={theme.colors.primary}
+            textColor="#FFFFFF"
             style={styles.confirmBtn}
             labelStyle={styles.confirmBtnLabel}
           >

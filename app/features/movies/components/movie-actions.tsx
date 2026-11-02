@@ -10,12 +10,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useAppTheme } from "@/lib/theme";
-import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useRecordInteraction } from "../hooks/mutations/use-record-interactions";
 import type { Movie, MovieInteractionAction } from "../types/movies.type";
-import ActionConfirmModal, {
-  ConfirmableAction,
-} from "./action-confirm-modal";
 
 interface MovieActionsProps {
   movie: Movie;
@@ -33,23 +29,23 @@ export default function MovieActions({
   onActionComplete,
 }: MovieActionsProps) {
   const theme = useAppTheme();
-  const [loadingAction, setLoadingAction] = useState<MovieInteractionAction | null>(null);
-  const [pendingAction, setPendingAction] = useState<Extract<ConfirmableAction, MovieInteractionAction> | null>(null);
-  const { data: profileData } = useProfile();
-  const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
+  const [loadingAction, setLoadingAction] =
+    useState<MovieInteractionAction | null>(null);
   const recordMutation = useRecordInteraction();
 
+  const isPick =
+    initialAction === "pick_tonight" || initialAction === "watchlist_add";
+  const isSeen = initialAction === "seen_before";
+  const isSkipped = initialAction === "skipped";
+  const isWatched = initialAction === "watched" || movie.is_watched;
+  const isLocked = initialAction === "locked_in";
   const isFinalized =
-    initialAction === "watched" ||
-    initialAction === "skipped" ||
-    initialAction === "watchlist_add" ||
-    initialAction === "pick_tonight" ||
-    initialAction === "locked_in" ||
-    movie.is_watched;
+    isPick || isSeen || isSkipped || isWatched || isLocked;
 
   const handleAction = (action: MovieInteractionAction) => {
     if (loadingAction || !sessionId) return;
 
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoadingAction(action);
     recordMutation.mutate(
       {
@@ -61,29 +57,23 @@ export default function MovieActions({
       {
         onSuccess: () => {
           setLoadingAction(null);
-          if (action === "watched") {
+          if (action === "pick_tonight") {
             Toast.show({
               type: "success",
-              text1: "Marked as Watched",
-              text2: "Added to your watched history.",
+              text1: "Picked for Tonight",
+              text2: "Head back to lock it in.",
+            });
+          } else if (action === "seen_before") {
+            Toast.show({
+              type: "info",
+              text1: "Marked as Seen",
+              text2: "This card is resolved.",
             });
           } else if (action === "skipped") {
             Toast.show({
               type: "info",
-              text1: "Movie Skipped",
-              text2: "Locked in for today.",
-            });
-          } else if (action === "pick_tonight" || action === "watchlist_add") {
-            Toast.show({
-              type: "success",
-              text1: "Today's Pick! 🍿",
-              text2: "Selected as today's feature.",
-            });
-          } else if (action === "locked_in") {
-            Toast.show({
-              type: "success",
-              text1: "Now Watching! 🍿",
-              text2: "Selection locked for today. Enjoy!",
+              text1: "Passed for Today",
+              text2: "This card is resolved.",
             });
           }
           onActionComplete?.();
@@ -100,17 +90,41 @@ export default function MovieActions({
     );
   };
 
-  const handleConfirmAction = () => {
-    if (!pendingAction) return;
-    const actionToRun = pendingAction;
-    setPendingAction(null);
-    handleAction(actionToRun);
-  };
+  const finalizedIcon = isLocked
+    ? "movie-play"
+    : isPick
+      ? "star"
+      : isSeen
+        ? "eye-outline"
+        : isSkipped
+          ? "close-circle-outline"
+          : "check-decagram";
 
-  const promptAction = (action: Extract<ConfirmableAction, MovieInteractionAction>) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setPendingAction(action);
-  };
+  const finalizedIconColor = isLocked || isPick
+    ? theme.colors.gold
+    : isWatched
+      ? theme.colors.success
+      : theme.colors.textMuted;
+
+  const finalizedTitle = isLocked
+    ? "Locked In for Tonight"
+    : isPick
+      ? "Picked for Tonight"
+      : isSeen
+        ? "Already Seen"
+        : isSkipped
+          ? "Passed for Today"
+          : "Marked as Watched";
+
+  const finalizedSubtitle = isLocked
+    ? "Tonight's feature is set."
+    : isPick
+      ? "Head back to lock it in, or pick another."
+      : isSeen
+        ? "This card is resolved."
+        : isSkipped
+          ? "This card is resolved."
+          : "Saved to your Journal.";
 
   return (
     <View style={styles.container}>
@@ -120,67 +134,39 @@ export default function MovieActions({
             styles.finalizedCard,
             {
               backgroundColor: theme.colors.elevation.level1,
-              borderColor:
-                initialAction === "locked_in" ||
-                initialAction === "pick_tonight" ||
-                initialAction === "watchlist_add"
-                  ? theme.colors.gold
-                  : initialAction === "watched" || movie.is_watched
+              borderColor: isLocked || isPick
+                ? theme.colors.gold
+                : isWatched
                   ? theme.colors.success
                   : theme.colors.outlineVariant,
             },
           ]}
         >
           <MaterialCommunityIcons
-            name={
-              initialAction === "locked_in"
-                ? "movie-play"
-                : initialAction === "pick_tonight" || initialAction === "watchlist_add"
-                ? "star"
-                : initialAction === "skipped"
-                ? "close-circle-outline"
-                : "check-decagram"
-            }
+            name={finalizedIcon}
             size={22}
-            color={
-              initialAction === "locked_in" ||
-              initialAction === "pick_tonight" ||
-              initialAction === "watchlist_add"
-                ? theme.colors.gold
-                : initialAction === "skipped"
-                ? theme.colors.textMuted
-                : theme.colors.success
-            }
+            color={finalizedIconColor}
           />
           <View style={styles.finalizedTextContainer}>
             <Text
               style={[styles.finalizedTitle, { color: theme.colors.textPrimary }]}
             >
-              {initialAction === "locked_in"
-                ? "Locked In for Tonight"
-                : initialAction === "pick_tonight" || initialAction === "watchlist_add"
-                ? "Selected as Today's Pick"
-                : initialAction === "skipped"
-                ? "Skipped for Today"
-                : "Marked as Watched"}
+              {finalizedTitle}
             </Text>
             <Text
-              style={[styles.finalizedSubtitle, { color: theme.colors.textSecondary }]}
+              style={[
+                styles.finalizedSubtitle,
+                { color: theme.colors.textSecondary },
+              ]}
             >
-              {initialAction === "locked_in"
-                ? "Tonight's feature film selection is locked."
-                : initialAction === "pick_tonight" || initialAction === "watchlist_add"
-                ? "Head back to lock in your feature film."
-                : initialAction === "skipped"
-                ? "Reel closed for today's rotation."
-                : "Saved to your journal and watch history."}
+              {finalizedSubtitle}
             </Text>
           </View>
         </View>
       ) : (
         <View style={styles.actionsContainer}>
           <Pressable
-            onPress={() => promptAction("pick_tonight")}
+            onPress={() => handleAction("pick_tonight")}
             disabled={!!loadingAction}
             style={({ pressed }) => [
               styles.heroPickBtn,
@@ -194,14 +180,14 @@ export default function MovieActions({
             ) : (
               <>
                 <MaterialCommunityIcons name="star" size={19} color="#121212" />
-                <Text style={styles.heroPickBtnText}>PICK AS TODAY&apos;S FILM</Text>
+                <Text style={styles.heroPickBtnText}>PICK FOR TONIGHT</Text>
               </>
             )}
           </Pressable>
 
           <View style={styles.secondaryRow}>
             <Pressable
-              onPress={() => promptAction("watched")}
+              onPress={() => handleAction("seen_before")}
               disabled={!!loadingAction}
               style={({ pressed }) => [
                 styles.secondaryBtn,
@@ -210,17 +196,17 @@ export default function MovieActions({
                   borderColor: theme.colors.outlineVariant,
                 },
                 pressed && { opacity: 0.8 },
-                loadingAction === "watched" && styles.btnDisabled,
+                loadingAction === "seen_before" && styles.btnDisabled,
               ]}
             >
-              {loadingAction === "watched" ? (
-                <ActivityIndicator size="small" color={theme.colors.success} />
+              {loadingAction === "seen_before" ? (
+                <ActivityIndicator size="small" color={theme.colors.textPrimary} />
               ) : (
                 <>
                   <MaterialCommunityIcons
-                    name="check-circle-outline"
+                    name="eye-outline"
                     size={18}
-                    color={theme.colors.success}
+                    color={theme.colors.textPrimary}
                   />
                   <Text
                     style={[
@@ -228,14 +214,14 @@ export default function MovieActions({
                       { color: theme.colors.textPrimary },
                     ]}
                   >
-                    Mark Watched
+                    Seen It
                   </Text>
                 </>
               )}
             </Pressable>
 
             <Pressable
-              onPress={() => promptAction("skipped")}
+              onPress={() => handleAction("skipped")}
               disabled={!!loadingAction}
               style={({ pressed }) => [
                 styles.secondaryBtn,
@@ -262,7 +248,7 @@ export default function MovieActions({
                       { color: theme.colors.textSecondary },
                     ]}
                   >
-                    Skip Movie
+                    Pass
                   </Text>
                 </>
               )}
@@ -270,15 +256,6 @@ export default function MovieActions({
           </View>
         </View>
       )}
-
-      <ActionConfirmModal
-        visible={pendingAction !== null}
-        action={pendingAction}
-        movieTitle={movie.title}
-        syncsRemaining={syncsRemaining}
-        onConfirm={handleConfirmAction}
-        onCancel={() => setPendingAction(null)}
-      />
     </View>
   );
 }

@@ -119,8 +119,9 @@
 
 ### F-10 · Pick is irreversible before lock-in
 
+- **Status:** Done — picks use `pick_tonight`, the latest pick is derived from `action_at`, and a new pick can replace the current one until lock-in.
 - **Area:** Client UX
-- **Files:** `app/app/(app)/(tabs)/index.tsx:175-188`, `242-266`
+- **Files:** `app/app/(app)/(tabs)/index.tsx`, `app/features/movies/components/coverflow-carousel.tsx`, `app/features/movies/components/mystery-card.tsx`, `api/internal/domain/grid.go`, `api/internal/repository/postgres/grid.go`
 - **Problem:** Once `hasTodayPick` is true, choosing a different movie is blocked. The user can change their mind until they lock in, but the UI does not allow it. The soft "pick" is more final than the hard "lock-in", which is backwards.
 - **Fix:** Allow changing the pick until `locked_in`. Show "Change feature" on the feature card. Only lock-in should be final. If you keep the current two-step flow, make step one a shortlist/feature selection and step two "Start tonight."
 - **Done when:** A user can pick A, change to B, then lock in B.
@@ -128,8 +129,9 @@
 
 ### F-11 · Reveal lock and toast enforce the rule instead of the UI
 
+- **Status:** Done — multiple cards can be revealed, picks can change, and the deck has a graceful "Not tonight" exit.
 - **Area:** Client UX
-- **Files:** `app/app/(app)/(tabs)/index.tsx:64-101`, `350-352`
+- **Files:** `app/app/(app)/(tabs)/index.tsx`, `app/features/movies/components/mystery-card.tsx`
 - **Problem:** Revealing one card blocks opening another until the first is resolved. The rule is enforced with a toast and a carousel scroll, which feels arbitrary. If the user reveals something they do not want, they are forced to skip or mark it watched. There is no "not tonight" exit.
 - **Fix:** Make the rule structural with a one-card stack (see R-01). If you keep the carousel, allow multiple revealed cards and only enforce one final feature. Add a graceful "Not tonight" action that ends the session without marking the movie.
 - **Done when:** The user can always leave the deck without a bad-faith action, and the next card is only blocked by the UI itself.
@@ -137,8 +139,9 @@
 
 ### F-12 · Confirmation dialogs on every action
 
+- **Status:** Done — pick, seen, and pass are one tap; only lock-in and sync keep a dialog.
 - **Area:** Client UX
-- **Files:** `app/features/movies/components/action-confirm-modal.tsx`, `app/features/movies/components/movie-actions.tsx:103-113`, `app/app/(app)/(tabs)/index.tsx:215-348`
+- **Files:** `app/features/movies/components/action-confirm-modal.tsx`, `app/features/movies/components/movie-actions.tsx`, `app/app/(app)/(tabs)/index.tsx`
 - **Problem:** Pick, watched, skip, lock-in, and sync all open a dialog. A decision-fatigue app should not add six confirmations. The friction is on reversible actions, while the irreversible one is just another dialog.
 - **Fix:** Make skip/seen instant with an undo toast. Keep a confirmation only for lock-in/start. Keep the sync mood sheet, but make it a proper bottom sheet, not a dialog with horizontal chips.
 - **Done when:** A skip is one tap, lock-in is the only confirmation, and no action is accidentally destructive.
@@ -146,8 +149,9 @@
 
 ### F-13 · "Mark watched" is used before watching, and actions are inconsistent
 
+- **Status:** Done — `seen_before` is separate from `watched`; picks use `pick_tonight`; watched is only recorded by the post-feature verdict.
 - **Area:** Data model + UX
-- **Files:** `app/app/(app)/(tabs)/index.tsx:242-250`, `app/features/movies/components/movie-actions.tsx:76-88`, `api/internal/service/scorer.go:16-23`, `api/internal/domain/interaction.go:17-24`
+- **Files:** `api/migrations/000011_add_seen_before_action.up.sql`, `api/internal/domain/interaction.go`, `api/internal/service/scorer.go`, `api/internal/repository/postgres/interaction.go`, `app/features/movies/types/movies.type.ts`, `app/features/movies/components/movie-actions.tsx`, `app/features/movies/components/mystery-card.tsx`, `app/app/(app)/(tabs)/journal.tsx`
 - **Problem:** During selection the user can "mark watched" before watching. That writes a strong +2.0 affinity, adds it to the Journal, and labels it watched. Separately, the confirmation sends `watchlist_add` even though the dialog says `pick_tonight`; `pick_tonight` is effectively unused. The action taxonomy has duplicate meanings.
 - **Fix:** Adopt the three-action model: **Pick**, **Pass**, **Seen it**. Move "Watched" to a post-feature verdict. Remove or repurpose `pick_tonight`/`watchlist_add` so there is one action per intent. Recalibrate weights after the split.
 - **Done when:** The Journal only contains movies actually watched, and the same intent is not represented by two action names.

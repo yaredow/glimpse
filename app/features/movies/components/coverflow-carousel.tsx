@@ -27,10 +27,10 @@ export interface CoverflowCarouselHandle {
 
 interface CoverflowCarouselProps {
   movies: GridMovie[];
-  hasTodayPick?: boolean;
+  currentPickId?: number;
   onReveal: (movie: GridMovie) => void;
   onPickTonight?: (movie: GridMovie) => void;
-  onWatched?: (movie: GridMovie) => void;
+  onSeen?: (movie: GridMovie) => void;
   onSkip?: (movie: GridMovie) => void;
   onViewDetails?: (movie: GridMovie) => void;
 }
@@ -46,10 +46,10 @@ const CoverflowCarousel = forwardRef<CoverflowCarouselHandle, CoverflowCarouselP
   function CoverflowCarousel(
     {
       movies,
-      hasTodayPick = false,
+      currentPickId,
       onReveal,
       onPickTonight,
-      onWatched,
+      onSeen,
       onSkip,
       onViewDetails,
     },
@@ -99,11 +99,11 @@ const CoverflowCarousel = forwardRef<CoverflowCarouselHandle, CoverflowCarouselP
           total={movies.length}
           scrollX={scrollX}
           isCenter={index === currentIndex}
-          hasTodayPick={hasTodayPick}
+          currentPickId={currentPickId}
           onPressAdjacent={() => scrollToIndex(index)}
           onReveal={() => onReveal(item)}
           onPickTonight={() => onPickTonight?.(item)}
-          onWatched={() => onWatched?.(item)}
+          onSeen={() => onSeen?.(item)}
           onSkip={() => onSkip?.(item)}
           onViewDetails={() => onViewDetails?.(item)}
         />
@@ -160,11 +160,11 @@ function CardSlot({
   total,
   scrollX,
   isCenter,
-  hasTodayPick,
+  currentPickId,
   onPressAdjacent,
   onReveal,
   onPickTonight,
-  onWatched,
+  onSeen,
   onSkip,
   onViewDetails,
 }: {
@@ -173,22 +173,23 @@ function CardSlot({
   total: number;
   scrollX: SharedValue<number>;
   isCenter: boolean;
-  hasTodayPick: boolean;
+  currentPickId?: number;
   onPressAdjacent: () => void;
   onReveal: () => void;
   onPickTonight: () => void;
-  onWatched: () => void;
+  onSeen: () => void;
   onSkip: () => void;
   onViewDetails: () => void;
 }) {
-  const isMarked =
+  const isResolved =
     movie.action === "watched" ||
     movie.action === "skipped" ||
+    movie.action === "seen_before" ||
     movie.action === "pick_tonight" ||
     movie.action === "watchlist_add" ||
     movie.action === "locked_in";
-  const isRevealed = Boolean(movie.is_revealed) || movie.action === "revealed" || isMarked;
-  const isLockedSealed = Boolean(hasTodayPick && !isRevealed);
+  const isRevealed =
+    Boolean(movie.is_revealed) || movie.action === "revealed" || isResolved;
 
   const animatedStyle = useAnimatedStyle(() => {
     const centerOffset = index * ITEM_W;
@@ -224,11 +225,10 @@ function CardSlot({
           index={index}
           total={total}
           isCenter={isCenter}
-          hasTodayPick={hasTodayPick}
-          isLockedSealed={isLockedSealed}
+          currentPickId={currentPickId}
           onReveal={onReveal}
           onPickTonight={onPickTonight}
-          onWatched={onWatched}
+          onSeen={onSeen}
           onSkip={onSkip}
           onViewDetails={onViewDetails}
         />
@@ -239,11 +239,10 @@ function CardSlot({
             index={index}
             total={total}
             isCenter={isCenter}
-            hasTodayPick={hasTodayPick}
-            isLockedSealed={isLockedSealed}
+            currentPickId={currentPickId}
             onReveal={onReveal}
             onPickTonight={onPickTonight}
-            onWatched={onWatched}
+            onSeen={onSeen}
             onSkip={onSkip}
             onViewDetails={onViewDetails}
           />

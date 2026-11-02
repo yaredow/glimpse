@@ -39,7 +39,8 @@ export type MovieInteractionAction =
   | "skipped"
   | "watchlist_add"
   | "pick_tonight"
-  | "locked_in";
+  | "locked_in"
+  | "seen_before";
 
 export interface RecordInteractionPayload {
   movie_id: number;
@@ -54,6 +55,7 @@ export interface GridMovie {
   slot_number: number;
   is_revealed: boolean;
   action?: MovieInteractionAction | null;
+  action_at?: string;
   is_locked_in?: boolean;
   movie_id: number;
   tmdb_id: number;

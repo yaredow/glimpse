@@ -20,12 +20,11 @@ interface MysteryCardProps {
   index: number;
   total?: number;
   isCenter: boolean;
-  hasTodayPick?: boolean;
-  isLockedSealed?: boolean;
+  currentPickId?: number;
   onReveal: () => void;
   onViewDetails?: () => void;
   onPickTonight?: () => void;
-  onWatched?: () => void;
+  onSeen?: () => void;
   onSkip?: () => void;
 }
 
@@ -34,25 +33,26 @@ export default function MysteryCard({
   index,
   total = 5,
   isCenter,
-  hasTodayPick = false,
-  isLockedSealed = false,
+  currentPickId,
   onReveal,
   onViewDetails,
   onPickTonight,
-  onWatched,
+  onSeen,
   onSkip,
 }: MysteryCardProps) {
   const theme = useAppTheme();
   const action = movie.action;
-  const isPicked =
-    action === "pick_tonight" ||
-    action === "watchlist_add" ||
-    action === "locked_in";
+  const isPickAction =
+    action === "pick_tonight" || action === "watchlist_add";
+  const isCurrentPick = movie.movie_id === currentPickId;
+  const isLocked = Boolean(movie.is_locked_in) || action === "locked_in";
   const isWatched = action === "watched";
+  const isSeen = action === "seen_before";
   const isSkipped = action === "skipped";
-  const isMarked = isPicked || isWatched || isSkipped;
-  const isRevealed = Boolean(movie.is_revealed) || action === "revealed" || isMarked;
-  const isLocked = isWatched || isSkipped;
+  const isResolved =
+    isPickAction || isLocked || isWatched || isSeen || isSkipped;
+  const isRevealed =
+    Boolean(movie.is_revealed) || action === "revealed" || isResolved;
 
   const [posterFailed, setPosterFailed] = useState(false);
   const posterSrc = tmdbImage(movie.poster_path || movie.backdrop_path, "w500");
@@ -95,31 +95,26 @@ export default function MysteryCard({
 
   const handleCardPress = () => {
     if (!isRevealed) {
-      if (isLockedSealed) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-        Toast.show({
-          type: "info",
-          text1: "Deck Locked",
-          text2: "You have already chosen your film for tonight.",
-        });
-        return;
-      }
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       onReveal();
-    } else {
-      if (isLocked) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        Toast.show({
-          type: "info",
-          text1: "Reel Locked",
-          text2: isSkipped
-            ? "This movie was skipped and cannot be opened."
-            : "This movie was marked as watched and cannot be opened.",
-        });
-        return;
-      }
-      onViewDetails?.();
+      return;
     }
+
+    if (isSkipped || isWatched || isSeen) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Toast.show({
+        type: "info",
+        text1: "Reel Locked",
+        text2: isSkipped
+          ? "This movie was passed for today."
+          : isSeen
+            ? "You already marked this as seen."
+            : "This movie was marked as watched.",
+      });
+      return;
+    }
+
+    onViewDetails?.();
   };
 
   const handleTogglePick = () => {
@@ -127,9 +122,9 @@ export default function MysteryCard({
     onPickTonight?.();
   };
 
-  const handleToggleWatched = () => {
+  const handleToggleSeen = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onWatched?.();
+    onSeen?.();
   };
 
   const handleToggleSkip = () => {
@@ -151,10 +146,12 @@ export default function MysteryCard({
     <View
       style={[
         styles.cardOuter,
-        isPicked && {
-          borderColor: theme.colors.gold,
-          borderWidth: 1.5,
-        },
+        isCurrentPick || isLocked
+          ? {
+              borderColor: theme.colors.gold,
+              borderWidth: 1.5,
+            }
+          : null,
       ]}
     >
       <Animated.View
@@ -173,9 +170,9 @@ export default function MysteryCard({
             </Text>
             <View style={styles.mysteryIconBadge}>
               <MaterialCommunityIcons
-                name={isLockedSealed ? "lock" : "lock-outline"}
+                name={isLocked ? "lock" : "lock-outline"}
                 size={14}
-                color={isLockedSealed ? theme.colors.textMuted : theme.colors.primary}
+                color={isLocked ? theme.colors.textMuted : theme.colors.primary}
               />
             </View>
           </View>
@@ -197,15 +194,15 @@ export default function MysteryCard({
           </View>
 
           <View style={styles.mysteryFooter}>
-            {isLockedSealed ? (
+            {isLocked || isCurrentPick ? (
               <View style={styles.unveilPrompt}>
                 <MaterialCommunityIcons
-                  name="lock"
+                  name={isLocked ? "lock" : "star"}
                   size={14}
-                  color={theme.colors.textMuted}
+                  color={theme.colors.gold}
                 />
-                <Text style={[styles.unveilText, { color: theme.colors.textMuted }]}>
-                  Locked · Selection chosen
+                <Text style={[styles.unveilText, { color: theme.colors.gold }]}>
+                  {isLocked ? "Locked · Tonight's feature" : "Picked for tonight"}
                 </Text>
               </View>
             ) : (
@@ -253,11 +250,11 @@ export default function MysteryCard({
             <View style={[StyleSheet.absoluteFill, styles.skippedDimOverlay]} />
           ) : null}
 
-          {isWatched || isSkipped ? (
+          {isWatched || isSkipped || isSeen ? (
             <View style={styles.cornerRibbonContainer} pointerEvents="none">
               <View style={styles.cornerRibbon}>
                 <Text style={styles.cornerRibbonText}>
-                  {isWatched ? "WATCHED" : "SKIPPED"}
+                  {isWatched ? "WATCHED" : isSeen ? "SEEN" : "PASSED"}
                 </Text>
               </View>
             </View>
@@ -279,7 +276,7 @@ export default function MysteryCard({
           </LinearGradient>
 
           <View style={styles.topActionsRow}>
-            {!isMarked ? (
+            {!isResolved ? (
               <>
                 <Pressable
                   onPress={(e) => {
@@ -290,7 +287,7 @@ export default function MysteryCard({
                     styles.actionCircleBtn,
                     pressed && { opacity: 0.7 },
                   ]}
-                  accessibilityLabel="Skip movie"
+                  accessibilityLabel="Pass movie"
                 >
                   <MaterialCommunityIcons name="close" size={17} color="#FFFFFF" />
                 </Pressable>
@@ -298,52 +295,65 @@ export default function MysteryCard({
                 <Pressable
                   onPress={(e) => {
                     e.stopPropagation();
-                    handleToggleWatched();
+                    handleToggleSeen();
                   }}
                   style={({ pressed }) => [
                     styles.actionCircleBtn,
                     pressed && { opacity: 0.7 },
                   ]}
-                  accessibilityLabel="Mark as watched"
+                  accessibilityLabel="Mark as seen"
                 >
-                  <MaterialCommunityIcons name="check" size={17} color="#FFFFFF" />
+                  <MaterialCommunityIcons name="eye-outline" size={17} color="#FFFFFF" />
                 </Pressable>
 
-                {!hasTodayPick ? (
-                  <Pressable
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      handleTogglePick();
-                    }}
-                    style={({ pressed }) => [
-                      styles.actionCircleBtn,
-                      pressed && { opacity: 0.7 },
-                    ]}
-                    accessibilityLabel="Make tonight's pick"
-                  >
-                    <MaterialCommunityIcons
-                      name="star-outline"
-                      size={17}
-                      color="#FFFFFF"
-                    />
-                  </Pressable>
-                ) : null}
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleTogglePick();
+                  }}
+                  style={({ pressed }) => [
+                    styles.actionCircleBtn,
+                    pressed && { opacity: 0.7 },
+                  ]}
+                  accessibilityLabel="Pick for tonight"
+                >
+                  <MaterialCommunityIcons
+                    name="star-outline"
+                    size={17}
+                    color="#FFFFFF"
+                  />
+                </Pressable>
               </>
-            ) : isPicked ? (
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  handleTogglePick();
-                }}
-                style={({ pressed }) => [
-                  styles.actionCircleBtn,
-                  { backgroundColor: theme.colors.gold },
-                  pressed && { opacity: 0.8 },
-                ]}
-                accessibilityLabel="Tonight's Pick"
-              >
-                <MaterialCommunityIcons name="star" size={18} color="#121212" />
-              </Pressable>
+            ) : isPickAction || isLocked ? (
+              isLocked ? (
+                <View
+                  style={[
+                    styles.actionCircleBtn,
+                    { backgroundColor: theme.colors.gold },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="movie-play"
+                    size={18}
+                    color="#121212"
+                  />
+                </View>
+              ) : (
+                <Pressable
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleTogglePick();
+                  }}
+                  style={({ pressed }) => [
+                    styles.actionCircleBtn,
+                    { backgroundColor: theme.colors.gold },
+                    pressed && { opacity: 0.8 },
+                  ]}
+                  accessibilityLabel="Pick for tonight"
+                >
+                  <MaterialCommunityIcons name="star" size={18} color="#121212" />
+                </Pressable>
+              )
             ) : null}
           </View>
         </Pressable>
