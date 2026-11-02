@@ -12,6 +12,7 @@ type GridSlotResponse struct {
 	SlotNumber       int         `json:"slot_number"`
 	IsRevealed       bool        `json:"is_revealed"`
 	Action           *ActionType `json:"action,omitempty"`
+	IsLockedIn       bool        `json:"is_locked_in"`
 	VagueDescription string      `json:"vague_description"`
 	Tagline          *string     `json:"tagline,omitempty"`
 	Genres           []string    `json:"genres"`

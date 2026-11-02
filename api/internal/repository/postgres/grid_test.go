@@ -79,7 +79,7 @@ func TestGridRepository_MarkRevealed(t *testing.T) {
 
 		repo := postgres.NewGridRepository(&postgres.DB{Pool: mock})
 
-		mock.ExpectExec(`UPDATE daily_pools SET is_revealed = TRUE WHERE user_id = \$1 AND movie_id = \$2`).
+		mock.ExpectExec(`UPDATE daily_pools SET is_revealed = TRUE WHERE user_id = \$1 AND movie_id = \$2 AND pool_date = CURRENT_DATE`).
 			WithArgs(int64(1), int64(10)).
 			WillReturnResult(pgxmock.NewResult("UPDATE", 1))
 
@@ -108,14 +108,14 @@ func TestGridRepository_GetByID(t *testing.T) {
 		rows := pgxmock.NewRows([]string{
 			"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
 			"tagline", "genres", "title", "poster_path", "backdrop_path",
-			"vote_average", "release_date", "grid_session_id", "action",
+			"vote_average", "release_date", "grid_session_id", "action", "is_locked_in",
 		}).AddRow(
 			int64(10), 550, 1, false, "A mysterious journey",
 			&tagline, []string{"Drama", "Action"}, "Inception", &posterPath, &backdropPath,
-			8.5, releaseDate, sessionID, nil,
+			8.5, releaseDate, sessionID, nil, false,
 		)
 
-		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 ORDER BY d.slot_number`).
+		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 AND d.pool_date = CURRENT_DATE ORDER BY d.slot_number`).
 			WithArgs(int64(1)).
 			WillReturnRows(rows)
 
@@ -149,14 +149,14 @@ func TestGridRepository_GetByID(t *testing.T) {
 		rows := pgxmock.NewRows([]string{
 			"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
 			"tagline", "genres", "title", "poster_path", "backdrop_path",
-			"vote_average", "release_date", "grid_session_id", "action",
+			"vote_average", "release_date", "grid_session_id", "action", "is_locked_in",
 		}).AddRow(
 			int64(10), 550, 1, false, "A mysterious journey",
 			nil, []string{"Drama"}, "Inception", nil, nil,
-			8.5, releaseDate, sessionID, &action,
+			8.5, releaseDate, sessionID, &action, true,
 		)
 
-		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 ORDER BY d.slot_number`).
+		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 AND d.pool_date = CURRENT_DATE ORDER BY d.slot_number`).
 			WithArgs(int64(1)).
 			WillReturnRows(rows)
 
@@ -176,7 +176,7 @@ func TestGridRepository_GetByID(t *testing.T) {
 
 		repo := postgres.NewGridRepository(&postgres.DB{Pool: mock})
 
-		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 ORDER BY d.slot_number`).
+		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 AND d.pool_date = CURRENT_DATE ORDER BY d.slot_number`).
 			WithArgs(int64(1)).
 			WillReturnRows(pgxmock.NewRows([]string{
 				"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
