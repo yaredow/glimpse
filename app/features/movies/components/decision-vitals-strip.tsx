@@ -49,8 +49,8 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       {/* 2. Rating & Consensus */}
       <View style={styles.column}>
         <View style={styles.headerRow}>
-          <MaterialCommunityIcons name="star" size={13} color="#F59E0B" />
-          <Text style={styles.label}>CONSENSUS</Text>
+          <MaterialCommunityIcons name="star-outline" size={13} color="#71717A" />
+          <Text style={styles.label}>RATING</Text>
         </View>
         <Text style={styles.primaryText} numberOfLines={1}>
           {score}
@@ -83,15 +83,14 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    borderWidth: 1,
-    borderRadius: 14,
     marginHorizontal: 16,
-    marginTop: 14,
-    marginBottom: 6,
+    marginTop: 12,
+    marginBottom: 8,
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.06)",
   },
   column: {
     flex: 1,
@@ -101,8 +100,8 @@ const styles = StyleSheet.create({
   },
   divider: {
     width: 1,
-    height: 32,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    height: 28,
+    backgroundColor: "rgba(255, 255, 255, 0.07)",
   },
   headerRow: {
     flexDirection: "row",

@@ -265,7 +265,8 @@ export default function MovieActions({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 4,
+    paddingBottom: 14,
   },
   actionsRow: {
     flexDirection: "row",
