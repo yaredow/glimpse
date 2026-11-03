@@ -31,16 +31,17 @@ export default function MovieActions({
   const theme = useAppTheme();
   const [loadingAction, setLoadingAction] =
     useState<MovieInteractionAction | null>(null);
+  const [currentAction, setCurrentAction] =
+    useState<MovieInteractionAction | null>(initialAction ?? null);
   const recordMutation = useRecordInteraction();
 
   const isPick =
-    initialAction === "pick_tonight" || initialAction === "watchlist_add";
-  const isSeen = initialAction === "seen_before";
-  const isSkipped = initialAction === "skipped";
-  const isWatched = initialAction === "watched" || movie.is_watched;
-  const isLocked = initialAction === "locked_in";
-  const isFinalized =
-    isPick || isSeen || isSkipped || isWatched || isLocked;
+    currentAction === "pick_tonight" || currentAction === "watchlist_add";
+  const isSeen = currentAction === "seen_before";
+  const isSkipped = currentAction === "skipped";
+  const isWatched = currentAction === "watched" || movie.is_watched;
+  const isLocked = currentAction === "locked_in";
+  const isFinalized = isLocked || isSeen || isSkipped || isWatched;
 
   const handleAction = (action: MovieInteractionAction) => {
     if (loadingAction || !sessionId) return;
@@ -57,11 +58,19 @@ export default function MovieActions({
       {
         onSuccess: () => {
           setLoadingAction(null);
+          setCurrentAction(action);
+
           if (action === "pick_tonight") {
             Toast.show({
               type: "success",
-              text1: "Picked for Tonight",
-              text2: "Head back to lock it in.",
+              text1: "Tonight's Feature",
+              text2: `"${movie.title}" is picked. Lock it in when you're ready.`,
+            });
+          } else if (action === "revealed") {
+            Toast.show({
+              type: "info",
+              text1: "Pick Removed",
+              text2: `"${movie.title}" is no longer tonight's pick.`,
             });
           } else if (action === "seen_before") {
             Toast.show({
@@ -69,14 +78,15 @@ export default function MovieActions({
               text1: "Marked as Seen",
               text2: "This card is resolved.",
             });
+            onActionComplete?.();
           } else if (action === "skipped") {
             Toast.show({
               type: "info",
               text1: "Passed for Today",
               text2: "This card is resolved.",
             });
+            onActionComplete?.();
           }
-          onActionComplete?.();
         },
         onError: (err) => {
           setLoadingAction(null);
@@ -92,15 +102,13 @@ export default function MovieActions({
 
   const finalizedIcon = isLocked
     ? "movie-play"
-    : isPick
-      ? "star"
-      : isSeen
-        ? "eye-outline"
-        : isSkipped
-          ? "close-circle-outline"
-          : "check-decagram";
+    : isSeen
+      ? "eye-outline"
+      : isSkipped
+        ? "close-circle-outline"
+        : "check-decagram";
 
-  const finalizedIconColor = isLocked || isPick
+  const finalizedIconColor = isLocked
     ? theme.colors.primary
     : isWatched
       ? theme.colors.success
@@ -108,23 +116,19 @@ export default function MovieActions({
 
   const finalizedTitle = isLocked
     ? "Locked In for Tonight"
-    : isPick
-      ? "Picked for Tonight"
-      : isSeen
-        ? "Already Seen"
-        : isSkipped
-          ? "Passed for Today"
-          : "Marked as Watched";
+    : isSeen
+      ? "Already Seen"
+      : isSkipped
+        ? "Passed for Today"
+        : "Marked as Watched";
 
   const finalizedSubtitle = isLocked
     ? "Tonight's feature is set."
-    : isPick
-      ? "Head back to lock it in, or pick another."
-      : isSeen
+    : isSeen
+      ? "This card is resolved."
+      : isSkipped
         ? "This card is resolved."
-        : isSkipped
-          ? "This card is resolved."
-          : "Saved to your Journal.";
+        : "Saved to your Journal.";
 
   return (
     <View style={styles.container}>
@@ -134,7 +138,7 @@ export default function MovieActions({
             styles.finalizedCard,
             {
               backgroundColor: theme.colors.elevation.level1,
-              borderColor: isLocked || isPick
+              borderColor: isLocked
                 ? theme.colors.primary
                 : isWatched
                   ? theme.colors.success
@@ -233,26 +237,41 @@ export default function MovieActions({
             )}
           </Pressable>
 
-          {/* Pick */}
+          {/* Pick / Picked */}
           <Pressable
-            onPress={() => handleAction("pick_tonight")}
+            onPress={() => handleAction(isPick ? "revealed" : "pick_tonight")}
             disabled={!!loadingAction}
             style={({ pressed }) => [
               styles.actionBtn,
               styles.pickBtn,
-              { backgroundColor: theme.colors.primary },
+              {
+                backgroundColor: isPick
+                  ? theme.colors.cinemaRedHover
+                  : theme.colors.primary,
+              },
               pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
-              loadingAction === "pick_tonight" && styles.btnDisabled,
+              (loadingAction === "pick_tonight" ||
+                loadingAction === "revealed") &&
+                styles.btnDisabled,
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Pick film for tonight"
+            accessibilityLabel={
+              isPick ? "Remove from tonight's pick" : "Pick film for tonight"
+            }
           >
-            {loadingAction === "pick_tonight" ? (
+            {loadingAction === "pick_tonight" ||
+            loadingAction === "revealed" ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <>
-                <MaterialCommunityIcons name="star" size={17} color="#FFFFFF" />
-                <Text style={styles.pickBtnText}>Pick</Text>
+                <MaterialCommunityIcons
+                  name={isPick ? "check-circle" : "star"}
+                  size={17}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.pickBtnText}>
+                  {isPick ? "Picked" : "Pick"}
+                </Text>
               </>
             )}
           </Pressable>

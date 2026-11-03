@@ -153,33 +153,103 @@ export default function TodayTab() {
 
   const handlePick = useCallback(
     (movie: GridMovie) => {
-      if (!movie.grid_session_id) return;
-      recordInteraction.mutate(
-        {
-          movie_id: movie.movie_id,
-          action: "pick_tonight",
-          grid_session_id: movie.grid_session_id,
-          grid_position: movie.slot_number,
-        },
-        {
-          onSuccess: () => {
-            Toast.show({
-              type: "success",
-              text1: "Tonight's Feature",
-              text2: `"${movie.title}" is picked. Lock it in when you're ready.`,
-            });
+      if (!movie.grid_session_id || recordInteraction.isPending) return;
+
+      const isAlreadyPicked = currentPickId === movie.movie_id;
+
+      if (isAlreadyPicked) {
+        // Toggle off / Unpick
+        recordInteraction.mutate(
+          {
+            movie_id: movie.movie_id,
+            action: "revealed",
+            grid_session_id: movie.grid_session_id,
+            grid_position: movie.slot_number,
           },
-          onError: (err) => {
-            Toast.show({
-              type: "error",
-              text1: "Action failed",
-              text2: err.message,
-            });
+          {
+            onSuccess: () => {
+              Toast.show({
+                type: "info",
+                text1: "Pick Removed",
+                text2: `"${movie.title}" is no longer tonight's pick.`,
+              });
+            },
+            onError: (err) => {
+              Toast.show({
+                type: "error",
+                text1: "Action failed",
+                text2: err.message,
+              });
+            },
           },
-        },
-      );
+        );
+
+        // Also clean up any lingering tentative picks in movies
+        const otherPicks = movies.filter(
+          (m) =>
+            m.movie_id !== movie.movie_id &&
+            !m.is_locked_in &&
+            m.action !== "locked_in" &&
+            (m.action === "pick_tonight" || m.action === "watchlist_add"),
+        );
+        for (const other of otherPicks) {
+          if (other.grid_session_id) {
+            recordInteraction.mutate({
+              movie_id: other.movie_id,
+              action: "revealed",
+              grid_session_id: other.grid_session_id,
+              grid_position: other.slot_number,
+            });
+          }
+        }
+      } else {
+        // Pick tonight
+        recordInteraction.mutate(
+          {
+            movie_id: movie.movie_id,
+            action: "pick_tonight",
+            grid_session_id: movie.grid_session_id,
+            grid_position: movie.slot_number,
+          },
+          {
+            onSuccess: () => {
+              Toast.show({
+                type: "success",
+                text1: "Tonight's Feature",
+                text2: `"${movie.title}" is picked. Lock it in when you're ready.`,
+              });
+            },
+            onError: (err) => {
+              Toast.show({
+                type: "error",
+                text1: "Action failed",
+                text2: err.message,
+              });
+            },
+          },
+        );
+
+        // Demote previous tentative pick so there's always at most one pick
+        const otherPicks = movies.filter(
+          (m) =>
+            m.movie_id !== movie.movie_id &&
+            !m.is_locked_in &&
+            m.action !== "locked_in" &&
+            (m.action === "pick_tonight" || m.action === "watchlist_add"),
+        );
+        for (const other of otherPicks) {
+          if (other.grid_session_id) {
+            recordInteraction.mutate({
+              movie_id: other.movie_id,
+              action: "revealed",
+              grid_session_id: other.grid_session_id,
+              grid_position: other.slot_number,
+            });
+          }
+        }
+      }
     },
-    [recordInteraction],
+    [movies, currentPickId, recordInteraction],
   );
 
   const handleSeen = useCallback(
