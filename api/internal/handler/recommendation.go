@@ -15,6 +15,7 @@ type GridService interface {
 	RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs, rating *int) error
 	SyncGrid(ctx context.Context, userID int64, mood string) ([]domain.GridSlotResponse, int, error)
 	GetHistory(ctx context.Context, userID int64, action string) ([]domain.HistoryMovie, error)
+	DealersChoice(ctx context.Context, userID int64) (*domain.GridSlotResponse, []domain.GridSlotResponse, int, error)
 }
 
 type RecommendationHandler struct {
@@ -102,4 +103,19 @@ func (rh *RecommendationHandler) GetHistory(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, envelope{"history": history})
+}
+
+func (rh *RecommendationHandler) DealersChoice(c *echo.Context) error {
+	user := c.Get("user").(*domain.User)
+
+	chosen, grid, remaining, err := rh.svc.DealersChoice(c.Request().Context(), user.ID)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, envelope{
+		"movie":                chosen,
+		"grid":                 grid,
+		"remaining_candidates": remaining,
+	})
 }

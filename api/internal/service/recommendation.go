@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -466,4 +467,109 @@ func (rs *RecommendationService) SeedFromOnboarding(ctx context.Context, userID 
 
 func (rs *RecommendationService) GetHistory(ctx context.Context, userID int64, action string) ([]domain.HistoryMovie, error) {
 	return rs.interactions.GetHistory(ctx, userID, action)
+}
+
+func (rs *RecommendationService) DealersChoice(ctx context.Context, userID int64) (*domain.GridSlotResponse, []domain.GridSlotResponse, int, error) {
+	_ = rs.users.ResetDailySyncsIfDue(ctx, userID)
+
+	grid, sessionID, err := rs.GenerateGrid(ctx, userID)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("generate or get grid: %w", err)
+	}
+
+	locked, err := rs.grid.IsLockedIn(ctx, userID)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("check locked status: %w", err)
+	}
+	if locked {
+		return nil, nil, 0, domain.ErrSelectionLocked
+	}
+
+	var candidates []domain.GridSlotResponse
+	for _, slot := range grid {
+		if slot.Action == nil || (*slot.Action != domain.ActionSkipped && *slot.Action != domain.ActionSeenBefore && *slot.Action != domain.ActionWatched) {
+			candidates = append(candidates, slot)
+		}
+	}
+
+	if len(candidates) == 0 {
+		return nil, nil, 0, domain.ErrNoEligibleCandidates
+	}
+
+	winner := candidates[0]
+	if len(candidates) > 1 {
+		affinityPtrs, err := rs.affinities.GetByUserID(ctx, userID)
+		if err != nil {
+			return nil, nil, 0, fmt.Errorf("get affinities: %w", err)
+		}
+		affinities := make([]domain.Affinity, len(affinityPtrs))
+		for i, a := range affinityPtrs {
+			affinities[i] = *a
+		}
+		affMap := buildAffinityMap(affinities)
+
+		user, err := rs.users.GetByID(ctx, userID)
+		if err != nil {
+			return nil, nil, 0, fmt.Errorf("get user: %w", err)
+		}
+		rate := explorationRateFor(user.TotalInteractions)
+
+		recentEntries, err := rs.gridHistory.GetRecent(ctx, userID, 50)
+		if err != nil {
+			return nil, nil, 0, fmt.Errorf("get recently shown: %w", err)
+		}
+		recentlyShown := make(map[int64]time.Time, len(recentEntries))
+		for _, e := range recentEntries {
+			recentlyShown[e.MovieID] = e.ShownAt
+		}
+
+		type scoredCandidate struct {
+			slot  domain.GridSlotResponse
+			score float64
+		}
+		scoredList := make([]scoredCandidate, 0, len(candidates))
+		for _, c := range candidates {
+			m, err := rs.movies.GetByID(ctx, c.MovieID)
+			if err != nil {
+				return nil, nil, 0, fmt.Errorf("get candidate movie %d: %w", c.MovieID, err)
+			}
+			score := movieScore(m, affMap, recentlyShown, rate)
+			scoredList = append(scoredList, scoredCandidate{slot: c, score: score})
+		}
+		sort.Slice(scoredList, func(i, j int) bool {
+			return scoredList[i].score > scoredList[j].score
+		})
+		winner = scoredList[0].slot
+	}
+
+	// Demote any previously tentatively picked candidate in the current grid that is not the winner
+	for _, slot := range grid {
+		if slot.MovieID != winner.MovieID && slot.Action != nil && (*slot.Action == domain.ActionPickTonight || *slot.Action == domain.ActionWatchlistAdd) {
+			_ = rs.RecordInteraction(ctx, userID, slot.MovieID, string(domain.ActionRevealed), sessionID, &slot.SlotNumber, nil, nil)
+		}
+	}
+
+	// Record pick_tonight for winner
+	if err := rs.RecordInteraction(ctx, userID, winner.MovieID, string(domain.ActionPickTonight), sessionID, &winner.SlotNumber, nil, nil); err != nil {
+		return nil, nil, 0, fmt.Errorf("record dealers choice pick: %w", err)
+	}
+
+	// Refetch latest grid from DB for complete consistency
+	freshGrid, err := rs.grid.GetByID(ctx, userID)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("refetch grid: %w", err)
+	}
+
+	var chosen *domain.GridSlotResponse
+	for i := range freshGrid {
+		if freshGrid[i].MovieID == winner.MovieID {
+			chosen = &freshGrid[i]
+			break
+		}
+	}
+	if chosen == nil {
+		chosen = &winner
+	}
+
+	return chosen, freshGrid, len(candidates), nil
 }

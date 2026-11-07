@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import {
+  DealersChoiceResponse,
   GridMovie,
   HistoryResponse,
   MovieDetailResponse,
@@ -28,6 +29,10 @@ export const syncGrid = async (mood?: string) => {
       json: mood ? { mood } : {},
     })
     .json<{ grid: GridMovie[]; syncs_remaining: number }>();
+};
+
+export const dealersChoice = async (): Promise<DealersChoiceResponse> => {
+  return api.post("v1/grid/dealers-choice").json<DealersChoiceResponse>();
 };
 
 export const getHistory = async (action?: string) => {

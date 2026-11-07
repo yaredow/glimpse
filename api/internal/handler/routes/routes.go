@@ -45,6 +45,7 @@ func Register(
 	e.GET("/v1/grid/today", recH.GetGrid, middleware.RequireAuthenticatedUser())
 	e.POST("/v1/grid/interactions", recH.RecordInteraction, middleware.RequireAuthenticatedUser())
 	e.POST("/v1/grid/sync", recH.SyncGrid, middleware.RequireAuthenticatedUser())
+	e.POST("/v1/grid/dealers-choice", recH.DealersChoice, middleware.RequireAuthenticatedUser())
 	e.GET("/v1/me/history", recH.GetHistory, middleware.RequireAuthenticatedUser())
 
 	movieH := handler.NewMovieHandler(movieSvc)

@@ -21,6 +21,7 @@ var (
 
 var (
 	ErrNotEnoughCandidates  = errors.New("not enough movies matching preferences")
+	ErrNoEligibleCandidates = errors.New("no eligible candidates remaining in current reel")
 	ErrInvalidAction        = errors.New("invalid action")
 	ErrMissingGridSessionID = errors.New("existing grid is missing grid session id")
 	ErrNoSyncsRemaining     = errors.New("no syncs remaining today")

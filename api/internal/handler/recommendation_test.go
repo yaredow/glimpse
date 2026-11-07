@@ -44,6 +44,13 @@ func (m *mockGridService) GetHistory(ctx context.Context, userID int64, action s
 	return history, args.Error(1)
 }
 
+func (m *mockGridService) DealersChoice(ctx context.Context, userID int64) (*domain.GridSlotResponse, []domain.GridSlotResponse, int, error) {
+	args := m.Called(ctx, userID)
+	chosen, _ := args.Get(0).(*domain.GridSlotResponse)
+	grid, _ := args.Get(1).([]domain.GridSlotResponse)
+	return chosen, grid, args.Int(2), args.Error(3)
+}
+
 func newRecHandlerTest(t *testing.T) (*mockGridService, *handler.RecommendationHandler, *echo.Echo) {
 	t.Helper()
 	mockSvc := &mockGridService{}
@@ -381,5 +388,83 @@ func TestRecommendationHandler_GetHistory(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, resp.History, 1)
 		require.Equal(t, "Inception", resp.History[0].Title)
+	})
+}
+
+// ─── DealersChoice ────────────────────────────────────────────────────────
+
+func TestRecommendationHandler_DealersChoice(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		action := domain.ActionPickTonight
+		chosen := &domain.GridSlotResponse{
+			MovieID:    101,
+			SlotNumber: 2,
+			Title:      "Interstellar",
+			Action:     &action,
+		}
+		grid := []domain.GridSlotResponse{*chosen}
+
+		mockSvc.On("DealersChoice", mock.Anything, int64(1)).Return(chosen, grid, 3, nil)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/dealers-choice", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.DealersChoice(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, rec.Code)
+
+		var resp struct {
+			Movie               domain.GridSlotResponse   `json:"movie"`
+			Grid                []domain.GridSlotResponse `json:"grid"`
+			RemainingCandidates int                       `json:"remaining_candidates"`
+		}
+		err = json.Unmarshal(rec.Body.Bytes(), &resp)
+		require.NoError(t, err)
+		require.Equal(t, int64(101), resp.Movie.MovieID)
+		require.Equal(t, "Interstellar", resp.Movie.Title)
+		require.Equal(t, 3, resp.RemainingCandidates)
+		require.Len(t, resp.Grid, 1)
+	})
+
+	t.Run("no eligible candidates returns 422", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		mockSvc.On("DealersChoice", mock.Anything, int64(1)).Return(nil, nil, 0, domain.ErrNoEligibleCandidates)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/dealers-choice", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.DealersChoice(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+	})
+
+	t.Run("selection locked returns 409", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		mockSvc.On("DealersChoice", mock.Anything, int64(1)).Return(nil, nil, 0, domain.ErrSelectionLocked)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/dealers-choice", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.DealersChoice(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusConflict, rec.Code)
 	})
 }

@@ -1,5 +1,12 @@
 import { useState, useCallback } from "react";
-import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
@@ -18,6 +25,9 @@ interface DeckStackProps {
   onSkip: (movie: GridMovie) => void;
   onViewDetails: (movie: GridMovie) => void;
   onReshuffle?: () => void;
+  onDealersChoice?: () => void;
+  isDealersChoiceLoading?: boolean;
+  jumpToMovieId?: number | null;
 }
 
 interface ReelClosedContent {
@@ -99,6 +109,9 @@ export default function DeckStack({
   onSkip,
   onViewDetails,
   onReshuffle,
+  onDealersChoice,
+  isDealersChoiceLoading,
+  jumpToMovieId,
 }: DeckStackProps) {
   const theme = useAppTheme();
 
@@ -121,6 +134,9 @@ export default function DeckStack({
   // Track session ID so when a fresh batch is synced, activeIndex resets to the new batch
   const currentSessionId = movies[0]?.grid_session_id;
   const [prevSessionId, setPrevSessionId] = useState(currentSessionId);
+
+  // Track explicit jump target (e.g. from Dealer's Choice)
+  const [prevJumpToMovieId, setPrevJumpToMovieId] = useState(jumpToMovieId);
 
   // 1. Sync index during render if currentPickId changes externally
   if (currentPickId !== prevPickId) {
@@ -173,6 +189,15 @@ export default function DeckStack({
       } else {
         setActiveIndex(movies.length);
       }
+    }
+  }
+
+  // 5. Jump directly to requested card (e.g. Dealer's Choice)
+  if (jumpToMovieId && jumpToMovieId !== prevJumpToMovieId) {
+    setPrevJumpToMovieId(jumpToMovieId);
+    const targetIdx = movies.findIndex((m) => m.movie_id === jumpToMovieId);
+    if (targetIdx >= 0) {
+      setActiveIndex(targetIdx);
     }
   }
 
@@ -249,8 +274,13 @@ export default function DeckStack({
 
   return (
     <View style={styles.container}>
-      {/* Progress Indicator ("2 of 5", R-01) */}
-      <View style={styles.metaBar}>
+      {/* Progress Indicator ("2 of 5", R-01) & Dealer's Choice (R-04) */}
+      <View
+        style={[
+          styles.metaBar,
+          (isDeckCompleted || !onDealersChoice) && styles.metaBarCentered,
+        ]}
+      >
         <View
           style={[
             styles.progressBadge,
@@ -268,6 +298,49 @@ export default function DeckStack({
               : `REEL ${String(Math.min(activeIndex + 1, movies.length)).padStart(2, "0")} OF ${String(movies.length).padStart(2, "0")}`}
           </Text>
         </View>
+
+        {!isDeckCompleted && onDealersChoice ? (
+          <Pressable
+            onPress={onDealersChoice}
+            disabled={isDealersChoiceLoading}
+            style={({ pressed }) => [
+              styles.dealersChoiceBadge,
+              {
+                backgroundColor: theme.colors.elevation.level2,
+                borderColor: theme.colors.outlineVariant,
+              },
+              pressed && {
+                opacity: 0.75,
+                backgroundColor: theme.colors.elevation.level3,
+              },
+              isDealersChoiceLoading && { opacity: 0.6 },
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Let Glimpse choose tonight's movie"
+          >
+            {isDealersChoiceLoading ? (
+              <ActivityIndicator
+                size="small"
+                color={theme.colors.primary}
+                style={styles.spinner}
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name="dice-multiple"
+                size={14}
+                color={theme.colors.primary}
+              />
+            )}
+            <Text
+              style={[
+                styles.dealersChoiceText,
+                { color: theme.colors.textPrimary },
+              ]}
+            >
+              {isDealersChoiceLoading ? "Choosing..." : "Dealer's Choice"}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
 
       {/* Physical 3D Stack Viewport (R-01) */}
@@ -525,9 +598,30 @@ const styles = StyleSheet.create({
   metaBar: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
     width: CARD_WIDTH,
     marginBottom: 8,
+  },
+  metaBarCentered: {
+    justifyContent: "center",
+  },
+  dealersChoiceBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  dealersChoiceText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 10.5,
+    letterSpacing: 0.4,
+  },
+  spinner: {
+    width: 14,
+    height: 14,
   },
   progressBadge: {
     paddingHorizontal: 12,

@@ -36,6 +36,7 @@ func getStatusCode(err error) int {
 		errors.Is(err, domain.ErrPasswordTooShort),
 		errors.Is(err, domain.ErrBadParamInput),
 		errors.Is(err, domain.ErrNotEnoughCandidates),
+		errors.Is(err, domain.ErrNoEligibleCandidates),
 		errors.Is(err, domain.ErrInvalidAction):
 		return http.StatusUnprocessableEntity
 	case errors.Is(err, domain.ErrMissingGridSessionID):

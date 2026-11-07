@@ -82,6 +82,12 @@ export interface MovieDetailResponse {
   movie: Movie;
 }
 
+export interface DealersChoiceResponse {
+  movie: GridMovie;
+  grid: GridMovie[];
+  remaining_candidates: number;
+}
+
 export interface PaginatedResponse<T> {
   metadata: {
     current_page: number;

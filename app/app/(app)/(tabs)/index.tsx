@@ -13,6 +13,7 @@ import { useAppTheme } from "@/lib/theme";
 import { useGetTodaysGrid } from "@/features/movies/hooks/query/use-today-grid";
 import { useRecordInteraction } from "@/features/movies/hooks/mutations/use-record-interactions";
 import { useSyncGrid } from "@/features/movies/hooks/mutations/use-sync-grid";
+import { useDealersChoice } from "@/features/movies/hooks/mutations/use-dealers-choice";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import type { GridMovie } from "@/features/movies/types/movies.type";
 import ExploreHeader from "@/features/movies/components/explore-header";
@@ -31,6 +32,8 @@ export default function TodayTab() {
   const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
   const recordInteraction = useRecordInteraction();
   const syncMutation = useSyncGrid();
+  const dealersChoiceMutation = useDealersChoice();
+  const [jumpToMovieId, setJumpToMovieId] = useState<number | null>(null);
   const [isLockingIn, setIsLockingIn] = useState(false);
 
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -331,6 +334,28 @@ export default function TodayTab() {
     setConfirmDialog({ visible: true, action: "sync", movie: null });
   }, [syncsRemaining, syncMutation.isPending]);
 
+  const handleDealersChoice = useCallback(() => {
+    if (dealersChoiceMutation.isPending) return;
+
+    dealersChoiceMutation.mutate(undefined, {
+      onSuccess: (res) => {
+        setJumpToMovieId(res.movie.movie_id);
+        Toast.show({
+          type: "success",
+          text1: "Dealer's Choice 🎲",
+          text2: `We picked "${res.movie.title}" for tonight. Lock it in when you're ready!`,
+        });
+      },
+      onError: (err) => {
+        Toast.show({
+          type: "error",
+          text1: "Dealer's Choice",
+          text2: err.message || "Failed to pick candidate.",
+        });
+      },
+    });
+  }, [dealersChoiceMutation]);
+
   const handleConfirmDialogAction = useCallback(
     (mood?: SyncMood) => {
       const { action, movie } = confirmDialog;
@@ -432,6 +457,9 @@ export default function TodayTab() {
               onSkip={handleSkip}
               onViewDetails={handleViewMovie}
               onReshuffle={handlePromptSync}
+              onDealersChoice={handleDealersChoice}
+              isDealersChoiceLoading={dealersChoiceMutation.isPending}
+              jumpToMovieId={jumpToMovieId}
             />
           </View>
         )}
