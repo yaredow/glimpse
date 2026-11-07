@@ -407,6 +407,18 @@ export default function TodayTab() {
     }
   }, [movies, tonightPick]);
 
+  const handleKeepBrowsing = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const otherIdx = movies.findIndex(
+      (m, idx) => idx !== activeIndex && !isResolvedAction(m.action),
+    );
+    if (otherIdx >= 0) {
+      setActiveIndex(otherIdx);
+    } else {
+      setActiveIndex((activeIndex + 1) % Math.max(movies.length, 1));
+    }
+  }, [movies, activeIndex]);
+
   const handleDealersChoice = useCallback(() => {
     if (dealersChoiceMutation.isPending) return;
 
@@ -542,6 +554,7 @@ export default function TodayTab() {
               onReshuffle={handlePromptSync}
               onDealersChoice={handleDealersChoice}
               isDealersChoiceLoading={dealersChoiceMutation.isPending}
+              onKeepBrowsing={handleKeepBrowsing}
             />
           </View>
         )}
@@ -585,7 +598,11 @@ export default function TodayTab() {
                     },
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel={`Return to ${tonightPick.title}`}
+                  accessibilityLabel={
+                    tonightPick.is_dealers_choice
+                      ? "Return to recommendation"
+                      : `Return to ${tonightPick.title}`
+                  }
                 >
                   <MaterialCommunityIcons
                     name="arrow-u-left-top"
@@ -599,7 +616,9 @@ export default function TodayTab() {
                     ]}
                     numberOfLines={1}
                   >
-                    RETURN TO &quot;{tonightPick.title.toUpperCase()}&quot;
+                    {tonightPick.is_dealers_choice
+                      ? "RETURN TO RECOMMENDATION"
+                      : `RETURN TO "${tonightPick.title.toUpperCase()}"`}
                   </Text>
                 </Pressable>
               )

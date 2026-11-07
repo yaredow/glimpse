@@ -58,7 +58,16 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 				  AND ui.movie_id = d.movie_id
 				  AND ui.grid_session_id = d.grid_session_id
 				  AND ui.action = 'locked_in'
-			) AS is_locked_in
+			) AS is_locked_in,
+			EXISTS (
+				SELECT 1
+				FROM user_interactions ui
+				WHERE ui.user_id = d.user_id
+				  AND ui.movie_id = d.movie_id
+				  AND ui.grid_session_id = d.grid_session_id
+				  AND ui.action = 'pick_tonight'
+				  AND ui.reveal_to_action_ms = -1
+			) AS is_dealers_choice
 		FROM daily_pools d
 		JOIN movies m ON m.id = d.movie_id
 		WHERE d.user_id = $1
@@ -92,6 +101,7 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			&s.Action,
 			&s.ActionAt,
 			&s.IsLockedIn,
+			&s.IsDealersChoice,
 		); err != nil {
 			return nil, err
 		}

@@ -467,4 +467,21 @@ func TestRecommendationHandler_DealersChoice(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusConflict, rec.Code)
 	})
+
+	t.Run("dealers choice already used returns 409", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		mockSvc.On("DealersChoice", mock.Anything, int64(1)).Return(nil, nil, 0, domain.ErrDealersChoiceAlreadyUsed)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/dealers-choice", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.DealersChoice(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusConflict, rec.Code)
+	})
 }

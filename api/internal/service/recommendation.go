@@ -39,6 +39,7 @@ type RecGridHistoryRepository interface {
 type RecInteractionRepository interface {
 	Insert(ctx context.Context, interaction *domain.Interaction) error
 	GetHistory(ctx context.Context, userID int64, action string) ([]domain.HistoryMovie, error)
+	HasUsedDealersChoice(ctx context.Context, userID int64, sessionID uuid.UUID) (bool, error)
 }
 
 type RecUserRepository interface {
@@ -485,6 +486,14 @@ func (rs *RecommendationService) DealersChoice(ctx context.Context, userID int64
 		return nil, nil, 0, domain.ErrSelectionLocked
 	}
 
+	alreadyUsed, err := rs.interactions.HasUsedDealersChoice(ctx, userID, sessionID)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("check dealers choice usage: %w", err)
+	}
+	if alreadyUsed {
+		return nil, nil, 0, domain.ErrDealersChoiceAlreadyUsed
+	}
+
 	var candidates []domain.GridSlotResponse
 	for _, slot := range grid {
 		if slot.Action == nil || (*slot.Action != domain.ActionSkipped && *slot.Action != domain.ActionSeenBefore && *slot.Action != domain.ActionWatched) {
@@ -549,8 +558,9 @@ func (rs *RecommendationService) DealersChoice(ctx context.Context, userID int64
 		}
 	}
 
-	// Record pick_tonight for winner
-	if err := rs.RecordInteraction(ctx, userID, winner.MovieID, string(domain.ActionPickTonight), sessionID, &winner.SlotNumber, nil, nil); err != nil {
+	// Record pick_tonight for winner with sentinel reveal_to_action_ms = -1 to denote dealer's choice
+	dealersChoiceSentinel := -1
+	if err := rs.RecordInteraction(ctx, userID, winner.MovieID, string(domain.ActionPickTonight), sessionID, &winner.SlotNumber, &dealersChoiceSentinel, nil); err != nil {
 		return nil, nil, 0, fmt.Errorf("record dealers choice pick: %w", err)
 	}
 

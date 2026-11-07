@@ -58,6 +58,13 @@ func (ir *InteractionRepository) HasWatched(ctx context.Context, userID, movieID
 	return exists, err
 }
 
+func (ir *InteractionRepository) HasUsedDealersChoice(ctx context.Context, userID int64, sessionID uuid.UUID) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM user_interactions WHERE user_id = $1 AND grid_session_id = $2 AND reveal_to_action_ms = -1)`
+	var used bool
+	err := ir.db.QueryRow(ctx, query, userID, sessionID).Scan(&used)
+	return used, err
+}
+
 func (ir *InteractionRepository) List(ctx context.Context, userID int64, limit int) ([]*domain.Interaction, error) {
 	query := `SELECT id, user_id, movie_id, action, grid_session_id, grid_position, reveal_to_action_ms, rating, acted_at FROM user_interactions WHERE user_id = $1 ORDER BY acted_at DESC LIMIT $2`
 

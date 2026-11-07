@@ -109,11 +109,11 @@ func TestGridRepository_GetByID(t *testing.T) {
 		rows := pgxmock.NewRows([]string{
 			"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
 			"tagline", "genres", "title", "poster_path", "backdrop_path",
-			"vote_average", "release_date", "runtime", "grid_session_id", "action", "action_at", "is_locked_in",
+			"vote_average", "release_date", "runtime", "grid_session_id", "action", "action_at", "is_locked_in", "is_dealers_choice",
 		}).AddRow(
 			int64(10), 550, 1, false, "A mysterious journey",
 			&tagline, []string{"Drama", "Action"}, "Inception", &posterPath, &backdropPath,
-			8.5, releaseDate, &runtime, sessionID, nil, nil, false,
+			8.5, releaseDate, &runtime, sessionID, nil, nil, false, false,
 		)
 
 		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 AND d.pool_date = CURRENT_DATE ORDER BY d.slot_number`).
@@ -152,11 +152,11 @@ func TestGridRepository_GetByID(t *testing.T) {
 		rows := pgxmock.NewRows([]string{
 			"id", "tmdb_id", "slot_number", "is_revealed", "vague_description",
 			"tagline", "genres", "title", "poster_path", "backdrop_path",
-			"vote_average", "release_date", "runtime", "grid_session_id", "action", "action_at", "is_locked_in",
+			"vote_average", "release_date", "runtime", "grid_session_id", "action", "action_at", "is_locked_in", "is_dealers_choice",
 		}).AddRow(
 			int64(10), 550, 1, false, "A mysterious journey",
 			nil, []string{"Drama"}, "Inception", nil, nil,
-			8.5, releaseDate, nil, sessionID, &action, &actionAt, true,
+			8.5, releaseDate, nil, sessionID, &action, &actionAt, true, false,
 		)
 
 		mock.ExpectQuery(`SELECT.*FROM daily_pools d JOIN movies m ON m.id = d.movie_id WHERE d.user_id = \$1 AND d.pool_date = CURRENT_DATE ORDER BY d.slot_number`).

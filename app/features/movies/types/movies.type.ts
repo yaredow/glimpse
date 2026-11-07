@@ -57,6 +57,7 @@ export interface GridMovie {
   action?: MovieInteractionAction | null;
   action_at?: string;
   is_locked_in?: boolean;
+  is_dealers_choice?: boolean;
   movie_id: number;
   tmdb_id: number;
   vague_description: string;

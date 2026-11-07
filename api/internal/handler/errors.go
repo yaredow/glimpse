@@ -25,6 +25,7 @@ func getStatusCode(err error) int {
 		errors.Is(err, domain.ErrEditConflict),
 		errors.Is(err, domain.ErrNoSyncsRemaining),
 		errors.Is(err, domain.ErrSelectionLocked),
+		errors.Is(err, domain.ErrDealersChoiceAlreadyUsed),
 		errors.Is(err, domain.ErrMovieAlreadyResolved):
 		return http.StatusConflict
 	case errors.Is(err, domain.ErrInvalidCredentials):
