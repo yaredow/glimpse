@@ -11,12 +11,73 @@ import { isResolvedAction } from "../utils/deck";
 interface DeckStackProps {
   movies: GridMovie[];
   currentPickId?: number;
+  syncsRemaining?: number;
   onReveal?: (movie: GridMovie) => void;
   onPickTonight: (movie: GridMovie) => void;
   onSeen: (movie: GridMovie) => void;
   onSkip: (movie: GridMovie) => void;
   onViewDetails: (movie: GridMovie) => void;
   onReshuffle?: () => void;
+}
+
+interface ReelClosedContent {
+  title: string;
+  subtitle: string;
+  buttonText: string | null;
+  canReshuffle: boolean;
+}
+
+function getReelClosedContent(
+  currentPickId?: number,
+  syncsRemaining: number = 3,
+): ReelClosedContent {
+  if (currentPickId) {
+    return {
+      title: "Tonight's Feature Set",
+      subtitle:
+        "You've resolved this reel. Your feature is ready to lock in below!",
+      buttonText: null,
+      canReshuffle: false,
+    };
+  }
+
+  if (syncsRemaining >= 3) {
+    return {
+      title: "Initial Reel Resolved",
+      subtitle:
+        "None of tonight's first five hit the mark? Draw a fresh batch for a new vibe — you have 3 reshuffles left tonight.",
+      buttonText: "Draw Fresh Reel (3 left)",
+      canReshuffle: true,
+    };
+  }
+
+  if (syncsRemaining === 2) {
+    return {
+      title: "Second Reel Resolved",
+      subtitle:
+        "Still searching? Reshuffle for a different mood (2 left), or call it a night.",
+      buttonText: "Reshuffle Reel (2 left)",
+      canReshuffle: true,
+    };
+  }
+
+  if (syncsRemaining === 1) {
+    return {
+      title: "Third Reel Resolved",
+      subtitle:
+        "One final reshuffle remaining for tonight. Ready to draw your last batch?",
+      buttonText: "Final Reshuffle (1 left)",
+      canReshuffle: true,
+    };
+  }
+
+  return {
+    title: "That's a Wrap for Tonight",
+    subtitle:
+      "You've explored all your reels for today. No syncs remaining — your daily five will reset at midnight.",
+    buttonText: null,
+    canReshuffle: false,
+  };
 }
 
 const { width: SW, height: SH } = Dimensions.get("window");
@@ -31,6 +92,7 @@ export const CARD_HEIGHT = targetHeight;
 export default function DeckStack({
   movies,
   currentPickId,
+  syncsRemaining = 3,
   onReveal: _onReveal,
   onPickTonight,
   onSeen,
@@ -56,6 +118,10 @@ export default function DeckStack({
   const [activeStamp, setActiveStamp] = useState<CardStamp>(null);
   const [prevPickId, setPrevPickId] = useState(currentPickId);
 
+  // Track session ID so when a fresh batch is synced, activeIndex resets to the new batch
+  const currentSessionId = movies[0]?.grid_session_id;
+  const [prevSessionId, setPrevSessionId] = useState(currentSessionId);
+
   // 1. Sync index during render if currentPickId changes externally
   if (currentPickId !== prevPickId) {
     setPrevPickId(currentPickId);
@@ -67,7 +133,29 @@ export default function DeckStack({
     }
   }
 
-  // 2. Reactive Auto-Advancement: If the active movie was resolved externally
+  // 2. Sync index during render if a new batch was synced (session ID changed)
+  if (currentSessionId && currentSessionId !== prevSessionId) {
+    setPrevSessionId(currentSessionId);
+    const firstUnresolved = movies.findIndex(
+      (m) => !isResolvedAction(m.action),
+    );
+    setActiveIndex(firstUnresolved >= 0 ? firstUnresolved : 0);
+  }
+
+  // 3. Fallback: If deck was marked completed (activeIndex >= movies.length), but movies now has unresolved cards
+  if (
+    activeIndex >= movies.length &&
+    movies.some((m) => !isResolvedAction(m.action))
+  ) {
+    const firstUnresolved = movies.findIndex(
+      (m) => !isResolvedAction(m.action),
+    );
+    if (firstUnresolved >= 0) {
+      setActiveIndex(firstUnresolved);
+    }
+  }
+
+  // 4. Reactive Auto-Advancement: If the active movie was resolved externally
   // (e.g. passed/seen from detail screen), adjust index during render to the next unresolved card.
   const currentCard = movies[activeIndex];
   if (currentCard && isResolvedAction(currentCard.action)) {
@@ -92,6 +180,8 @@ export default function DeckStack({
     movies.length > 0 &&
     (activeIndex >= movies.length ||
       movies.every((m) => isResolvedAction(m.action)));
+
+  const closedContent = getReelClosedContent(currentPickId, syncsRemaining);
 
   const activeMovie = !isDeckCompleted
     ? (movies[activeIndex] as GridMovie | undefined)
@@ -205,7 +295,7 @@ export default function DeckStack({
                 { color: theme.colors.textPrimary },
               ]}
             >
-              Reel Closed for Tonight
+              {closedContent.title}
             </Text>
             <Text
               style={[
@@ -213,11 +303,9 @@ export default function DeckStack({
                 { color: theme.colors.textSecondary },
               ]}
             >
-              {currentPickId
-                ? "You've resolved tonight's five. Your feature is ready to lock in below!"
-                : "You've resolved tonight's five. Ready to call it a night, or reshuffle for a new vibe?"}
+              {closedContent.subtitle}
             </Text>
-            {onReshuffle && !currentPickId ? (
+            {onReshuffle && closedContent.canReshuffle && closedContent.buttonText ? (
               <Pressable
                 onPress={onReshuffle}
                 style={({ pressed }) => [
@@ -229,7 +317,7 @@ export default function DeckStack({
                   pressed && { opacity: 0.8 },
                 ]}
                 accessibilityRole="button"
-                accessibilityLabel="Reshuffle tonight's reel"
+                accessibilityLabel={closedContent.buttonText}
               >
                 <MaterialCommunityIcons
                   name="sync"
@@ -242,7 +330,7 @@ export default function DeckStack({
                     { color: theme.colors.textPrimary },
                   ]}
                 >
-                  Reshuffle Tonight&apos;s Reel
+                  {closedContent.buttonText}
                 </Text>
               </Pressable>
             ) : null}

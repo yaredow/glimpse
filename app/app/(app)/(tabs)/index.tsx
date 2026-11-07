@@ -425,6 +425,7 @@ export default function TodayTab() {
             <DeckStack
               movies={movies}
               currentPickId={currentPickId}
+              syncsRemaining={syncsRemaining}
               onReveal={handleReveal}
               onPickTonight={handlePick}
               onSeen={handleSeen}
