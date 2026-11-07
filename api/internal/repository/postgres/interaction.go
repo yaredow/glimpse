@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"context"
+	"errors"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
 )
@@ -34,6 +36,19 @@ func (ir *InteractionRepository) Insert(ctx context.Context, interaction *domain
 	_, err := ir.db.Exec(ctx, query, args...)
 
 	return err
+}
+
+func (ir *InteractionRepository) GetLatestAction(ctx context.Context, userID, movieID int64, sessionID uuid.UUID) (*domain.ActionType, error) {
+	query := `SELECT action FROM user_interactions WHERE user_id = $1 AND movie_id = $2 AND grid_session_id = $3 ORDER BY acted_at DESC LIMIT 1`
+	var action domain.ActionType
+	err := ir.db.QueryRow(ctx, query, userID, movieID, sessionID).Scan(&action)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &action, nil
 }
 
 func (ir *InteractionRepository) HasWatched(ctx context.Context, userID, movieID int64) (bool, error) {

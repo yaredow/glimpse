@@ -176,3 +176,45 @@ func TestInteractionRepository_GetHistory(t *testing.T) {
 	require.Equal(t, 4, *history[0].Rating)
 	require.NoError(t, mock.ExpectationsWereMet())
 }
+
+func TestInteractionRepository_GetLatestAction(t *testing.T) {
+	t.Parallel()
+
+	t.Run("found action", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewInteractionRepository(&postgres.DB{Pool: mock})
+		sessionID := uuid.New()
+
+		rows := pgxmock.NewRows([]string{"action"}).AddRow(domain.ActionSkipped)
+		mock.ExpectQuery(`SELECT action FROM user_interactions WHERE user_id = \$1 AND movie_id = \$2 AND grid_session_id = \$3 ORDER BY acted_at DESC LIMIT 1`).
+			WithArgs(int64(1), int64(10), sessionID).
+			WillReturnRows(rows)
+
+		action, err := repo.GetLatestAction(context.Background(), 1, 10, sessionID)
+		require.NoError(t, err)
+		require.NotNil(t, action)
+		require.Equal(t, domain.ActionSkipped, *action)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("no rows returns nil", func(t *testing.T) {
+		mock, err := pgxmock.NewPool()
+		require.NoError(t, err)
+		defer mock.Close()
+
+		repo := postgres.NewInteractionRepository(&postgres.DB{Pool: mock})
+		sessionID := uuid.New()
+
+		mock.ExpectQuery(`SELECT action FROM user_interactions WHERE user_id = \$1 AND movie_id = \$2 AND grid_session_id = \$3 ORDER BY acted_at DESC LIMIT 1`).
+			WithArgs(int64(1), int64(10), sessionID).
+			WillReturnRows(pgxmock.NewRows([]string{"action"}))
+
+		action, err := repo.GetLatestAction(context.Background(), 1, 10, sessionID)
+		require.NoError(t, err)
+		require.Nil(t, action)
+		require.NoError(t, mock.ExpectationsWereMet())
+	})
+}

@@ -1,17 +1,8 @@
 import { useState, useCallback } from "react";
-import {
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { useAppTheme } from "@/lib/theme";
 import MysteryCard, { CardStamp } from "./mystery-card";
 import type { GridMovie } from "../types/movies.type";
@@ -25,12 +16,11 @@ interface DeckStackProps {
   onSeen: (movie: GridMovie) => void;
   onSkip: (movie: GridMovie) => void;
   onViewDetails: (movie: GridMovie) => void;
+  onReshuffle?: () => void;
 }
 
 const { width: SW, height: SH } = Dimensions.get("window");
 
-// Target 1:1.5 cinema poster ratio, maximizing card presence
-// Sized so deck stack, meta bar, decision buttons, and bottom dock have ample room without vertical scrolling
 const maxAllowedHeight = Math.max(SH - 270, 360);
 const targetWidth = Math.min(Math.round(SW * 0.88), 356);
 const targetHeight = Math.min(Math.round(targetWidth * 1.5), maxAllowedHeight);
@@ -41,30 +31,32 @@ export const CARD_HEIGHT = targetHeight;
 export default function DeckStack({
   movies,
   currentPickId,
-  onReveal,
+  onReveal: _onReveal,
   onPickTonight,
   onSeen,
   onSkip,
   onViewDetails,
+  onReshuffle,
 }: DeckStackProps) {
   const theme = useAppTheme();
 
-  // Determine top card index: prioritize active pick, or first unresolved card
   const getInitialIndex = () => {
     if (movies.length === 0) return 0;
     if (currentPickId) {
       const pickIdx = movies.findIndex((m) => m.movie_id === currentPickId);
       if (pickIdx >= 0) return pickIdx;
     }
-    const firstUnresolved = movies.findIndex((m) => !isResolvedAction(m.action));
-    return firstUnresolved >= 0 ? firstUnresolved : 0;
+    const firstUnresolved = movies.findIndex(
+      (m) => !isResolvedAction(m.action),
+    );
+    return firstUnresolved >= 0 ? firstUnresolved : movies.length;
   };
 
   const [activeIndex, setActiveIndex] = useState(getInitialIndex);
   const [activeStamp, setActiveStamp] = useState<CardStamp>(null);
-
-  // Sync index if currentPickId changes externally
   const [prevPickId, setPrevPickId] = useState(currentPickId);
+
+  // 1. Sync index during render if currentPickId changes externally
   if (currentPickId !== prevPickId) {
     setPrevPickId(currentPickId);
     if (currentPickId) {
@@ -75,8 +67,39 @@ export default function DeckStack({
     }
   }
 
-  const activeMovie = movies[activeIndex] as GridMovie | undefined;
+  // 2. Reactive Auto-Advancement: If the active movie was resolved externally
+  // (e.g. passed/seen from detail screen), adjust index during render to the next unresolved card.
+  const currentCard = movies[activeIndex];
+  if (currentCard && isResolvedAction(currentCard.action)) {
+    const nextUnresolved = movies.findIndex(
+      (m, idx) => idx >= activeIndex && !isResolvedAction(m.action),
+    );
+    if (nextUnresolved >= 0) {
+      setActiveIndex(nextUnresolved);
+    } else {
+      const anyUnresolved = movies.findIndex(
+        (m) => !isResolvedAction(m.action),
+      );
+      if (anyUnresolved >= 0) {
+        setActiveIndex(anyUnresolved);
+      } else {
+        setActiveIndex(movies.length);
+      }
+    }
+  }
+
+  const isDeckCompleted =
+    movies.length > 0 &&
+    (activeIndex >= movies.length ||
+      movies.every((m) => isResolvedAction(m.action)));
+
+  const activeMovie = !isDeckCompleted
+    ? (movies[activeIndex] as GridMovie | undefined)
+    : undefined;
   const isPicked = activeMovie?.movie_id === currentPickId;
+  const isCurrentCardResolved = activeMovie
+    ? isResolvedAction(activeMovie.action)
+    : false;
 
   // Animation values for top card sliding away
   const translateX = useSharedValue(0);
@@ -105,32 +128,28 @@ export default function DeckStack({
   );
 
   const handlePass = useCallback(() => {
-    if (!activeMovie) return;
+    if (!activeMovie || isResolvedAction(activeMovie.action)) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setActiveStamp("PASSED");
 
     animateCardExit("left", () => {
       setActiveStamp(null);
       onSkip(activeMovie);
-      if (activeIndex < movies.length - 1) {
-        setActiveIndex((prev) => prev + 1);
-      }
+      setActiveIndex((prev) => prev + 1);
     });
-  }, [activeMovie, activeIndex, animateCardExit, movies.length, onSkip]);
+  }, [activeMovie, animateCardExit, onSkip]);
 
   const handleSeen = useCallback(() => {
-    if (!activeMovie) return;
+    if (!activeMovie || isResolvedAction(activeMovie.action)) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setActiveStamp("SEEN");
 
     animateCardExit("right", () => {
       setActiveStamp(null);
       onSeen(activeMovie);
-      if (activeIndex < movies.length - 1) {
-        setActiveIndex((prev) => prev + 1);
-      }
+      setActiveIndex((prev) => prev + 1);
     });
-  }, [activeMovie, activeIndex, animateCardExit, movies.length, onSeen]);
+  }, [activeMovie, animateCardExit, onSeen]);
 
   const handlePick = useCallback(() => {
     if (!activeMovie) return;
@@ -151,100 +170,171 @@ export default function DeckStack({
             },
           ]}
         >
-          <Text style={[styles.progressText, { color: theme.colors.textSecondary }]}>
-            REEL {String(activeIndex + 1).padStart(2, "0")} OF {String(movies.length).padStart(2, "0")}
+          <Text
+            style={[styles.progressText, { color: theme.colors.textSecondary }]}
+          >
+            {isDeckCompleted
+              ? "ALL REELS RESOLVED"
+              : `REEL ${String(Math.min(activeIndex + 1, movies.length)).padStart(2, "0")} OF ${String(movies.length).padStart(2, "0")}`}
           </Text>
         </View>
       </View>
 
       {/* Physical 3D Stack Viewport (R-01) */}
       <View style={styles.stackViewport}>
-        {movies.map((movie, index) => {
-          const offset = index - activeIndex;
-
-          // Render only the top card and up to two cards directly beneath it
-          if (offset < 0 || offset > 2) return null;
-
-          if (offset === 0) {
-            // Top face-up interactive card
-            return (
-              <Animated.View
-                key={movie.movie_id}
-                style={[
-                  styles.cardSlot,
+        {isDeckCompleted ? (
+          <View
+            style={[
+              styles.cardSlot,
+              styles.reelClosedCard,
+              {
+                backgroundColor: theme.colors.elevation.level1,
+                borderColor: theme.colors.outlineVariant,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="filmstrip-off"
+              size={48}
+              color={theme.colors.primary}
+              style={styles.reelClosedIcon}
+            />
+            <Text
+              style={[
+                styles.reelClosedTitle,
+                { color: theme.colors.textPrimary },
+              ]}
+            >
+              Reel Closed for Tonight
+            </Text>
+            <Text
+              style={[
+                styles.reelClosedSubtitle,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              {currentPickId
+                ? "You've resolved tonight's five. Your feature is ready to lock in below!"
+                : "You've resolved tonight's five. Ready to call it a night, or reshuffle for a new vibe?"}
+            </Text>
+            {onReshuffle && !currentPickId ? (
+              <Pressable
+                onPress={onReshuffle}
+                style={({ pressed }) => [
+                  styles.reshuffleBtn,
                   {
-                    zIndex: 10,
-                    transform: [
-                      { translateX },
-                      { rotate: `${rotateDeg.value}deg` },
-                    ],
-                    opacity: opacityVal,
+                    backgroundColor: theme.colors.elevation.level2,
+                    borderColor: theme.colors.outlineVariant,
                   },
+                  pressed && { opacity: 0.8 },
                 ]}
+                accessibilityRole="button"
+                accessibilityLabel="Reshuffle tonight's reel"
               >
-                <MysteryCard
-                  movie={movie}
-                  index={index}
-                  total={movies.length}
-                  isInteractive={true}
-                  stamp={activeStamp}
-                  onViewDetails={() => onViewDetails(movie)}
+                <MaterialCommunityIcons
+                  name="sync"
+                  size={16}
+                  color={theme.colors.textPrimary}
                 />
-              </Animated.View>
-            );
-          }
+                <Text
+                  style={[
+                    styles.reshuffleBtnText,
+                    { color: theme.colors.textPrimary },
+                  ]}
+                >
+                  Reshuffle Tonight&apos;s Reel
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
+        ) : (
+          movies.map((movie, index) => {
+            const offset = index - activeIndex;
 
-          // Background card 1 (peeking behind top card)
-          if (offset === 1) {
-            return (
-              <View
-                key={movie.movie_id}
-                style={[
-                  styles.cardSlot,
-                  styles.backgroundLayer1,
-                  { zIndex: 9 },
-                ]}
-                pointerEvents="none"
-              >
-                <MysteryCard
-                  movie={movie}
-                  index={index}
-                  total={movies.length}
-                  isInteractive={false}
-                />
-              </View>
-            );
-          }
+            // Render only the top card and up to two cards directly beneath it
+            if (offset < 0 || offset > 2) return null;
 
-          // Background card 2 (deepest visible card in physical stack)
-          if (offset === 2) {
-            return (
-              <View
-                key={movie.movie_id}
-                style={[
-                  styles.cardSlot,
-                  styles.backgroundLayer2,
-                  { zIndex: 8 },
-                ]}
-                pointerEvents="none"
-              >
-                <MysteryCard
-                  movie={movie}
-                  index={index}
-                  total={movies.length}
-                  isInteractive={false}
-                />
-              </View>
-            );
-          }
+            if (offset === 0) {
+              // Top face-up interactive card
+              return (
+                <Animated.View
+                  key={movie.movie_id}
+                  style={[
+                    styles.cardSlot,
+                    {
+                      zIndex: 10,
+                      transform: [
+                        { translateX },
+                        { rotate: `${rotateDeg.value}deg` },
+                      ],
+                      opacity: opacityVal,
+                    },
+                  ]}
+                >
+                  <MysteryCard
+                    movie={movie}
+                    index={index}
+                    total={movies.length}
+                    isInteractive={true}
+                    stamp={activeStamp}
+                    onViewDetails={() => onViewDetails(movie)}
+                  />
+                </Animated.View>
+              );
+            }
 
-          return null;
-        })}
+            // Background card 1 (peeking behind top card)
+            if (offset === 1) {
+              return (
+                <View
+                  key={movie.movie_id}
+                  style={[
+                    styles.cardSlot,
+                    styles.backgroundLayer1,
+                    { zIndex: 9 },
+                  ]}
+                  pointerEvents="none"
+                >
+                  <MysteryCard
+                    movie={movie}
+                    index={index}
+                    total={movies.length}
+                    isInteractive={false}
+                  />
+                </View>
+              );
+            }
+
+            // Background card 2 (deepest visible card in physical stack)
+            if (offset === 2) {
+              return (
+                <View
+                  key={movie.movie_id}
+                  style={[
+                    styles.cardSlot,
+                    styles.backgroundLayer2,
+                    { zIndex: 8 },
+                  ]}
+                  pointerEvents="none"
+                >
+                  <MysteryCard
+                    movie={movie}
+                    index={index}
+                    total={movies.length}
+                    isInteractive={false}
+                  />
+                </View>
+              );
+            }
+
+            return null;
+          })
+        )}
       </View>
 
-      {/* Decision Actions: 3 buttons always active (R-01 & R-05) */}
+      {/* Decision Actions: 3 buttons active if activeMovie exists and is unresolved */}
       <View style={styles.bottomBar}>
-        {activeMovie ? (
+        {activeMovie && !isDeckCompleted && !isCurrentCardResolved ? (
           <View style={styles.actionsRow}>
             {/* Pass */}
             <Pressable
@@ -267,7 +357,10 @@ export default function DeckStack({
                 color={theme.colors.textMuted}
               />
               <Text
-                style={[styles.actionBtnText, { color: theme.colors.textSecondary }]}
+                style={[
+                  styles.actionBtnText,
+                  { color: theme.colors.textSecondary },
+                ]}
               >
                 Pass
               </Text>
@@ -294,7 +387,10 @@ export default function DeckStack({
                 color={theme.colors.textPrimary}
               />
               <Text
-                style={[styles.actionBtnText, { color: theme.colors.textPrimary }]}
+                style={[
+                  styles.actionBtnText,
+                  { color: theme.colors.textPrimary },
+                ]}
               >
                 Seen
               </Text>
@@ -369,6 +465,48 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
   },
+  reelClosedCard: {
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  reelClosedIcon: {
+    marginBottom: 16,
+  },
+  reelClosedTitle: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 20,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  reelClosedSubtitle: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
+    paddingHorizontal: 10,
+  },
+  reshuffleBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  reshuffleBtnText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+  },
   backgroundLayer1: {
     transform: [{ scale: 0.94 }, { translateY: 10 }, { rotate: "2deg" }],
     opacity: 0.82,
@@ -425,4 +563,3 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
 });
-

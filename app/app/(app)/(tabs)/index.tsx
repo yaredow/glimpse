@@ -430,6 +430,7 @@ export default function TodayTab() {
               onSeen={handleSeen}
               onSkip={handleSkip}
               onViewDetails={handleViewMovie}
+              onReshuffle={handlePromptSync}
             />
           </View>
         )}

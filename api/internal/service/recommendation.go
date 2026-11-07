@@ -375,6 +375,30 @@ func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, 
 
 	return rs.db.ExecTx(ctx, func(tx pgx.Tx) error {
 		txDB := postgres.NewDBFromTx(tx)
+		itx := postgres.NewInteractionRepository(txDB)
+
+		latestAction, err := itx.GetLatestAction(ctx, userID, movieID, sessionID)
+		if err != nil {
+			return fmt.Errorf("get latest action: %w", err)
+		}
+
+		// 1. Idempotency guard: If the movie is already in this exact state, succeed without double-applying side-effects
+		if latestAction != nil && *latestAction == domain.ActionType(action) {
+			return nil
+		}
+
+		// 2. Terminal state guard: If already resolved (skipped, seen_before, watched), disallow conflicting transitions
+		if latestAction != nil {
+			switch *latestAction {
+			case domain.ActionSkipped, domain.ActionSeenBefore, domain.ActionWatched:
+				return domain.ErrMovieAlreadyResolved
+			case domain.ActionLockedIn:
+				// Once locked in, only watching/logging verdict is permitted
+				if action != string(domain.ActionWatched) {
+					return domain.ErrSelectionLocked
+				}
+			}
+		}
 
 		atx := postgres.NewAffinityRepository(txDB)
 		if weight.Delta != 0 {
@@ -385,7 +409,6 @@ func (rs *RecommendationService) RecordInteraction(ctx context.Context, userID, 
 			}
 		}
 
-		itx := postgres.NewInteractionRepository(txDB)
 		if err := itx.Insert(ctx, &domain.Interaction{
 			UserID:           userID,
 			MovieID:          movieID,

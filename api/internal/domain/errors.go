@@ -25,4 +25,5 @@ var (
 	ErrMissingGridSessionID = errors.New("existing grid is missing grid session id")
 	ErrNoSyncsRemaining     = errors.New("no syncs remaining today")
 	ErrSelectionLocked      = errors.New("movie selection already locked for today")
+	ErrMovieAlreadyResolved = errors.New("movie already resolved for today")
 )
