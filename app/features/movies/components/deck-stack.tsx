@@ -29,7 +29,6 @@ interface DeckStackProps {
   onReshuffle?: () => void;
   onDealersChoice?: () => void;
   isDealersChoiceLoading?: boolean;
-  onKeepBrowsing?: () => void;
 }
 
 interface ReelClosedContent {
@@ -115,7 +114,6 @@ export default function DeckStack({
   onReshuffle,
   onDealersChoice,
   isDealersChoiceLoading,
-  onKeepBrowsing,
 }: DeckStackProps) {
   const theme = useAppTheme();
   const [activeStamp, setActiveStamp] = useState<CardStamp>(null);
@@ -440,158 +438,98 @@ export default function DeckStack({
         )}
       </View>
 
-      {/* Decision Actions: 3 buttons active if activeMovie exists and is unresolved */}
-      <View style={styles.bottomBar}>
-        {activeMovie && !isDeckCompleted && !isCurrentCardResolved ? (
-          activeMovie.is_dealers_choice ? (
-            <View style={styles.spotlightRow}>
-              <View
+      {/* Decision Actions: 3 buttons active if activeMovie exists, is unresolved, and not dealer's choice */}
+      {activeMovie && !isDeckCompleted && !isCurrentCardResolved && !activeMovie.is_dealers_choice ? (
+        <View style={styles.bottomBar}>
+          <View style={styles.actionsRow}>
+            {/* Pass */}
+            <Pressable
+              onPress={handlePass}
+              style={({ pressed }) => [
+                styles.actionBtn,
+                styles.passBtn,
+                {
+                  backgroundColor: theme.colors.elevation.level2,
+                  borderColor: theme.colors.outlineVariant,
+                },
+                pressed && { opacity: 0.75 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Pass this film for today"
+            >
+              <MaterialCommunityIcons
+                name="close"
+                size={18}
+                color={theme.colors.textMuted}
+              />
+              <Text
                 style={[
-                  styles.spotlightBadge,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
+                  styles.actionBtnText,
+                  { color: theme.colors.textSecondary },
                 ]}
               >
-                <MaterialCommunityIcons
-                  name="dice-multiple"
-                  size={14}
-                  color={theme.colors.primary}
-                />
-                <Text
-                  style={[
-                    styles.spotlightBadgeText,
-                    { color: theme.colors.textPrimary },
-                  ]}
-                >
-                  Dealer&apos;s Pick
-                </Text>
-              </View>
+                Pass
+              </Text>
+            </Pressable>
 
-              {onKeepBrowsing ? (
-                <Pressable
-                  onPress={onKeepBrowsing}
-                  style={({ pressed }) => [
-                    styles.browseOthersBtn,
-                    {
-                      borderColor: theme.colors.outlineVariant,
-                    },
-                    pressed && {
-                      opacity: 0.75,
-                      backgroundColor: theme.colors.elevation.level2,
-                    },
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Browse other films in this batch"
-                >
-                  <Text
-                    style={[
-                      styles.browseOthersBtnText,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    Browse other movies
-                  </Text>
-                  <MaterialCommunityIcons
-                    name="arrow-right"
-                    size={14}
-                    color={theme.colors.textSecondary}
-                  />
-                </Pressable>
-              ) : null}
-            </View>
-          ) : (
-            <View style={styles.actionsRow}>
-              {/* Pass */}
-              <Pressable
-                onPress={handlePass}
-                style={({ pressed }) => [
-                  styles.actionBtn,
-                  styles.passBtn,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                  pressed && { opacity: 0.75 },
+            {/* Seen */}
+            <Pressable
+              onPress={handleSeen}
+              style={({ pressed }) => [
+                styles.actionBtn,
+                styles.seenBtn,
+                {
+                  backgroundColor: theme.colors.elevation.level2,
+                  borderColor: theme.colors.outlineVariant,
+                },
+                pressed && { opacity: 0.75 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Mark film as already seen"
+            >
+              <MaterialCommunityIcons
+                name="eye-outline"
+                size={18}
+                color={theme.colors.textPrimary}
+              />
+              <Text
+                style={[
+                  styles.actionBtnText,
+                  { color: theme.colors.textPrimary },
                 ]}
-                accessibilityRole="button"
-                accessibilityLabel="Pass this film for today"
               >
-                <MaterialCommunityIcons
-                  name="close"
-                  size={18}
-                  color={theme.colors.textMuted}
-                />
-                <Text
-                  style={[
-                    styles.actionBtnText,
-                    { color: theme.colors.textSecondary },
-                  ]}
-                >
-                  Pass
-                </Text>
-              </Pressable>
+                Seen
+              </Text>
+            </Pressable>
 
-              {/* Seen */}
-              <Pressable
-                onPress={handleSeen}
-                style={({ pressed }) => [
-                  styles.actionBtn,
-                  styles.seenBtn,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                  pressed && { opacity: 0.75 },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Mark film as already seen"
-              >
-                <MaterialCommunityIcons
-                  name="eye-outline"
-                  size={18}
-                  color={theme.colors.textPrimary}
-                />
-                <Text
-                  style={[
-                    styles.actionBtnText,
-                    { color: theme.colors.textPrimary },
-                  ]}
-                >
-                  Seen
-                </Text>
-              </Pressable>
-
-              {/* Pick */}
-              <Pressable
-                onPress={handlePick}
-                style={({ pressed }) => [
-                  styles.actionBtn,
-                  styles.pickBtn,
-                  {
-                    backgroundColor: isPicked
-                      ? theme.colors.cinemaRedHover
-                      : theme.colors.primary,
-                  },
-                  pressed && { opacity: 0.88 },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Pick film for tonight"
-              >
-                <MaterialCommunityIcons
-                  name={isPicked ? "check-circle" : "star"}
-                  size={18}
-                  color="#FFFFFF"
-                />
-                <Text style={styles.pickBtnText}>
-                  {isPicked ? "Picked" : "Pick"}
-                </Text>
-              </Pressable>
-            </View>
-          )
-        ) : null}
-      </View>
+            {/* Pick */}
+            <Pressable
+              onPress={handlePick}
+              style={({ pressed }) => [
+                styles.actionBtn,
+                styles.pickBtn,
+                {
+                  backgroundColor: isPicked
+                    ? theme.colors.cinemaRedHover
+                    : theme.colors.primary,
+                },
+                pressed && { opacity: 0.88 },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Pick film for tonight"
+            >
+              <MaterialCommunityIcons
+                name={isPicked ? "check-circle" : "star"}
+                size={18}
+                color="#FFFFFF"
+              />
+              <Text style={styles.pickBtnText}>
+                {isPicked ? "Picked" : "Pick"}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -750,44 +688,6 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     fontSize: 13,
     letterSpacing: 0.4,
-  },
-  spotlightRow: {
-    flexDirection: "row",
-    width: CARD_WIDTH,
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-  },
-  spotlightBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  spotlightBadgeText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    letterSpacing: 0.2,
-  },
-  browseOthersBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    borderWidth: 1,
-    paddingVertical: 9,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: "transparent",
-  },
-  browseOthersBtnText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-    letterSpacing: 0.2,
   },
   dealersChoiceUsedBadge: {
     opacity: 0.55,

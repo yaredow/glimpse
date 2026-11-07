@@ -554,7 +554,6 @@ export default function TodayTab() {
               onReshuffle={handlePromptSync}
               onDealersChoice={handleDealersChoice}
               isDealersChoiceLoading={dealersChoiceMutation.isPending}
-              onKeepBrowsing={handleKeepBrowsing}
             />
           </View>
         )}
@@ -563,25 +562,54 @@ export default function TodayTab() {
           <View style={styles.bottomDock}>
             {tonightPick.action !== "locked_in" ? (
               isViewingTonightPick ? (
-                <Pressable
-                  onPress={handlePromptLockIn}
-                  style={({ pressed }) => [
-                    styles.lockInPill,
-                    { backgroundColor: theme.colors.primary },
-                    pressed && { opacity: 0.85 },
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Lock in ${tonightPick.title}`}
-                >
-                  <MaterialCommunityIcons
-                    name="movie-play-outline"
-                    size={17}
-                    color="#FFFFFF"
-                  />
-                  <Text style={styles.lockInPillText} numberOfLines={1}>
-                    LOCK IN &quot;{tonightPick.title.toUpperCase()}&quot;
-                  </Text>
-                </Pressable>
+                <View style={styles.dockColumn}>
+                  <Pressable
+                    onPress={handlePromptLockIn}
+                    style={({ pressed }) => [
+                      styles.lockInPill,
+                      { backgroundColor: theme.colors.primary },
+                      pressed && { opacity: 0.85 },
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Lock in ${tonightPick.title}`}
+                  >
+                    <MaterialCommunityIcons
+                      name="movie-play-outline"
+                      size={17}
+                      color="#FFFFFF"
+                    />
+                    <Text style={styles.lockInPillText} numberOfLines={1}>
+                      LOCK IN &quot;{tonightPick.title.toUpperCase()}&quot;
+                    </Text>
+                  </Pressable>
+
+                  {tonightPick.is_dealers_choice ? (
+                    <Pressable
+                      onPress={handleKeepBrowsing}
+                      style={({ pressed }) => [
+                        styles.browseOthersLink,
+                        pressed && { opacity: 0.6 },
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Browse other movies in this batch"
+                      hitSlop={{ top: 8, bottom: 8, left: 16, right: 16 }}
+                    >
+                      <Text
+                        style={[
+                          styles.browseOthersLinkText,
+                          { color: theme.colors.textSecondary },
+                        ]}
+                      >
+                        Browse other movies
+                      </Text>
+                      <MaterialCommunityIcons
+                        name="arrow-right"
+                        size={14}
+                        color={theme.colors.textSecondary}
+                      />
+                    </Pressable>
+                  ) : null}
+                </View>
               ) : (
                 <Pressable
                   onPress={handleReturnToPick}
@@ -723,6 +751,26 @@ const styles = StyleSheet.create({
   },
   lockedStatusText: {
     fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    letterSpacing: 0.2,
+  },
+  dockColumn: {
+    width: "100%",
+    maxWidth: 320,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  browseOthersLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+  },
+  browseOthersLinkText: {
+    fontFamily: "Inter_500Medium",
     fontSize: 13,
     letterSpacing: 0.2,
   },
