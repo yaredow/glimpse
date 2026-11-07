@@ -26,6 +26,7 @@ import ActionConfirmModal, {
 } from "@/features/movies/components/action-confirm-modal";
 import ShowtimeHub from "@/features/movies/components/showtime-hub";
 import { isResolvedAction } from "@/features/movies/utils/deck";
+import { deriveProgramTheme } from "@/features/movies/utils/program";
 
 export default function TodayTab() {
   const theme = useAppTheme();
@@ -36,6 +37,7 @@ export default function TodayTab() {
   const syncMutation = useSyncGrid();
   const dealersChoiceMutation = useDealersChoice();
   const [isLockingIn, setIsLockingIn] = useState(false);
+  const [selectedMood, setSelectedMood] = useState<SyncMood | undefined>(undefined);
 
   const [confirmDialog, setConfirmDialog] = useState<{
     visible: boolean;
@@ -48,6 +50,11 @@ export default function TodayTab() {
   });
 
   const movies = useMemo(() => data?.grid ?? [], [data?.grid]);
+
+  const programTheme = useMemo(
+    () => deriveProgramTheme(movies, selectedMood),
+    [movies, selectedMood],
+  );
 
   const pickCandidates = movies.filter(
     (m) =>
@@ -455,6 +462,7 @@ export default function TodayTab() {
       setConfirmDialog({ visible: false, action: null, movie: null });
 
       if (action === "sync") {
+        setSelectedMood(mood);
         syncMutation.mutate(mood, {
           onSuccess: (res) => {
             Toast.show({
@@ -531,6 +539,7 @@ export default function TodayTab() {
         syncsRemaining={syncsRemaining}
         onSyncPress={handlePromptSync}
         isSyncing={syncMutation.isPending}
+        programTheme={programTheme}
       />
 
       <View style={styles.mainContent}>

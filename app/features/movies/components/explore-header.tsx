@@ -8,12 +8,14 @@ interface ExploreHeaderProps {
   syncsRemaining?: number;
   onSyncPress?: () => void;
   isSyncing?: boolean;
+  programTheme?: string;
 }
 
 export default function ExploreHeader({
   syncsRemaining = 3,
   onSyncPress,
   isSyncing = false,
+  programTheme,
 }: ExploreHeaderProps) {
   const theme = useAppTheme();
 
@@ -35,8 +37,20 @@ export default function ExploreHeader({
     <View style={styles.container}>
       <View style={styles.brandContainer}>
         <GlimpseLogo size="medium" showMark={false} />
-        <Text style={[styles.dateText, { color: theme.colors.textSecondary }]}>
-          {`TODAY'S REEL · ${todayDate}`}
+        <Text
+          style={[styles.dateText, { color: theme.colors.textSecondary }]}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {todayDate}
+          {programTheme ? (
+            <>
+              {" · "}
+              <Text style={{ color: theme.colors.gold }}>
+                {`✦ ${programTheme}`}
+              </Text>
+            </>
+          ) : null}
         </Text>
       </View>
 
@@ -101,6 +115,8 @@ const styles = StyleSheet.create({
   },
   brandContainer: {
     justifyContent: "center",
+    flex: 1,
+    marginRight: 12,
   },
   dateText: {
     fontFamily: "Inter_600SemiBold",
