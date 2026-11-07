@@ -444,38 +444,60 @@ export default function DeckStack({
       <View style={styles.bottomBar}>
         {activeMovie && !isDeckCompleted && !isCurrentCardResolved ? (
           activeMovie.is_dealers_choice ? (
-            <View style={styles.actionsRow}>
+            <View style={styles.spotlightRow}>
+              <View
+                style={[
+                  styles.spotlightBadge,
+                  {
+                    backgroundColor: theme.colors.elevation.level2,
+                    borderColor: theme.colors.outlineVariant,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="dice-multiple"
+                  size={14}
+                  color={theme.colors.primary}
+                />
+                <Text
+                  style={[
+                    styles.spotlightBadgeText,
+                    { color: theme.colors.textPrimary },
+                  ]}
+                >
+                  Dealer&apos;s Pick
+                </Text>
+              </View>
+
               {onKeepBrowsing ? (
                 <Pressable
                   onPress={onKeepBrowsing}
                   style={({ pressed }) => [
-                    styles.actionBtn,
-                    styles.keepBrowsingBtn,
+                    styles.browseOthersBtn,
                     {
-                      backgroundColor: theme.colors.elevation.level2,
                       borderColor: theme.colors.outlineVariant,
                     },
                     pressed && {
                       opacity: 0.75,
-                      backgroundColor: theme.colors.elevation.level3,
+                      backgroundColor: theme.colors.elevation.level2,
                     },
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel="Keep browsing other films in this batch"
+                  accessibilityLabel="Browse other films in this batch"
                 >
-                  <MaterialCommunityIcons
-                    name="cards-outline"
-                    size={18}
-                    color={theme.colors.textPrimary}
-                  />
                   <Text
                     style={[
-                      styles.keepBrowsingBtnText,
-                      { color: theme.colors.textPrimary },
+                      styles.browseOthersBtnText,
+                      { color: theme.colors.textSecondary },
                     ]}
                   >
-                    Keep Browsing Deck
+                    Browse other movies
                   </Text>
+                  <MaterialCommunityIcons
+                    name="arrow-right"
+                    size={14}
+                    color={theme.colors.textSecondary}
+                  />
                 </Pressable>
               ) : null}
             </View>
@@ -729,20 +751,43 @@ const styles = StyleSheet.create({
     fontSize: 13,
     letterSpacing: 0.4,
   },
-  keepBrowsingBtn: {
+  spotlightRow: {
+    flexDirection: "row",
+    width: CARD_WIDTH,
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  spotlightBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  spotlightBadgeText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12,
+    letterSpacing: 0.2,
+  },
+  browseOthersBtn: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 6,
     borderWidth: 1,
-    paddingVertical: 12,
-    borderRadius: 14,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: "transparent",
   },
-  keepBrowsingBtnText: {
+  browseOthersBtnText: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-    letterSpacing: 0.3,
+    fontSize: 12,
+    letterSpacing: 0.2,
   },
   dealersChoiceUsedBadge: {
     opacity: 0.55,
