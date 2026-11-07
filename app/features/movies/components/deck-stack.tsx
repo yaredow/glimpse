@@ -17,6 +17,8 @@ import { isResolvedAction } from "../utils/deck";
 
 interface DeckStackProps {
   movies: GridMovie[];
+  activeIndex: number;
+  onActiveIndexChange: (index: number) => void;
   currentPickId?: number;
   syncsRemaining?: number;
   onReveal?: (movie: GridMovie) => void;
@@ -27,7 +29,6 @@ interface DeckStackProps {
   onReshuffle?: () => void;
   onDealersChoice?: () => void;
   isDealersChoiceLoading?: boolean;
-  jumpToMovieId?: number | null;
 }
 
 interface ReelClosedContent {
@@ -101,6 +102,8 @@ export const CARD_HEIGHT = targetHeight;
 
 export default function DeckStack({
   movies,
+  activeIndex,
+  onActiveIndexChange,
   currentPickId,
   syncsRemaining = 3,
   onReveal: _onReveal,
@@ -111,95 +114,9 @@ export default function DeckStack({
   onReshuffle,
   onDealersChoice,
   isDealersChoiceLoading,
-  jumpToMovieId,
 }: DeckStackProps) {
   const theme = useAppTheme();
-
-  const getInitialIndex = () => {
-    if (movies.length === 0) return 0;
-    if (currentPickId) {
-      const pickIdx = movies.findIndex((m) => m.movie_id === currentPickId);
-      if (pickIdx >= 0) return pickIdx;
-    }
-    const firstUnresolved = movies.findIndex(
-      (m) => !isResolvedAction(m.action),
-    );
-    return firstUnresolved >= 0 ? firstUnresolved : movies.length;
-  };
-
-  const [activeIndex, setActiveIndex] = useState(getInitialIndex);
   const [activeStamp, setActiveStamp] = useState<CardStamp>(null);
-  const [prevPickId, setPrevPickId] = useState(currentPickId);
-
-  // Track session ID so when a fresh batch is synced, activeIndex resets to the new batch
-  const currentSessionId = movies[0]?.grid_session_id;
-  const [prevSessionId, setPrevSessionId] = useState(currentSessionId);
-
-  // Track explicit jump target (e.g. from Dealer's Choice)
-  const [prevJumpToMovieId, setPrevJumpToMovieId] = useState(jumpToMovieId);
-
-  // 1. Sync index during render if currentPickId changes externally
-  if (currentPickId !== prevPickId) {
-    setPrevPickId(currentPickId);
-    if (currentPickId) {
-      const pickIdx = movies.findIndex((m) => m.movie_id === currentPickId);
-      if (pickIdx >= 0) {
-        setActiveIndex(pickIdx);
-      }
-    }
-  }
-
-  // 2. Sync index during render if a new batch was synced (session ID changed)
-  if (currentSessionId && currentSessionId !== prevSessionId) {
-    setPrevSessionId(currentSessionId);
-    const firstUnresolved = movies.findIndex(
-      (m) => !isResolvedAction(m.action),
-    );
-    setActiveIndex(firstUnresolved >= 0 ? firstUnresolved : 0);
-  }
-
-  // 3. Fallback: If deck was marked completed (activeIndex >= movies.length), but movies now has unresolved cards
-  if (
-    activeIndex >= movies.length &&
-    movies.some((m) => !isResolvedAction(m.action))
-  ) {
-    const firstUnresolved = movies.findIndex(
-      (m) => !isResolvedAction(m.action),
-    );
-    if (firstUnresolved >= 0) {
-      setActiveIndex(firstUnresolved);
-    }
-  }
-
-  // 4. Reactive Auto-Advancement: If the active movie was resolved externally
-  // (e.g. passed/seen from detail screen), adjust index during render to the next unresolved card.
-  const currentCard = movies[activeIndex];
-  if (currentCard && isResolvedAction(currentCard.action)) {
-    const nextUnresolved = movies.findIndex(
-      (m, idx) => idx >= activeIndex && !isResolvedAction(m.action),
-    );
-    if (nextUnresolved >= 0) {
-      setActiveIndex(nextUnresolved);
-    } else {
-      const anyUnresolved = movies.findIndex(
-        (m) => !isResolvedAction(m.action),
-      );
-      if (anyUnresolved >= 0) {
-        setActiveIndex(anyUnresolved);
-      } else {
-        setActiveIndex(movies.length);
-      }
-    }
-  }
-
-  // 5. Jump directly to requested card (e.g. Dealer's Choice)
-  if (jumpToMovieId && jumpToMovieId !== prevJumpToMovieId) {
-    setPrevJumpToMovieId(jumpToMovieId);
-    const targetIdx = movies.findIndex((m) => m.movie_id === jumpToMovieId);
-    if (targetIdx >= 0) {
-      setActiveIndex(targetIdx);
-    }
-  }
 
   const isDeckCompleted =
     movies.length > 0 &&
@@ -250,9 +167,9 @@ export default function DeckStack({
     animateCardExit("left", () => {
       setActiveStamp(null);
       onSkip(activeMovie);
-      setActiveIndex((prev) => prev + 1);
+      onActiveIndexChange(activeIndex + 1);
     });
-  }, [activeMovie, animateCardExit, onSkip]);
+  }, [activeMovie, animateCardExit, onSkip, onActiveIndexChange, activeIndex]);
 
   const handleSeen = useCallback(() => {
     if (!activeMovie || isResolvedAction(activeMovie.action)) return;
@@ -262,9 +179,9 @@ export default function DeckStack({
     animateCardExit("right", () => {
       setActiveStamp(null);
       onSeen(activeMovie);
-      setActiveIndex((prev) => prev + 1);
+      onActiveIndexChange(activeIndex + 1);
     });
-  }, [activeMovie, animateCardExit, onSeen]);
+  }, [activeMovie, animateCardExit, onSeen, onActiveIndexChange, activeIndex]);
 
   const handlePick = useCallback(() => {
     if (!activeMovie) return;

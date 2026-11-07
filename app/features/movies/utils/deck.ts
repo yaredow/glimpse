@@ -12,10 +12,7 @@ export function isResolvedAction(
   return (
     action === "skipped" ||
     action === "seen_before" ||
-    action === "watched" ||
-    action === "pick_tonight" ||
-    action === "locked_in" ||
-    action === "watchlist_add"
+    action === "watched"
   );
 }
 

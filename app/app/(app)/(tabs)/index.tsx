@@ -8,6 +8,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useAppTheme } from "@/lib/theme";
 import { useGetTodaysGrid } from "@/features/movies/hooks/query/use-today-grid";
@@ -24,6 +25,7 @@ import ActionConfirmModal, {
   SyncMood,
 } from "@/features/movies/components/action-confirm-modal";
 import ShowtimeHub from "@/features/movies/components/showtime-hub";
+import { isResolvedAction } from "@/features/movies/utils/deck";
 
 export default function TodayTab() {
   const theme = useAppTheme();
@@ -33,7 +35,6 @@ export default function TodayTab() {
   const recordInteraction = useRecordInteraction();
   const syncMutation = useSyncGrid();
   const dealersChoiceMutation = useDealersChoice();
-  const [jumpToMovieId, setJumpToMovieId] = useState<number | null>(null);
   const [isLockingIn, setIsLockingIn] = useState(false);
 
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -69,6 +70,67 @@ export default function TodayTab() {
   const currentPickId = tonightPick?.movie_id;
   const isShowtimeMode =
     Boolean(tonightPick?.is_locked_in) || tonightPick?.action === "locked_in";
+
+  const getInitialIndex = () => {
+    if (movies.length === 0) return 0;
+    if (tonightPick) {
+      const pickIdx = movies.findIndex(
+        (m) => m.movie_id === tonightPick.movie_id,
+      );
+      if (pickIdx >= 0) return pickIdx;
+    }
+    const firstUnresolved = movies.findIndex(
+      (m) => !isResolvedAction(m.action),
+    );
+    return firstUnresolved >= 0 ? firstUnresolved : 0;
+  };
+
+  const [activeIndex, setActiveIndex] = useState(getInitialIndex);
+
+  // Track session ID so when a fresh batch is synced, activeIndex resets to 0
+  const currentSessionId = movies[0]?.grid_session_id;
+  const [prevSessionId, setPrevSessionId] = useState(currentSessionId);
+
+  if (currentSessionId && currentSessionId !== prevSessionId) {
+    setPrevSessionId(currentSessionId);
+    const firstUnresolved = movies.findIndex(
+      (m) => !isResolvedAction(m.action),
+    );
+    setActiveIndex(firstUnresolved >= 0 ? firstUnresolved : 0);
+  }
+
+  // Reactive Auto-Advancement: If the active movie was resolved externally
+  // (e.g. passed/seen from detail screen), adjust index during render to the next unresolved card.
+  const currentCard = movies[activeIndex];
+  if (currentCard && isResolvedAction(currentCard.action)) {
+    const nextUnresolved = movies.findIndex(
+      (m, idx) => idx >= activeIndex && !isResolvedAction(m.action),
+    );
+    if (nextUnresolved >= 0) {
+      setActiveIndex(nextUnresolved);
+    } else {
+      const anyUnresolved = movies.findIndex(
+        (m) => !isResolvedAction(m.action),
+      );
+      if (anyUnresolved >= 0) {
+        setActiveIndex(anyUnresolved);
+      } else {
+        setActiveIndex(movies.length);
+      }
+    }
+  }
+
+  const isDeckCompleted =
+    movies.length > 0 &&
+    (activeIndex >= movies.length ||
+      movies.every((m) => isResolvedAction(m.action)));
+
+  const activeDeckMovie = !isDeckCompleted ? movies[activeIndex] : undefined;
+
+  const isViewingTonightPick =
+    tonightPick &&
+    (activeIndex >= movies.length ||
+      (activeDeckMovie && activeDeckMovie.movie_id === tonightPick.movie_id));
 
   const handleReveal = useCallback(
     (movie: GridMovie) => {
@@ -334,12 +396,30 @@ export default function TodayTab() {
     setConfirmDialog({ visible: true, action: "sync", movie: null });
   }, [syncsRemaining, syncMutation.isPending]);
 
+  const handleReturnToPick = useCallback(() => {
+    if (!tonightPick) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const pickIdx = movies.findIndex(
+      (m) => m.movie_id === tonightPick.movie_id,
+    );
+    if (pickIdx >= 0) {
+      setActiveIndex(pickIdx);
+    }
+  }, [movies, tonightPick]);
+
   const handleDealersChoice = useCallback(() => {
     if (dealersChoiceMutation.isPending) return;
 
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     dealersChoiceMutation.mutate(undefined, {
       onSuccess: (res) => {
-        setJumpToMovieId(res.movie.movie_id);
+        const targetIdx = res.grid.findIndex(
+          (m) => m.movie_id === res.movie.movie_id,
+        );
+        if (targetIdx >= 0) {
+          setActiveIndex(targetIdx);
+        }
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Toast.show({
           type: "success",
           text1: "Dealer's Choice 🎲",
@@ -347,6 +427,7 @@ export default function TodayTab() {
         });
       },
       onError: (err) => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Toast.show({
           type: "error",
           text1: "Dealer's Choice",
@@ -449,6 +530,8 @@ export default function TodayTab() {
           <View style={styles.deckContainer}>
             <DeckStack
               movies={movies}
+              activeIndex={activeIndex}
+              onActiveIndexChange={setActiveIndex}
               currentPickId={currentPickId}
               syncsRemaining={syncsRemaining}
               onReveal={handleReveal}
@@ -459,7 +542,6 @@ export default function TodayTab() {
               onReshuffle={handlePromptSync}
               onDealersChoice={handleDealersChoice}
               isDealersChoiceLoading={dealersChoiceMutation.isPending}
-              jumpToMovieId={jumpToMovieId}
             />
           </View>
         )}
@@ -467,23 +549,60 @@ export default function TodayTab() {
         {tonightPick ? (
           <View style={styles.bottomDock}>
             {tonightPick.action !== "locked_in" ? (
-              <Pressable
-                onPress={handlePromptLockIn}
-                style={({ pressed }) => [
-                  styles.lockInPill,
-                  { backgroundColor: theme.colors.primary },
-                  pressed && { opacity: 0.85 },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="movie-play-outline"
-                  size={17}
-                  color="#FFFFFF"
-                />
-                <Text style={styles.lockInPillText} numberOfLines={1}>
-                  LOCK IN &quot;{tonightPick.title.toUpperCase()}&quot;
-                </Text>
-              </Pressable>
+              isViewingTonightPick ? (
+                <Pressable
+                  onPress={handlePromptLockIn}
+                  style={({ pressed }) => [
+                    styles.lockInPill,
+                    { backgroundColor: theme.colors.primary },
+                    pressed && { opacity: 0.85 },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Lock in ${tonightPick.title}`}
+                >
+                  <MaterialCommunityIcons
+                    name="movie-play-outline"
+                    size={17}
+                    color="#FFFFFF"
+                  />
+                  <Text style={styles.lockInPillText} numberOfLines={1}>
+                    LOCK IN &quot;{tonightPick.title.toUpperCase()}&quot;
+                  </Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  onPress={handleReturnToPick}
+                  style={({ pressed }) => [
+                    styles.lockInPill,
+                    styles.returnPill,
+                    {
+                      backgroundColor: theme.colors.elevation.level2,
+                      borderColor: theme.colors.outlineVariant,
+                    },
+                    pressed && {
+                      opacity: 0.85,
+                      backgroundColor: theme.colors.elevation.level3,
+                    },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Return to ${tonightPick.title}`}
+                >
+                  <MaterialCommunityIcons
+                    name="arrow-u-left-top"
+                    size={17}
+                    color={theme.colors.primary}
+                  />
+                  <Text
+                    style={[
+                      styles.lockInPillText,
+                      { color: theme.colors.textPrimary },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    RETURN TO &quot;{tonightPick.title.toUpperCase()}&quot;
+                  </Text>
+                </Pressable>
+              )
             ) : (
               <View
                 style={[
@@ -563,6 +682,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
+  },
+  returnPill: {
+    borderWidth: 1,
+    shadowOpacity: 0.15,
   },
   lockInPillText: {
     color: "#FFFFFF",
