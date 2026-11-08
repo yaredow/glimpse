@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -9,7 +9,13 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+  withSequence,
+  withSpring,
+} from "react-native-reanimated";
 import { useAppTheme } from "@/lib/theme";
 import MysteryCard, { CardStamp } from "./mystery-card";
 import type { GridMovie } from "../types/movies.type";
@@ -29,6 +35,7 @@ interface DeckStackProps {
   onReshuffle?: () => void;
   onDealersChoice?: () => void;
   isDealersChoiceLoading?: boolean;
+  isShuffling?: boolean;
 }
 
 interface ReelClosedContent {
@@ -114,6 +121,7 @@ export default function DeckStack({
   onReshuffle,
   onDealersChoice,
   isDealersChoiceLoading,
+  isShuffling = false,
 }: DeckStackProps) {
   const theme = useAppTheme();
   const [activeStamp, setActiveStamp] = useState<CardStamp>(null);
@@ -139,11 +147,57 @@ export default function DeckStack({
   const rotateDeg = useSharedValue(0);
   const opacityVal = useSharedValue(1);
 
+  // 3D Card Shuffle shared value (R-04)
+  const shuffleShift = useSharedValue(0);
+
+  useEffect(() => {
+    if (isShuffling) {
+      shuffleShift.value = withSequence(
+        withTiming(-1, { duration: 160 }),
+        withTiming(1, { duration: 180 }),
+        withTiming(-0.6, { duration: 160 }),
+        withTiming(0.4, { duration: 140 }),
+        withSpring(0, { damping: 14, stiffness: 120 }),
+      );
+    } else {
+      shuffleShift.value = withSpring(0);
+    }
+  }, [isShuffling, shuffleShift]);
+
+  const topCardAnimStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value + shuffleShift.value * 48 },
+      { rotate: `${rotateDeg.value + shuffleShift.value * 6}deg` },
+    ],
+    opacity: opacityVal.value,
+  }));
+
+  const midCardAnimStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: 0.94 },
+      { translateY: 10 },
+      { translateX: -shuffleShift.value * 38 },
+      { rotate: `${2 - shuffleShift.value * 5}deg` },
+    ],
+    opacity: 0.82,
+  }));
+
+  const botCardAnimStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: 0.88 },
+      { translateY: 20 },
+      { translateX: shuffleShift.value * 24 },
+      { rotate: `${-1.5 + shuffleShift.value * 4}deg` },
+    ],
+    opacity: 0.5,
+  }));
+
   const animateCardExit = useCallback(
     (direction: "left" | "right", onFinish: () => void) => {
       const targetX = direction === "left" ? -SW * 1.15 : SW * 1.15;
       const targetRot = direction === "left" ? -14 : 14;
 
+      /* eslint-disable react-hooks/immutability */
       translateX.value = withTiming(targetX, { duration: 240 }, () => {
         translateX.value = 0;
         rotateDeg.value = 0;
@@ -151,6 +205,7 @@ export default function DeckStack({
       });
       rotateDeg.value = withTiming(targetRot, { duration: 240 });
       opacityVal.value = withTiming(0, { duration: 200 });
+      /* eslint-enable react-hooks/immutability */
 
       setTimeout(() => {
         onFinish();
@@ -221,7 +276,7 @@ export default function DeckStack({
           !isDealersChoiceUsed ? (
             <Pressable
               onPress={onDealersChoice}
-              disabled={isDealersChoiceLoading}
+              disabled={isDealersChoiceLoading || isShuffling}
               style={({ pressed }) => [
                 styles.dealersChoiceBadge,
                 {
@@ -232,12 +287,12 @@ export default function DeckStack({
                   opacity: 0.75,
                   backgroundColor: theme.colors.elevation.level3,
                 },
-                isDealersChoiceLoading && { opacity: 0.6 },
+                (isDealersChoiceLoading || isShuffling) && { opacity: 0.6 },
               ]}
               accessibilityRole="button"
               accessibilityLabel="Let Glimpse choose tonight's movie"
             >
-              {isDealersChoiceLoading ? (
+              {isDealersChoiceLoading || isShuffling ? (
                 <ActivityIndicator
                   size="small"
                   color={theme.colors.primary}
@@ -256,7 +311,9 @@ export default function DeckStack({
                   { color: theme.colors.textPrimary },
                 ]}
               >
-                {isDealersChoiceLoading ? "Choosing..." : "Dealer's Choice"}
+                {isDealersChoiceLoading || isShuffling
+                  ? "Shuffling..."
+                  : "Dealer's Choice"}
               </Text>
             </Pressable>
           ) : (
@@ -367,21 +424,15 @@ export default function DeckStack({
                   key={movie.movie_id}
                   style={[
                     styles.cardSlot,
-                    {
-                      zIndex: 10,
-                      transform: [
-                        { translateX },
-                        { rotate: `${rotateDeg.value}deg` },
-                      ],
-                      opacity: opacityVal,
-                    },
+                    { zIndex: 10 },
+                    topCardAnimStyle,
                   ]}
                 >
                   <MysteryCard
                     movie={movie}
                     index={index}
                     total={movies.length}
-                    isInteractive={true}
+                    isInteractive={!isShuffling}
                     stamp={activeStamp}
                     onViewDetails={() => onViewDetails(movie)}
                   />
@@ -392,12 +443,12 @@ export default function DeckStack({
             // Background card 1 (peeking behind top card)
             if (offset === 1) {
               return (
-                <View
+                <Animated.View
                   key={movie.movie_id}
                   style={[
                     styles.cardSlot,
-                    styles.backgroundLayer1,
                     { zIndex: 9 },
+                    midCardAnimStyle,
                   ]}
                   pointerEvents="none"
                 >
@@ -407,19 +458,19 @@ export default function DeckStack({
                     total={movies.length}
                     isInteractive={false}
                   />
-                </View>
+                </Animated.View>
               );
             }
 
             // Background card 2 (deepest visible card in physical stack)
             if (offset === 2) {
               return (
-                <View
+                <Animated.View
                   key={movie.movie_id}
                   style={[
                     styles.cardSlot,
-                    styles.backgroundLayer2,
                     { zIndex: 8 },
+                    botCardAnimStyle,
                   ]}
                   pointerEvents="none"
                 >
@@ -429,7 +480,7 @@ export default function DeckStack({
                     total={movies.length}
                     isInteractive={false}
                   />
-                </View>
+                </Animated.View>
               );
             }
 

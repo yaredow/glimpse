@@ -37,6 +37,7 @@ export default function TodayTab() {
   const syncMutation = useSyncGrid();
   const dealersChoiceMutation = useDealersChoice();
   const [isLockingIn, setIsLockingIn] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
   const [selectedMood, setSelectedMood] = useState<SyncMood | undefined>(undefined);
 
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -427,25 +428,49 @@ export default function TodayTab() {
   }, [movies, activeIndex]);
 
   const handleDealersChoice = useCallback(() => {
-    if (dealersChoiceMutation.isPending) return;
+    if (dealersChoiceMutation.isPending || isShuffling) return;
 
+    setIsShuffling(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    const timer1 = setTimeout(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, 160);
+    const timer2 = setTimeout(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, 340);
+    const timer3 = setTimeout(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, 500);
+
+    const startTime = Date.now();
+
     dealersChoiceMutation.mutate(undefined, {
       onSuccess: (res) => {
-        const targetIdx = res.grid.findIndex(
-          (m) => m.movie_id === res.movie.movie_id,
-        );
-        if (targetIdx >= 0) {
-          setActiveIndex(targetIdx);
-        }
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Toast.show({
-          type: "success",
-          text1: "Dealer's Choice 🎲",
-          text2: `We picked "${res.movie.title}" for tonight. Lock it in when you're ready!`,
-        });
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, 680 - elapsed);
+
+        setTimeout(() => {
+          setIsShuffling(false);
+          const targetIdx = res.grid.findIndex(
+            (m) => m.movie_id === res.movie.movie_id,
+          );
+          if (targetIdx >= 0) {
+            setActiveIndex(targetIdx);
+          }
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          Toast.show({
+            type: "success",
+            text1: "Dealer's Choice 🎲",
+            text2: `We picked "${res.movie.title}" for tonight. Lock it in when you're ready!`,
+          });
+        }, remaining);
       },
       onError: (err) => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        setIsShuffling(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         Toast.show({
           type: "error",
@@ -454,7 +479,7 @@ export default function TodayTab() {
         });
       },
     });
-  }, [dealersChoiceMutation]);
+  }, [dealersChoiceMutation, isShuffling]);
 
   const handleConfirmDialogAction = useCallback(
     (mood?: SyncMood) => {
@@ -563,6 +588,7 @@ export default function TodayTab() {
               onReshuffle={handlePromptSync}
               onDealersChoice={handleDealersChoice}
               isDealersChoiceLoading={dealersChoiceMutation.isPending}
+              isShuffling={isShuffling}
             />
           </View>
         )}

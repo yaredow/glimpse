@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"sort"
 	"time"
 
@@ -224,6 +225,11 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 
 	picked := enforceDiversity(scored)
 
+	// Shuffle the 5 dealt cards so the deck is not dealt in predictable score-descending order
+	rand.Shuffle(len(picked), func(i, j int) {
+		picked[i], picked[j] = picked[j], picked[i]
+	})
+
 	sessionID := uuid.New()
 
 	movieIDs := make([]int64, len(picked))
@@ -312,6 +318,12 @@ func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64, moo
 	}
 
 	picked := enforceDiversity(scored)
+
+	// Shuffle the 5 dealt cards so the deck is not dealt in predictable score-descending order
+	rand.Shuffle(len(picked), func(i, j int) {
+		picked[i], picked[j] = picked[j], picked[i]
+	})
+
 	sessionID := uuid.New()
 
 	movieIDs := make([]int64, len(picked))
