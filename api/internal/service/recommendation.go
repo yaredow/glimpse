@@ -225,7 +225,6 @@ func (rs *RecommendationService) GenerateGrid(ctx context.Context, userID int64)
 
 	picked := enforceDiversity(scored)
 
-	// Shuffle the 5 dealt cards so the deck is not dealt in predictable score-descending order
 	rand.Shuffle(len(picked), func(i, j int) {
 		picked[i], picked[j] = picked[j], picked[i]
 	})
@@ -319,7 +318,6 @@ func (rs *RecommendationService) SyncGrid(ctx context.Context, userID int64, moo
 
 	picked := enforceDiversity(scored)
 
-	// Shuffle the 5 dealt cards so the deck is not dealt in predictable score-descending order
 	rand.Shuffle(len(picked), func(i, j int) {
 		picked[i], picked[j] = picked[j], picked[i]
 	})
@@ -570,7 +568,6 @@ func (rs *RecommendationService) DealersChoice(ctx context.Context, userID int64
 		}
 	}
 
-	// Record pick_tonight for winner with sentinel reveal_to_action_ms = -1 to denote dealer's choice
 	dealersChoiceSentinel := -1
 	if err := rs.RecordInteraction(ctx, userID, winner.MovieID, string(domain.ActionPickTonight), sessionID, &winner.SlotNumber, &dealersChoiceSentinel, nil); err != nil {
 		return nil, nil, 0, fmt.Errorf("record dealers choice pick: %w", err)

@@ -147,7 +147,6 @@ export default function DeckStack({
   const rotateDeg = useSharedValue(0);
   const opacityVal = useSharedValue(1);
 
-  // 3D Card Shuffle shared value (R-04)
   const shuffleShift = useSharedValue(0);
 
   useEffect(() => {
@@ -247,7 +246,6 @@ export default function DeckStack({
 
   return (
     <View style={styles.container}>
-      {/* Progress Indicator ("2 of 5", R-01) & Dealer's Choice (R-04) */}
       <View
         style={[
           styles.metaBar,
@@ -345,7 +343,6 @@ export default function DeckStack({
         ) : null}
       </View>
 
-      {/* Physical 3D Stack Viewport (R-01) */}
       <View style={styles.stackViewport}>
         {isDeckCompleted ? (
           <View
@@ -489,7 +486,6 @@ export default function DeckStack({
         )}
       </View>
 
-      {/* Decision Actions: 3 buttons active if activeMovie exists, is unresolved, and not dealer's choice */}
       {activeMovie && !isDeckCompleted && !isCurrentCardResolved && !activeMovie.is_dealers_choice ? (
         <View style={styles.bottomBar}>
           <View style={styles.actionsRow}>
