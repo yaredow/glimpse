@@ -67,37 +67,57 @@ export function deriveProgramTheme(
   const drama = genreCounts["Drama"] || 0;
   const romance = genreCounts["Romance"] || 0;
 
-  // 3. Match dominant aesthetic
+  // 3. Match dominant aesthetic (Animation & Family take precedence so cartoons are never mislabeled)
+  if (animation >= 2 || (animation >= 1 && family >= 1)) {
+    return "ANIMATED ESCAPISM";
+  }
+  if (animation + family + comedy >= 3) {
+    return "WHIMSICAL WORLDS";
+  }
+
+  // Horror / Occult
   if (horror >= 2) {
     return "MIDNIGHT DREAD";
   }
+
+  // Vintage crime / thriller
   if (isVintage && (crime >= 2 || thriller >= 2 || action >= 2)) {
     return "90s VAULT: NOIR & TENSION";
   }
-  if (crime + mystery >= 3 || (crime >= 2 && thriller >= 2)) {
+
+  // Neon Noir & Crime (strictly non-animated)
+  if (animation === 0 && (crime + mystery >= 3 || (crime >= 2 && thriller >= 2))) {
     return "NEON NOIR & SHADOWS";
   }
+
+  // Action / Adventure
   if (action + adventure >= 3 || action >= 3) {
     return "HIGH-OCTANE THRILLS";
   }
+
+  // Sci-Fi / Mindbenders
   if (sciFi >= 2 && (thriller >= 1 || mystery >= 1)) {
     return "MINDBENDERS & DARK HORIZONS";
   }
   if (sciFi >= 2) {
     return "SPECULATIVE HORIZONS";
   }
-  if (animation + family + comedy >= 3) {
-    return "WHIMSICAL WORLDS";
-  }
+
+  // Thriller
   if (thriller >= 2) {
     return "COLD TENSION & SUSPENSE";
   }
+
+  // Drama / Romance
   if (drama + romance >= 3) {
     return "RAW EMOTION & INTIMATE TRUTH";
   }
+
+  // Comedy
   if (comedy >= 2) {
     return "SATIRE & SHARP WIT";
   }
+
   if (isVintage) {
     return "20TH CENTURY CLASSICS";
   }
