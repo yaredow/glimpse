@@ -23,7 +23,7 @@ import (
 
 const (
 	defaultTimeout = 30
-	defaultAddress = "0.0.0.0:4000"
+	defaultPort = "4000"
 )
 
 func main() {
@@ -35,7 +35,11 @@ func main() {
 	smtpSender := os.Getenv("SMTP_SENDER")
 
 	// Server
-	pool, err := pgxpool.New(context.Background(), os.Getenv("DB_DSN"))
+	dsn := os.Getenv("DB_DSN")
+	if dsn == "" {
+		dsn = os.Getenv("DATABASE_URL")
+	}
+	pool, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		log.Fatal("unable to connect to the database", err)
 	}
@@ -113,7 +117,15 @@ func main() {
 	// Routes
 	routes.Register(e, userService, jwtMgr, mailer, wp, prefSvc, movieRepo, prefSvc, userService, recSvc, recSvc, movieSvc)
 
-	if err := e.Start(defaultAddress); err != nil {
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = defaultPort
+	}
+
+	address := ":" + port
+
+	if err := e.Start(address); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
 	}
 }

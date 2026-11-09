@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main, glimpse-revamp]
+  pull_request:
+    branches: [main, glimpse-revamp]
+
+jobs:
+  backend-test:
+    name: Backend (Go) Tests & Vet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+          cache-dependency-path: api/go.sum
+
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: Run Audit
+        working-directory: api
+        run: make audit
+
+  mobile-check:
+    name: Mobile (React Native) Typecheck & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        working-directory: app
+        run: bun install --frozen-lockfile
+
+      - name: TypeScript Check
+        working-directory: app
+        run: bun x tsc --noEmit
+
+      - name: ESLint Check
+        working-directory: app
+        run: bun x eslint features/movies "app/(app)"

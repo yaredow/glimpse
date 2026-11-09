@@ -23,6 +23,11 @@ func Register(
 	affSeed handler.AffinitySeeder,
 	movieSvc handler.MovieService,
 ) {
+	// Health check
+	e.GET("/health", func(c *echo.Context) error {
+		return c.JSON(200, map[string]string{"status": "ok"})
+	})
+
 	userH := handler.NewUserHandler(userSvc, jwtMgr, mailer, workers)
 	e.POST("/v1/users/register", userH.Create)
 	e.POST("/v1/users/login", userH.Authenticate)
