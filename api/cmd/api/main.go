@@ -30,6 +30,11 @@ func main() {
 	// Environment variables
 	jwtSecret := os.Getenv("JWT_SECRET")
 	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPortStr := os.Getenv("SMTP_PORT")
+	smtpPort, err := strconv.Atoi(smtpPortStr)
+	if err != nil {
+		smtpPort = 587
+	}
 	smtpUsername := os.Getenv("SMTP_USERNAME")
 	smtpPassword := os.Getenv("SMTP_PASSWORD")
 	smtpSender := os.Getenv("SMTP_SENDER")
@@ -69,7 +74,7 @@ func main() {
 	movieRepo := postgres.NewMovieRepository(db)
 
 	// Mailer
-	mailer := mailer.New(smtpHost, 25, smtpUsername, smtpPassword, smtpSender)
+	mailer := mailer.New(smtpHost, smtpPort, smtpUsername, smtpPassword, smtpSender)
 
 	// Worker pool
 	wp := worker.New()
