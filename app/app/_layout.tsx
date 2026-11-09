@@ -1,4 +1,11 @@
 import { useFonts } from "expo-font";
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from "@expo-google-fonts/plus-jakarta-sans";
 import { Stack, router, useSegments, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -19,11 +26,18 @@ export default function RootLayout() {
   useOnlineManager();
   const { isAuthenticated, isRestoring, restoreToken } = useAuthStore();
   const [loaded, error] = useFonts({
-    Inter_400Regular: require("@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf"),
-    Inter_500Medium: require("@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf"),
-    Inter_600SemiBold: require("@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf"),
-    Inter_700Bold: require("@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf"),
-    Inter_900Black: require("@expo-google-fonts/inter/900Black/Inter_900Black.ttf"),
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
+
+    // Aliased to Plus Jakarta Sans for instant app-wide upgrade
+    Inter_400Regular: PlusJakartaSans_400Regular,
+    Inter_500Medium: PlusJakartaSans_500Medium,
+    Inter_600SemiBold: PlusJakartaSans_600SemiBold,
+    Inter_700Bold: PlusJakartaSans_700Bold,
+    Inter_900Black: PlusJakartaSans_800ExtraBold,
   });
 
   useEffect(() => {

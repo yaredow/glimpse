@@ -1,69 +1,77 @@
 import { MD3DarkTheme } from "react-native-paper";
 
+export const fonts = {
+  regular: "PlusJakartaSans_400Regular",
+  medium: "PlusJakartaSans_500Medium",
+  semiBold: "PlusJakartaSans_600SemiBold",
+  bold: "PlusJakartaSans_700Bold",
+  extraBold: "PlusJakartaSans_800ExtraBold",
+} as const;
+
 export const themeFonts = {
   ...MD3DarkTheme.fonts,
   displayLarge: {
     ...MD3DarkTheme.fonts.displayLarge,
-    fontFamily: "Inter_700Bold",
+    fontFamily: fonts.extraBold,
   },
   displayMedium: {
     ...MD3DarkTheme.fonts.displayMedium,
-    fontFamily: "Inter_700Bold",
+    fontFamily: fonts.bold,
   },
   displaySmall: {
     ...MD3DarkTheme.fonts.displaySmall,
-    fontFamily: "Inter_700Bold",
+    fontFamily: fonts.bold,
   },
   headlineLarge: {
     ...MD3DarkTheme.fonts.headlineLarge,
-    fontFamily: "Inter_700Bold",
+    fontFamily: fonts.bold,
   },
   headlineMedium: {
     ...MD3DarkTheme.fonts.headlineMedium,
-    fontFamily: "Inter_700Bold",
+    fontFamily: fonts.bold,
   },
   headlineSmall: {
     ...MD3DarkTheme.fonts.headlineSmall,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: fonts.semiBold,
   },
   titleLarge: {
     ...MD3DarkTheme.fonts.titleLarge,
-    fontFamily: "Inter_700Bold",
+    fontFamily: fonts.bold,
   },
   titleMedium: {
     ...MD3DarkTheme.fonts.titleMedium,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: fonts.semiBold,
   },
   titleSmall: {
     ...MD3DarkTheme.fonts.titleSmall,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: fonts.semiBold,
   },
   labelLarge: {
     ...MD3DarkTheme.fonts.labelLarge,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: fonts.semiBold,
   },
   labelMedium: {
     ...MD3DarkTheme.fonts.labelMedium,
-    fontFamily: "Inter_500Medium",
+    fontFamily: fonts.medium,
   },
   labelSmall: {
     ...MD3DarkTheme.fonts.labelSmall,
-    fontFamily: "Inter_500Medium",
+    fontFamily: fonts.medium,
   },
   bodyLarge: {
     ...MD3DarkTheme.fonts.bodyLarge,
-    fontFamily: "Inter_400Regular",
+    fontFamily: fonts.regular,
   },
   bodyMedium: {
     ...MD3DarkTheme.fonts.bodyMedium,
-    fontFamily: "Inter_400Regular",
+    fontFamily: fonts.regular,
   },
   bodySmall: {
     ...MD3DarkTheme.fonts.bodySmall,
-    fontFamily: "Inter_400Regular",
+    fontFamily: fonts.regular,
   },
   default: {
     ...MD3DarkTheme.fonts.default,
-    fontFamily: "Inter_400Regular",
+    fontFamily: fonts.regular,
   },
 };

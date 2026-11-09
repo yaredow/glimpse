@@ -9,7 +9,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  XIcon,
+  StarIcon,
+  XCircleIcon,
+  CheckIcon,
+  CheckCircleIcon,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
@@ -267,10 +273,10 @@ function EditPreferencesForm({
             { backgroundColor: theme.colors.elevation.level2 },
           ]}
         >
-          <MaterialCommunityIcons
-            name="close"
-            size={18}
+          <XIcon
+            size={16}
             color={theme.colors.textSecondary}
+            weight="bold"
           />
         </Pressable>
       </View>
@@ -340,14 +346,14 @@ function EditPreferencesForm({
                   ],
                 ]}
               >
-                <MaterialCommunityIcons
-                  name="star"
+                <StarIcon
                   size={14}
                   color={
                     genreTab === "favorites"
                       ? theme.colors.primary
                       : theme.colors.textMuted
                   }
+                  weight={genreTab === "favorites" ? "fill" : "regular"}
                 />
                 <Text
                   style={[
@@ -384,14 +390,14 @@ function EditPreferencesForm({
                   ],
                 ]}
               >
-                <MaterialCommunityIcons
-                  name="cancel"
+                <XCircleIcon
                   size={14}
                   color={
                     genreTab === "excluded"
                       ? theme.colors.error
                       : theme.colors.textMuted
                   }
+                  weight={genreTab === "excluded" ? "fill" : "regular"}
                 />
                 <Text
                   style={[
@@ -470,10 +476,10 @@ function EditPreferencesForm({
                         {genre.name}
                       </Text>
                       {isSelected && (
-                        <MaterialCommunityIcons
-                          name="check"
-                          size={14}
+                        <CheckIcon
+                          size={13}
                           color={theme.colors.primary}
+                          weight="bold"
                           style={styles.chipCheck}
                         />
                       )}
@@ -523,10 +529,10 @@ function EditPreferencesForm({
                         {genre.name}
                       </Text>
                       {isExcluded && (
-                        <MaterialCommunityIcons
-                          name="close"
-                          size={14}
+                        <XIcon
+                          size={13}
                           color={theme.colors.error}
+                          weight="bold"
                           style={styles.chipCheck}
                         />
                       )}
@@ -613,10 +619,10 @@ function EditPreferencesForm({
                       </Text>
                     </View>
                     {isSelected && (
-                      <MaterialCommunityIcons
-                        name="radiobox-marked"
+                      <CheckCircleIcon
                         size={18}
                         color={theme.colors.primary}
+                        weight="fill"
                       />
                     )}
                   </Pressable>
@@ -751,10 +757,10 @@ function EditPreferencesForm({
                       {lang.label}
                     </Text>
                     {isSelected && (
-                      <MaterialCommunityIcons
-                        name="check"
-                        size={14}
+                      <CheckIcon
+                        size={13}
                         color={theme.colors.primary}
+                        weight="bold"
                         style={styles.chipCheck}
                       />
                     )}

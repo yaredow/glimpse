@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FilmStripIcon, BookmarkSimpleIcon, UserIcon } from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAppTheme } from "@/lib/theme";
+import { useAppTheme, fonts } from "@/lib/theme";
 
 export default function TabsLayout() {
   const theme = useAppTheme();
@@ -22,10 +22,10 @@ export default function TabsLayout() {
           paddingTop: 8,
           paddingBottom: bottomInset,
         },
-        tabBarActiveTintColor: theme.colors.textPrimary,
+        tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textMuted,
         tabBarLabelStyle: {
-          fontFamily: "Inter_600SemiBold",
+          fontFamily: fonts.semiBold,
           fontSize: 11,
           letterSpacing: 0.3,
         },
@@ -36,10 +36,10 @@ export default function TabsLayout() {
         options={{
           title: "Today",
           tabBarIcon: ({ color, size, focused }) => (
-            <MaterialCommunityIcons
-              name={focused ? "filmstrip-box" : "filmstrip"}
-              color={color ? String(color) : undefined}
-              size={size}
+            <FilmStripIcon
+              size={size ?? 22}
+              color={String(color)}
+              weight={focused ? "fill" : "regular"}
             />
           ),
         }}
@@ -50,10 +50,10 @@ export default function TabsLayout() {
         options={{
           title: "Journal",
           tabBarIcon: ({ color, size, focused }) => (
-            <MaterialCommunityIcons
-              name={focused ? "bookmark" : "bookmark-outline"}
-              color={color ? String(color) : undefined}
-              size={size}
+            <BookmarkSimpleIcon
+              size={size ?? 22}
+              color={String(color)}
+              weight={focused ? "fill" : "regular"}
             />
           ),
         }}
@@ -64,10 +64,10 @@ export default function TabsLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ color, size, focused }) => (
-            <MaterialCommunityIcons
-              name={focused ? "account" : "account-outline"}
-              color={color ? String(color) : undefined}
-              size={size}
+            <UserIcon
+              size={size ?? 22}
+              color={String(color)}
+              weight={focused ? "fill" : "regular"}
             />
           ),
         }}

@@ -2,7 +2,16 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  CalendarBlankIcon,
+  LightningIcon,
+  SlidersHorizontalIcon,
+  PencilSimpleIcon,
+  XIcon,
+  StarIcon,
+  EnvelopeSimpleIcon,
+  FilmStripIcon,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
 import { useProfile } from "@/features/profile/hooks/use-profile";
@@ -118,9 +127,8 @@ export default function Profile() {
                     },
                   ]}
                 >
-                  <MaterialCommunityIcons
-                    name="calendar-blank-outline"
-                    size={11}
+                  <CalendarBlankIcon
+                    size={12}
                     color={theme.colors.textMuted}
                   />
                   <Text
@@ -144,10 +152,10 @@ export default function Profile() {
             },
           ]}
         >
-          <MaterialCommunityIcons
-            name="lightning-bolt"
-            size={15}
+          <LightningIcon
+            size={14}
             color={theme.colors.gold}
+            weight="fill"
           />
           <Text style={[styles.syncPillText, { color: theme.colors.textPrimary }]}>
             {syncsRemaining} of 3 syncs available
@@ -170,10 +178,10 @@ export default function Profile() {
         >
           <View style={styles.cardHeaderRow}>
             <View style={styles.cardHeaderTitle}>
-              <MaterialCommunityIcons
-                name="tune-vertical"
-                size={18}
+              <SlidersHorizontalIcon
+                size={16}
                 color={theme.colors.primary}
+                weight="bold"
               />
               <Text
                 style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
@@ -195,8 +203,7 @@ export default function Profile() {
                 pressed && { opacity: 0.7 },
               ]}
             >
-              <MaterialCommunityIcons
-                name="pencil-outline"
+              <PencilSimpleIcon
                 size={13}
                 color={theme.colors.textSecondary}
               />
@@ -265,10 +272,10 @@ export default function Profile() {
                           },
                         ]}
                       >
-                        <MaterialCommunityIcons
-                          name="close"
+                        <XIcon
                           size={11}
                           color={theme.colors.textMuted}
+                          weight="bold"
                         />
                         <Text
                           style={[
@@ -316,10 +323,10 @@ export default function Profile() {
                       MIN RATING
                     </Text>
                     <View style={styles.ratingValueRow}>
-                      <MaterialCommunityIcons
-                        name="star"
-                        size={12}
+                      <StarIcon
+                        size={13}
                         color={theme.colors.gold}
+                        weight="fill"
                       />
                       <Text
                         style={[
@@ -369,8 +376,7 @@ export default function Profile() {
           </Text>
 
           <View style={styles.accountRow}>
-            <MaterialCommunityIcons
-              name="email-outline"
+            <EnvelopeSimpleIcon
               size={16}
               color={theme.colors.textMuted}
             />
@@ -385,8 +391,7 @@ export default function Profile() {
           </View>
 
           <View style={styles.accountRow}>
-            <MaterialCommunityIcons
-              name="filmstrip"
+            <FilmStripIcon
               size={16}
               color={theme.colors.textMuted}
             />
