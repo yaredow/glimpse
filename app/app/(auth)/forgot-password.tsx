@@ -46,7 +46,20 @@ export default function ForgotPassword() {
     return (
       <AuthShell
         title="Check your inbox."
-        subtitle={`We sent a reset link to ${sentTo} if an account exists.`}
+        subtitle={
+          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+            We sent a reset link to{"\n"}
+            <Text
+              style={{
+                color: theme.colors.textPrimary,
+                fontFamily: "Inter_600SemiBold",
+              }}
+            >
+              {sentTo}
+            </Text>{" "}
+            if an account exists.
+          </Text>
+        }
       >
         <View style={styles.successBody}>
           <View
@@ -127,9 +140,15 @@ export default function ForgotPassword() {
 }
 
 const styles = StyleSheet.create({
+  subtitle: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    lineHeight: 20,
+  },
   successBody: {
     alignItems: "center",
     gap: 16,
+    width: "100%",
   },
   iconCircle: {
     width: 68,

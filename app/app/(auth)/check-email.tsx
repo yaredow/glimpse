@@ -16,9 +16,21 @@ export default function CheckEmail() {
     <AuthShell
       title="Check your inbox."
       subtitle={
-        email
-          ? `We sent an activation link to ${email}.`
-          : "We sent you an activation link."
+        email ? (
+          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+            We sent an activation link to{"\n"}
+            <Text
+              style={{
+                color: theme.colors.textPrimary,
+                fontFamily: "Inter_600SemiBold",
+              }}
+            >
+              {email}
+            </Text>
+          </Text>
+        ) : (
+          "We sent you an activation link."
+        )
       }
     >
       <View style={styles.body}>
@@ -62,9 +74,15 @@ export default function CheckEmail() {
 }
 
 const styles = StyleSheet.create({
+  subtitle: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    lineHeight: 20,
+  },
   body: {
     alignItems: "center",
     gap: 16,
+    width: "100%",
   },
   iconCircle: {
     width: 68,

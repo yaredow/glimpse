@@ -15,7 +15,7 @@ import { useAppTheme } from "@/lib/theme";
 
 interface AuthShellProps {
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
 }
@@ -43,11 +43,13 @@ export default function AuthShell({
         <ScrollView
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
-          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
+          keyboardDismissMode={
+            Platform.OS === "ios" ? "interactive" : "on-drag"
+          }
           showsVerticalScrollIndicator={false}
         >
           <Animated.View entering={FadeIn.duration(450)} style={styles.brand}>
-            <GlimpseLogo size="large" style={styles.logo} />
+            <GlimpseLogo size="large" showMark={false} style={styles.logo} />
             <Text style={[styles.tagline, { color: theme.colors.textMuted }]}>
               FIVE FILMS. ONE NIGHT. NO SCROLLING.
             </Text>
@@ -63,16 +65,25 @@ export default function AuthShell({
               },
             ]}
           >
-            <View style={[styles.accent, { backgroundColor: theme.colors.primary }]} />
+            <View
+              style={[styles.accent, { backgroundColor: theme.colors.primary }]}
+            />
             <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
               {title}
             </Text>
             {subtitle ? (
-              <Text
-                style={[styles.subtitle, { color: theme.colors.textSecondary }]}
-              >
-                {subtitle}
-              </Text>
+              typeof subtitle === "string" ? (
+                <Text
+                  style={[
+                    styles.subtitle,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {subtitle}
+                </Text>
+              ) : (
+                <View style={styles.subtitleWrapper}>{subtitle}</View>
+              )
             ) : null}
 
             <View style={styles.body}>{children}</View>
@@ -103,17 +114,18 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
   },
   brand: {
-    alignItems: "center",
+    alignItems: "flex-start",
+    paddingHorizontal: 22,
   },
   logo: {
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   tagline: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 10,
     letterSpacing: 2.2,
-    marginTop: 10,
-    textAlign: "center",
+    marginTop: 8,
+    textAlign: "left",
   },
   panel: {
     borderRadius: 26,
@@ -144,6 +156,9 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     fontSize: 14,
     lineHeight: 20,
+    marginTop: 6,
+  },
+  subtitleWrapper: {
     marginTop: 6,
   },
   body: {

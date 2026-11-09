@@ -102,11 +102,14 @@ export function AuthErrorBanner({ message }: { message: string }) {
 
 const styles = StyleSheet.create({
   primaryButton: {
+    width: "100%",
+    alignSelf: "stretch",
     height: 52,
     borderRadius: 14,
     backgroundColor: palette.cinemaRed,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 20,
     marginTop: 6,
   },
   primaryLabel: {

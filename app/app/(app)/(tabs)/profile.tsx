@@ -1,20 +1,35 @@
+import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "react-native-paper";
-import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
-import { useOnboardingStore } from "@/features/onboarding/store/onboarding.store";
 import { useLogout } from "@/features/auth/hooks/mutations/use-logout";
+import EditPreferencesModal from "@/features/profile/components/edit-preferences-modal";
 
 const GENRE_NAMES: Record<number, string> = {
-  28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
-  80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
-  14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
-  9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
-  10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western",
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Science Fiction",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western",
 };
 
 function getInitials(name: string): string {
@@ -42,11 +57,8 @@ export default function Profile() {
   const theme = useAppTheme();
   const { data: profileData, isPending: profileLoading } = useProfile(true);
   const { data: prefData, isPending: prefLoading } = useGetPreferences(true);
-  const hydrateFromPreference = useOnboardingStore(
-    (s) => s.hydrateFromPreference,
-  );
-  const setMode = useOnboardingStore((s) => s.setMode);
   const { mutate: logout, isPending: logoutPending } = useLogout();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const user = profileData?.user;
   const pref = prefData?.preference;
@@ -61,13 +73,14 @@ export default function Profile() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Header / Avatar */}
         <View style={styles.avatarSection}>
           <View
             style={[
               styles.avatar,
               {
-                backgroundColor: theme.colors.primary,
-                borderColor: theme.colors.outlineVariant,
+                backgroundColor: theme.colors.elevation.level2,
+                borderColor: "rgba(229, 9, 20, 0.4)",
               },
             ]}
           >
@@ -96,79 +109,56 @@ export default function Profile() {
                 {user?.email}
               </Text>
               {user?.created_at ? (
-                <Text
-                  style={[styles.memberSince, { color: theme.colors.textMuted }]}
+                <View
+                  style={[
+                    styles.memberPill,
+                    {
+                      backgroundColor: theme.colors.elevation.level1,
+                      borderColor: theme.colors.outlineVariant,
+                    },
+                  ]}
                 >
                   <MaterialCommunityIcons
                     name="calendar-blank-outline"
-                    size={12}
+                    size={11}
                     color={theme.colors.textMuted}
-                    style={styles.calendarIcon}
                   />
-                  Member since {formatDate(user.created_at)}
-                </Text>
+                  <Text
+                    style={[styles.memberSince, { color: theme.colors.textMuted }]}
+                  >
+                    Member since {formatDate(user.created_at)}
+                  </Text>
+                </View>
               ) : null}
             </>
           )}
         </View>
 
+        {/* Compact Daily Sync Allowance */}
         <View
           style={[
-            styles.card,
+            styles.syncPill,
             {
               backgroundColor: theme.colors.elevation.level1,
               borderColor: theme.colors.outlineVariant,
             },
           ]}
         >
-          <View style={styles.cardHeaderRow}>
-            <View style={styles.cardHeaderTitle}>
-              <MaterialCommunityIcons
-                name="lightning-bolt"
-                size={18}
-                color={theme.colors.gold}
-              />
-              <Text
-                style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
-              >
-                Daily Sync Allowance
-              </Text>
-            </View>
-            <View
-              style={[
-                styles.syncBadge,
-                {
-                  backgroundColor:
-                    syncsRemaining > 0
-                      ? theme.colors.elevation.level3
-                      : theme.colors.elevation.level2,
-                  borderColor: theme.colors.outlineVariant,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.syncBadgeText,
-                  {
-                    color:
-                      syncsRemaining > 0
-                        ? theme.colors.gold
-                        : theme.colors.textMuted,
-                  },
-                ]}
-              >
-                {syncsRemaining} of 3 Available
-              </Text>
-            </View>
-          </View>
-
-          <Text
-            style={[styles.syncSubtext, { color: theme.colors.textSecondary }]}
-          >
-            Your Daily Five resets at midnight. Syncs refresh automatically each day.
+          <MaterialCommunityIcons
+            name="lightning-bolt"
+            size={15}
+            color={theme.colors.gold}
+          />
+          <Text style={[styles.syncPillText, { color: theme.colors.textPrimary }]}>
+            {syncsRemaining} of 3 syncs available
+          </Text>
+          <Text style={[styles.syncDot, { color: theme.colors.textMuted }]}>·</Text>
+          <Text style={[styles.syncResetText, { color: theme.colors.textMuted }]}>
+            Resets at midnight
           </Text>
         </View>
 
+        {/* Film Preferences Card */}
         <View
           style={[
             styles.card,
@@ -181,29 +171,28 @@ export default function Profile() {
           <View style={styles.cardHeaderRow}>
             <View style={styles.cardHeaderTitle}>
               <MaterialCommunityIcons
-                name="dna"
+                name="tune-vertical"
                 size={18}
                 color={theme.colors.primary}
               />
               <Text
                 style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
               >
-                Taste DNA
+                Film Preferences
               </Text>
             </View>
             <Pressable
               onPress={() => {
-                if (!pref) return;
-                hydrateFromPreference(pref);
-                setMode("edit");
-                router.push("/(onboarding)");
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setIsEditModalOpen(true);
               }}
-              style={[
+              style={({ pressed }) => [
                 styles.editBtn,
                 {
                   backgroundColor: theme.colors.elevation.level2,
                   borderColor: theme.colors.outlineVariant,
                 },
+                pressed && { opacity: 0.7 },
               ]}
             >
               <MaterialCommunityIcons
@@ -220,23 +209,19 @@ export default function Profile() {
           </View>
 
           {prefLoading ? (
-            <Text
-              style={[styles.emptyText, { color: theme.colors.textMuted }]}
-            >
-              Loading taste profile...
+            <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
+              Loading preferences...
             </Text>
           ) : !pref ? (
-            <Text
-              style={[styles.emptyText, { color: theme.colors.textMuted }]}
-            >
-              No taste preferences set yet.
+            <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
+              No preferences set yet.
             </Text>
           ) : (
             <View style={styles.prefContent}>
               {pref.favorite_genres.length > 0 && (
-                <View style={styles.prefRow}>
+                <View style={styles.prefSection}>
                   <Text
-                    style={[styles.label, { color: theme.colors.primary }]}
+                    style={[styles.sectionLabel, { color: theme.colors.textMuted }]}
                   >
                     FAVORITE GENRES
                   </Text>
@@ -245,19 +230,14 @@ export default function Profile() {
                       <View
                         key={id}
                         style={[
-                          styles.chip,
+                          styles.chipFavorite,
                           {
-                            backgroundColor: theme.colors.cinemaRedMuted,
-                            borderColor: "rgba(229, 9, 20, 0.3)",
+                            backgroundColor: "rgba(229, 9, 20, 0.12)",
+                            borderColor: "rgba(229, 9, 20, 0.35)",
                           },
                         ]}
                       >
-                        <Text
-                          style={[
-                            styles.chipText,
-                            { color: theme.colors.primary },
-                          ]}
-                        >
+                        <Text style={styles.chipFavoriteText}>
                           {genreName(id)}
                         </Text>
                       </View>
@@ -267,9 +247,9 @@ export default function Profile() {
               )}
 
               {pref.excluded_genres.length > 0 && (
-                <View style={styles.prefRow}>
+                <View style={styles.prefSection}>
                   <Text
-                    style={[styles.label, { color: theme.colors.textMuted }]}
+                    style={[styles.sectionLabel, { color: theme.colors.textMuted }]}
                   >
                     EXCLUDED GENRES
                   </Text>
@@ -278,16 +258,21 @@ export default function Profile() {
                       <View
                         key={id}
                         style={[
-                          styles.chip,
+                          styles.chipExcluded,
                           {
                             backgroundColor: theme.colors.elevation.level2,
                             borderColor: theme.colors.outlineVariant,
                           },
                         ]}
                       >
+                        <MaterialCommunityIcons
+                          name="close"
+                          size={11}
+                          color={theme.colors.textMuted}
+                        />
                         <Text
                           style={[
-                            styles.chipText,
+                            styles.chipExcludedText,
                             { color: theme.colors.textSecondary },
                           ]}
                         >
@@ -299,61 +284,75 @@ export default function Profile() {
                 </View>
               )}
 
-              {pref.languages.length > 0 && (
-                <View style={styles.prefRow}>
+              {/* Filter Metadata Row */}
+              <View
+                style={[
+                  styles.metaRow,
+                  {
+                    borderTopColor: "rgba(255, 255, 255, 0.06)",
+                  },
+                ]}
+              >
+                <View style={styles.metaItem}>
                   <Text
-                    style={[styles.label, { color: theme.colors.textMuted }]}
+                    style={[styles.metaLabel, { color: theme.colors.textMuted }]}
                   >
-                    LANGUAGES
+                    ERA
                   </Text>
                   <Text
-                    style={[styles.value, { color: theme.colors.textPrimary }]}
+                    style={[styles.metaValue, { color: theme.colors.textPrimary }]}
                   >
-                    {pref.languages.join("  \u00B7  ")}
-                  </Text>
-                </View>
-              )}
-
-              {(pref.min_year > 1888 || pref.max_year < 2100) && (
-                <View style={styles.prefRow}>
-                  <Text
-                    style={[styles.label, { color: theme.colors.textMuted }]}
-                  >
-                    YEAR RANGE
-                  </Text>
-                  <Text
-                    style={[styles.value, { color: theme.colors.textPrimary }]}
-                  >
-                    {pref.min_year} – {pref.max_year}
+                    {pref.min_year <= 1888 && pref.max_year >= 2025
+                      ? "All Time"
+                      : `${pref.min_year} – ${pref.max_year}`}
                   </Text>
                 </View>
-              )}
 
-              {pref.min_rating > 0 && (
-                <View style={styles.prefRow}>
-                  <Text
-                    style={[styles.label, { color: theme.colors.textMuted }]}
-                  >
-                    MINIMUM RATING
-                  </Text>
-                  <View style={styles.ratingRow}>
-                    <MaterialCommunityIcons
-                      name="star"
-                      size={14}
-                      color={theme.colors.gold}
-                    />
+                {pref.min_rating > 0 && (
+                  <View style={styles.metaItem}>
                     <Text
-                      style={[styles.value, { color: theme.colors.textPrimary }]}
+                      style={[styles.metaLabel, { color: theme.colors.textMuted }]}
                     >
-                      {pref.min_rating.toFixed(1)} and above
+                      MIN RATING
+                    </Text>
+                    <View style={styles.ratingValueRow}>
+                      <MaterialCommunityIcons
+                        name="star"
+                        size={12}
+                        color={theme.colors.gold}
+                      />
+                      <Text
+                        style={[
+                          styles.metaValue,
+                          { color: theme.colors.textPrimary },
+                        ]}
+                      >
+                        {pref.min_rating.toFixed(1)}+
+                      </Text>
+                    </View>
+                  </View>
+                )}
+
+                {pref.languages.length > 0 && (
+                  <View style={styles.metaItem}>
+                    <Text
+                      style={[styles.metaLabel, { color: theme.colors.textMuted }]}
+                    >
+                      LANGUAGES
+                    </Text>
+                    <Text
+                      style={[styles.metaValue, { color: theme.colors.textPrimary }]}
+                    >
+                      {pref.languages.map((l) => l.toUpperCase()).join(", ")}
                     </Text>
                   </View>
-                </View>
-              )}
+                )}
+              </View>
             </View>
           )}
         </View>
 
+        {/* Account Details */}
         <View
           style={[
             styles.card,
@@ -366,13 +365,13 @@ export default function Profile() {
           <Text
             style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
           >
-            Account & Session
+            Account
           </Text>
 
           <View style={styles.accountRow}>
             <MaterialCommunityIcons
               name="email-outline"
-              size={18}
+              size={16}
               color={theme.colors.textMuted}
             />
             <Text
@@ -387,8 +386,8 @@ export default function Profile() {
 
           <View style={styles.accountRow}>
             <MaterialCommunityIcons
-              name="information-outline"
-              size={18}
+              name="filmstrip"
+              size={16}
               color={theme.colors.textMuted}
             />
             <Text
@@ -423,6 +422,13 @@ export default function Profile() {
           </Button>
         </View>
       </ScrollView>
+
+      {/* Edit Preferences Modal */}
+      <EditPreferencesModal
+        visible={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        currentPreferences={pref}
+      />
     </SafeAreaView>
   );
 }
@@ -434,65 +440,92 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: 12,
     paddingBottom: 40,
-    gap: 16,
+    gap: 14,
   },
   avatarSection: {
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
   avatar: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 1,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1.5,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   avatarText: {
+    color: "#FFFFFF",
     fontFamily: "Inter_700Bold",
     fontSize: 22,
-    color: "#FFFFFF",
+    letterSpacing: 0.5,
   },
   userName: {
     fontFamily: "Inter_700Bold",
     fontSize: 20,
+    lineHeight: 26,
     letterSpacing: -0.3,
-    textAlign: "center",
   },
   userEmail: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
+    lineHeight: 18,
     marginTop: 2,
-    textAlign: "center",
+  },
+  memberPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginTop: 8,
   },
   memberSince: {
     fontFamily: "Inter_400Regular",
-    fontSize: 12,
-    marginTop: 8,
-    alignItems: "center",
-  },
-  calendarIcon: {
-    marginRight: 4,
+    fontSize: 11,
   },
   skeletonName: {
-    width: 120,
-    height: 24,
+    width: 140,
+    height: 22,
     borderRadius: 6,
-    marginTop: 8,
+    marginTop: 4,
+  },
+  syncPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 7,
+  },
+  syncPillText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12.5,
+  },
+  syncDot: {
+    fontSize: 12,
+  },
+  syncResetText: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
   },
   card: {
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
-    padding: 18,
+    padding: 16,
+    gap: 14,
   },
   cardHeaderRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 14,
+    justifyContent: "space-between",
   },
   cardHeaderTitle: {
     flexDirection: "row",
@@ -501,30 +534,15 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontFamily: "Inter_700Bold",
-    fontSize: 14,
-    letterSpacing: 0.3,
-  },
-  syncBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  syncBadgeText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-  },
-  syncSubtext: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 15,
+    letterSpacing: 0.2,
   },
   editBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 5,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 8,
     borderWidth: 1,
   },
@@ -535,43 +553,69 @@ const styles = StyleSheet.create({
   emptyText: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    fontStyle: "italic",
+    paddingVertical: 6,
   },
   prefContent: {
     gap: 14,
   },
-  prefRow: {
-    gap: 6,
+  prefSection: {
+    gap: 8,
   },
-  label: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 10,
+  sectionLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 10.5,
     letterSpacing: 1.2,
-    textTransform: "uppercase",
-  },
-  value: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    textTransform: "uppercase",
   },
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 6,
+    gap: 7,
   },
-  chip: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+  chipFavorite: {
+    paddingHorizontal: 11,
+    paddingVertical: 5,
     borderRadius: 8,
     borderWidth: 1,
   },
-  chipText: {
+  chipFavoriteText: {
+    color: "#FFFFFF",
     fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    textTransform: "uppercase",
-    letterSpacing: 0.4,
+    fontSize: 12,
   },
-  ratingRow: {
+  chipExcluded: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  chipExcludedText: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    flexWrap: "wrap",
+    gap: 18,
+    paddingTop: 12,
+    borderTopWidth: 1,
+  },
+  metaItem: {
+    gap: 3,
+  },
+  metaLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 10,
+    letterSpacing: 1,
+  },
+  metaValue: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 12.5,
+  },
+  ratingValueRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -580,7 +624,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    paddingVertical: 6,
   },
   accountValue: {
     fontFamily: "Inter_400Regular",
@@ -588,11 +631,10 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    marginVertical: 12,
   },
   logoutButton: {
     borderRadius: 10,
-    marginTop: 4,
+    marginTop: 2,
   },
   logoutContent: {
     height: 44,
@@ -600,6 +642,6 @@ const styles = StyleSheet.create({
   logoutLabel: {
     fontFamily: "Inter_700Bold",
     fontSize: 13,
-    letterSpacing: 1,
+    letterSpacing: 0.8,
   },
 });

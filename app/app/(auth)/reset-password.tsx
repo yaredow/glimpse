@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
   successBody: {
     alignItems: "center",
     gap: 16,
+    width: "100%",
   },
   iconCircle: {
     width: 68,
