@@ -5,7 +5,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -30,6 +30,7 @@ import { deriveProgramTheme } from "@/features/movies/utils/program";
 
 export default function TodayTab() {
   const theme = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { data, isPending } = useGetTodaysGrid();
   const { data: profileData } = useProfile();
   const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
@@ -567,7 +568,12 @@ export default function TodayTab() {
         programTheme={programTheme}
       />
 
-      <View style={styles.mainContent}>
+      <View
+        style={[
+          styles.mainContent,
+          { paddingBottom: Math.max(insets.bottom, 16) + 64 },
+        ]}
+      >
         {isPending ? (
           <View style={styles.deckContainer}>
             <SkeletonLoader count={5} />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "react-native-paper";
 import {
   CalendarBlankIcon,
@@ -64,6 +64,7 @@ function genreName(id: number): string {
 
 export default function Profile() {
   const theme = useAppTheme();
+  const insets = useSafeAreaInsets();
   const { data: profileData, isPending: profileLoading } = useProfile(true);
   const { data: prefData, isPending: prefLoading } = useGetPreferences(true);
   const { mutate: logout, isPending: logoutPending } = useLogout();
@@ -79,7 +80,10 @@ export default function Profile() {
       edges={["top"]}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: Math.max(insets.bottom, 16) + 80 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {/* Header / Avatar */}

@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -28,6 +28,7 @@ type FilterTab = "all" | "watched" | "pick_tonight";
 
 export default function Journal() {
   const theme = useAppTheme();
+  const insets = useSafeAreaInsets();
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
   const { data, isPending, refetch, isRefetching } = useGetHistory();
 
@@ -367,13 +368,23 @@ export default function Journal() {
       </View>
 
       {isPending ? (
-        <View style={styles.centered}>
+        <View
+          style={[
+            styles.centered,
+            { paddingBottom: Math.max(insets.bottom, 16) + 60 },
+          ]}
+        >
           <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
             Loading cinema archive...
           </Text>
         </View>
       ) : filteredHistory.length === 0 ? (
-        <View style={styles.centered}>
+        <View
+          style={[
+            styles.centered,
+            { paddingBottom: Math.max(insets.bottom, 16) + 60 },
+          ]}
+        >
           <MaterialCommunityIcons
             name="movie-open-outline"
             size={48}
@@ -409,7 +420,10 @@ export default function Journal() {
           renderItem={renderItem}
           numColumns={3}
           columnWrapperStyle={styles.columnWrapper}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingBottom: Math.max(insets.bottom, 16) + 80 },
+          ]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
