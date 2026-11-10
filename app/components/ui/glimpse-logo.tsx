@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAppTheme } from "@/lib/theme";
 
 interface GlimpseLogoProps {
-  size?: "small" | "medium" | "large" | number;
+  size?: "small" | "medium" | "large" | "hero" | number;
   showMark?: boolean;
   showWordmark?: boolean;
   tagline?: string;
@@ -63,6 +63,17 @@ export default function GlimpseLogo({
           letterSpacing: 4.5,
           dotMarginBottom: 6,
           gap: 12,
+        };
+      case "hero":
+        return {
+          badgeSize: 68,
+          iconSize: 36,
+          badgeRadius: 20,
+          fontSize: 28,
+          dotSize: 9,
+          letterSpacing: 4.8,
+          dotMarginBottom: 6,
+          gap: 14,
         };
       case "medium":
       default:

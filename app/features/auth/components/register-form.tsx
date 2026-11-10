@@ -1,8 +1,8 @@
 import { useRef, useState, type ComponentRef } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
 import { useForm } from "@tanstack/react-form";
 import { router } from "expo-router";
-import { useAppTheme } from "@/lib/theme";
+import { Text } from "@/components/ui/text";
 import { getErrorMessage } from "@/lib/error";
 import { registerSchema, type RegisterFormData } from "../schemas/auth.schema";
 import { firstFieldError } from "../utils/form-error";
@@ -15,7 +15,6 @@ import {
 } from "./auth-actions";
 
 export const RegisterForm = () => {
-  const theme = useAppTheme();
   const registerMutation = useRegister();
   const emailRef = useRef<ComponentRef<typeof TextInput>>(null);
   const passwordRef = useRef<ComponentRef<typeof TextInput>>(null);
@@ -53,6 +52,7 @@ export const RegisterForm = () => {
         {(field) => (
           <AuthField
             label="Full name"
+            placeholder="Enter your name"
             value={field.state.value}
             onChangeText={(value) => {
               field.handleChange(value);
@@ -60,7 +60,7 @@ export const RegisterForm = () => {
             }}
             onBlur={field.handleBlur}
             error={firstFieldError(field.state.meta.errors)}
-            icon="account-outline"
+            icon="user"
             autoComplete="name"
             textContentType="name"
             autoCapitalize="words"
@@ -75,6 +75,7 @@ export const RegisterForm = () => {
         {(field) => (
           <AuthField
             label="Email"
+            placeholder="Enter your email"
             value={field.state.value}
             onChangeText={(value) => {
               field.handleChange(value);
@@ -82,7 +83,7 @@ export const RegisterForm = () => {
             }}
             onBlur={field.handleBlur}
             error={firstFieldError(field.state.meta.errors)}
-            icon="email-outline"
+            icon="email"
             inputRef={emailRef}
             keyboardType="email-address"
             autoComplete="email"
@@ -98,6 +99,7 @@ export const RegisterForm = () => {
         {(field) => (
           <AuthField
             label="Password"
+            placeholder="Create a password"
             value={field.state.value}
             onChangeText={(value) => {
               field.handleChange(value);
@@ -106,7 +108,7 @@ export const RegisterForm = () => {
             onBlur={field.handleBlur}
             error={firstFieldError(field.state.meta.errors)}
             hint="At least 8 characters"
-            icon="lock-outline"
+            icon="lock"
             secure
             inputRef={passwordRef}
             autoComplete="new-password"
@@ -127,32 +129,25 @@ export const RegisterForm = () => {
         onPress={() => form.handleSubmit()}
       />
 
-      <View style={styles.footer}>
-        <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>
-          Already have an account?
-        </Text>
-        <AuthTextLink
-          label="Sign in"
-          onPress={() => router.replace("/(auth)/login")}
-        />
+      <View className="mt-8 items-center">
+        <View className="mb-4 flex-row items-center gap-3 w-full max-w-[280px]">
+          <View className="flex-1 h-px bg-white/[0.08]" />
+          <Text className="text-[11px] text-zinc-500 font-medium tracking-wider">
+            OR
+          </Text>
+          <View className="flex-1 h-px bg-white/[0.08]" />
+        </View>
+        <View className="flex-row items-center gap-1.5">
+          <Text className="text-zinc-400 text-xs font-normal">
+            Already have an account?
+          </Text>
+          <AuthTextLink
+            label="Sign in"
+            href="/(auth)/login"
+            onPress={() => router.replace("/(auth)/login")}
+          />
+        </View>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-    marginTop: 18,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.07)",
-  },
-  footerText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-  },
-});

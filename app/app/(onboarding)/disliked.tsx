@@ -1,16 +1,13 @@
-import { StyleSheet, View } from "react-native";
-import { Text, useTheme, ActivityIndicator } from "react-native-paper";
 import { router } from "expo-router";
-import { Button } from "@/components/ui/button";
 import StepLayout from "@/features/onboarding/components/step-layout";
 import ExcludedGenreSelector from "@/features/onboarding/components/excluded-genre-selector";
-import { useOnboardingData } from "@/features/onboarding/hooks/queries/use-onboarding-data";
 import { useOnboardingStore } from "@/features/onboarding/store/onboarding.store";
 import { useFinishOnboarding } from "@/features/onboarding/hooks/mutations/use-finish-onboarding";
+import { useAuthStore } from "@/features/auth/store/auth.store";
+import { ONBOARDING_GENRES } from "@/features/onboarding/constants/onboarding-data";
 
 export default function DislikedGenresScreen() {
-  const { colors } = useTheme();
-  const { data, isLoading, error, refetch } = useOnboardingData();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const {
     favoriteGenres,
     excludedGenres,
@@ -19,6 +16,7 @@ export default function DislikedGenresScreen() {
     maxYear,
     minRating,
     setExcludedGenres,
+    setHasCompletedLocalOnboarding,
   } = useOnboardingStore();
 
   const { mutate: finish, isPending } = useFinishOnboarding();
@@ -26,55 +24,21 @@ export default function DislikedGenresScreen() {
   const handleFinish = (selectedExcludedIds: number[]) => {
     setExcludedGenres(selectedExcludedIds);
 
+    if (!isAuthenticated) {
+      setHasCompletedLocalOnboarding(true);
+      router.replace("/(auth)/register");
+      return;
+    }
+
     finish({
       favorite_genres: favoriteGenres,
       excluded_genres: selectedExcludedIds,
       languages: languages.length > 0 ? languages : ["en"],
       min_year: minYear ?? 1888,
-      max_year: maxYear ?? 2026,
+      max_year: maxYear ?? new Date().getFullYear(),
       min_rating: minRating ?? 0,
     });
   };
-
-  if (isLoading) {
-    return (
-      <StepLayout
-        step={3}
-        totalSteps={4}
-        title="Any Dealbreakers?"
-        subtitle="Almost there..."
-        onBack={() => router.back()}
-      >
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      </StepLayout>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <StepLayout
-        step={3}
-        totalSteps={4}
-        title="Any Dealbreakers?"
-        subtitle="Failed to load options"
-        onBack={() => router.back()}
-      >
-        <View style={styles.center}>
-          <Text
-            variant="bodyLarge"
-            style={{ color: colors.error, marginBottom: 16 }}
-          >
-            Failed to load genres.
-          </Text>
-          <Button variant="outline" onPress={() => refetch()}>
-            Retry
-          </Button>
-        </View>
-      </StepLayout>
-    );
-  }
 
   return (
     <StepLayout
@@ -85,7 +49,7 @@ export default function DislikedGenresScreen() {
       onBack={() => router.back()}
     >
       <ExcludedGenreSelector
-        genres={data.genres}
+        genres={ONBOARDING_GENRES}
         initialSelected={excludedGenres}
         favoriteGenreIds={favoriteGenres}
         onFinish={handleFinish}
@@ -94,11 +58,3 @@ export default function DislikedGenresScreen() {
     </StepLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

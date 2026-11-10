@@ -1,9 +1,16 @@
-import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { useForm } from "@tanstack/react-form";
 import { router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useAppTheme } from "@/lib/theme";
+import { EnvelopeSimpleIcon } from "phosphor-react-native";
+import { Text } from "@/components/ui/text";
 import { getErrorMessage } from "@/lib/error";
 import {
   forgotPasswordSchema,
@@ -20,10 +27,28 @@ import {
 } from "@/features/auth/components/auth-actions";
 
 export default function ForgotPassword() {
-  const theme = useAppTheme();
   const requestReset = useRequestPasswordReset();
   const [serverError, setServerError] = useState<string>();
   const [sentTo, setSentTo] = useState<string>();
+
+  const pulseAnim = useSharedValue(1);
+
+  useEffect(() => {
+    if (sentTo) {
+      pulseAnim.value = withRepeat(
+        withSequence(
+          withTiming(1.06, { duration: 900 }),
+          withTiming(1.0, { duration: 900 })
+        ),
+        -1,
+        true
+      );
+    }
+  }, [sentTo, pulseAnim]);
+
+  const animatedPulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseAnim.value }],
+  }));
 
   const form = useForm({
     defaultValues: { email: "" } as ForgotPasswordFormData,
@@ -47,47 +72,31 @@ export default function ForgotPassword() {
       <AuthShell
         title="Check your inbox."
         subtitle={
-          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+          <Text className="text-zinc-400 text-sm text-center leading-relaxed">
             We sent a reset link to{"\n"}
-            <Text
-              style={{
-                color: theme.colors.textPrimary,
-                fontFamily: "Inter_600SemiBold",
-              }}
-            >
-              {sentTo}
-            </Text>{" "}
+            <Text className="text-white font-semibold">{sentTo}</Text>{" "}
             if an account exists.
           </Text>
         }
       >
-        <View style={styles.successBody}>
-          <View
-            style={[
-              styles.iconCircle,
-              {
-                backgroundColor: theme.colors.cinemaRedMuted,
-                borderColor: "rgba(229, 9, 20, 0.3)",
-              },
-            ]}
+        <View className="items-center gap-4 w-full">
+          <Animated.View
+            style={animatedPulseStyle}
+            className="w-16 h-16 rounded-full border border-primary/30 bg-primary/10 items-center justify-center mt-1 mb-2 shadow-lg shadow-red-950/40"
           >
-            <MaterialCommunityIcons
-              name="email-outline"
-              size={30}
-              color={theme.colors.primary}
-            />
-          </View>
-          <Text style={[styles.successText, { color: theme.colors.textSecondary }]}>
+            <EnvelopeSimpleIcon size={32} color="#E50914" weight="fill" />
+          </Animated.View>
+          <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
             Open the link in that email, or use the reset code from the message
             on the next screen.
           </Text>
           <AuthPrimaryButton
-            label="Back to sign in"
-            onPress={() => router.replace("/(auth)/login")}
-          />
-          <AuthTextLink
             label="I have a reset code"
             onPress={() => router.push("/(auth)/reset-password")}
+          />
+          <AuthTextLink
+            label="Back to sign in"
+            onPress={() => router.replace("/(auth)/login")}
           />
         </View>
       </AuthShell>
@@ -103,6 +112,7 @@ export default function ForgotPassword() {
         {(field) => (
           <AuthField
             label="Email"
+            placeholder="Enter your email"
             value={field.state.value}
             onChangeText={(value) => {
               field.handleChange(value);
@@ -110,7 +120,7 @@ export default function ForgotPassword() {
             }}
             onBlur={field.handleBlur}
             error={firstFieldError(field.state.meta.errors)}
-            icon="email-outline"
+            icon="email"
             keyboardType="email-address"
             autoComplete="email"
             textContentType="emailAddress"
@@ -129,7 +139,7 @@ export default function ForgotPassword() {
         onPress={() => form.handleSubmit()}
       />
 
-      <View style={styles.footer}>
+      <View className="items-center mt-6">
         <AuthTextLink
           label="Back to sign in"
           onPress={() => router.replace("/(auth)/login")}
@@ -138,39 +148,3 @@ export default function ForgotPassword() {
     </AuthShell>
   );
 }
-
-const styles = StyleSheet.create({
-  subtitle: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  successBody: {
-    alignItems: "center",
-    gap: 16,
-    width: "100%",
-  },
-  iconCircle: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-  },
-  successText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    lineHeight: 20,
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  footer: {
-    alignItems: "center",
-    marginTop: 18,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.07)",
-  },
-});

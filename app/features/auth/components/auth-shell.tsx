@@ -1,23 +1,36 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
+  useWindowDimensions,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
-import GlimpseLogo from "@/components/ui/glimpse-logo";
-import { useAppTheme } from "@/lib/theme";
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ApertureIcon } from "phosphor-react-native";
+import { Text } from "@/components/ui/text";
+import { AuthBackdrop } from "./auth-backdrop";
 
 interface AuthShellProps {
   title: string;
   subtitle?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  icon?: ReactNode;
+  showBack?: boolean;
+  onBack?: () => void;
+  compact?: boolean;
 }
 
 export default function AuthShell({
@@ -25,156 +38,266 @@ export default function AuthShell({
   subtitle,
   children,
   footer,
+  compact = false,
 }: AuthShellProps) {
-  const theme = useAppTheme();
+  const insets = useSafeAreaInsets();
+  const { height: screenHeight } = useWindowDimensions();
+
+  // Ensure backdrop height accounts for safe area so logo is never behind punch hole/notch
+  const initialBackdropHeight = compact
+    ? Math.round(insets.top + screenHeight * 0.22)
+    : Math.round(insets.top + screenHeight * 0.3);
+  const collapsedBackdropHeight = Math.round(insets.top + screenHeight * 0.12);
+
+  const keyboardProgress = useSharedValue(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      () => {
+        keyboardProgress.value = withTiming(1, { duration: 250 });
+      }
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      () => {
+        keyboardProgress.value = withTiming(0, { duration: 250 });
+      }
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [keyboardProgress]);
+
+  const animatedBackdropStyle = useAnimatedStyle(() => {
+    const currentHeight = interpolate(
+      keyboardProgress.value,
+      [0, 1],
+      [initialBackdropHeight, collapsedBackdropHeight]
+    );
+    return {
+      height: currentHeight,
+    };
+  });
+
+  const animatedLogoContentStyle = useAnimatedStyle(() => {
+    const scale = interpolate(keyboardProgress.value, [0, 1], [1, 0.75]);
+    const opacity = interpolate(keyboardProgress.value, [0, 1], [1, 0.35]);
+    const translateY = interpolate(keyboardProgress.value, [0, 1], [0, -8]);
+    return {
+      transform: [{ scale }, { translateY }],
+      opacity,
+    };
+  });
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <LinearGradient
-        colors={[theme.colors.background, theme.colors.surface, "#1a1214"]}
-        locations={[0, 0.55, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+    <View style={styles.container}>
+      {/* Top Backdrop Zone with Movie Still Atmosphere */}
+      <Animated.View
+        style={[
+          styles.backdropZone,
+          { paddingTop: Math.max(insets.top, 24) + 10 },
+          animatedBackdropStyle,
+        ]}
+      >
+        <AuthBackdrop />
 
+        {/* Hero Logo & Brand Centerpiece (Safely below notch/punch hole) */}
+        <Animated.View
+          style={[styles.logoCenterpiece, animatedLogoContentStyle]}
+        >
+          {/* Emblem Badge with Aperture Icon */}
+          <Animated.View
+            entering={FadeIn.delay(100).duration(600)}
+            style={styles.emblemBadge}
+          >
+            <ApertureIcon size={32} color="#E50914" weight="fill" />
+          </Animated.View>
+
+          {/* GLIMPSE Wordmark with Cinema Red Dot */}
+          <Animated.View
+            entering={FadeInDown.delay(250).duration(500)}
+            style={styles.brandRow}
+          >
+            <Text style={styles.brandName}>GLIMPSE</Text>
+            <View style={styles.brandDot} />
+          </Animated.View>
+
+          {/* Brand Tagline */}
+          <Animated.Text
+            entering={FadeIn.delay(450).duration(400)}
+            style={styles.brandTagline}
+          >
+            FIVE FILMS. ONE NIGHT. NO SCROLLING.
+          </Animated.Text>
+        </Animated.View>
+      </Animated.View>
+
+      {/* Bottom Form Zone */}
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.flex}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.formZone}
       >
         <ScrollView
-          contentContainerStyle={styles.scroll}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: Math.max(insets.bottom + 12, 24) },
+          ]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={
             Platform.OS === "ios" ? "interactive" : "on-drag"
           }
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View entering={FadeIn.duration(450)} style={styles.brand}>
-            <GlimpseLogo size="large" showMark={false} style={styles.logo} />
-            <Text style={[styles.tagline, { color: theme.colors.textMuted }]}>
-              FIVE FILMS. ONE NIGHT. NO SCROLLING.
-            </Text>
-          </Animated.View>
-
-          <Animated.View
-            entering={FadeInDown.duration(500).delay(80)}
-            style={[
-              styles.panel,
-              {
-                backgroundColor: "rgba(18, 18, 20, 0.96)",
-                borderColor: theme.colors.glassBorder,
-              },
-            ]}
-          >
-            <View
-              style={[styles.accent, { backgroundColor: theme.colors.primary }]}
-            />
-            <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
-              {title}
-            </Text>
-            {subtitle ? (
-              typeof subtitle === "string" ? (
-                <Text
-                  style={[
-                    styles.subtitle,
-                    { color: theme.colors.textSecondary },
-                  ]}
+          <View style={styles.formContainer}>
+            {/* Title & Subtitle */}
+            <View style={styles.titleBlock}>
+              <Animated.Text
+                entering={FadeInDown.delay(100).duration(350).springify()}
+                className="text-2xl font-bold text-white tracking-tight text-center"
+              >
+                {title}
+              </Animated.Text>
+              {subtitle ? (
+                <Animated.View
+                  entering={FadeIn.delay(200).duration(300)}
+                  style={styles.subtitleWrapper}
                 >
-                  {subtitle}
-                </Text>
-              ) : (
-                <View style={styles.subtitleWrapper}>{subtitle}</View>
-              )
-            ) : null}
+                  {typeof subtitle === "string" ? (
+                    <Text className="text-zinc-400 text-sm text-center leading-relaxed px-4 max-w-sm self-center">
+                      {subtitle}
+                    </Text>
+                  ) : (
+                    <View className="items-center">{subtitle}</View>
+                  )}
+                </Animated.View>
+              ) : null}
+            </View>
 
-            <View style={styles.body}>{children}</View>
-            {footer ? <View style={styles.footer}>{footer}</View> : null}
-          </Animated.View>
+            {/* Form Fields & Children */}
+            <Animated.View
+              entering={FadeInUp.delay(300).duration(400)}
+              style={styles.formBody}
+            >
+              {children}
+              {footer ? <View className="mt-4">{footer}</View> : null}
+            </Animated.View>
+          </View>
 
-          <Text style={[styles.footnote, { color: theme.colors.textMuted }]}>
-            A quieter way to choose what to watch.
-          </Text>
+          {/* Bottom Footnote */}
+          <View style={styles.footnoteRow}>
+            <Text style={styles.footnoteText}>
+              A quieter way to choose what to watch.
+            </Text>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  container: {
     flex: 1,
-    backgroundColor: "#121212",
+    backgroundColor: "#0C0C0E",
   },
-  flex: {
-    flex: 1,
-  },
-  scroll: {
-    flexGrow: 1,
+  backdropZone: {
+    width: "100%",
+    position: "relative",
     justifyContent: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 32,
+    alignItems: "center",
+    overflow: "hidden",
+    paddingBottom: 12,
   },
-  brand: {
-    alignItems: "flex-start",
-    paddingHorizontal: 22,
+  logoCenterpiece: {
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+    paddingHorizontal: 16,
   },
-  logo: {
-    alignItems: "flex-start",
+  emblemBadge: {
+    width: 60,
+    height: 60,
+    borderRadius: 18,
+    backgroundColor: "rgba(229, 9, 20, 0.18)",
+    borderWidth: 1.5,
+    borderColor: "rgba(229, 9, 20, 0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+    shadowColor: "#E50914",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
   },
-  tagline: {
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  brandName: {
+    fontFamily: "Inter_900Black",
+    fontSize: 24,
+    lineHeight: 28,
+    letterSpacing: 5,
+    color: "#FFFFFF",
+  },
+  brandDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: "#E50914",
+    marginBottom: 5,
+    marginLeft: 3,
+  },
+  brandTagline: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 10,
-    letterSpacing: 2.2,
-    marginTop: 8,
-    textAlign: "left",
-  },
-  panel: {
-    borderRadius: 26,
-    borderWidth: 1,
-    paddingHorizontal: 22,
-    paddingTop: 22,
-    paddingBottom: 20,
-    marginTop: 28,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 18 },
-    shadowOpacity: 0.4,
-    shadowRadius: 28,
-    elevation: 10,
-  },
-  accent: {
-    width: 34,
-    height: 2,
-    borderRadius: 1,
-    marginBottom: 16,
-  },
-  title: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 27,
-    lineHeight: 32,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    lineHeight: 20,
+    letterSpacing: 2.8,
+    color: "#8B8B94",
+    textTransform: "uppercase",
     marginTop: 6,
+    textAlign: "center",
+  },
+  formZone: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "space-between",
+  },
+  formContainer: {
+    width: "100%",
+    maxWidth: 420,
+    alignSelf: "center",
+    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
+  titleBlock: {
+    alignItems: "center",
+    marginBottom: 8,
   },
   subtitleWrapper: {
     marginTop: 6,
+    alignItems: "center",
   },
-  body: {
-    marginTop: 22,
+  formBody: {
+    marginTop: 16,
   },
-  footer: {
-    marginTop: 18,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.07)",
-    gap: 10,
+  footnoteRow: {
+    paddingTop: 24,
+    paddingBottom: 6,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  footnote: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
+  footnoteText: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 10,
+    letterSpacing: 1.2,
+    color: "#52525B",
+    textTransform: "uppercase",
     textAlign: "center",
-    marginTop: 20,
   },
 });

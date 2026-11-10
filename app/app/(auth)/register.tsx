@@ -6,6 +6,7 @@ export default function Register() {
     <AuthShell
       title="Start your ritual."
       subtitle="Create an account and get five handpicked films every night."
+      compact
     >
       <RegisterForm />
     </AuthShell>

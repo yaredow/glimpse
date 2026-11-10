@@ -1,3 +1,5 @@
+import "../global.css";
+import * as SystemUI from "expo-system-ui";
 import { useFonts } from "expo-font";
 import {
   PlusJakartaSans_400Regular,
@@ -18,9 +20,12 @@ import { glimpseDarkTheme, glimpseNavigationTheme, toastConfig } from "@/lib/the
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
+import { useOnboardingStore } from "@/features/onboarding/store/onboarding.store";
+import { useFinishOnboarding } from "@/features/onboarding/hooks/mutations/use-finish-onboarding";
 import AnimatedSplashScreen from "@/components/ui/animated-splash-screen";
 
 SplashScreen.preventAutoHideAsync();
+void SystemUI.setBackgroundColorAsync("#0C0C0E");
 
 export default function RootLayout() {
   useOnlineManager();
@@ -68,12 +73,51 @@ function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
     useGetPreferences(isAuthenticated);
   const isOnboarded = !!data?.preference?.favorite_genres?.length;
 
+  const {
+    favoriteGenres,
+    excludedGenres,
+    languages,
+    minYear,
+    maxYear,
+    minRating,
+    hasCompletedLocalOnboarding,
+  } = useOnboardingStore();
+
+  const { mutate: syncPreferences, isPending: isSyncing } =
+    useFinishOnboarding();
+
+  useEffect(() => {
+    if (isAuthenticated && hasCompletedLocalOnboarding && !isSyncing) {
+      syncPreferences({
+        favorite_genres: favoriteGenres,
+        excluded_genres: excludedGenres,
+        languages: languages.length > 0 ? languages : ["en"],
+        min_year: minYear ?? 1888,
+        max_year: maxYear ?? 2026,
+        min_rating: minRating ?? 0,
+      });
+    }
+  }, [
+    isAuthenticated,
+    hasCompletedLocalOnboarding,
+    isSyncing,
+    favoriteGenres,
+    excludedGenres,
+    languages,
+    minYear,
+    maxYear,
+    minRating,
+    syncPreferences,
+  ]);
+
   useEffect(() => {
     if (!isAuthenticated) {
-      if (currentGroup === "(auth)") return;
-      router.replace("/(auth)/login");
+      if (currentGroup === "(auth)" || currentGroup === "(onboarding)") return;
+      router.replace("/(auth)/welcome");
       return;
     }
+
+    if (hasCompletedLocalOnboarding || isSyncing) return;
 
     if (!isPreferenceFetched) return;
 
@@ -84,12 +128,24 @@ function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
       if (currentGroup === "(onboarding)") return;
       router.replace("/(onboarding)");
     }
-  }, [currentGroup, isAuthenticated, isPreferenceFetched, isOnboarded]);
+  }, [
+    currentGroup,
+    isAuthenticated,
+    isPreferenceFetched,
+    isOnboarded,
+    hasCompletedLocalOnboarding,
+    isSyncing,
+  ]);
 
   return (
     <>
       <StatusBar style="light" />
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: "#0C0C0E" },
+        }}
+      >
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(onboarding)" />

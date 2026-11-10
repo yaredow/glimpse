@@ -8,6 +8,6 @@ export default function Index() {
     return <Redirect href="/(app)/(tabs)" />;
   }
 
-  return <Redirect href="/(auth)/login" />;
+  return <Redirect href="/(auth)/welcome" />;
 }
 

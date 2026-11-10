@@ -1,8 +1,8 @@
 import { useRef, useState, type ComponentRef } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
 import { useForm } from "@tanstack/react-form";
 import { router } from "expo-router";
-import { useAppTheme } from "@/lib/theme";
+import { Text } from "@/components/ui/text";
 import { getErrorMessage } from "@/lib/error";
 import { loginSchema, type LoginFormData } from "../schemas/auth.schema";
 import { firstFieldError } from "../utils/form-error";
@@ -15,7 +15,6 @@ import {
 } from "./auth-actions";
 
 export const LoginForm = () => {
-  const theme = useAppTheme();
   const loginMutation = useLogin();
   const passwordRef = useRef<ComponentRef<typeof TextInput>>(null);
   const [serverError, setServerError] = useState<string>();
@@ -45,6 +44,7 @@ export const LoginForm = () => {
         {(field) => (
           <AuthField
             label="Email"
+            placeholder="Enter your email"
             value={field.state.value}
             onChangeText={(value) => {
               field.handleChange(value);
@@ -52,7 +52,7 @@ export const LoginForm = () => {
             }}
             onBlur={field.handleBlur}
             error={firstFieldError(field.state.meta.errors)}
-            icon="email-outline"
+            icon="email"
             keyboardType="email-address"
             autoComplete="username"
             textContentType="username"
@@ -67,6 +67,7 @@ export const LoginForm = () => {
         {(field) => (
           <AuthField
             label="Password"
+            placeholder="Enter your password"
             value={field.state.value}
             onChangeText={(value) => {
               field.handleChange(value);
@@ -74,7 +75,7 @@ export const LoginForm = () => {
             }}
             onBlur={field.handleBlur}
             error={firstFieldError(field.state.meta.errors)}
-            icon="lock-outline"
+            icon="lock"
             secure
             inputRef={passwordRef}
             autoComplete="current-password"
@@ -86,21 +87,32 @@ export const LoginForm = () => {
         )}
       </form.Field>
 
-      <View style={styles.forgotRow}>
+      <View className="items-end -mt-0.5 mb-3">
         <AuthTextLink
           label="Forgot password?"
           align="flex-end"
-          onPress={() => router.push("/(auth)/forgot-password")}
+          tone="muted"
+          href="/(auth)/forgot-password"
+          onPress={() => {
+            try {
+              router.push("/(auth)/forgot-password");
+            } catch {
+              router.push("/forgot-password");
+            }
+          }}
         />
       </View>
 
       {serverError ? <AuthErrorBanner message={serverError} /> : null}
       {serverError?.toLowerCase().includes("activ") ? (
-        <AuthTextLink
-          label="Activate your account"
-          align="flex-start"
-          onPress={() => router.push("/(auth)/activate")}
-        />
+        <View className="mb-3">
+          <AuthTextLink
+            label="Activate your account"
+            align="flex-start"
+            href="/(auth)/activate"
+            onPress={() => router.push("/(auth)/activate")}
+          />
+        </View>
       ) : null}
 
       <AuthPrimaryButton
@@ -109,37 +121,25 @@ export const LoginForm = () => {
         onPress={() => form.handleSubmit()}
       />
 
-      <View style={styles.footer}>
-        <Text style={[styles.footerText, { color: theme.colors.textSecondary }]}>
-          New to Glimpse?
-        </Text>
-        <AuthTextLink
-          label="Create an account"
-          onPress={() => router.push("/(auth)/register")}
-        />
+      <View className="mt-8 items-center">
+        <View className="mb-4 flex-row items-center gap-3 w-full max-w-[280px]">
+          <View className="flex-1 h-px bg-white/[0.08]" />
+          <Text className="text-[11px] text-zinc-500 font-medium tracking-wider">
+            OR
+          </Text>
+          <View className="flex-1 h-px bg-white/[0.08]" />
+        </View>
+        <View className="flex-row items-center gap-1.5">
+          <Text className="text-zinc-400 text-xs font-normal">
+            New to Glimpse?
+          </Text>
+          <AuthTextLink
+            label="Create an account"
+            href="/(auth)/register"
+            onPress={() => router.push("/(auth)/register")}
+          />
+        </View>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  forgotRow: {
-    alignItems: "flex-end",
-    marginTop: -4,
-    marginBottom: 12,
-  },
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-    marginTop: 18,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.07)",
-  },
-  footerText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-  },
-});

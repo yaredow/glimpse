@@ -1,19 +1,17 @@
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import { Link, type Href } from "expo-router";
 import * as Haptics from "expo-haptics";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { palette, useAppTheme } from "@/lib/theme";
+import { WarningCircleIcon } from "phosphor-react-native";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
 
 interface AuthPrimaryButtonProps {
   label: string;
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
+  className?: string;
 }
 
 export function AuthPrimaryButton({
@@ -21,126 +19,111 @@ export function AuthPrimaryButton({
   onPress,
   loading = false,
   disabled = false,
+  className,
 }: AuthPrimaryButtonProps) {
   const isDisabled = disabled || loading;
 
   return (
-    <Pressable
+    <Button
+      size="lg"
+      disabled={isDisabled}
       onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
         onPress();
       }}
-      disabled={isDisabled}
+      className={cn(
+        "w-full h-[54px] rounded-2xl bg-primary active:opacity-90 shadow-md shadow-red-900/40 mt-3",
+        isDisabled && "opacity-50",
+        className
+      )}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
-      style={({ pressed }) => [
-        styles.primaryButton,
-        pressed && !isDisabled && { opacity: 0.9 },
-        isDisabled && { opacity: 0.5 },
-      ]}
     >
       {loading ? (
         <ActivityIndicator size="small" color="#FFFFFF" />
       ) : (
-        <Text style={styles.primaryLabel}>{label}</Text>
+        <Text className="text-white font-bold text-[15px] tracking-wide">
+          {label}
+        </Text>
       )}
-    </Pressable>
+    </Button>
   );
 }
 
 interface AuthTextLinkProps {
   label: string;
-  onPress: () => void;
+  onPress?: () => void;
+  href?: Href;
   align?: "center" | "flex-start" | "flex-end";
+  tone?: "primary" | "muted";
+  className?: string;
 }
 
 export function AuthTextLink({
   label,
   onPress,
+  href,
   align = "center",
+  tone = "primary",
+  className,
 }: AuthTextLinkProps) {
-  const theme = useAppTheme();
-
-  return (
+  const content = (
     <Pressable
-      onPress={onPress}
-      hitSlop={8}
+      onPress={() => {
+        Haptics.selectionAsync().catch(() => {});
+        onPress?.();
+      }}
+      hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
       accessibilityRole="link"
-      style={({ pressed }) => [
-        styles.textLink,
-        { alignSelf: align },
-        pressed && { opacity: 0.7 },
-      ]}
+      className={cn(
+        "py-2 px-1.5",
+        align === "flex-end" && "self-end",
+        align === "flex-start" && "self-start",
+        align === "center" && "self-center",
+        className
+      )}
     >
-      <Text style={[styles.textLinkLabel, { color: theme.colors.primary }]}>
-        {label}
-      </Text>
+      {({ pressed }) => (
+        <Text
+          className={cn(
+            "font-semibold text-xs tracking-wide",
+            tone === "primary" ? "text-primary" : "text-zinc-400",
+            pressed && "opacity-50"
+          )}
+        >
+          {label}
+        </Text>
+      )}
     </Pressable>
   );
+
+  if (href) {
+    return (
+      <Link href={href} asChild>
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 }
 
 export function AuthErrorBanner({ message }: { message: string }) {
-  const theme = useAppTheme();
-
   return (
     <View
-      style={styles.errorBanner}
+      className="flex-row items-start gap-2.5 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 mb-3.5"
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"
     >
-      <MaterialCommunityIcons
-        name="alert-circle-outline"
-        size={16}
-        color={theme.colors.error}
+      <WarningCircleIcon
+        size={17}
+        color="#EF4444"
+        weight="fill"
+        style={{ marginTop: 1 }}
       />
-      <Text style={[styles.errorText, { color: theme.colors.error }]}>
+      <Text className="flex-1 text-destructive text-xs leading-5 font-medium">
         {message}
       </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  primaryButton: {
-    width: "100%",
-    alignSelf: "stretch",
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: palette.cinemaRed,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    marginTop: 6,
-  },
-  primaryLabel: {
-    color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
-    fontSize: 14,
-    letterSpacing: 0.4,
-  },
-  textLink: {
-    paddingVertical: 4,
-  },
-  textLinkLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-  errorBanner: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(239, 68, 68, 0.25)",
-    backgroundColor: "rgba(239, 68, 68, 0.08)",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 14,
-  },
-  errorText: {
-    flex: 1,
-    fontFamily: "Inter_400Regular",
-    fontSize: 12.5,
-    lineHeight: 18,
-  },
-});

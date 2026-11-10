@@ -23,7 +23,6 @@ func Register(
 	affSeed handler.AffinitySeeder,
 	movieSvc handler.MovieService,
 ) {
-	// Health check
 	e.GET("/health", func(c *echo.Context) error {
 		return c.JSON(200, map[string]string{"status": "ok"})
 	})
@@ -43,7 +42,7 @@ func Register(
 	e.PUT("/v1/me/preferences", prefH.UpsertPreference, middleware.RequireAuthenticatedUser())
 
 	onbH := handler.NewOnboardingHandler(genreLister, prefUpserter, onboarder, affSeed)
-	e.GET("/v1/onboarding/start", onbH.Start, middleware.RequireAuthenticatedUser())
+	e.GET("/v1/onboarding/start", onbH.Start)
 	e.POST("/v1/onboarding/finish", onbH.Complete, middleware.RequireAuthenticatedUser())
 
 	recH := handler.NewRecommendationHandler(gridSvc)

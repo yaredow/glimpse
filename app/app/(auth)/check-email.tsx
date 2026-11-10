@@ -1,7 +1,15 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect } from "react";
+import { View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { router, useLocalSearchParams } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useAppTheme } from "@/lib/theme";
+import { EnvelopeSimpleIcon } from "phosphor-react-native";
+import { Text } from "@/components/ui/text";
 import AuthShell from "@/features/auth/components/auth-shell";
 import {
   AuthPrimaryButton,
@@ -9,48 +17,47 @@ import {
 } from "@/features/auth/components/auth-actions";
 
 export default function CheckEmail() {
-  const theme = useAppTheme();
   const { email } = useLocalSearchParams<{ email?: string }>();
+  const pulseAnim = useSharedValue(1);
+
+  useEffect(() => {
+    pulseAnim.value = withRepeat(
+      withSequence(
+        withTiming(1.06, { duration: 900 }),
+        withTiming(1.0, { duration: 900 })
+      ),
+      -1,
+      true
+    );
+  }, [pulseAnim]);
+
+  const animatedPulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseAnim.value }],
+  }));
 
   return (
     <AuthShell
       title="Check your inbox."
       subtitle={
         email ? (
-          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+          <Text className="text-zinc-400 text-sm text-center leading-relaxed">
             We sent an activation link to{"\n"}
-            <Text
-              style={{
-                color: theme.colors.textPrimary,
-                fontFamily: "Inter_600SemiBold",
-              }}
-            >
-              {email}
-            </Text>
+            <Text className="text-white font-semibold">{email}</Text>
           </Text>
         ) : (
           "We sent you an activation link."
         )
       }
     >
-      <View style={styles.body}>
-        <View
-          style={[
-            styles.iconCircle,
-            {
-              backgroundColor: theme.colors.cinemaRedMuted,
-              borderColor: "rgba(229, 9, 20, 0.3)",
-            },
-          ]}
+      <View className="items-center gap-4 w-full">
+        <Animated.View
+          style={animatedPulseStyle}
+          className="w-16 h-16 rounded-full border border-primary/30 bg-primary/10 items-center justify-center mt-1 mb-2 shadow-lg shadow-red-950/40"
         >
-          <MaterialCommunityIcons
-            name="email-fast-outline"
-            size={30}
-            color={theme.colors.primary}
-          />
-        </View>
+          <EnvelopeSimpleIcon size={32} color="#E50914" weight="fill" />
+        </Animated.View>
 
-        <Text style={[styles.text, { color: theme.colors.textSecondary }]}>
+        <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
           Open the link on this device to activate your account. If nothing
           arrives, check your spam folder.
         </Text>
@@ -72,31 +79,3 @@ export default function CheckEmail() {
     </AuthShell>
   );
 }
-
-const styles = StyleSheet.create({
-  subtitle: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  body: {
-    alignItems: "center",
-    gap: 16,
-    width: "100%",
-  },
-  iconCircle: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-  },
-  text: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    lineHeight: 20,
-    textAlign: "center",
-  },
-});

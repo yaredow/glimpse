@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { View } from "react-native";
+import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { router, useLocalSearchParams } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useAppTheme } from "@/lib/theme";
+import * as Haptics from "expo-haptics";
+import { CheckCircleIcon } from "phosphor-react-native";
+import { Text } from "@/components/ui/text";
 import { getErrorMessage } from "@/lib/error";
 import { useActivateUser } from "@/features/auth/hooks/mutations/use-activate-user";
 import AuthShell from "@/features/auth/components/auth-shell";
@@ -14,7 +16,6 @@ import {
 } from "@/features/auth/components/auth-actions";
 
 export default function Activate() {
-  const theme = useAppTheme();
   const { token: tokenParam, email } = useLocalSearchParams<{
     token?: string;
     email?: string;
@@ -23,6 +24,18 @@ export default function Activate() {
   const [token, setToken] = useState(tokenParam ?? "");
   const [serverError, setServerError] = useState<string>();
   const [activated, setActivated] = useState(false);
+
+  useEffect(() => {
+    if (activated) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
+        () => {}
+      );
+      const timer = setTimeout(() => {
+        router.replace("/(auth)/login");
+      }, 2400);
+      return () => clearTimeout(timer);
+    }
+  }, [activated]);
 
   const handleActivate = () => {
     if (!token.trim()) {
@@ -43,32 +56,26 @@ export default function Activate() {
     return (
       <AuthShell
         title="You're in."
-        subtitle="Your account is activated."
+        subtitle="Your account is activated. Redirecting you to sign in..."
       >
-        <View style={styles.successBody}>
-          <View
-            style={[
-              styles.iconCircle,
-              {
-                backgroundColor: "rgba(16, 185, 129, 0.1)",
-                borderColor: "rgba(16, 185, 129, 0.3)",
-              },
-            ]}
+        <Animated.View
+          entering={FadeIn.duration(400)}
+          className="items-center gap-4 w-full"
+        >
+          <Animated.View
+            entering={ZoomIn.duration(450).springify()}
+            className="w-20 h-20 rounded-full border border-emerald-500/30 bg-emerald-500/10 items-center justify-center mt-2 mb-2 shadow-lg shadow-emerald-950/40"
           >
-            <MaterialCommunityIcons
-              name="check-circle-outline"
-              size={32}
-              color={theme.colors.success}
-            />
-          </View>
-          <Text style={[styles.successText, { color: theme.colors.textSecondary }]}>
+            <CheckCircleIcon size={40} color="#10B981" weight="fill" />
+          </Animated.View>
+          <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
             Sign in to start your nightly five.
           </Text>
           <AuthPrimaryButton
-            label="Sign in"
+            label="Sign in now"
             onPress={() => router.replace("/(auth)/login")}
           />
-        </View>
+        </Animated.View>
       </AuthShell>
     );
   }
@@ -84,13 +91,14 @@ export default function Activate() {
     >
       <AuthField
         label="Activation code"
+        placeholder="Enter activation code"
         value={token}
         onChangeText={(value) => {
           setToken(value);
           if (serverError) setServerError(undefined);
         }}
         hint="The code is case-sensitive. You can paste it from your email."
-        icon="key-outline"
+        icon="key"
         autoComplete="off"
         textContentType="none"
         returnKeyType="go"
@@ -106,8 +114,8 @@ export default function Activate() {
         onPress={handleActivate}
       />
 
-      <View style={styles.footer}>
-        <Text style={[styles.helper, { color: theme.colors.textMuted }]}>
+      <View className="items-center gap-2.5 mt-8 pt-5 border-t border-white/[0.08]">
+        <Text className="text-zinc-500 text-[11px] text-center">
           Didn&apos;t get the email? Check your spam folder.
         </Text>
         <AuthTextLink
@@ -118,41 +126,3 @@ export default function Activate() {
     </AuthShell>
   );
 }
-
-const styles = StyleSheet.create({
-  successBody: {
-    alignItems: "center",
-    gap: 16,
-    width: "100%",
-  },
-  iconCircle: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-  },
-  successText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    lineHeight: 20,
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  footer: {
-    alignItems: "center",
-    gap: 10,
-    marginTop: 18,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.07)",
-  },
-  helper: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 11,
-    lineHeight: 16,
-    textAlign: "center",
-  },
-});
