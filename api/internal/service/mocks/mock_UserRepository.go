@@ -342,6 +342,53 @@ func (_c *MockUserRepository_UpdateOnboarded_Call) RunAndReturn(run func(context
 	return _c
 }
 
+// ResetDailySyncsIfDue provides a mock function with given fields: ctx, userID
+func (_m *MockUserRepository) ResetDailySyncsIfDue(ctx context.Context, userID int64) error {
+	ret := _m.Called(ctx, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ResetDailySyncsIfDue")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockUserRepository_ResetDailySyncsIfDue_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ResetDailySyncsIfDue'
+type MockUserRepository_ResetDailySyncsIfDue_Call struct {
+	*mock.Call
+}
+
+// ResetDailySyncsIfDue is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID int64
+func (_e *MockUserRepository_Expecter) ResetDailySyncsIfDue(ctx interface{}, userID interface{}) *MockUserRepository_ResetDailySyncsIfDue_Call {
+	return &MockUserRepository_ResetDailySyncsIfDue_Call{Call: _e.mock.On("ResetDailySyncsIfDue", ctx, userID)}
+}
+
+func (_c *MockUserRepository_ResetDailySyncsIfDue_Call) Run(run func(ctx context.Context, userID int64)) *MockUserRepository_ResetDailySyncsIfDue_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(int64))
+	})
+	return _c
+}
+
+func (_c *MockUserRepository_ResetDailySyncsIfDue_Call) Return(_a0 error) *MockUserRepository_ResetDailySyncsIfDue_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockUserRepository_ResetDailySyncsIfDue_Call) RunAndReturn(run func(context.Context, int64) error) *MockUserRepository_ResetDailySyncsIfDue_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockUserRepository creates a new instance of MockUserRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockUserRepository(t interface {

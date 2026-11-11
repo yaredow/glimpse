@@ -1,141 +1,39 @@
-import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Toast from "react-native-toast-message";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-} from "react-native-reanimated";
 import { useAppTheme } from "@/lib/theme";
-import { tmdbImage } from "../consants/images";
+import { tmdbImage } from "../constants/images";
 import type { GridMovie } from "../types/movies.type";
+import { curatorNote, structuredClues } from "../utils/deck";
+
+export type CardStamp = "PASSED" | "SEEN" | null;
 
 interface MysteryCardProps {
   movie: GridMovie;
   index: number;
   total?: number;
-  isCenter: boolean;
-  hasTodayPick?: boolean;
-  isLockedSealed?: boolean;
-  onReveal: () => void;
+  isInteractive: boolean;
+  stamp?: CardStamp;
+  onReveal?: () => void;
   onViewDetails?: () => void;
-  onPickTonight?: () => void;
-  onWatched?: () => void;
-  onSkip?: () => void;
 }
 
 export default function MysteryCard({
   movie,
-  index,
-  total = 5,
-  isCenter,
-  hasTodayPick = false,
-  isLockedSealed = false,
-  onReveal,
+  index: _index,
+  total: _total = 5,
+  isInteractive,
+  stamp = null,
   onViewDetails,
-  onPickTonight,
-  onWatched,
-  onSkip,
 }: MysteryCardProps) {
   const theme = useAppTheme();
-  const action = movie.action;
-  const isPicked =
-    action === "pick_tonight" ||
-    action === "watchlist_add" ||
-    action === "locked_in";
-  const isWatched = action === "watched";
-  const isSkipped = action === "skipped";
-  const isMarked = isPicked || isWatched || isSkipped;
-  const isRevealed = Boolean(movie.is_revealed) || action === "revealed" || isMarked;
-  const isLocked = isWatched || isSkipped;
-
   const [posterFailed, setPosterFailed] = useState(false);
-  const posterSrc = tmdbImage(movie.poster_path || movie.backdrop_path, "w500");
-
-  const flipProgress = useSharedValue(isRevealed ? 1 : 0);
-
-  useEffect(() => {
-    flipProgress.value = withSpring(isRevealed ? 1 : 0, {
-      stiffness: 120,
-      damping: 16,
-      mass: 0.7,
-    });
-  }, [flipProgress, isRevealed]);
-
-  const frontAnimatedStyle = useAnimatedStyle(() => {
-    const rotateValue = interpolate(flipProgress.value, [0, 1], [0, 180]);
-    const opacity = interpolate(
-      flipProgress.value,
-      [0, 0.48, 0.52, 1],
-      [1, 1, 0, 0],
-    );
-    return {
-      transform: [{ perspective: 1200 }, { rotateY: `${rotateValue}deg` }],
-      opacity,
-    };
-  });
-
-  const backAnimatedStyle = useAnimatedStyle(() => {
-    const rotateValue = interpolate(flipProgress.value, [0, 1], [180, 360]);
-    const opacity = interpolate(
-      flipProgress.value,
-      [0, 0.48, 0.52, 1],
-      [0, 0, 1, 1],
-    );
-    return {
-      transform: [{ perspective: 1200 }, { rotateY: `${rotateValue}deg` }],
-      opacity,
-    };
-  });
-
-  const handleCardPress = () => {
-    if (!isRevealed) {
-      if (isLockedSealed) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-        Toast.show({
-          type: "info",
-          text1: "Deck Locked",
-          text2: "You have already chosen your film for tonight.",
-        });
-        return;
-      }
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      onReveal();
-    } else {
-      if (isLocked) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        Toast.show({
-          type: "info",
-          text1: "Reel Locked",
-          text2: isSkipped
-            ? "This movie was skipped and cannot be opened."
-            : "This movie was marked as watched and cannot be opened.",
-        });
-        return;
-      }
-      onViewDetails?.();
-    }
-  };
-
-  const handleTogglePick = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onPickTonight?.();
-  };
-
-  const handleToggleWatched = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onWatched?.();
-  };
-
-  const handleToggleSkip = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onSkip?.();
-  };
+  const posterSrc = tmdbImage(movie.poster_path || movie.backdrop_path, "w780");
+  const note = curatorNote(movie);
+  const clues = structuredClues(movie);
 
   const releaseYear = movie.release_date
     ? new Date(movie.release_date).getFullYear()
@@ -147,398 +45,163 @@ export default function MysteryCard({
   if (movie.vote_average > 0) metaParts.push(`★ ${movie.vote_average.toFixed(1)}`);
   const metaLine = metaParts.join("  ·  ");
 
+  const handlePress = () => {
+    if (!isInteractive) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onViewDetails?.();
+  };
+
   return (
     <View
-      style={[
-        styles.cardOuter,
-        isPicked && {
-          borderColor: theme.colors.gold,
-          borderWidth: 1.5,
-        },
-      ]}
+      className="h-full w-full overflow-hidden rounded-[24px] border border-white/[0.1] bg-card"
+      style={{
+        boxShadow: "0px 12px 20.0px rgba(0, 0, 0, 0.5)",
+      }}
     >
-      <Animated.View
-        style={[styles.face, styles.frontFace, frontAnimatedStyle]}
-        pointerEvents={isRevealed ? "none" : "auto"}
+      <Pressable
+        onPress={handlePress}
+        disabled={!isInteractive}
+        className="flex-1"
+        accessibilityRole="button"
+        accessibilityLabel={`${movie.title}. Tap for details.`}
       >
-        <Pressable onPress={handleCardPress} style={styles.pressableFace}>
-          <LinearGradient
-            colors={["#1e1e22", "#141416", "#0e0e10"]}
-            style={StyleSheet.absoluteFill}
+        {/* Full-bleed poster image */}
+        {posterSrc && !posterFailed ? (
+          <Image
+            source={{ uri: posterSrc }}
+            style={StyleSheetAbsoluteFill}
+            contentFit="cover"
+            transition={300}
+            cachePolicy="memory-disk"
+            onError={() => setPosterFailed(true)}
           />
-
-          <View style={styles.mysteryHeader}>
-            <Text style={styles.reelIndexText}>
-              REEL {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-            </Text>
-            <View style={styles.mysteryIconBadge}>
-              <MaterialCommunityIcons
-                name={isLockedSealed ? "lock" : "lock-outline"}
-                size={14}
-                color={isLockedSealed ? theme.colors.textMuted : theme.colors.primary}
-              />
-            </View>
-          </View>
-
-          <View style={styles.mysteryBody}>
-            <Text style={styles.mysteryTagline} numberOfLines={4}>
-              {movie.tagline ||
-                movie.vague_description ||
-                "A captivating mystery lies within this reel."}
-            </Text>
-
-            {movie.genres?.length > 0 ? (
-              <View style={styles.genreRow}>
-                {movie.genres.slice(0, 2).map((genre) => (
-                  <View key={genre} style={styles.genreChip}>
-                    <Text style={styles.genreChipText}>{genre}</Text>
-                  </View>
-                ))}
-              </View>
-            ) : null}
-          </View>
-
-          <View style={styles.mysteryFooter}>
-            {isLockedSealed ? (
-              <View style={styles.unveilPrompt}>
-                <MaterialCommunityIcons
-                  name="lock"
-                  size={14}
-                  color={theme.colors.textMuted}
-                />
-                <Text style={[styles.unveilText, { color: theme.colors.textMuted }]}>
-                  Locked · Selection chosen
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.unveilPrompt}>
-                <MaterialCommunityIcons
-                  name="eye-outline"
-                  size={15}
-                  color={theme.colors.primary}
-                />
-                <Text style={[styles.unveilText, { color: theme.colors.textPrimary }]}>
-                  Tap to unveil
-                </Text>
-              </View>
-            )}
-          </View>
-        </Pressable>
-      </Animated.View>
-
-      <Animated.View
-        style={[styles.face, styles.backFace, backAnimatedStyle]}
-        pointerEvents={isRevealed ? "auto" : "none"}
-      >
-        <Pressable onPress={handleCardPress} style={styles.pressableFace}>
-          {posterSrc && !posterFailed ? (
-            <Image
-              source={{ uri: posterSrc }}
-              style={StyleSheet.absoluteFill}
-              contentFit="cover"
-              transition={250}
-              cachePolicy="memory-disk"
-              onError={() => setPosterFailed(true)}
+        ) : (
+          <View className="absolute inset-0 items-center justify-center bg-surface-zinc-900 p-6">
+            <MaterialCommunityIcons
+              name="filmstrip"
+              size={56}
+              color={theme.colors.textMuted}
             />
-          ) : (
-            <View style={[styles.fallbackPoster, { backgroundColor: "#1c1c1f" }]}>
-              <MaterialCommunityIcons
-                name="filmstrip"
-                size={48}
-                color={theme.colors.textMuted}
-              />
-              <Text style={styles.fallbackTitle}>{movie.title}</Text>
-            </View>
-          )}
-
-          {isSkipped ? (
-            <View style={[StyleSheet.absoluteFill, styles.skippedDimOverlay]} />
-          ) : null}
-
-          {isWatched || isSkipped ? (
-            <View style={styles.cornerRibbonContainer} pointerEvents="none">
-              <View style={styles.cornerRibbon}>
-                <Text style={styles.cornerRibbonText}>
-                  {isWatched ? "WATCHED" : "SKIPPED"}
-                </Text>
-              </View>
-            </View>
-          ) : null}
-
-          <LinearGradient
-            colors={["transparent", "rgba(0,0,0,0.45)", "rgba(0,0,0,0.92)"]}
-            locations={[0, 0.42, 1]}
-            style={styles.scrim}
-          >
-            <Text style={styles.movieTitle} numberOfLines={2}>
+            <Text className="mt-3.5 text-center text-[20px] font-brandBold text-white">
               {movie.title}
             </Text>
-            {metaLine.length > 0 ? (
-              <Text style={styles.metaLine} numberOfLines={1}>
-                {metaLine}
-              </Text>
-            ) : null}
-          </LinearGradient>
-
-          <View style={styles.topActionsRow}>
-            {!isMarked ? (
-              <>
-                <Pressable
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handleToggleSkip();
-                  }}
-                  style={({ pressed }) => [
-                    styles.actionCircleBtn,
-                    pressed && { opacity: 0.7 },
-                  ]}
-                  accessibilityLabel="Skip movie"
-                >
-                  <MaterialCommunityIcons name="close" size={17} color="#FFFFFF" />
-                </Pressable>
-
-                <Pressable
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handleToggleWatched();
-                  }}
-                  style={({ pressed }) => [
-                    styles.actionCircleBtn,
-                    pressed && { opacity: 0.7 },
-                  ]}
-                  accessibilityLabel="Mark as watched"
-                >
-                  <MaterialCommunityIcons name="check" size={17} color="#FFFFFF" />
-                </Pressable>
-
-                {!hasTodayPick ? (
-                  <Pressable
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      handleTogglePick();
-                    }}
-                    style={({ pressed }) => [
-                      styles.actionCircleBtn,
-                      pressed && { opacity: 0.7 },
-                    ]}
-                    accessibilityLabel="Make tonight's pick"
-                  >
-                    <MaterialCommunityIcons
-                      name="star-outline"
-                      size={17}
-                      color="#FFFFFF"
-                    />
-                  </Pressable>
-                ) : null}
-              </>
-            ) : isPicked ? (
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  handleTogglePick();
-                }}
-                style={({ pressed }) => [
-                  styles.actionCircleBtn,
-                  { backgroundColor: theme.colors.gold },
-                  pressed && { opacity: 0.8 },
-                ]}
-                accessibilityLabel="Tonight's Pick"
-              >
-                <MaterialCommunityIcons name="star" size={18} color="#121212" />
-              </Pressable>
-            ) : null}
           </View>
-        </Pressable>
-      </Animated.View>
+        )}
+
+        {/* Resolved stamp overlay */}
+        {stamp ? (
+          <View
+            className="absolute inset-0 z-10 bg-black/[0.45]"
+            pointerEvents="none"
+          />
+        ) : null}
+
+        {stamp ? (
+          <View
+            className="absolute top-0 left-0 z-[25] h-[88px] w-[88px] overflow-hidden rounded-tl-[23px]"
+            pointerEvents="none"
+          >
+            <View
+              className="absolute top-[18px] left-[-28px] h-[22px] w-[114px] items-center justify-center bg-white"
+              style={{ transform: [{ rotate: "-45deg" }] }}
+            >
+              <Text className="text-center text-[9.5px] tracking-[1.2px] font-brandBold text-surface-obsidian">
+                {stamp}
+              </Text>
+            </View>
+          </View>
+        ) : null}
+
+        {/* Gradient Scrim & Info Overlay */}
+        <LinearGradient
+          colors={[
+            "transparent",
+            "rgba(10, 10, 14, 0.45)",
+            "rgba(10, 10, 14, 0.92)",
+            "#0a0a0c",
+          ]}
+          locations={[0, 0.25, 0.65, 1]}
+          style={ScrimStyle}
+        >
+          {/* Genre / Vibe tags */}
+          {clues.length > 0 ? (
+            <View className="mb-1.5 flex-row gap-1.5">
+              {clues.slice(0, 2).map((clue) => (
+                <View
+                  key={clue}
+                  className="rounded-[7px] border border-white/[0.18] bg-black/[0.65] px-2 py-[3.5px]"
+                >
+                  <Text className="text-[10px] tracking-[0.3px] font-brandSemiBold text-white">
+                    {clue}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          {/* Film Title */}
+          <Text
+            className="text-[22px] leading-[26px] tracking-[-0.4px] font-brandBold text-white"
+            numberOfLines={2}
+            style={TitleShadow}
+          >
+            {movie.title}
+          </Text>
+
+          {/* Metadata */}
+          {metaLine.length > 0 ? (
+            <Text
+              className="mt-1 text-[12px] tracking-[0.2px] font-brandMedium text-white/[0.78]"
+              numberOfLines={1}
+              style={TextShadow}
+            >
+              {metaLine}
+            </Text>
+          ) : null}
+
+          {/* Curator Note / Hook */}
+          {note ? (
+            <Text
+              className="mt-1.5 text-[12.5px] leading-[17px] font-brand text-white/[0.85]"
+              numberOfLines={2}
+              style={TextShadow}
+            >
+              {note}
+            </Text>
+          ) : null}
+        </LinearGradient>
+      </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  cardOuter: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    backgroundColor: "#161618",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 8,
-  },
-  face: {
-    ...StyleSheet.absoluteFill,
-    borderRadius: 27,
-    overflow: "hidden",
-  },
-  frontFace: {},
-  backFace: {},
-  pressableFace: {
-    flex: 1,
-  },
-  mysteryHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 22,
-    paddingTop: 22,
-  },
-  reelIndexText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 11,
-    letterSpacing: 1.5,
-    color: "rgba(255, 255, 255, 0.4)",
-  },
-  mysteryIconBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  mysteryBody: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  mysteryTagline: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 16,
-    lineHeight: 24,
-    color: "#FFFFFF",
-    letterSpacing: -0.2,
-  },
-  genreRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 16,
-  },
-  genreChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-  },
-  genreChipText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    color: "rgba(255, 255, 255, 0.7)",
-    letterSpacing: 0.3,
-  },
-  mysteryFooter: {
-    paddingHorizontal: 22,
-    paddingBottom: 22,
-  },
-  unveilPrompt: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  unveilText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-    letterSpacing: 0.3,
-  },
-  fallbackPoster: {
-    ...StyleSheet.absoluteFill,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
-  fallbackTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 18,
-    color: "#FFFFFF",
-    textAlign: "center",
-    marginTop: 12,
-  },
-  scrim: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 22,
-    paddingTop: 48,
-    paddingBottom: 22,
-    justifyContent: "flex-end",
-  },
-  movieTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 22,
-    lineHeight: 28,
-    color: "#FFFFFF",
-    letterSpacing: -0.4,
-  },
-  metaLine: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 13,
-    color: "rgba(255, 255, 255, 0.7)",
-    marginTop: 6,
-    letterSpacing: 0.2,
-  },
-  cornerRibbonContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: 88,
-    height: 88,
-    overflow: "hidden",
-    borderTopLeftRadius: 27,
-    zIndex: 25,
-  },
-  cornerRibbon: {
-    position: "absolute",
-    top: 18,
-    left: -28,
-    width: 114,
-    height: 22,
-    transform: [{ rotate: "-45deg" }],
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
-    shadowRadius: 3,
-    elevation: 4,
-  },
-  cornerRibbonText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 9.5,
-    letterSpacing: 1.2,
-    color: "#121212",
-    textAlign: "center",
-  },
-  skippedDimOverlay: {
-    backgroundColor: "rgba(0, 0, 0, 0.45)",
-    zIndex: 10,
-  },
-  topActionsRow: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    zIndex: 30,
-  },
-  actionCircleBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(0, 0, 0, 0.55)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.18)",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-});
+const StyleSheetAbsoluteFill = {
+  position: "absolute" as const,
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+};
+
+const ScrimStyle = {
+  position: "absolute" as const,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  height: "48%" as const,
+  paddingHorizontal: 18,
+  paddingBottom: 18,
+  justifyContent: "flex-end" as const,
+};
+
+const TitleShadow = {
+  textShadowColor: "rgba(0, 0, 0, 0.95)",
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 6,
+};
+
+const TextShadow = {
+  textShadowColor: "rgba(0, 0, 0, 0.95)",
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 4,
+};

@@ -2,19 +2,17 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  Share,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
-import { useProfile } from "@/features/profile/hooks/use-profile";
+import { useAppTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 import { useRecordInteraction } from "../hooks/mutations/use-record-interactions";
 import type { Movie, MovieInteractionAction } from "../types/movies.type";
-import ActionConfirmModal, {
-  ConfirmableAction,
-} from "./action-confirm-modal";
+import { palette } from "@/lib/theme/colors";
 
 interface MovieActionsProps {
   movie: Movie;
@@ -31,23 +29,25 @@ export default function MovieActions({
   initialAction,
   onActionComplete,
 }: MovieActionsProps) {
-  const [loadingAction, setLoadingAction] = useState<MovieInteractionAction | null>(null);
-  const [pendingAction, setPendingAction] = useState<Extract<ConfirmableAction, MovieInteractionAction> | null>(null);
-  const { data: profileData } = useProfile();
-  const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
+  const theme = useAppTheme();
+  const [loadingAction, setLoadingAction] =
+    useState<MovieInteractionAction | null>(null);
+  const [currentAction, setCurrentAction] =
+    useState<MovieInteractionAction | null>(initialAction ?? null);
   const recordMutation = useRecordInteraction();
 
-  const isFinalized =
-    initialAction === "watched" ||
-    initialAction === "skipped" ||
-    initialAction === "watchlist_add" ||
-    initialAction === "pick_tonight" ||
-    initialAction === "locked_in" ||
-    movie.is_watched;
+  const isPick =
+    currentAction === "pick_tonight" || currentAction === "watchlist_add";
+  const isSeen = currentAction === "seen_before";
+  const isSkipped = currentAction === "skipped";
+  const isWatched = currentAction === "watched" || movie.is_watched;
+  const isLocked = currentAction === "locked_in";
+  const isFinalized = isLocked || isSeen || isSkipped || isWatched;
 
   const handleAction = (action: MovieInteractionAction) => {
     if (loadingAction || !sessionId) return;
 
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoadingAction(action);
     recordMutation.mutate(
       {
@@ -59,32 +59,35 @@ export default function MovieActions({
       {
         onSuccess: () => {
           setLoadingAction(null);
-          if (action === "watched") {
+          setCurrentAction(action);
+
+          if (action === "pick_tonight") {
             Toast.show({
               type: "success",
-              text1: "Marked as Watched",
-              text2: "Added to your watched history.",
+              text1: "Tonight's Feature",
+              text2: `"${movie.title}" is picked. Lock it in when you're ready.`,
             });
+          } else if (action === "revealed") {
+            Toast.show({
+              type: "info",
+              text1: "Pick Removed",
+              text2: `"${movie.title}" is no longer tonight's pick.`,
+            });
+          } else if (action === "seen_before") {
+            Toast.show({
+              type: "info",
+              text1: "Marked as Seen",
+              text2: "This card is resolved.",
+            });
+            onActionComplete?.();
           } else if (action === "skipped") {
             Toast.show({
               type: "info",
-              text1: "Movie Skipped",
-              text2: "Locked in for today.",
+              text1: "Passed for Today",
+              text2: "This card is resolved.",
             });
-          } else if (action === "pick_tonight" || action === "watchlist_add") {
-            Toast.show({
-              type: "success",
-              text1: "Today's Pick! 🍿",
-              text2: "Selected as today's feature.",
-            });
-          } else if (action === "locked_in") {
-            Toast.show({
-              type: "success",
-              text1: "Now Watching! 🍿",
-              text2: "Selection locked for today. Enjoy!",
-            });
+            onActionComplete?.();
           }
-          onActionComplete?.();
         },
         onError: (err) => {
           setLoadingAction(null);
@@ -98,263 +101,153 @@ export default function MovieActions({
     );
   };
 
-  const handleConfirmAction = () => {
-    if (!pendingAction) return;
-    const actionToRun = pendingAction;
-    setPendingAction(null);
-    handleAction(actionToRun);
-  };
+  const finalizedIcon = isLocked
+    ? "movie-play"
+    : isSeen
+      ? "eye-outline"
+      : isSkipped
+        ? "close-circle-outline"
+        : "check-decagram";
 
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: movie.imdb_id
-          ? `Check out "${movie.title}" on IMDb: https://www.imdb.com/title/${movie.imdb_id}`
-          : movie.title,
-      });
-    } catch {
-      // user cancelled
-    }
-  };
+  const finalizedIconColor = isLocked
+    ? theme.colors.primary
+    : isWatched
+      ? theme.colors.success
+      : theme.colors.textMuted;
+
+  const finalizedTitle = isLocked
+    ? "Locked In for Tonight"
+    : isSeen
+      ? "Already Seen"
+      : isSkipped
+        ? "Passed for Today"
+        : "Marked as Watched";
+
+  const finalizedSubtitle = isLocked
+    ? "Tonight's feature is set."
+    : isSeen
+      ? "This card is resolved."
+      : isSkipped
+        ? "This card is resolved."
+        : "Saved to your Journal.";
 
   return (
-    <View style={styles.container}>
+    <View className="px-4 pt-1 pb-3.5">
       {isFinalized ? (
-        <View style={styles.finalizedContainer}>
-          {initialAction === "locked_in" ? (
-            <View style={[styles.statusBanner, styles.bannerPick]}>
-              <MaterialCommunityIcons name="play-circle" size={16} color="#FFFFFF" />
-              <Text style={styles.bannerPickText}>Now Watching 🍿</Text>
-            </View>
-          ) : initialAction === "pick_tonight" || initialAction === "watchlist_add" ? (
-            <View style={[styles.statusBanner, styles.bannerPick]}>
-              <MaterialCommunityIcons name="star" size={16} color="#FFFFFF" />
-              <Text style={styles.bannerPickText}>Selected as Today&apos;s Pick</Text>
-            </View>
-          ) : initialAction === "skipped" ? (
-            <View style={[styles.statusBanner, styles.bannerSkipped]}>
-              <MaterialCommunityIcons name="close-circle" size={16} color="#71717A" />
-              <Text style={styles.bannerSkippedText}>Skipped for Today</Text>
-            </View>
-          ) : (
-            <View style={[styles.statusBanner, styles.bannerWatched]}>
-              <MaterialCommunityIcons name="check-circle" size={16} color="#FFFFFF" />
-              <Text style={styles.bannerWatchedText}>Marked as Watched</Text>
-            </View>
+        <View
+          className={cn(
+            "flex-row items-center gap-3 rounded-[14px] border px-4 py-3",
+            isLocked
+              ? "border-primary bg-surface-zinc-900"
+              : isWatched
+                ? "border-emerald-500 bg-surface-zinc-900"
+                : "border-white/[0.08] bg-surface-zinc-900",
           )}
-
-          <Pressable style={styles.shareIconButton} onPress={handleShare}>
-            <MaterialCommunityIcons name="share-outline" size={20} color="#999" />
-          </Pressable>
+        >
+          <MaterialCommunityIcons
+            name={finalizedIcon}
+            size={22}
+            color={finalizedIconColor}
+          />
+          <View className="flex-1">
+            <Text className="text-[13.5px] font-brandBold text-white">
+              {finalizedTitle}
+            </Text>
+            <Text className="mt-0.5 text-[12px] leading-4 text-zinc-400">
+              {finalizedSubtitle}
+            </Text>
+          </View>
         </View>
       ) : (
-        <>
-          <View style={styles.decisionRow}>
-            {/* 1. Skip Button */}
-            <Pressable
-              style={[
-                styles.actionBtn,
-                styles.skipBtn,
-                loadingAction === "skipped" && styles.btnDisabled,
-              ]}
-              disabled={!!loadingAction}
-              onPress={() => setPendingAction("skipped")}
-            >
-              {loadingAction === "skipped" ? (
-                <ActivityIndicator size="small" color="#999" />
-              ) : (
-                <>
-                  <MaterialCommunityIcons
-                    name="close-circle-outline"
-                    size={20}
-                    color="#999"
-                  />
-                  <Text style={styles.skipBtnText}>Skip</Text>
-                </>
-              )}
-            </Pressable>
-
-            {/* 2. Watched Button */}
-            <Pressable
-              style={[
-                styles.actionBtn,
-                styles.watchedBtn,
-                loadingAction === "watched" && styles.btnDisabled,
-              ]}
-              disabled={!!loadingAction}
-              onPress={() => setPendingAction("watched")}
-            >
-              {loadingAction === "watched" ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <MaterialCommunityIcons
-                    name="check-circle-outline"
-                    size={20}
-                    color="#FFFFFF"
-                  />
-                  <Text style={styles.watchedBtnText}>Watched</Text>
-                </>
-              )}
-            </Pressable>
-
-            {/* 3. Today's Pick Button */}
-            <Pressable
-              style={[
-                styles.actionBtn,
-                styles.pickBtn,
-                loadingAction === "pick_tonight" && styles.btnDisabled,
-              ]}
-              disabled={!!loadingAction}
-              onPress={() => setPendingAction("pick_tonight")}
-            >
-              {loadingAction === "pick_tonight" ? (
-                <ActivityIndicator size="small" color="#121212" />
-              ) : (
-                <>
-                  <MaterialCommunityIcons
-                    name="star"
-                    size={18}
-                    color="#121212"
-                  />
-                  <Text style={styles.pickBtnText}>Today&apos;s Pick</Text>
-                </>
-              )}
-            </Pressable>
-          </View>
-
-          <Pressable style={styles.secondaryShare} onPress={handleShare}>
-            <MaterialCommunityIcons name="share-variant-outline" size={16} color="#777" />
-            <Text style={styles.secondaryShareText}>Share Movie</Text>
+        <View className="w-full flex-row items-center justify-between gap-2.5">
+          {/* Pass */}
+          <Pressable
+            onPress={() => handleAction("skipped")}
+            disabled={!!loadingAction}
+            className={cn(
+              "h-11 flex-1 flex-row items-center justify-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.05] active:opacity-75",
+              loadingAction === "skipped" && "opacity-55",
+            )}
+            accessibilityRole="button"
+            accessibilityLabel="Pass this film for today"
+          >
+            {loadingAction === "skipped" ? (
+              <ActivityIndicator size="small" color={theme.colors.textMuted} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="close"
+                  size={17}
+                  color={theme.colors.textMuted}
+                />
+                <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+                  Pass
+                </Text>
+              </>
+            )}
           </Pressable>
-        </>
-      )}
 
-      {/* Action Confirmation Modal */}
-      <ActionConfirmModal
-        visible={pendingAction !== null}
-        action={pendingAction}
-        movieTitle={movie.title}
-        syncsRemaining={syncsRemaining}
-        onConfirm={handleConfirmAction}
-        onCancel={() => setPendingAction(null)}
-      />
+          {/* Seen */}
+          <Pressable
+            onPress={() => handleAction("seen_before")}
+            disabled={!!loadingAction}
+            className={cn(
+              "h-11 flex-1 flex-row items-center justify-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.05] active:opacity-75",
+              loadingAction === "seen_before" && "opacity-55",
+            )}
+            accessibilityRole="button"
+            accessibilityLabel="Mark film as already seen"
+          >
+            {loadingAction === "seen_before" ? (
+              <ActivityIndicator size="small" color={theme.colors.textPrimary} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="eye-outline"
+                  size={17}
+                  color={theme.colors.textPrimary}
+                />
+                <Text className="text-[13px] font-brandSemiBold text-white">
+                  Seen
+                </Text>
+              </>
+            )}
+          </Pressable>
+
+          {/* Pick / Picked */}
+          <Pressable
+            onPress={() => handleAction(isPick ? "revealed" : "pick_tonight")}
+            disabled={!!loadingAction}
+            className={cn(
+              "h-11 flex-[1.4] flex-row items-center justify-center gap-1.5 rounded-lg active:opacity-90 active:scale-[0.99]",
+              isPick ? "bg-primary-hover" : "bg-primary",
+              (loadingAction === "pick_tonight" ||
+                loadingAction === "revealed") &&
+                "opacity-55",
+            )}
+            accessibilityRole="button"
+            accessibilityLabel={
+              isPick ? "Remove from tonight's pick" : "Pick film for tonight"
+            }
+          >
+            {loadingAction === "pick_tonight" ||
+            loadingAction === "revealed" ? (
+              <ActivityIndicator size="small" color={palette.white} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name={isPick ? "check-circle" : "star"}
+                  size={17}
+                  color={palette.white}
+                />
+                <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
+                  {isPick ? "Picked" : "Pick"}
+                </Text>
+              </>
+            )}
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 12,
-  },
-  decisionRow: {
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "center",
-  },
-  actionBtn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: "#1e1e1e",
-    borderWidth: 1,
-  },
-  btnDisabled: {
-    opacity: 0.6,
-  },
-  skipBtn: {
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-  skipBtnText: {
-    color: "#A1A1AA",
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-  watchedBtn: {
-    borderColor: "rgba(255,255,255,0.12)",
-    backgroundColor: "#1e1e1e",
-  },
-  watchedBtnText: {
-    color: "#FFFFFF",
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-  pickBtn: {
-    borderColor: "#FFFFFF",
-    backgroundColor: "#FFFFFF",
-    flex: 1.3,
-  },
-  pickBtnText: {
-    color: "#121212",
-    fontFamily: "Inter_700Bold",
-    fontSize: 13,
-  },
-  secondaryShare: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 6,
-  },
-  secondaryShareText: {
-    color: "#777",
-    fontSize: 12,
-    fontFamily: "Inter_500Medium",
-  },
-  finalizedContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  statusBanner: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  bannerWatched: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderColor: "rgba(255,255,255,0.12)",
-  },
-  bannerWatchedText: {
-    color: "#FFFFFF",
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-  bannerSkipped: {
-    backgroundColor: "rgba(255,255,255,0.03)",
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-  bannerSkippedText: {
-    color: "#71717A",
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-  bannerPick: {
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderColor: "rgba(255,255,255,0.15)",
-  },
-  bannerPickText: {
-    color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
-    fontSize: 13,
-  },
-  shareIconButton: {
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: "#1e1e1e",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-  },
-});

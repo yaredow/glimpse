@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
 import PersonCard from "./person-card";
 import type { CastMember } from "../types/movies.type";
 
@@ -12,8 +12,10 @@ export default function MovieCast({ cast }: MovieCastProps) {
   const sorted = [...cast].sort((a, b) => a.order - b.order);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Cast</Text>
+    <View className="py-4">
+      <Text className="mb-4 px-4 text-[16px] font-brandBold text-primary">
+        Cast
+      </Text>
       <FlatList
         data={sorted}
         renderItem={({ item }) => (
@@ -30,16 +32,3 @@ export default function MovieCast({ cast }: MovieCastProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 16,
-  },
-  header: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#E50914",
-    marginBottom: 16,
-    paddingHorizontal: 16,
-  },
-});

@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
-import { StyleSheet, ScrollView, View, Pressable } from "react-native";
-import { Text } from "react-native-paper";
+import { ScrollView, Text, View, Pressable } from "react-native";
 import { Button } from "@/components/ui/button";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { typeClasses } from "@/lib/theme/typography";
+import { cn } from "@/lib/utils";
+import { XCircleIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { Genre } from "../types/onboarding.type";
-import { getGenreMeta } from "../utils/genre-meta";
+import { getGenreIcon } from "../utils/genre-meta";
+import { palette } from "@/lib/theme/colors";
 
 interface ExcludedGenreSelectorProps {
   genres: Genre[];
@@ -24,7 +26,6 @@ export default function ExcludedGenreSelector({
 }: ExcludedGenreSelectorProps) {
   const [selected, setSelected] = useState<number[]>(initialSelected);
 
-  // Filter out genres the user already picked as favorites
   const eligibleGenres = genres.filter((g) => !favoriteGenreIds.includes(g.id));
 
   const toggle = useCallback((id: number) => {
@@ -43,67 +44,85 @@ export default function ExcludedGenreSelector({
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <ScrollView
-        contentContainerStyle={styles.chipGrid}
+        contentContainerClassName="flex-row flex-wrap gap-2.5 pb-6 pt-2"
         showsVerticalScrollIndicator={false}
       >
         {eligibleGenres.map((genre) => {
           const isExcluded = selected.includes(genre.id);
-          const meta = getGenreMeta(genre.name);
+          const GenreIcon = getGenreIcon(genre.name);
 
           return (
             <Pressable
               key={genre.id}
+              accessibilityRole="checkbox"
+              accessibilityLabel={genre.name}
+              accessibilityState={{ checked: isExcluded }}
               onPress={() => toggle(genre.id)}
-              style={[
-                styles.chip,
-                isExcluded ? styles.chipExcluded : styles.chipNeutral,
-              ]}
+              className={cn(
+                "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
+                isExcluded
+                  ? "border-destructive bg-surface-danger"
+                  : "border-zinc-800 bg-zinc-900",
+              )}
             >
-              <Text style={styles.emoji}>{meta.emoji}</Text>
+              <GenreIcon
+                size={16}
+                color={isExcluded ? palette.onErrorContainer : palette.zinc400}
+                weight="bold"
+                style={{ marginRight: 8 }}
+              />
               <Text
-                style={[
-                  styles.chipText,
+                className={cn(
+                  typeClasses.default,
+                  "text-[14px] font-semibold",
                   isExcluded
-                    ? styles.chipTextExcluded
-                    : styles.chipTextNeutral,
-                ]}
+                    ? "text-red-300 font-bold line-through"
+                    : "text-zinc-300",
+                )}
               >
                 {genre.name}
               </Text>
               {isExcluded ? (
-                <MaterialCommunityIcons
-                  name="close-circle"
+                <XCircleIcon
                   size={16}
-                  color="#EF4444"
-                  style={styles.actionIcon}
+                  color={palette.error}
+                  weight="fill"
+                  style={{ marginLeft: 8 }}
                 />
-              ) : (
-                <MaterialCommunityIcons
-                  name="plus"
-                  size={16}
-                  color="#52525B"
-                  style={styles.actionIcon}
-                />
-              )}
+              ) : null}
             </Pressable>
           );
         })}
       </ScrollView>
 
       {/* Floating Bottom Action Area */}
-      <View style={styles.footer}>
+      <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
+        <View className="items-center">
+          <Text
+            className={cn(typeClasses.bodySmall, "text-zinc-400 font-semibold")}
+          >
+            {selected.length > 0
+              ? `${selected.length} ${
+                  selected.length === 1 ? "genre" : "genres"
+                } excluded`
+              : "Nothing excluded"}
+          </Text>
+        </View>
+
         {selected.length > 0 ? (
           <Button
+            size="xl"
             variant="primary"
             onPress={handleFinish}
             loading={isSubmitting}
             disabled={isSubmitting}
             haptic="success"
-            style={styles.mainButton}
+            className="w-full"
           >
-            Exclude {selected.length} {selected.length === 1 ? "Genre" : "Genres"} & Complete
+            Exclude {selected.length}{" "}
+            {selected.length === 1 ? "Genre" : "Genres"} & Complete
           </Button>
         ) : (
           <Button
@@ -112,71 +131,12 @@ export default function ExcludedGenreSelector({
             loading={isSubmitting}
             disabled={isSubmitting}
             haptic="success"
-            style={styles.mainButton}
+            className="w-full"
           >
-            No Dealbreakers — Start Discovering
+            Continue
           </Button>
         )}
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  chipGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    paddingTop: 8,
-    paddingBottom: 24,
-  },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 24,
-    borderWidth: 1.5,
-  },
-  chipNeutral: {
-    backgroundColor: "#18181B",
-    borderColor: "#27272A",
-  },
-  chipExcluded: {
-    backgroundColor: "#200E10",
-    borderColor: "#EF4444",
-  },
-  emoji: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  chipTextNeutral: {
-    color: "#D4D4D8",
-  },
-  chipTextExcluded: {
-    color: "#FCA5A5",
-    textDecorationLine: "line-through",
-    fontWeight: "700",
-  },
-  actionIcon: {
-    marginLeft: 8,
-  },
-  footer: {
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#27272A",
-    marginTop: "auto",
-  },
-  mainButton: {
-    width: "100%",
-    borderRadius: 8,
-  },
-});
-

@@ -8,7 +8,9 @@ const rawUrl =
 
 const BASE_URL = rawUrl.endsWith("/") ? rawUrl : `${rawUrl}/`;
 
-console.log("🌐 [API BASE_URL]:", BASE_URL);
+if (__DEV__) {
+  console.log("[API] base url:", BASE_URL);
+}
 
 export { HTTPError, isHTTPError } from "ky";
 

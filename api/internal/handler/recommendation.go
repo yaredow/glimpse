@@ -12,9 +12,10 @@ import (
 
 type GridService interface {
 	GenerateGrid(ctx context.Context, userID int64) ([]domain.GridSlotResponse, uuid.UUID, error)
-	RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs *int) error
+	RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs, rating *int) error
 	SyncGrid(ctx context.Context, userID int64, mood string) ([]domain.GridSlotResponse, int, error)
 	GetHistory(ctx context.Context, userID int64, action string) ([]domain.HistoryMovie, error)
+	DealersChoice(ctx context.Context, userID int64) (*domain.GridSlotResponse, []domain.GridSlotResponse, int, error)
 }
 
 type RecommendationHandler struct {
@@ -45,18 +46,23 @@ func (rh *RecommendationHandler) RecordInteraction(c *echo.Context) error {
 		GridSessionID  uuid.UUID `json:"grid_session_id" validate:"required"`
 		GridPosition   *int      `json:"grid_position"`
 		RevealActionMs *int      `json:"reveal_action_ms"`
+		Rating         *int      `json:"rating" validate:"omitempty,min=1,max=5"`
 	}
 
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return c.JSON(http.StatusUnprocessableEntity, ResponseError{Message: err.Error()})
 	}
 
 	v := validator.New()
 	if err := v.Struct(input); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 	}
 
-	err := rh.svc.RecordInteraction(c.Request().Context(), user.ID, input.MovieID, input.Action, input.GridSessionID, input.GridPosition, input.RevealActionMs)
+	if input.Rating != nil && input.Action != string(domain.ActionWatched) {
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: "rating is only allowed for watched interactions"})
+	}
+
+	err := rh.svc.RecordInteraction(c.Request().Context(), user.ID, input.MovieID, input.Action, input.GridSessionID, input.GridPosition, input.RevealActionMs, input.Rating)
 	if err != nil {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
@@ -97,4 +103,19 @@ func (rh *RecommendationHandler) GetHistory(c *echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, envelope{"history": history})
+}
+
+func (rh *RecommendationHandler) DealersChoice(c *echo.Context) error {
+	user := c.Get("user").(*domain.User)
+
+	chosen, grid, remaining, err := rh.svc.DealersChoice(c.Request().Context(), user.ID)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, envelope{
+		"movie":                chosen,
+		"grid":                 grid,
+		"remaining_candidates": remaining,
+	})
 }

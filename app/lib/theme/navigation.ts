@@ -1,17 +1,15 @@
-import { adaptNavigationTheme } from "react-native-paper";
-import { DarkTheme as NavigationDarkTheme, type Theme } from "@react-navigation/native";
+import {
+  DarkTheme as NavigationDarkTheme,
+  type Theme,
+} from "@react-navigation/native";
 import { themeColors } from "./colors";
-
-const { DarkTheme: adaptedDarkTheme } = adaptNavigationTheme({
-  reactNavigationDark: NavigationDarkTheme,
-});
+import { themeFonts } from "./typography";
 
 export const glimpseNavigationTheme: Theme = {
   ...NavigationDarkTheme,
-  ...adaptedDarkTheme,
   dark: true,
   colors: {
-    ...adaptedDarkTheme.colors,
+    ...NavigationDarkTheme.colors,
     primary: themeColors.primary,
     background: themeColors.background,
     card: themeColors.surface,
@@ -19,5 +17,11 @@ export const glimpseNavigationTheme: Theme = {
     border: themeColors.outlineVariant,
     notification: themeColors.primary,
   },
-  fonts: NavigationDarkTheme.fonts,
+  fonts: {
+    ...NavigationDarkTheme.fonts,
+    regular: { ...NavigationDarkTheme.fonts.regular, fontFamily: themeFonts.default.fontFamily },
+    medium: { ...NavigationDarkTheme.fonts.medium, fontFamily: themeFonts.bodyMedium.fontFamily },
+    bold: { ...NavigationDarkTheme.fonts.bold, fontFamily: themeFonts.titleMedium.fontFamily },
+    heavy: { ...NavigationDarkTheme.fonts.heavy, fontFamily: themeFonts.headlineMedium.fontFamily },
+  },
 };

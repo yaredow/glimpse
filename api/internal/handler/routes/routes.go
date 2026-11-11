@@ -23,6 +23,10 @@ func Register(
 	affSeed handler.AffinitySeeder,
 	movieSvc handler.MovieService,
 ) {
+	e.GET("/health", func(c *echo.Context) error {
+		return c.JSON(200, map[string]string{"status": "ok"})
+	})
+
 	userH := handler.NewUserHandler(userSvc, jwtMgr, mailer, workers)
 	e.POST("/v1/users/register", userH.Create)
 	e.POST("/v1/users/login", userH.Authenticate)
@@ -38,15 +42,18 @@ func Register(
 	e.PUT("/v1/me/preferences", prefH.UpsertPreference, middleware.RequireAuthenticatedUser())
 
 	onbH := handler.NewOnboardingHandler(genreLister, prefUpserter, onboarder, affSeed)
-	e.GET("/v1/onboarding/start", onbH.Start, middleware.RequireAuthenticatedUser())
+	e.GET("/v1/onboarding/start", onbH.Start)
 	e.POST("/v1/onboarding/finish", onbH.Complete, middleware.RequireAuthenticatedUser())
 
 	recH := handler.NewRecommendationHandler(gridSvc)
 	e.GET("/v1/grid/today", recH.GetGrid, middleware.RequireAuthenticatedUser())
 	e.POST("/v1/grid/interactions", recH.RecordInteraction, middleware.RequireAuthenticatedUser())
 	e.POST("/v1/grid/sync", recH.SyncGrid, middleware.RequireAuthenticatedUser())
+	e.POST("/v1/grid/dealers-choice", recH.DealersChoice, middleware.RequireAuthenticatedUser())
 	e.GET("/v1/me/history", recH.GetHistory, middleware.RequireAuthenticatedUser())
 
 	movieH := handler.NewMovieHandler(movieSvc)
 	e.GET("/v1/movies/:id", movieH.GetMovie, middleware.RequireAuthenticatedUser())
+	e.GET("/v1/movies/:id/sources", movieH.GetMovieSources, middleware.RequireAuthenticatedUser())
+	e.GET("/v1/movies/:id/reviews", movieH.GetMovieReviews, middleware.RequireAuthenticatedUser())
 }

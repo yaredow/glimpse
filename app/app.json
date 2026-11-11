@@ -1,13 +1,18 @@
 {
   "expo": {
-    "name": "glimpse-app",
+    "name": "GLIMPSE",
     "slug": "glimpse-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "glimpseapp",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0C0C0E"
+    },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -17,8 +22,9 @@
       }
     },
     "android": {
+      "package": "com.yaredow.glimpse",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0C0C0E",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -36,18 +42,18 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "imageWidth": 220,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#0C0C0E",
           "dark": {
-            "backgroundColor": "#000000"
+            "image": "./assets/images/splash-icon.png",
+            "backgroundColor": "#0C0C0E"
           }
         }
       ],
       "expo-font",
       "expo-secure-store",
       "expo-image",
-      "expo-web-browser",
       "expo-status-bar"
     ],
     "experiments": {

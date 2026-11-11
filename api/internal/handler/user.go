@@ -24,6 +24,7 @@ type envelope map[string]any
 type UserService interface {
 	Create(ctx context.Context, user *domain.User) (*domain.Token, error)
 	GetByID(ctx context.Context, id int64) (*domain.User, error)
+	ResetDailySyncsIfDue(ctx context.Context, userID int64) error
 	Authenticate(ctx context.Context, email, password string) (*domain.User, *domain.RefreshToken, error)
 	Activate(ctx context.Context, tokenPlainText string) (*domain.User, error)
 	RequestPasswordReset(ctx context.Context, email string) (*domain.Token, error)
@@ -51,12 +52,12 @@ func (uh *UserHandler) Create(c *echo.Context) error {
 	}
 
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return c.JSON(http.StatusUnprocessableEntity, ResponseError{Message: err.Error()})
 	}
 
 	v := validator.New()
 	if err := v.Struct(input); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 	}
 
 	user := &domain.User{
@@ -91,12 +92,12 @@ func (uh *UserHandler) Authenticate(c *echo.Context) error {
 	}
 
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return c.JSON(http.StatusUnprocessableEntity, ResponseError{Message: err.Error()})
 	}
 
 	v := validator.New()
 	if err := v.Struct(input); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 	}
 
 	user, refreshToken, err := uh.svc.Authenticate(c.Request().Context(), input.Email, input.Password)
@@ -124,12 +125,12 @@ func (uh *UserHandler) Activate(c *echo.Context) error {
 	}
 
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return c.JSON(http.StatusUnprocessableEntity, ResponseError{Message: err.Error()})
 	}
 
 	v := validator.New()
 	if err := v.Struct(input); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 	}
 
 	user, err := uh.svc.Activate(c.Request().Context(), input.TokenPlainText)
@@ -146,12 +147,12 @@ func (uh *UserHandler) RequestPasswordReset(c *echo.Context) error {
 	}
 
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return c.JSON(http.StatusUnprocessableEntity, ResponseError{Message: err.Error()})
 	}
 
 	v := validator.New()
 	if err := v.Struct(input); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 	}
 
 	token, err := uh.svc.RequestPasswordReset(c.Request().Context(), input.Email)
@@ -180,12 +181,12 @@ func (uh *UserHandler) ResetPassword(c *echo.Context) error {
 	}
 
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return c.JSON(http.StatusUnprocessableEntity, ResponseError{Message: err.Error()})
 	}
 
 	v := validator.New()
 	if err := v.Struct(input); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 	}
 
 	err := uh.svc.ResetPassword(c.Request().Context(), input.Token, input.NewPassword)
@@ -198,7 +199,18 @@ func (uh *UserHandler) ResetPassword(c *echo.Context) error {
 
 func (uh *UserHandler) GetMe(c *echo.Context) error {
 	user := c.Get("user").(*domain.User)
-	return c.JSON(http.StatusOK, envelope{"user": user})
+	ctx := c.Request().Context()
+
+	if err := uh.svc.ResetDailySyncsIfDue(ctx, user.ID); err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	refreshed, err := uh.svc.GetByID(ctx, user.ID)
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, envelope{"user": refreshed})
 }
 
 func (uh *UserHandler) RefreshToken(c *echo.Context) error {
@@ -207,12 +219,12 @@ func (uh *UserHandler) RefreshToken(c *echo.Context) error {
 	}
 
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return c.JSON(http.StatusUnprocessableEntity, ResponseError{Message: err.Error()})
 	}
 
 	v := validator.New()
 	if err := v.Struct(input); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 	}
 
 	refreshToken, err := uh.svc.RotateRefreshToken(c.Request().Context(), input.RefreshToken)
@@ -240,12 +252,12 @@ func (uh *UserHandler) Logout(c *echo.Context) error {
 	}
 
 	if err := c.Bind(&input); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return c.JSON(http.StatusUnprocessableEntity, ResponseError{Message: err.Error()})
 	}
 
 	v := validator.New()
 	if err := v.Struct(input); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusBadRequest, ResponseError{Message: err.Error()})
 	}
 
 	err := uh.svc.RevokeRefreshToken(c.Request().Context(), input.RefreshToken)

@@ -12,6 +12,9 @@ type GridSlotResponse struct {
 	SlotNumber       int         `json:"slot_number"`
 	IsRevealed       bool        `json:"is_revealed"`
 	Action           *ActionType `json:"action,omitempty"`
+	ActionAt         *time.Time  `json:"action_at,omitempty"`
+	IsLockedIn       bool        `json:"is_locked_in"`
+	IsDealersChoice  bool        `json:"is_dealers_choice"`
 	VagueDescription string      `json:"vague_description"`
 	Tagline          *string     `json:"tagline,omitempty"`
 	Genres           []string    `json:"genres"`
@@ -20,6 +23,7 @@ type GridSlotResponse struct {
 	BackdropPath     *string     `json:"backdrop_path,omitempty"`
 	VoteAverage      float64     `json:"vote_average"`
 	ReleaseDate      time.Time   `json:"release_date"`
+	Runtime          *int        `json:"runtime,omitempty"`
 	GridSessionID    uuid.UUID   `json:"grid_session_id"`
 }
 

@@ -20,6 +20,7 @@ var ActionWeights = ActionWeightsMap{
 	"locked_in":     {Delta: 3.0, AffectExploration: true},
 	"revealed":      {Delta: 0.3, AffectExploration: false},
 	"skipped":       {Delta: -0.5, AffectExploration: true},
+	"seen_before":   {Delta: 0.0, AffectExploration: false},
 }
 
 func ValidActions() []string {

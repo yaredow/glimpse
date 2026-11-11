@@ -31,6 +31,7 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			m.backdrop_path,
 			m.vote_average,
 			m.release_date,
+			m.runtime,
 			d.grid_session_id,
 			(
 				SELECT ui.action
@@ -40,10 +41,37 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 				  AND ui.grid_session_id = d.grid_session_id
 				ORDER BY ui.acted_at DESC
 				LIMIT 1
-			) AS action
+			) AS action,
+			(
+				SELECT ui.acted_at
+				FROM user_interactions ui
+				WHERE ui.user_id = d.user_id
+				  AND ui.movie_id = d.movie_id
+				  AND ui.grid_session_id = d.grid_session_id
+				ORDER BY ui.acted_at DESC
+				LIMIT 1
+			) AS action_at,
+			EXISTS (
+				SELECT 1
+				FROM user_interactions ui
+				WHERE ui.user_id = d.user_id
+				  AND ui.movie_id = d.movie_id
+				  AND ui.grid_session_id = d.grid_session_id
+				  AND ui.action = 'locked_in'
+			) AS is_locked_in,
+			EXISTS (
+				SELECT 1
+				FROM user_interactions ui
+				WHERE ui.user_id = d.user_id
+				  AND ui.movie_id = d.movie_id
+				  AND ui.grid_session_id = d.grid_session_id
+				  AND ui.action = 'pick_tonight'
+				  AND ui.reveal_to_action_ms = -1
+			) AS is_dealers_choice
 		FROM daily_pools d
 		JOIN movies m ON m.id = d.movie_id
 		WHERE d.user_id = $1
+		  AND d.pool_date = CURRENT_DATE
 		ORDER BY d.slot_number`
 
 	rows, err := gr.db.Query(ctx, query, userID)
@@ -68,8 +96,12 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 			&s.BackdropPath,
 			&s.VoteAverage,
 			&s.ReleaseDate,
+			&s.Runtime,
 			&s.GridSessionID,
 			&s.Action,
+			&s.ActionAt,
+			&s.IsLockedIn,
+			&s.IsDealersChoice,
 		); err != nil {
 			return nil, err
 		}
@@ -83,7 +115,7 @@ func (gr *GridRepository) GetByID(ctx context.Context, userID int64) ([]domain.G
 }
 
 func (gr *GridRepository) MarkRevealed(ctx context.Context, userID, movieID int64) error {
-	query := `UPDATE daily_pools SET is_revealed = TRUE WHERE user_id = $1 AND movie_id = $2`
+	query := `UPDATE daily_pools SET is_revealed = TRUE WHERE user_id = $1 AND movie_id = $2 AND pool_date = CURRENT_DATE`
 	_, err := gr.db.Exec(ctx, query, userID, movieID)
 	return err
 }
@@ -116,6 +148,7 @@ func (gr *GridRepository) IsLockedIn(ctx context.Context, userID int64) (bool, e
 			                         AND ui.movie_id = d.movie_id
 			                         AND ui.grid_session_id = d.grid_session_id
 			WHERE d.user_id = $1
+			  AND d.pool_date = CURRENT_DATE
 			  AND ui.action = 'locked_in'
 		)
 	`

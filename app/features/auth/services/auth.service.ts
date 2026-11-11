@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import { LoginFormData, RegisterFormData } from "../schemas/auth.schema";
-import { LoginResponse } from "../types/auth.type";
+import { ActivateResponse, LoginResponse } from "../types/auth.type";
 import { useAuthStore } from "../store/auth.store";
 
 export const logIn = async (data: LoginFormData): Promise<LoginResponse> => {
@@ -19,6 +19,24 @@ export const activateAccount = async (token: string) => {
   return api
     .put("v1/users/activates", {
       json: { token: token.trim() },
+      context: { auth: false },
+    })
+    .json<ActivateResponse>();
+};
+
+export const requestPasswordReset = async (email: string) => {
+  return api
+    .post("v1/tokens/password-reset", {
+      json: { email: email.trim().toLowerCase() },
+      context: { auth: false },
+    })
+    .json();
+};
+
+export const resetPassword = async (token: string, newPassword: string) => {
+  return api
+    .put("v1/users/password", {
+      json: { token: token.trim(), newPassword },
       context: { auth: false },
     })
     .json();

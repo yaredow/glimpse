@@ -1,9 +1,10 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { tmdbImage } from "../consants/images";
+import { tmdbImage } from "../constants/images";
 import type { Movie } from "../types/movies.type";
+import { palette } from "@/lib/theme/colors";
 
 interface MovieHeaderProps {
   movie: Movie;
@@ -24,70 +25,87 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
   const posterSrc = posterUrl(movie.poster_path);
 
   return (
-    <View style={styles.container}>
+    <View className="h-[350px] w-full">
       {backdropSrc ? (
         <Image
           source={{ uri: backdropSrc }}
-          style={styles.backdrop}
+          style={StyleSheetAbsoluteFill}
           contentFit="cover"
           cachePolicy="memory-disk"
           transition={300}
         />
       ) : (
-        <View style={[styles.backdrop, styles.backdropFallback]} />
+        <View className="absolute inset-0 bg-surface-zinc-850" />
       )}
       <LinearGradient
-        colors={["transparent", "rgba(20, 20, 20, 0.95)"]}
-        style={styles.gradient}
+        colors={["transparent", "rgba(20, 20, 20, 0.65)", palette.charcoal]}
+        locations={[0, 0.6, 1]}
+        style={StyleSheetAbsoluteFill}
         pointerEvents="none"
       />
 
-      <View style={styles.content}>
-        <View style={styles.details}>
-          <Text style={styles.title} numberOfLines={2}>
+      <View className="flex-1 flex-row items-end px-4 pb-4 pt-20">
+        <View className="flex-1 justify-end mr-3.5">
+          {movie.genres && movie.genres.length > 0 ? (
+            <View className="mb-2 flex-row items-center gap-1.5">
+              {movie.genres.slice(0, 2).map((genre) => (
+                <View
+                  key={genre}
+                  className="rounded-[6px] border border-white/[0.12] bg-white/[0.08] px-2 py-[3px]"
+                >
+                  <Text className="text-[10px] tracking-[0.3px] font-brandBold text-zinc-200">
+                    {genre}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          <Text className="mb-1.5 text-[24px] leading-[29px] font-brandBold text-white" numberOfLines={2}>
             {movie.title}
           </Text>
 
-          {movie.director ? (
-            <>
-              <Text style={styles.directorLabel}>DIRECTED BY</Text>
-              <Text style={styles.directorName}>{movie.director}</Text>
-            </>
-          ) : null}
-
-          <View style={styles.meta}>
-            {year ? <Text style={styles.metaText}>{year}</Text> : null}
-            {year && movie.runtime ? (
-              <Text style={styles.metaDot}>•</Text>
+          <View className="mb-2.5 flex-row flex-nowrap items-center">
+            {year ? (
+              <Text className="text-[13px] font-brandSemiBold text-zinc-300">
+                {year}
+              </Text>
             ) : null}
-            {movie.runtime ? (
-              <Text style={styles.metaText}>{movie.runtime} min</Text>
+            {year && movie.director ? (
+              <Text className="mx-1.5 text-[13px] text-zinc-500">•</Text>
             ) : null}
-
-            {movie.trailer_key ? (
-              <Pressable
-                style={styles.trailerButton}
-                onPress={onTrailerPress}
-                accessibilityRole="button"
-                accessibilityLabel="Watch trailer"
-              >
-                <MaterialCommunityIcons name="play" size={14} color="white" />
-                <Text style={styles.trailerText}>TRAILER</Text>
-              </Pressable>
+            {movie.director ? (
+              <Text className="shrink text-[13px] font-brandMedium text-zinc-400" numberOfLines={1}>
+                Dir. {movie.director}
+              </Text>
             ) : null}
           </View>
+
+          {movie.trailer_key ? (
+            <Pressable
+              className="flex-row items-center gap-[5px] self-start rounded-[8px] bg-primary/[0.9] px-3 py-1.5 active:opacity-80"
+              onPress={onTrailerPress}
+              accessibilityRole="button"
+              accessibilityLabel="Watch trailer"
+            >
+              <MaterialCommunityIcons name="play" size={14} color={palette.white} />
+              <Text className="text-[11px] tracking-[0.6px] font-brandBold text-white">
+                TRAILER
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
 
         {posterSrc ? (
           <Image
             source={{ uri: posterSrc }}
-            style={styles.poster}
+            style={PosterStyle}
             contentFit="cover"
             cachePolicy="memory-disk"
             transition={300}
           />
         ) : (
-          <View style={[styles.poster, styles.posterFallback]}>
+          <View className="h-36 w-24 items-center justify-center rounded-[8px] border border-white/[0.2] bg-surface-zinc-800">
             <MaterialCommunityIcons name="filmstrip" size={32} color="#666" />
           </View>
         )}
@@ -96,89 +114,18 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    height: 350,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-  },
-  gradient: {
-    ...StyleSheet.absoluteFill,
-  },
-  content: {
-    flex: 1,
-    flexDirection: "row",
-    padding: 16,
-    paddingTop: 80,
-    alignItems: "flex-end",
-  },
-  details: {
-    flex: 1,
-    justifyContent: "flex-end",
-    marginRight: 10,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 8,
-  },
-  directorLabel: {
-    fontSize: 12,
-    color: "#E50914",
-    marginBottom: 2,
-  },
-  directorName: {
-    fontSize: 14,
-    color: "white",
-    fontWeight: "500",
-    marginBottom: 8,
-  },
-  meta: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  metaText: {
-    fontSize: 14,
-    color: "white",
-    fontWeight: "bold",
-  },
-  metaDot: {
-    fontSize: 14,
-    color: "white",
-    marginHorizontal: 8,
-  },
-  trailerButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "white",
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginLeft: 8,
-    gap: 4,
-  },
-  trailerText: {
-    fontSize: 12,
-    color: "white",
-    fontWeight: "bold",
-  },
-  poster: {
-    width: 100,
-    height: 150,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: "white",
-  },
-  backdropFallback: {
-    backgroundColor: "#1F1F1F",
-  },
-  posterFallback: {
-    backgroundColor: "#262626",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+const StyleSheetAbsoluteFill = {
+  position: "absolute" as const,
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+};
+
+const PosterStyle = {
+  width: 96,
+  height: 144,
+  borderRadius: 8,
+  borderWidth: 1,
+  borderColor: "rgba(255, 255, 255, 0.2)",
+};

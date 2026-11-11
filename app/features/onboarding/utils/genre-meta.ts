@@ -1,33 +1,50 @@
-export interface GenreMeta {
-  emoji: string;
-  icon: string;
-}
+import {
+  BabyIcon,
+  BookOpenIcon,
+  CompassIcon,
+  ConfettiIcon,
+  CrosshairIcon,
+  DetectiveIcon,
+  FilmStripIcon,
+  GhostIcon,
+  HeartIcon,
+  HorseIcon,
+  LightningIcon,
+  MagicWandIcon,
+  MagnifyingGlassIcon,
+  MusicNotesIcon,
+  PaletteIcon,
+  RocketIcon,
+  SwordIcon,
+  TelevisionIcon,
+  UsersIcon,
+  VideoIcon,
+  type Icon,
+} from "phosphor-react-native";
 
-const GENRE_MAP: Record<string, GenreMeta> = {
-  action: { emoji: "💥", icon: "fire" },
-  adventure: { emoji: "🗺️", icon: "compass-outline" },
-  animation: { emoji: "🎨", icon: "palette-outline" },
-  comedy: { emoji: "🍿", icon: "emoticon-happy-outline" },
-  crime: { emoji: "🕵️", icon: "incognito" },
-  documentary: { emoji: "🎥", icon: "video-vintage" },
-  drama: { emoji: "🎭", icon: "drama-masks" },
-  family: { emoji: "🧸", icon: "account-group-outline" },
-  fantasy: { emoji: "🧙‍♂️", icon: "magic-staff" },
-  history: { emoji: "📜", icon: "book-open-page-variant-outline" },
-  horror: { emoji: "👻", icon: "ghost-outline" },
-  music: { emoji: "🎵", icon: "music" },
-  mystery: { emoji: "🔍", icon: "magnify" },
-  romance: { emoji: "🌹", icon: "heart-outline" },
-  "science fiction": { emoji: "🚀", icon: "rocket-launch-outline" },
-  "sci-fi": { emoji: "🚀", icon: "rocket-launch-outline" },
-  "tv movie": { emoji: "📺", icon: "television-classic" },
-  thriller: { emoji: "⚡", icon: "flash-outline" },
-  war: { emoji: "🪖", icon: "shield-cross-outline" },
-  western: { emoji: "🤠", icon: "horseshoe" },
+const GENRE_ICONS: Record<string, Icon> = {
+  action: LightningIcon,
+  adventure: CompassIcon,
+  animation: PaletteIcon,
+  biography: BookOpenIcon,
+  comedy: ConfettiIcon,
+  crime: DetectiveIcon,
+  documentary: VideoIcon,
+  drama: UsersIcon,
+  family: BabyIcon,
+  fantasy: MagicWandIcon,
+  history: BookOpenIcon,
+  horror: GhostIcon,
+  music: MusicNotesIcon,
+  mystery: MagnifyingGlassIcon,
+  romance: HeartIcon,
+  "science fiction": RocketIcon,
+  "sci-fi": RocketIcon,
+  "tv movie": TelevisionIcon,
+  thriller: CrosshairIcon,
+  war: SwordIcon,
+  western: HorseIcon,
 };
 
-export const getGenreMeta = (name: string): GenreMeta => {
-  const key = name.toLowerCase().trim();
-  return GENRE_MAP[key] || { emoji: "🎬", icon: "movie-open-outline" };
-};
-
+export const getGenreIcon = (name: string): Icon =>
+  GENRE_ICONS[name.toLowerCase().trim()] ?? FilmStripIcon;

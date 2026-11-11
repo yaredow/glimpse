@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
-import { StyleSheet, ScrollView, View, Pressable } from "react-native";
-import { Text } from "react-native-paper";
+import { ScrollView, Text, View, Pressable } from "react-native";
 import { Button } from "@/components/ui/button";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { typeClasses } from "@/lib/theme/typography";
+import { cn } from "@/lib/utils";
+import { CheckIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { Genre } from "../types/onboarding.type";
-import { getGenreMeta } from "../utils/genre-meta";
+import { getGenreIcon } from "../utils/genre-meta";
+import { palette } from "@/lib/theme/colors";
 
 interface GenreSelectorProps {
   genres: Genre[];
@@ -38,41 +40,50 @@ export default function GenreSelector({
   const remaining = Math.max(0, minSelection - selected.length);
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <ScrollView
-        contentContainerStyle={styles.chipGrid}
+        contentContainerClassName="flex-row flex-wrap gap-2.5 pb-6 pt-2"
         showsVerticalScrollIndicator={false}
       >
         {genres.map((genre) => {
           const isSelected = selected.includes(genre.id);
-          const meta = getGenreMeta(genre.name);
+          const GenreIcon = getGenreIcon(genre.name);
 
           return (
             <Pressable
               key={genre.id}
+              accessibilityRole="checkbox"
+              accessibilityLabel={genre.name}
+              accessibilityState={{ checked: isSelected }}
               onPress={() => toggle(genre.id)}
-              style={[
-                styles.chip,
-                isSelected ? styles.chipSelected : styles.chipUnselected,
-              ]}
+              className={cn(
+                "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
+                isSelected
+                  ? "border-primary bg-surface-brand"
+                  : "border-zinc-800 bg-zinc-900",
+              )}
             >
-              <Text style={styles.emoji}>{meta.emoji}</Text>
+              <GenreIcon
+                size={16}
+                color={isSelected ? palette.white : palette.zinc400}
+                weight="bold"
+                style={{ marginRight: 8 }}
+              />
               <Text
-                style={[
-                  styles.chipText,
-                  isSelected
-                    ? styles.chipTextSelected
-                    : styles.chipTextUnselected,
-                ]}
+                className={cn(
+                  typeClasses.default,
+                  "text-[14px] font-semibold tracking-[0.2px]",
+                  isSelected ? "text-white font-bold" : "text-zinc-300",
+                )}
               >
                 {genre.name}
               </Text>
               {isSelected && (
-                <MaterialCommunityIcons
-                  name="check"
+                <CheckIcon
                   size={16}
-                  color="#E50914"
-                  style={styles.checkIcon}
+                  color={palette.cinemaRed}
+                  weight="bold"
+                  style={{ marginLeft: 6 }}
                 />
               )}
             </Pressable>
@@ -80,10 +91,11 @@ export default function GenreSelector({
         })}
       </ScrollView>
 
-      {/* Floating Bottom Bar with Dynamic Counter */}
-      <View style={[styles.footer, { borderTopColor: "#27272A" }]}>
-        <View style={styles.counterRow}>
-          <Text variant="bodySmall" style={styles.counterText}>
+      <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
+        <View className="items-center">
+          <Text
+            className={cn(typeClasses.bodySmall, "text-zinc-400 font-semibold")}
+          >
             {selected.length >= minSelection
               ? `${selected.length} genres selected`
               : `Select at least ${remaining} more`}
@@ -91,11 +103,12 @@ export default function GenreSelector({
         </View>
 
         <Button
+          size="xl"
           variant="primary"
           onPress={handleNext}
           disabled={selected.length < minSelection}
           haptic="success"
-          style={styles.nextButton}
+          className="w-full"
         >
           Continue
         </Button>
@@ -103,68 +116,3 @@ export default function GenreSelector({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  chipGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    paddingTop: 8,
-    paddingBottom: 24,
-  },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 24,
-    borderWidth: 1.5,
-  },
-  chipUnselected: {
-    backgroundColor: "#18181B",
-    borderColor: "#27272A",
-  },
-  chipSelected: {
-    backgroundColor: "#201012",
-    borderColor: "#E50914",
-  },
-  emoji: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: "600",
-    letterSpacing: 0.2,
-  },
-  chipTextUnselected: {
-    color: "#D4D4D8",
-  },
-  chipTextSelected: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-  checkIcon: {
-    marginLeft: 6,
-  },
-  footer: {
-    paddingTop: 16,
-    borderTopWidth: 1,
-    marginTop: "auto",
-    gap: 12,
-  },
-  counterRow: {
-    alignItems: "center",
-  },
-  counterText: {
-    color: "#A1A1AA",
-    fontWeight: "600",
-  },
-  nextButton: {
-    width: "100%",
-    borderRadius: 8,
-  },
-});

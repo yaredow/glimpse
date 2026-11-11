@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"context"
+	"errors"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/yaredow/glimpse-api/internal/domain"
 )
@@ -20,7 +22,7 @@ func (ir *InteractionRepository) WithTx(tx pgx.Tx) *InteractionRepository {
 }
 
 func (ir *InteractionRepository) Insert(ctx context.Context, interaction *domain.Interaction) error {
-	query := `INSERT INTO user_interactions (user_id, movie_id, action, grid_session_id, grid_position, reveal_to_action_ms) VALUES ($1, $2, $3, $4, $5, $6)`
+	query := `INSERT INTO user_interactions (user_id, movie_id, action, grid_session_id, grid_position, reveal_to_action_ms, rating) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 	args := []any{
 		interaction.UserID,
@@ -29,10 +31,24 @@ func (ir *InteractionRepository) Insert(ctx context.Context, interaction *domain
 		interaction.GridSessionID,
 		interaction.GridPosition,
 		interaction.RevealToActionMS,
+		interaction.Rating,
 	}
 	_, err := ir.db.Exec(ctx, query, args...)
 
 	return err
+}
+
+func (ir *InteractionRepository) GetLatestAction(ctx context.Context, userID, movieID int64, sessionID uuid.UUID) (*domain.ActionType, error) {
+	query := `SELECT action FROM user_interactions WHERE user_id = $1 AND movie_id = $2 AND grid_session_id = $3 ORDER BY acted_at DESC LIMIT 1`
+	var action domain.ActionType
+	err := ir.db.QueryRow(ctx, query, userID, movieID, sessionID).Scan(&action)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &action, nil
 }
 
 func (ir *InteractionRepository) HasWatched(ctx context.Context, userID, movieID int64) (bool, error) {
@@ -42,8 +58,15 @@ func (ir *InteractionRepository) HasWatched(ctx context.Context, userID, movieID
 	return exists, err
 }
 
+func (ir *InteractionRepository) HasUsedDealersChoice(ctx context.Context, userID int64, sessionID uuid.UUID) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM user_interactions WHERE user_id = $1 AND grid_session_id = $2 AND reveal_to_action_ms = -1)`
+	var used bool
+	err := ir.db.QueryRow(ctx, query, userID, sessionID).Scan(&used)
+	return used, err
+}
+
 func (ir *InteractionRepository) List(ctx context.Context, userID int64, limit int) ([]*domain.Interaction, error) {
-	query := `SELECT id, user_id, movie_id, action, grid_session_id, grid_position, reveal_to_action_ms, acted_at FROM user_interactions WHERE user_id = $1 ORDER BY acted_at DESC LIMIT $2`
+	query := `SELECT id, user_id, movie_id, action, grid_session_id, grid_position, reveal_to_action_ms, rating, acted_at FROM user_interactions WHERE user_id = $1 ORDER BY acted_at DESC LIMIT $2`
 
 	rows, err := ir.db.Query(ctx, query, userID, limit)
 	if err != nil {
@@ -56,7 +79,8 @@ func (ir *InteractionRepository) List(ctx context.Context, userID int64, limit i
 		var i domain.Interaction
 		if err := rows.Scan(
 			&i.ID, &i.UserID, &i.MovieID, &i.Action,
-			&i.GridSessionID, &i.GridPosition, &i.RevealToActionMS, &i.ActedAt,
+			&i.GridSessionID, &i.GridPosition, &i.RevealToActionMS,
+			&i.Rating, &i.ActedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -70,7 +94,7 @@ func (ir *InteractionRepository) GetHistory(ctx context.Context, userID int64, a
 	query := `
 		WITH ranked_history AS (
 			SELECT 
-				ui.movie_id, ui.action::text, ui.acted_at,
+				ui.movie_id, ui.action::text, ui.acted_at, ui.rating,
 				m.title, m.poster_path, m.backdrop_path, m.genres,
 				m.release_date, m.vote_average, m.runtime,
 				m.vague_description, m.full_synopsis, m.tagline,
@@ -80,10 +104,10 @@ func (ir *InteractionRepository) GetHistory(ctx context.Context, userID int64, a
 			JOIN movies m ON m.id = ui.movie_id
 			WHERE ui.user_id = $1
 			  AND ($2 = '' OR ui.action::text = $2)
-			  AND ui.action IN ('watched', 'watchlist_add')
+			  AND ui.action IN ('watched', 'watchlist_add', 'pick_tonight')
 		)
 		SELECT 
-			movie_id, action, acted_at,
+			movie_id, action, acted_at, rating,
 			title, poster_path, backdrop_path, genres,
 			release_date, vote_average, runtime,
 			vague_description, full_synopsis, tagline,
@@ -102,7 +126,7 @@ func (ir *InteractionRepository) GetHistory(ctx context.Context, userID int64, a
 	for rows.Next() {
 		var h domain.HistoryMovie
 		if err := rows.Scan(
-			&h.MovieID, &h.Action, &h.ActedAt,
+			&h.MovieID, &h.Action, &h.ActedAt, &h.Rating,
 			&h.Title, &h.PosterPath, &h.BackdropPath, &h.Genres,
 			&h.ReleaseDate, &h.VoteAverage, &h.Runtime,
 			&h.VagueDescription, &h.FullSynopsis, &h.Tagline,

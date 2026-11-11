@@ -1,19 +1,16 @@
+import { useLocalSearchParams } from "expo-router";
 import { LoginForm } from "@/features/auth/components/login-form";
-import { StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import AuthShell from "@/features/auth/components/auth-shell";
 
 export default function Login() {
+  const { email } = useLocalSearchParams<{ email?: string }>();
+
   return (
-    <SafeAreaView style={styles.container}>
-      <LoginForm />
-    </SafeAreaView>
+    <AuthShell
+      title="Welcome back."
+      subtitle="Your nightly five are waiting."
+    >
+      <LoginForm initialEmail={email} />
+    </AuthShell>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-});

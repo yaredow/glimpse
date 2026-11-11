@@ -4,6 +4,13 @@ export interface RegisterResponse {
   activated: boolean;
 }
 
+export interface ActivateResponse {
+  id?: number;
+  email: string;
+  name?: string;
+  activated?: boolean;
+}
+
 export interface AccessToken {
   token: string;
   expires_at: string;

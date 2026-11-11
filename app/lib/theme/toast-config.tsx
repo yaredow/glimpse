@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ToastConfig, ToastConfigParams } from "react-native-toast-message";
 import { themeColors } from "./colors";
@@ -24,19 +24,26 @@ const CinemaToast = ({
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.container, { borderLeftColor: accentBorderColor }]}
+      accessibilityRole="button"
+      accessibilityLabel={text1}
+
+      className="w-[92%] max-w-[420px] flex-row items-center gap-3 rounded-[14px] border border-l-4 border-white/[0.08] bg-surface-zinc-800 px-4 py-3"
+      style={{
+        borderLeftColor: accentBorderColor,
+        boxShadow: "0px 6px 10.0px rgba(0, 0, 0, 0.4)",
+      }}
     >
-      <View style={styles.iconContainer}>
+      <View className="items-center justify-center">
         <MaterialCommunityIcons name={icon} size={22} color={iconColor} />
       </View>
-      <View style={styles.contentContainer}>
+      <View className="flex-1">
         {text1 ? (
-          <Text style={styles.title} numberOfLines={2}>
+          <Text className="text-[14px] tracking-[0.1px] font-brandSemiBold text-off-white" numberOfLines={2}>
             {text1}
           </Text>
         ) : null}
         {text2 ? (
-          <Text style={styles.message} numberOfLines={3}>
+          <Text className="mt-0.5 text-[13px] leading-[18px] font-brand text-zinc-400" numberOfLines={3}>
             {text2}
           </Text>
         ) : null}
@@ -62,8 +69,8 @@ export const toastConfig: ToastConfig = {
       text2={text2}
       onPress={onPress}
       icon="alert-circle"
-      iconColor={themeColors.primary}
-      accentBorderColor={themeColors.primary}
+      iconColor={themeColors.error}
+      accentBorderColor={themeColors.error}
     />
   ),
   info: ({ text1, text2, onPress }: ToastConfigParams<any>) => (
@@ -77,46 +84,3 @@ export const toastConfig: ToastConfig = {
     />
   ),
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: "92%",
-    maxWidth: 420,
-    backgroundColor: themeColors.elevation.level3,
-    borderWidth: 1,
-    borderColor: themeColors.outlineVariant,
-    borderLeftWidth: 4,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  iconContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  contentContainer: {
-    flex: 1,
-  },
-  title: {
-    color: themeColors.onSurface,
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 14,
-    letterSpacing: 0.1,
-  },
-  message: {
-    color: themeColors.onSurfaceVariant,
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 2,
-  },
-});
-

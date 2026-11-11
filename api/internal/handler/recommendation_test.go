@@ -27,8 +27,8 @@ func (m *mockGridService) GenerateGrid(ctx context.Context, userID int64) ([]dom
 	return grid, sid, args.Error(2)
 }
 
-func (m *mockGridService) RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs *int) error {
-	args := m.Called(ctx, userID, movieID, action, sessionID, gridPosition, revealActionMs)
+func (m *mockGridService) RecordInteraction(ctx context.Context, userID, movieID int64, action string, sessionID uuid.UUID, gridPosition, revealActionMs, rating *int) error {
+	args := m.Called(ctx, userID, movieID, action, sessionID, gridPosition, revealActionMs, rating)
 	return args.Error(0)
 }
 
@@ -42,6 +42,13 @@ func (m *mockGridService) GetHistory(ctx context.Context, userID int64, action s
 	args := m.Called(ctx, userID, action)
 	history, _ := args.Get(0).([]domain.HistoryMovie)
 	return history, args.Error(1)
+}
+
+func (m *mockGridService) DealersChoice(ctx context.Context, userID int64) (*domain.GridSlotResponse, []domain.GridSlotResponse, int, error) {
+	args := m.Called(ctx, userID)
+	chosen, _ := args.Get(0).(*domain.GridSlotResponse)
+	grid, _ := args.Get(1).([]domain.GridSlotResponse)
+	return chosen, grid, args.Int(2), args.Error(3)
 }
 
 func newRecHandlerTest(t *testing.T) (*mockGridService, *handler.RecommendationHandler, *echo.Echo) {
@@ -117,7 +124,7 @@ func TestRecommendationHandler_RecordInteraction(t *testing.T) {
 		mockSvc, h, e := newRecHandlerTest(t)
 		sessionID := uuid.New()
 
-		mockSvc.On("RecordInteraction", mock.Anything, int64(1), int64(10), "revealed", sessionID, mock.Anything, (*int)(nil)).
+		mockSvc.On("RecordInteraction", mock.Anything, int64(1), int64(10), "revealed", sessionID, mock.Anything, (*int)(nil), (*int)(nil)).
 			Return(nil)
 
 		body := `{"movie_id":10,"action":"revealed","grid_session_id":"` + sessionID.String() + `","grid_position":3}`
@@ -135,6 +142,54 @@ func TestRecommendationHandler_RecordInteraction(t *testing.T) {
 		err = json.Unmarshal(rec.Body.Bytes(), &resp)
 		require.NoError(t, err)
 		require.Equal(t, "interaction recorded", resp["message"])
+	})
+
+	t.Run("watched with rating", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+		sessionID := uuid.New()
+
+		mockSvc.On(
+			"RecordInteraction",
+			mock.Anything,
+			int64(1),
+			int64(10),
+			"watched",
+			sessionID,
+			(*int)(nil),
+			(*int)(nil),
+			mock.MatchedBy(func(rating *int) bool { return rating != nil && *rating == 5 }),
+		).Return(nil)
+
+		body := `{"movie_id":10,"action":"watched","grid_session_id":"` + sessionID.String() + `","rating":5}`
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/interactions", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.RecordInteraction(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, rec.Code)
+	})
+
+	t.Run("rating outside watched action", func(t *testing.T) {
+		t.Parallel()
+
+		_, h, e := newRecHandlerTest(t)
+		sessionID := uuid.New()
+
+		body := `{"movie_id":10,"action":"revealed","grid_session_id":"` + sessionID.String() + `","rating":5}`
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/interactions", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.RecordInteraction(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusBadRequest, rec.Code)
 	})
 
 	t.Run("invalid request body", func(t *testing.T) {
@@ -177,7 +232,7 @@ func TestRecommendationHandler_RecordInteraction(t *testing.T) {
 		mockSvc, h, e := newRecHandlerTest(t)
 		sessionID := uuid.New()
 
-		mockSvc.On("RecordInteraction", mock.Anything, int64(1), int64(10), "watched", sessionID, (*int)(nil), (*int)(nil)).
+		mockSvc.On("RecordInteraction", mock.Anything, int64(1), int64(10), "watched", sessionID, (*int)(nil), (*int)(nil), (*int)(nil)).
 			Return(domain.ErrInternalServerError)
 
 		body := `{"movie_id":10,"action":"watched","grid_session_id":"` + sessionID.String() + `"}`
@@ -278,7 +333,7 @@ func TestRecommendationHandler_SyncGrid(t *testing.T) {
 
 		err := h.SyncGrid(c)
 		require.NoError(t, err)
-		require.Equal(t, http.StatusBadRequest, rec.Code)
+		require.Equal(t, http.StatusConflict, rec.Code)
 	})
 
 	t.Run("selection locked", func(t *testing.T) {
@@ -295,7 +350,7 @@ func TestRecommendationHandler_SyncGrid(t *testing.T) {
 
 		err := h.SyncGrid(c)
 		require.NoError(t, err)
-		require.Equal(t, http.StatusBadRequest, rec.Code)
+		require.Equal(t, http.StatusConflict, rec.Code)
 	})
 }
 
@@ -333,5 +388,100 @@ func TestRecommendationHandler_GetHistory(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, resp.History, 1)
 		require.Equal(t, "Inception", resp.History[0].Title)
+	})
+}
+
+// ─── DealersChoice ────────────────────────────────────────────────────────
+
+func TestRecommendationHandler_DealersChoice(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		action := domain.ActionPickTonight
+		chosen := &domain.GridSlotResponse{
+			MovieID:    101,
+			SlotNumber: 2,
+			Title:      "Interstellar",
+			Action:     &action,
+		}
+		grid := []domain.GridSlotResponse{*chosen}
+
+		mockSvc.On("DealersChoice", mock.Anything, int64(1)).Return(chosen, grid, 3, nil)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/dealers-choice", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.DealersChoice(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, rec.Code)
+
+		var resp struct {
+			Movie               domain.GridSlotResponse   `json:"movie"`
+			Grid                []domain.GridSlotResponse `json:"grid"`
+			RemainingCandidates int                       `json:"remaining_candidates"`
+		}
+		err = json.Unmarshal(rec.Body.Bytes(), &resp)
+		require.NoError(t, err)
+		require.Equal(t, int64(101), resp.Movie.MovieID)
+		require.Equal(t, "Interstellar", resp.Movie.Title)
+		require.Equal(t, 3, resp.RemainingCandidates)
+		require.Len(t, resp.Grid, 1)
+	})
+
+	t.Run("no eligible candidates returns 422", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		mockSvc.On("DealersChoice", mock.Anything, int64(1)).Return(nil, nil, 0, domain.ErrNoEligibleCandidates)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/dealers-choice", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.DealersChoice(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+	})
+
+	t.Run("selection locked returns 409", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		mockSvc.On("DealersChoice", mock.Anything, int64(1)).Return(nil, nil, 0, domain.ErrSelectionLocked)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/dealers-choice", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.DealersChoice(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusConflict, rec.Code)
+	})
+
+	t.Run("dealers choice already used returns 409", func(t *testing.T) {
+		t.Parallel()
+
+		mockSvc, h, e := newRecHandlerTest(t)
+
+		mockSvc.On("DealersChoice", mock.Anything, int64(1)).Return(nil, nil, 0, domain.ErrDealersChoiceAlreadyUsed)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/grid/dealers-choice", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user", &domain.User{ID: 1})
+
+		err := h.DealersChoice(c)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusConflict, rec.Code)
 	})
 }

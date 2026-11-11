@@ -1,41 +1,96 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState, type ComponentProps } from "react";
 import {
   Pressable,
-  ScrollView,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useAppTheme } from "@/lib/theme";
 import { useGetTodaysGrid } from "@/features/movies/hooks/query/use-today-grid";
 import { useRecordInteraction } from "@/features/movies/hooks/mutations/use-record-interactions";
 import { useSyncGrid } from "@/features/movies/hooks/mutations/use-sync-grid";
+import { useDealersChoice } from "@/features/movies/hooks/mutations/use-dealers-choice";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import type { GridMovie } from "@/features/movies/types/movies.type";
 import ExploreHeader from "@/features/movies/components/explore-header";
-import CoverflowCarousel, {
-  CoverflowCarouselHandle,
-} from "@/features/movies/components/coverflow-carousel";
-import SyncButton from "@/features/movies/components/sync-button";
+import DeckStack from "@/features/movies/components/deck-stack";
 import SkeletonLoader from "@/features/movies/components/skeleton-loader";
 import ActionConfirmModal, {
   ConfirmableAction,
   SyncMood,
 } from "@/features/movies/components/action-confirm-modal";
+import ShowtimeHub from "@/features/movies/components/showtime-hub";
+import { isResolvedAction } from "@/features/movies/utils/deck";
+import { deriveProgramTheme } from "@/features/movies/utils/program";
+import { palette } from "@/lib/theme/colors";
+
+const PILL_SHADOW = {
+  boxShadow: "0px 4px 8.0px rgba(0, 0, 0, 0.3)",
+};
+
+interface GridStateCardProps {
+  icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
+  title: string;
+  subtitle: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+function GridStateCard({
+  icon,
+  title,
+  subtitle,
+  actionLabel,
+  onAction,
+}: GridStateCardProps) {
+  const theme = useAppTheme();
+
+  return (
+    <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-surface-zinc-900 px-6 py-8">
+      <MaterialCommunityIcons
+        name={icon}
+        size={42}
+        color={theme.colors.primary}
+        style={{ marginBottom: 4 }}
+      />
+      <Text className="text-center text-[15px] font-brandBold text-white">
+        {title}
+      </Text>
+      <Text className="text-center text-[13px] leading-[19px] font-brand text-zinc-400">
+        {subtitle}
+      </Text>
+      {actionLabel && onAction ? (
+        <Pressable
+          onPress={onAction}
+          className="mt-3 min-h-[44px] justify-center rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-5 active:opacity-80"
+          accessibilityRole="button"
+          accessibilityLabel={actionLabel}
+        >
+          <Text className="text-[13px] font-brandSemiBold text-white">
+            {actionLabel}
+          </Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
 
 export default function TodayTab() {
   const theme = useAppTheme();
-  const carouselRef = useRef<CoverflowCarouselHandle>(null);
-  const { data, isPending } = useGetTodaysGrid();
+  const insets = useSafeAreaInsets();
+  const { data, isPending, isError, refetch } = useGetTodaysGrid();
   const { data: profileData } = useProfile();
   const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
   const recordInteraction = useRecordInteraction();
   const syncMutation = useSyncGrid();
+  const dealersChoiceMutation = useDealersChoice();
   const [isLockingIn, setIsLockingIn] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
+  const [selectedMood, setSelectedMood] = useState<SyncMood | undefined>(undefined);
 
   const [confirmDialog, setConfirmDialog] = useState<{
     visible: boolean;
@@ -49,52 +104,93 @@ export default function TodayTab() {
 
   const movies = useMemo(() => data?.grid ?? [], [data?.grid]);
 
-  const tonightPick = movies.find(
+  const programTheme = useMemo(
+    () => deriveProgramTheme(movies, selectedMood),
+    [movies, selectedMood],
+  );
+
+  const pickCandidates = movies.filter(
     (m) =>
-      m.action === "pick_tonight" ||
+      Boolean(m.is_locked_in) ||
       m.action === "locked_in" ||
+      m.action === "pick_tonight" ||
       m.action === "watchlist_add",
   );
-  const hasTodayPick = Boolean(tonightPick);
+  const lockedPick = pickCandidates.find(
+    (m) => Boolean(m.is_locked_in) || m.action === "locked_in",
+  );
+  const latestPick = pickCandidates
+    .filter((m) => !Boolean(m.is_locked_in) && m.action !== "locked_in")
+    .sort(
+      (a, b) =>
+        new Date(b.action_at ?? 0).getTime() -
+        new Date(a.action_at ?? 0).getTime(),
+    )[0];
+  const tonightPick = lockedPick ?? latestPick;
+  const currentPickId = tonightPick?.movie_id;
+  const isShowtimeMode =
+    Boolean(tonightPick?.is_locked_in) || tonightPick?.action === "locked_in";
 
-  const unmarkedRevealedMovie = movies.find((m) => {
-    const isRevealed = Boolean(m.is_revealed) || m.action === "revealed";
-    const isMarked =
-      m.action === "watched" ||
-      m.action === "skipped" ||
-      m.action === "watchlist_add" ||
-      m.action === "pick_tonight" ||
-      m.action === "locked_in";
-    return isRevealed && !isMarked;
-  });
+  const getInitialIndex = () => {
+    if (movies.length === 0) return 0;
+    if (tonightPick) {
+      const pickIdx = movies.findIndex(
+        (m) => m.movie_id === tonightPick.movie_id,
+      );
+      if (pickIdx >= 0) return pickIdx;
+    }
+    const firstUnresolved = movies.findIndex(
+      (m) => !isResolvedAction(m.action),
+    );
+    return firstUnresolved >= 0 ? firstUnresolved : 0;
+  };
+
+  const [activeIndex, setActiveIndex] = useState(getInitialIndex);
+
+  // Track session ID so when a fresh batch is synced, activeIndex resets to 0
+  const currentSessionId = movies[0]?.grid_session_id;
+  const [prevSessionId, setPrevSessionId] = useState(currentSessionId);
+
+  if (currentSessionId && currentSessionId !== prevSessionId) {
+    setPrevSessionId(currentSessionId);
+    const firstUnresolved = movies.findIndex(
+      (m) => !isResolvedAction(m.action),
+    );
+    setActiveIndex(firstUnresolved >= 0 ? firstUnresolved : 0);
+  }
+
+  // Reactive Auto-Advancement: if the active card was resolved elsewhere
+  // (e.g. passed/seen from the detail screen), move to the next unresolved one.
+  const activeCard = movies[activeIndex];
+  if (activeCard && isResolvedAction(activeCard.action)) {
+    const nextUnresolved = movies.findIndex(
+      (m, idx) => idx >= activeIndex && !isResolvedAction(m.action),
+    );
+    if (nextUnresolved >= 0) {
+      setActiveIndex(nextUnresolved);
+    } else {
+      const anyUnresolved = movies.findIndex(
+        (m) => !isResolvedAction(m.action),
+      );
+      setActiveIndex(anyUnresolved >= 0 ? anyUnresolved : movies.length);
+    }
+  }
+
+  const isDeckCompleted =
+    movies.length > 0 &&
+    (activeIndex >= movies.length ||
+      movies.every((m) => isResolvedAction(m.action)));
+
+  const activeDeckMovie = !isDeckCompleted ? movies[activeIndex] : undefined;
+
+  const isViewingTonightPick =
+    tonightPick &&
+    (activeIndex >= movies.length ||
+      (activeDeckMovie && activeDeckMovie.movie_id === tonightPick.movie_id));
 
   const handleReveal = useCallback(
     (movie: GridMovie) => {
       if (!movie.grid_session_id) return;
-
-      if (hasTodayPick) {
-        Toast.show({
-          type: "info",
-          text1: "Deck Locked",
-          text2: `You already picked "${tonightPick?.title}" for tonight.`,
-        });
-        return;
-      }
-
-      if (unmarkedRevealedMovie && unmarkedRevealedMovie.movie_id !== movie.movie_id) {
-        const unactedIndex = movies.findIndex(
-          (m) => m.movie_id === unmarkedRevealedMovie.movie_id,
-        );
-        if (unactedIndex >= 0) {
-          carouselRef.current?.scrollToIndex(unactedIndex);
-        }
-        Toast.show({
-          type: "info",
-          text1: "Action Required",
-          text2: `Complete that opened revealed movie before opening another.`,
-        });
-        return;
-      }
 
       const isAlreadyRevealed =
         Boolean(movie.is_revealed) || movie.action === "revealed";
@@ -107,55 +203,237 @@ export default function TodayTab() {
         });
       }
     },
-    [hasTodayPick, movies, recordInteraction, tonightPick?.title, unmarkedRevealedMovie],
+    [recordInteraction],
   );
 
-  const handleViewMovie = useCallback((movie: GridMovie) => {
-    if (movie.action === "skipped" || movie.action === "watched") {
-      Toast.show({
-        type: "info",
-        text1: "Reel Locked",
-        text2:
-          movie.action === "skipped"
-            ? "This movie was skipped and cannot be opened."
-            : "This movie was marked as watched and cannot be opened.",
-      });
-      return;
-    }
-
-    router.push({
-      pathname: "/(app)/movies/[id]",
-      params: {
-        id: movie.movie_id,
-        sessionId: movie.grid_session_id ?? "",
-        slot: movie.slot_number,
-        action: movie.action ?? "",
-      },
-    });
-  }, []);
-
-  const handlePromptPick = useCallback(
-    (movie: GridMovie) => {
-      if (hasTodayPick && tonightPick?.movie_id !== movie.movie_id) {
+  const handleViewMovie = useCallback(
+    (movie: GridMovie, allowWatched = false) => {
+      if (
+        !allowWatched &&
+        (movie.action === "skipped" ||
+          movie.action === "watched" ||
+          movie.action === "seen_before")
+      ) {
         Toast.show({
           type: "info",
-          text1: "Pick Already Chosen",
-          text2: `You already selected "${tonightPick?.title}" for tonight.`,
+          text1: "Reel Locked",
+          text2:
+            movie.action === "skipped"
+              ? "This movie was passed for today."
+              : movie.action === "seen_before"
+                ? "You already marked this as seen."
+                : "This movie was marked as watched.",
         });
         return;
       }
-      setConfirmDialog({ visible: true, action: "pick_tonight", movie });
+
+      router.push({
+        pathname: "/(app)/movies/[id]",
+        params: {
+          id: movie.movie_id,
+          sessionId: movie.grid_session_id ?? "",
+          slot: movie.slot_number,
+          action: movie.action ?? "",
+        },
+      });
     },
-    [hasTodayPick, tonightPick?.movie_id, tonightPick?.title],
+    [],
   );
 
-  const handlePromptWatched = useCallback((movie: GridMovie) => {
-    setConfirmDialog({ visible: true, action: "watched", movie });
-  }, []);
+  const handleLogWatched = useCallback(
+    (movie: GridMovie, rating: number) => {
+      if (!movie.grid_session_id) return;
+      recordInteraction.mutate(
+        {
+          movie_id: movie.movie_id,
+          action: "watched",
+          grid_session_id: movie.grid_session_id,
+          grid_position: movie.slot_number,
+          rating,
+        },
+        {
+          onSuccess: () => {
+            Toast.show({
+              type: "success",
+              text1: "Verdict Logged! 🍿",
+              text2: `Rated ${rating} ★ · "${movie.title}" added to your Journal.`,
+            });
+          },
+          onError: (err) => {
+            Toast.show({
+              type: "error",
+              text1: "Action failed",
+              text2: err.message,
+            });
+          },
+        },
+      );
+    },
+    [recordInteraction],
+  );
 
-  const handlePromptSkip = useCallback((movie: GridMovie) => {
-    setConfirmDialog({ visible: true, action: "skipped", movie });
-  }, []);
+  const handlePick = useCallback(
+    (movie: GridMovie) => {
+      if (!movie.grid_session_id || recordInteraction.isPending) return;
+
+      const isAlreadyPicked = currentPickId === movie.movie_id;
+
+      if (isAlreadyPicked) {
+        // Toggle off / Unpick
+        recordInteraction.mutate(
+          {
+            movie_id: movie.movie_id,
+            action: "revealed",
+            grid_session_id: movie.grid_session_id,
+            grid_position: movie.slot_number,
+          },
+          {
+            onSuccess: () => {
+              Toast.show({
+                type: "info",
+                text1: "Pick Removed",
+                text2: `"${movie.title}" is no longer tonight's pick.`,
+              });
+            },
+            onError: (err) => {
+              Toast.show({
+                type: "error",
+                text1: "Action failed",
+                text2: err.message,
+              });
+            },
+          },
+        );
+
+        // Also clean up any lingering tentative picks in movies
+        const otherPicks = movies.filter(
+          (m) =>
+            m.movie_id !== movie.movie_id &&
+            !m.is_locked_in &&
+            m.action !== "locked_in" &&
+            (m.action === "pick_tonight" || m.action === "watchlist_add"),
+        );
+        for (const other of otherPicks) {
+          if (other.grid_session_id) {
+            void recordInteraction.mutateAsync({
+              movie_id: other.movie_id,
+              action: "revealed",
+              grid_session_id: other.grid_session_id,
+              grid_position: other.slot_number,
+            }).catch(() => {});
+          }
+        }
+      } else {
+        // Pick tonight
+        recordInteraction.mutate(
+          {
+            movie_id: movie.movie_id,
+            action: "pick_tonight",
+            grid_session_id: movie.grid_session_id,
+            grid_position: movie.slot_number,
+          },
+          {
+            onSuccess: () => {
+              Toast.show({
+                type: "success",
+                text1: "Tonight's Feature",
+                text2: `"${movie.title}" is picked. Lock it in when you're ready.`,
+              });
+            },
+            onError: (err) => {
+              Toast.show({
+                type: "error",
+                text1: "Action failed",
+                text2: err.message,
+              });
+            },
+          },
+        );
+
+        // Demote previous tentative pick so there's always at most one pick
+        const otherPicks = movies.filter(
+          (m) =>
+            m.movie_id !== movie.movie_id &&
+            !m.is_locked_in &&
+            m.action !== "locked_in" &&
+            (m.action === "pick_tonight" || m.action === "watchlist_add"),
+        );
+        for (const other of otherPicks) {
+          if (other.grid_session_id) {
+            void recordInteraction.mutateAsync({
+              movie_id: other.movie_id,
+              action: "revealed",
+              grid_session_id: other.grid_session_id,
+              grid_position: other.slot_number,
+            }).catch(() => {});
+          }
+        }
+      }
+    },
+    [movies, currentPickId, recordInteraction],
+  );
+
+  const handleSeen = useCallback(
+    (movie: GridMovie) => {
+      if (!movie.grid_session_id) return;
+      recordInteraction.mutate(
+        {
+          movie_id: movie.movie_id,
+          action: "seen_before",
+          grid_session_id: movie.grid_session_id,
+          grid_position: movie.slot_number,
+        },
+        {
+          onSuccess: () => {
+            Toast.show({
+              type: "info",
+              text1: "Marked as Seen",
+              text2: `"${movie.title}" is resolved.`,
+            });
+          },
+          onError: (err) => {
+            Toast.show({
+              type: "error",
+              text1: "Action failed",
+              text2: err.message,
+            });
+          },
+        },
+      );
+    },
+    [recordInteraction],
+  );
+
+  const handleSkip = useCallback(
+    (movie: GridMovie) => {
+      if (!movie.grid_session_id) return;
+      recordInteraction.mutate(
+        {
+          movie_id: movie.movie_id,
+          action: "skipped",
+          grid_session_id: movie.grid_session_id,
+          grid_position: movie.slot_number,
+        },
+        {
+          onSuccess: () => {
+            Toast.show({
+              type: "info",
+              text1: "Passed for Today",
+              text2: `"${movie.title}" is resolved.`,
+            });
+          },
+          onError: (err) => {
+            Toast.show({
+              type: "error",
+              text1: "Action failed",
+              text2: err.message,
+            });
+          },
+        },
+      );
+    },
+    [recordInteraction],
+  );
 
   const handlePromptLockIn = useCallback(() => {
     if (!tonightPick || isLockingIn) return;
@@ -174,12 +452,90 @@ export default function TodayTab() {
     setConfirmDialog({ visible: true, action: "sync", movie: null });
   }, [syncsRemaining, syncMutation.isPending]);
 
+  const handleReturnToPick = useCallback(() => {
+    if (!tonightPick) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const pickIdx = movies.findIndex(
+      (m) => m.movie_id === tonightPick.movie_id,
+    );
+    if (pickIdx >= 0) {
+      setActiveIndex(pickIdx);
+    }
+  }, [movies, tonightPick]);
+
+  const handleKeepBrowsing = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const otherIdx = movies.findIndex(
+      (m, idx) => idx !== activeIndex && !isResolvedAction(m.action),
+    );
+    if (otherIdx >= 0) {
+      setActiveIndex(otherIdx);
+    } else {
+      setActiveIndex((activeIndex + 1) % Math.max(movies.length, 1));
+    }
+  }, [movies, activeIndex]);
+
+  const handleDealersChoice = useCallback(() => {
+    if (dealersChoiceMutation.isPending || isShuffling) return;
+
+    setIsShuffling(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    const timer1 = setTimeout(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, 160);
+    const timer2 = setTimeout(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, 340);
+    const timer3 = setTimeout(() => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }, 500);
+
+    const startTime = Date.now();
+
+    dealersChoiceMutation.mutate(undefined, {
+      onSuccess: (res) => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, 680 - elapsed);
+
+        setTimeout(() => {
+          setIsShuffling(false);
+          const targetIdx = res.grid.findIndex(
+            (m) => m.movie_id === res.movie.movie_id,
+          );
+          if (targetIdx >= 0) {
+            setActiveIndex(targetIdx);
+          }
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          Toast.show({
+            type: "success",
+            text1: "Dealer's Choice 🎲",
+            text2: `We picked "${res.movie.title}" for tonight. Lock it in when you're ready!`,
+          });
+        }, remaining);
+      },
+      onError: (err) => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        setIsShuffling(false);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        Toast.show({
+          type: "error",
+          text1: "Dealer's Choice",
+          text2: err.message || "Failed to pick candidate.",
+        });
+      },
+    });
+  }, [dealersChoiceMutation, isShuffling]);
+
   const handleConfirmDialogAction = useCallback(
     (mood?: SyncMood) => {
       const { action, movie } = confirmDialog;
       setConfirmDialog({ visible: false, action: null, movie: null });
 
       if (action === "sync") {
+        setSelectedMood(mood);
         syncMutation.mutate(mood, {
           onSuccess: (res) => {
             Toast.show({
@@ -199,216 +555,197 @@ export default function TodayTab() {
         return;
       }
 
-      if (!movie || !movie.grid_session_id) return;
+      if (action !== "locked_in" || !movie || !movie.grid_session_id) return;
 
-      if (action === "pick_tonight") {
-        recordInteraction.mutate(
-          {
-            movie_id: movie.movie_id,
-            action: "watchlist_add",
-            grid_session_id: movie.grid_session_id,
-            grid_position: movie.slot_number,
+      setIsLockingIn(true);
+      recordInteraction.mutate(
+        {
+          movie_id: movie.movie_id,
+          action: "locked_in",
+          grid_session_id: movie.grid_session_id,
+          grid_position: movie.slot_number,
+        },
+        {
+          onSuccess: () => {
+            setIsLockingIn(false);
+            Toast.show({
+              type: "success",
+              text1: "Now Watching",
+              text2: "Selection locked for today. Enjoy the show!",
+            });
           },
-          {
-            onSuccess: () => {
-              Toast.show({
-                type: "success",
-                text1: "Tonight's Pick",
-                text2: `"${movie.title}" selected as your feature film.`,
-              });
-            },
-            onError: (err) => {
-              Toast.show({
-                type: "error",
-                text1: "Action failed",
-                text2: err.message,
-              });
-            },
+          onError: (err) => {
+            setIsLockingIn(false);
+            Toast.show({
+              type: "error",
+              text1: "Failed to lock in",
+              text2: err.message,
+            });
           },
-        );
-      } else if (action === "watched") {
-        recordInteraction.mutate(
-          {
-            movie_id: movie.movie_id,
-            action: "watched",
-            grid_session_id: movie.grid_session_id,
-            grid_position: movie.slot_number,
-          },
-          {
-            onSuccess: () => {
-              Toast.show({
-                type: "success",
-                text1: "Marked as Watched",
-                text2: `"${movie.title}" logged. Next reel unlocked!`,
-              });
-            },
-            onError: (err) => {
-              Toast.show({
-                type: "error",
-                text1: "Action failed",
-                text2: err.message,
-              });
-            },
-          },
-        );
-      } else if (action === "skipped") {
-        recordInteraction.mutate(
-          {
-            movie_id: movie.movie_id,
-            action: "skipped",
-            grid_session_id: movie.grid_session_id,
-            grid_position: movie.slot_number,
-          },
-          {
-            onSuccess: () => {
-              Toast.show({
-                type: "info",
-                text1: "Reel Skipped",
-                text2: `Skipped "${movie.title}". Next reel unlocked!`,
-              });
-            },
-            onError: (err) => {
-              Toast.show({
-                type: "error",
-                text1: "Action failed",
-                text2: err.message,
-              });
-            },
-          },
-        );
-      } else if (action === "locked_in") {
-        setIsLockingIn(true);
-        recordInteraction.mutate(
-          {
-            movie_id: movie.movie_id,
-            action: "locked_in",
-            grid_session_id: movie.grid_session_id,
-            grid_position: movie.slot_number,
-          },
-          {
-            onSuccess: () => {
-              setIsLockingIn(false);
-              Toast.show({
-                type: "success",
-                text1: "Now Watching",
-                text2: "Selection locked for today. Enjoy the show!",
-              });
-            },
-            onError: (err) => {
-              setIsLockingIn(false);
-              Toast.show({
-                type: "error",
-                text1: "Failed to lock in",
-                text2: err.message,
-              });
-            },
-          },
-        );
-      }
+        },
+      );
     },
     [confirmDialog, recordInteraction, syncMutation],
   );
 
-  const unactedIndex = unmarkedRevealedMovie
-    ? movies.findIndex((m) => m.movie_id === unmarkedRevealedMovie.movie_id)
-    : -1;
+  if (!isPending && isShowtimeMode && tonightPick) {
+    return (
+      <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
+        <ShowtimeHub
+          movie={tonightPick}
+          onLogWatched={handleLogWatched}
+          onOpenDetails={(m) => handleViewMovie(m, true)}
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      edges={["top"]}
-    >
+    <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
       <ExploreHeader
         syncsRemaining={syncsRemaining}
         onSyncPress={handlePromptSync}
+        isSyncing={syncMutation.isPending}
+        programTheme={programTheme}
       />
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+      <View
+        className="flex-1 justify-between"
+        style={{ paddingBottom: Math.max(insets.bottom, 16) + 64 }}
       >
-        <View style={styles.headerBlock}>
-          <Text style={[styles.screenHeading, { color: theme.colors.textPrimary }]}>
-            Today&apos;s Reel
-          </Text>
-          <Text style={[styles.screenSubheading, { color: theme.colors.textSecondary }]}>
-            {hasTodayPick
-              ? `Tonight's Pick: ${tonightPick?.title}`
-              : unactedIndex >= 0
-                ? `Complete Reel 0${unactedIndex + 1} to unlock more`
-                : "Five films handpicked for your evening"}
-          </Text>
-        </View>
-
         {isPending ? (
-          <SkeletonLoader count={5} />
-        ) : (
-          <>
-            <CoverflowCarousel
-              ref={carouselRef}
-              movies={movies}
-              hasTodayPick={hasTodayPick}
-              onReveal={handleReveal}
-              onPickTonight={handlePromptPick}
-              onWatched={handlePromptWatched}
-              onSkip={handlePromptSkip}
-              onViewDetails={handleViewMovie}
+          <View className="flex-1 items-center justify-center">
+            <SkeletonLoader count={5} />
+          </View>
+        ) : isError ? (
+          <View className="flex-1 items-center justify-center">
+            <GridStateCard
+              icon="wifi-off"
+              title="Couldn&apos;t load tonight&apos;s reel"
+              subtitle="We couldn&apos;t reach the cinema. Check your connection and try again."
+              actionLabel="Try again"
+              onAction={() => {
+                refetch();
+              }}
             />
+          </View>
+        ) : movies.length === 0 ? (
+          <View className="flex-1 items-center justify-center">
+            <GridStateCard
+              icon="filmstrip-off"
+              title="Tonight&apos;s reel is empty"
+              subtitle="No films were drawn for you yet. Pull a fresh batch to start choosing."
+              actionLabel="Draw a fresh reel"
+              onAction={handlePromptSync}
+            />
+          </View>
+        ) : (
+          <View className="flex-1 items-center justify-center">
+            <DeckStack
+              movies={movies}
+              activeIndex={activeIndex}
+              onActiveIndexChange={setActiveIndex}
+              currentPickId={currentPickId}
+              syncsRemaining={syncsRemaining}
+              onReveal={handleReveal}
+              onPickTonight={handlePick}
+              onSeen={handleSeen}
+              onSkip={handleSkip}
+              onViewDetails={handleViewMovie}
+              onReshuffle={handlePromptSync}
+              onDealersChoice={handleDealersChoice}
+              isDealersChoiceLoading={dealersChoiceMutation.isPending}
+              isShuffling={isShuffling}
+            />
+          </View>
+        )}
 
-            <View style={styles.bottomDock}>
-              {tonightPick && tonightPick.action !== "locked_in" ? (
-                <Pressable
-                  onPress={handlePromptLockIn}
-                  style={({ pressed }) => [
-                    styles.lockInPill,
-                    { backgroundColor: theme.colors.primary },
-                    pressed && { opacity: 0.85 },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name="movie-play-outline"
-                    size={17}
-                    color="#FFFFFF"
-                  />
-                  <Text style={styles.lockInPillText} numberOfLines={1}>
-                    LOCK IN &quot;{tonightPick.title.toUpperCase()}&quot;
-                  </Text>
-                </Pressable>
-              ) : tonightPick?.action === "locked_in" ? (
-                <View
-                  style={[
-                    styles.lockedStatusPill,
-                    {
-                      backgroundColor: theme.colors.elevation.level2,
-                      borderColor: theme.colors.outlineVariant,
-                    },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name="check-circle"
-                    size={16}
-                    color={theme.colors.success}
-                  />
-                  <Text
-                    style={[
-                      styles.lockedStatusText,
-                      { color: theme.colors.textPrimary },
-                    ]}
+        {tonightPick ? (
+          <View className="mb-1.5 min-h-[48px] items-center justify-center px-6">
+            {tonightPick.action !== "locked_in" ? (
+              isViewingTonightPick ? (
+                <View className="w-full max-w-[320px] items-center justify-center gap-2">
+                  <Pressable
+                    onPress={handlePromptLockIn}
+                    className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] bg-primary px-[22px] py-3 active:opacity-85"
+                    style={PILL_SHADOW}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Lock in ${tonightPick.title}`}
                   >
-                    Locked in for tonight
-                  </Text>
+                    <MaterialCommunityIcons
+                      name="movie-play-outline"
+                      size={17}
+                      color={palette.white}
+                    />
+                    <Text
+                      className="text-[12px] tracking-[0.8px] font-brandBold text-white"
+                      numberOfLines={1}
+                    >
+                      LOCK IN &quot;{tonightPick.title.toUpperCase()}&quot;
+                    </Text>
+                  </Pressable>
+
+                  {tonightPick.is_dealers_choice ? (
+                    <Pressable
+                      onPress={handleKeepBrowsing}
+                      className="flex-row items-center justify-center gap-1.5 px-3 py-1 active:opacity-60"
+                      accessibilityRole="button"
+                      accessibilityLabel="Browse other movies in this batch"
+                      hitSlop={{ top: 8, bottom: 8, left: 16, right: 16 }}
+                    >
+                      <Text className="text-[13px] tracking-[0.2px] font-brandMedium text-zinc-400">
+                        Browse other movies
+                      </Text>
+                      <MaterialCommunityIcons
+                        name="arrow-right"
+                        size={14}
+                        color={theme.colors.textSecondary}
+                      />
+                    </Pressable>
+                  ) : null}
                 </View>
               ) : (
-                <SyncButton
-                  onSync={handlePromptSync}
-                  syncsRemaining={syncsRemaining}
-                  isSyncing={syncMutation.isPending}
+                <Pressable
+                  onPress={handleReturnToPick}
+                  className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-zinc-850 px-[22px] py-3 active:bg-surface-zinc-800 active:opacity-85"
+                  style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)" }}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    tonightPick.is_dealers_choice
+                      ? "Return to recommendation"
+                      : `Return to ${tonightPick.title}`
+                  }
+                >
+                  <MaterialCommunityIcons
+                    name="arrow-u-left-top"
+                    size={17}
+                    color={theme.colors.primary}
+                  />
+                  <Text
+                    className="text-[12px] tracking-[0.8px] font-brandBold text-white"
+                    numberOfLines={1}
+                  >
+                    {tonightPick.is_dealers_choice
+                      ? "RETURN TO RECOMMENDATION"
+                      : `RETURN TO "${tonightPick.title.toUpperCase()}"`}
+                  </Text>
+                </Pressable>
+              )
+            ) : (
+              <View className="flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-zinc-850 px-[18px] py-2.5">
+                <MaterialCommunityIcons
+                  name="check-circle"
+                  size={16}
+                  color={theme.colors.success}
                 />
-              )}
-            </View>
-          </>
-        )}
-      </ScrollView>
+                <Text className="text-[13px] tracking-[0.2px] font-brandSemiBold text-white">
+                  Locked in for tonight
+                </Text>
+              </View>
+            )}
+          </View>
+        ) : null}
+      </View>
 
       <ActionConfirmModal
         visible={confirmDialog.visible}
@@ -424,69 +761,3 @@ export default function TodayTab() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 40,
-  },
-  headerBlock: {
-    paddingHorizontal: 24,
-    paddingTop: 6,
-    paddingBottom: 10,
-  },
-  screenHeading: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 24,
-    letterSpacing: -0.4,
-  },
-  screenSubheading: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    marginTop: 3,
-    letterSpacing: 0.1,
-  },
-  bottomDock: {
-    marginTop: 12,
-    alignItems: "center",
-    paddingHorizontal: 24,
-  },
-  lockInPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-    borderRadius: 24,
-    width: "100%",
-    maxWidth: 320,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  lockInPillText: {
-    color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
-    fontSize: 12,
-    letterSpacing: 0.8,
-  },
-  lockedStatusPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  lockedStatusText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-    letterSpacing: 0.2,
-  },
-});

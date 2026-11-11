@@ -1,46 +1,55 @@
 import { useMemo, useState } from "react";
 import {
-  Dimensions,
   FlatList,
   Pressable,
   RefreshControl,
-  StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 import { useGetHistory } from "@/features/movies/hooks/query/use-get-history";
 import type { HistoryMovie } from "@/features/movies/types/movies.type";
+import { palette } from "@/lib/theme/colors";
 
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342";
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const COLUMN_GAP = 10;
 const PADDING = 16;
-const CARD_WIDTH = (SCREEN_WIDTH - PADDING * 2 - COLUMN_GAP * 2) / 3;
-const CARD_HEIGHT = CARD_WIDTH * 1.5;
 
-type FilterTab = "all" | "watched" | "watchlist_add";
+type FilterTab = "all" | "watched" | "pick_tonight";
 
 export default function Journal() {
   const theme = useAppTheme();
+  const insets = useSafeAreaInsets();
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
   const { data, isPending, refetch, isRefetching } = useGetHistory();
+
+  const cardWidth = (SCREEN_WIDTH - PADDING * 2 - COLUMN_GAP * 2) / 3;
+  const cardHeight = cardWidth * 1.5;
 
   const allHistory = useMemo(() => data?.history ?? [], [data?.history]);
 
   const filteredHistory = useMemo(() => {
     if (activeFilter === "all") return allHistory;
-    return allHistory.filter((item) => item.action === activeFilter);
+    return allHistory.filter(
+      (item) =>
+        item.action === activeFilter ||
+        (activeFilter === "pick_tonight" && item.action === "watchlist_add"),
+    );
   }, [allHistory, activeFilter]);
 
   const stats = useMemo(() => {
     const watchedCount = allHistory.filter((i) => i.action === "watched").length;
-    const picksCount = allHistory.filter((i) => i.action === "watchlist_add").length;
+    const picksCount = allHistory.filter(
+      (i) => i.action === "pick_tonight" || i.action === "watchlist_add",
+    ).length;
 
     const genreCounts: Record<string, number> = {};
     for (const item of allHistory) {
@@ -93,28 +102,21 @@ export default function Journal() {
     return (
       <Pressable
         onPress={() => handleMoviePress(item)}
-        style={({ pressed }) => [
-          styles.card,
-          {
-            backgroundColor: theme.colors.elevation.level1,
-            borderColor: theme.colors.outlineVariant,
-            opacity: pressed ? 0.8 : 1,
-          },
-        ]}
+        className="overflow-hidden rounded-md border border-white/[0.08] bg-surface-zinc-900 active:opacity-80"
+        accessibilityRole="button"
+        accessibilityLabel={item.title}
       >
         {posterUri ? (
           <Image
             source={{ uri: posterUri }}
-            style={styles.poster}
+            style={{ width: "100%", height: cardHeight }}
             contentFit="cover"
             transition={200}
           />
         ) : (
           <View
-            style={[
-              styles.posterPlaceholder,
-              { backgroundColor: theme.colors.elevation.level2 },
-            ]}
+            className="w-full items-center justify-center bg-surface-zinc-850 p-1.5"
+            style={{ height: cardHeight }}
           >
             <MaterialCommunityIcons
               name="filmstrip"
@@ -122,7 +124,7 @@ export default function Journal() {
               color={theme.colors.textMuted}
             />
             <Text
-              style={[styles.placeholderTitle, { color: theme.colors.textSecondary }]}
+              className="mt-1 text-center text-[10px] font-brandSemiBold text-zinc-400"
               numberOfLines={2}
             >
               {item.title}
@@ -130,216 +132,169 @@ export default function Journal() {
           </View>
         )}
 
-        <View style={styles.badgeRow}>
+        <View className="absolute left-1.5 right-1.5 top-1.5 flex-row justify-between">
           {item.vote_average > 0 ? (
-            <View
-              style={[
-                styles.badge,
-                { backgroundColor: "rgba(0, 0, 0, 0.75)" },
-              ]}
-            >
+            <View className="flex-row items-center gap-[3px] rounded-md bg-black/75 px-[5px] py-0.5">
               <MaterialCommunityIcons
                 name="star"
                 size={11}
                 color={theme.colors.gold}
               />
-              <Text style={styles.badgeText}>
+              <Text className="text-[9px] font-brandBold text-white">
                 {item.vote_average.toFixed(1)}
               </Text>
             </View>
           ) : <View />}
 
           <View
-            style={[
-              styles.badge,
-              {
-                backgroundColor:
-                  item.action === "watched"
-                    ? "rgba(16, 185, 129, 0.85)"
-                    : "rgba(229, 9, 20, 0.85)",
-              },
-            ]}
+            className={cn(
+              "flex-row items-center gap-[3px] rounded-md px-[5px] py-0.5",
+              item.action === "watched" ? "bg-emerald-500/85" : "bg-primary/85",
+            )}
           >
             <MaterialCommunityIcons
               name={item.action === "watched" ? "check" : "bookmark"}
               size={10}
-              color="#FFFFFF"
+              color={palette.white}
             />
-            <Text style={styles.badgeText}>{formatDate(item.acted_at)}</Text>
+            <Text className="text-[9px] font-brandBold text-white">
+              {formatDate(item.acted_at)}
+            </Text>
           </View>
         </View>
 
-        <View style={styles.cardInfo}>
+        <View className="px-1.5 py-1.5">
           <Text
-            style={[styles.movieTitle, { color: theme.colors.textPrimary }]}
+            className="text-[11px] font-brandSemiBold text-white"
             numberOfLines={1}
           >
             {item.title}
           </Text>
+          {item.rating ? (
+            <View className="mt-[3px] flex-row items-center gap-[3px]">
+              <MaterialCommunityIcons
+                name="star"
+                size={9}
+                color={theme.colors.gold}
+              />
+              <Text className="text-[9px] font-brandBold text-amber-500">
+                {item.rating}/5
+              </Text>
+            </View>
+          ) : null}
         </View>
       </Pressable>
     );
   };
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      edges={["top"]}
-    >
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <Text style={[styles.screenTitle, { color: theme.colors.textPrimary }]}>
+    <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
+      <View className="px-4 pb-3 pt-2">
+        <View className="flex-row items-baseline gap-[3px]">
+          <Text className="text-[22px] tracking-[2px] font-brandExtraBold text-white">
             JOURNAL
           </Text>
-          <View style={[styles.brandDot, { backgroundColor: theme.colors.primary }]} />
+          <View className="mb-0.5 h-[5px] w-[5px] rounded-full bg-primary" />
         </View>
-        <Text style={[styles.screenSubtitle, { color: theme.colors.textSecondary }]}>
+        <Text className="mt-0.5 text-[12px] font-brand text-zinc-400">
           Your lifetime cinema archive and history
         </Text>
       </View>
 
-      <View style={styles.statsContainer}>
-        <View
-          style={[
-            styles.statCard,
-            {
-              backgroundColor: theme.colors.elevation.level2,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
-          <Text style={[styles.statValue, { color: theme.colors.primary }]}>
+      <View className="mb-3 flex-row gap-2 px-4">
+        <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-zinc-850 px-2 py-2.5">
+          <Text className="text-[17px] font-brandBold text-primary">
             {stats.watchedCount}
           </Text>
-          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-zinc-400">
             Watched
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.statCard,
-            {
-              backgroundColor: theme.colors.elevation.level2,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
-          <Text style={[styles.statValue, { color: theme.colors.gold }]}>
+        <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-zinc-850 px-2 py-2.5">
+          <Text className="text-[17px] font-brandBold text-amber-500">
             {stats.picksCount}
           </Text>
-          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-zinc-400">
             Picks
           </Text>
         </View>
 
-        <View
-          style={[
-            styles.statCard,
-            {
-              backgroundColor: theme.colors.elevation.level2,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
+        <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-zinc-850 px-2 py-2.5">
           <Text
-            style={[styles.statValue, { color: theme.colors.textPrimary }]}
+            className="text-[17px] font-brandBold text-white"
             numberOfLines={1}
           >
             {stats.topGenre}
           </Text>
-          <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>
+          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-zinc-400">
             Top Vibe
           </Text>
         </View>
       </View>
 
-      <View style={styles.filterRow}>
+      <View className="mb-3 flex-row gap-2 px-4">
         <Pressable
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeFilter === "all" }}
+          accessibilityLabel={`All, ${allHistory.length} entries`}
           onPress={() => handleTabPress("all")}
-          style={[
-            styles.filterPill,
+          className={cn(
+            "rounded-[18px] px-3.5 py-1.5",
             activeFilter === "all"
-              ? [styles.filterPillActive, { backgroundColor: theme.colors.textPrimary }]
-              : [
-                  styles.filterPillInactive,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                ],
-          ]}
+              ? "bg-white"
+              : "border border-white/[0.08] bg-surface-zinc-850",
+          )}
         >
           <Text
-            style={[
-              styles.filterText,
-              {
-                color:
-                  activeFilter === "all"
-                    ? theme.colors.inverseOnSurface
-                    : theme.colors.textSecondary,
-              },
-            ]}
+            className={cn(
+              "text-[12px] font-brandSemiBold",
+              activeFilter === "all" ? "text-surface-obsidian" : "text-zinc-400",
+            )}
           >
             All ({allHistory.length})
           </Text>
         </Pressable>
 
         <Pressable
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeFilter === "watched" }}
+          accessibilityLabel={`Watched, ${stats.watchedCount} entries`}
           onPress={() => handleTabPress("watched")}
-          style={[
-            styles.filterPill,
+          className={cn(
+            "rounded-[18px] px-3.5 py-1.5",
             activeFilter === "watched"
-              ? [styles.filterPillActive, { backgroundColor: theme.colors.textPrimary }]
-              : [
-                  styles.filterPillInactive,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                ],
-          ]}
+              ? "bg-white"
+              : "border border-white/[0.08] bg-surface-zinc-850",
+          )}
         >
           <Text
-            style={[
-              styles.filterText,
-              {
-                color:
-                  activeFilter === "watched"
-                    ? theme.colors.inverseOnSurface
-                    : theme.colors.textSecondary,
-              },
-            ]}
+            className={cn(
+              "text-[12px] font-brandSemiBold",
+              activeFilter === "watched" ? "text-surface-obsidian" : "text-zinc-400",
+            )}
           >
             Watched ({stats.watchedCount})
           </Text>
         </Pressable>
 
         <Pressable
-          onPress={() => handleTabPress("watchlist_add")}
-          style={[
-            styles.filterPill,
-            activeFilter === "watchlist_add"
-              ? [styles.filterPillActive, { backgroundColor: theme.colors.textPrimary }]
-              : [
-                  styles.filterPillInactive,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                ],
-          ]}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeFilter === "pick_tonight" }}
+          accessibilityLabel={`Picks, ${stats.picksCount} entries`}
+          onPress={() => handleTabPress("pick_tonight")}
+          className={cn(
+            "rounded-[18px] px-3.5 py-1.5",
+            activeFilter === "pick_tonight"
+              ? "bg-white"
+              : "border border-white/[0.08] bg-surface-zinc-850",
+          )}
         >
           <Text
-            style={[
-              styles.filterText,
-              {
-                color:
-                  activeFilter === "watchlist_add"
-                    ? theme.colors.inverseOnSurface
-                    : theme.colors.textSecondary,
-              },
-            ]}
+            className={cn(
+              "text-[12px] font-brandSemiBold",
+              activeFilter === "pick_tonight" ? "text-surface-obsidian" : "text-zinc-400",
+            )}
           >
             Picks ({stats.picksCount})
           </Text>
@@ -347,37 +302,42 @@ export default function Journal() {
       </View>
 
       {isPending ? (
-        <View style={styles.centered}>
-          <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+        <View
+          className="flex-1 items-center justify-center px-8"
+          style={{ paddingBottom: Math.max(insets.bottom, 16) + 60 }}
+        >
+          <Text className="text-[14px] font-brand text-zinc-400">
             Loading cinema archive...
           </Text>
         </View>
       ) : filteredHistory.length === 0 ? (
-        <View style={styles.centered}>
+        <View
+          className="flex-1 items-center justify-center px-8"
+          style={{ paddingBottom: Math.max(insets.bottom, 16) + 60 }}
+        >
           <MaterialCommunityIcons
             name="movie-open-outline"
             size={48}
             color={theme.colors.textMuted}
-            style={styles.emptyIcon}
+            style={{ marginBottom: 12 }}
           />
-          <Text style={[styles.emptyTitle, { color: theme.colors.textPrimary }]}>
+          <Text className="mb-1.5 text-center text-[17px] font-brandBold text-white">
             {activeFilter === "watched"
               ? "No watched films yet"
-              : activeFilter === "watchlist_add"
+              : activeFilter === "pick_tonight"
               ? "No picks saved yet"
               : "Your journal is empty"}
           </Text>
-          <Text style={[styles.emptySubtitle, { color: theme.colors.textMuted }]}>
+          <Text className="mb-5 text-center text-[13px] leading-[19px] font-brand text-zinc-500">
             Movies you mark as watched or select as your daily pick will be collected here.
           </Text>
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Explore today's batch"
             onPress={() => router.push("/(app)/(tabs)")}
-            style={[
-              styles.exploreBtn,
-              { backgroundColor: theme.colors.elevation.level3, borderColor: theme.colors.outlineVariant },
-            ]}
+            className="rounded-lg border border-white/[0.08] bg-surface-zinc-800 px-[18px] py-2.5"
           >
-            <Text style={[styles.exploreBtnText, { color: theme.colors.textPrimary }]}>
+            <Text className="text-[13px] font-brandSemiBold text-white">
               Explore Today&apos;s Batch
             </Text>
           </Pressable>
@@ -388,8 +348,15 @@ export default function Journal() {
           keyExtractor={(item) => `${item.movie_id}-${item.action}-${item.acted_at}`}
           renderItem={renderItem}
           numColumns={3}
-          columnWrapperStyle={styles.columnWrapper}
-          contentContainerStyle={styles.listContent}
+          columnWrapperStyle={{
+            gap: COLUMN_GAP,
+            paddingHorizontal: PADDING,
+            marginBottom: 14,
+          }}
+          contentContainerStyle={{
+            paddingTop: 4,
+            paddingBottom: Math.max(insets.bottom, 16) + 80,
+          }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -406,175 +373,3 @@ export default function Journal() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 3,
-  },
-  screenTitle: {
-    fontFamily: "Inter_900Black",
-    fontSize: 22,
-    letterSpacing: 2,
-  },
-  brandDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    marginBottom: 2,
-  },
-  screenSubtitle: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 12,
-    marginTop: 2,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    gap: 8,
-    marginBottom: 12,
-  },
-  statCard: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: "center",
-  },
-  statValue: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 17,
-  },
-  statLabel: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 10,
-    letterSpacing: 0.5,
-    marginTop: 2,
-    textTransform: "uppercase",
-  },
-  filterRow: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    gap: 8,
-    marginBottom: 12,
-  },
-  filterPill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 18,
-  },
-  filterPillActive: {},
-  filterPillInactive: {
-    borderWidth: 1,
-  },
-  filterText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 12,
-  },
-  columnWrapper: {
-    gap: COLUMN_GAP,
-    paddingHorizontal: PADDING,
-    marginBottom: 14,
-  },
-  listContent: {
-    paddingTop: 4,
-    paddingBottom: 32,
-  },
-  card: {
-    width: CARD_WIDTH,
-    borderRadius: 10,
-    overflow: "hidden",
-    borderWidth: 1,
-  },
-  poster: {
-    width: "100%",
-    height: CARD_HEIGHT,
-  },
-  posterPlaceholder: {
-    width: "100%",
-    height: CARD_HEIGHT,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 6,
-  },
-  placeholderTitle: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 10,
-    textAlign: "center",
-    marginTop: 4,
-  },
-  badgeRow: {
-    position: "absolute",
-    top: 6,
-    left: 6,
-    right: 6,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  badgeText: {
-    color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
-    fontSize: 9,
-  },
-  cardInfo: {
-    paddingHorizontal: 6,
-    paddingVertical: 6,
-  },
-  movieTitle: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-  },
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-  },
-  loadingText: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 14,
-  },
-  emptyIcon: {
-    marginBottom: 12,
-  },
-  emptyTitle: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 17,
-    marginBottom: 6,
-    textAlign: "center",
-  },
-  emptySubtitle: {
-    fontFamily: "Inter_400Regular",
-    fontSize: 13,
-    textAlign: "center",
-    lineHeight: 19,
-    marginBottom: 20,
-  },
-  exploreBtn: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  exploreBtnText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 13,
-  },
-});

@@ -8,13 +8,20 @@ import { jwtDecode } from "jwt-decode";
 
 const TOKEN_EXPIRY_BUFFER_MS = 60 * 1000;
 
+let refreshInFlight: Promise<string | null> | null = null;
+
 export const getValidAccessToken = async (): Promise<string | null> => {
   const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
 
   if (!accessToken) return null;
 
-  const { exp } = jwtDecode<{ exp: number }>(accessToken);
-  const expiresInMs = exp * 1000 - Date.now();
+  const expiry = decodeExpiry(accessToken);
+
+  if (expiry === null) {
+    return await refreshAccessToken();
+  }
+
+  const expiresInMs = expiry * 1000 - Date.now();
 
   if (expiresInMs < TOKEN_EXPIRY_BUFFER_MS) {
     return await refreshAccessToken();
@@ -23,10 +30,36 @@ export const getValidAccessToken = async (): Promise<string | null> => {
   return accessToken;
 };
 
+function decodeExpiry(token: string): number | null {
+  try {
+    const { exp } = jwtDecode<{ exp: number }>(token);
+    return typeof exp === "number" ? exp : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function refreshAccessToken(): Promise<string | null> {
+  if (refreshInFlight) {
+    return refreshInFlight;
+  }
+
+  refreshInFlight = performRefresh();
+
+  try {
+    return await refreshInFlight;
+  } finally {
+    refreshInFlight = null;
+  }
+}
+
+async function performRefresh(): Promise<string | null> {
   const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 
-  if (!refreshToken) return null;
+  if (!refreshToken) {
+    await useAuthStore.getState().logout();
+    return null;
+  }
 
   const { data, error } = await tryCatch(
     http

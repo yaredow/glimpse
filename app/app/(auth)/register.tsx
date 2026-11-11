@@ -1,20 +1,23 @@
-import { View, StyleSheet } from "react-native";
-import { useTheme } from "react-native-paper";
-import { RegisterForm } from "../../features/auth/components/register-form";
+import { RegisterForm } from "@/features/auth/components/register-form";
+import AuthShell from "@/features/auth/components/auth-shell";
+import { useOnboardingStore } from "@/features/onboarding/store/onboarding.store";
 
 export default function Register() {
-  const { colors } = useTheme();
+  const hasCompletedLocalOnboarding = useOnboardingStore(
+    (s) => s.hasCompletedLocalOnboarding,
+  );
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <AuthShell
+      title={hasCompletedLocalOnboarding ? "One last step." : "Create your account."}
+      subtitle={
+        hasCompletedLocalOnboarding
+          ? "Your picks are saved. Create an account to unlock your first five."
+          : "Five handpicked films, every night."
+      }
+      compact
+    >
       <RegisterForm />
-    </View>
+    </AuthShell>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-});

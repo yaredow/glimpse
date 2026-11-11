@@ -1,201 +1,94 @@
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
-import NotificationsDropdown from "./notifications-dropdown";
+import { cn } from "@/lib/utils";
+import GlimpseLogo from "@/components/ui/glimpse-logo";
 
 interface ExploreHeaderProps {
   syncsRemaining?: number;
   onSyncPress?: () => void;
+  isSyncing?: boolean;
+  programTheme?: string;
 }
 
 export default function ExploreHeader({
   syncsRemaining = 3,
   onSyncPress,
+  isSyncing = false,
+  programTheme,
 }: ExploreHeaderProps) {
   const theme = useAppTheme();
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [hasUnread, setHasUnread] = useState(true);
 
   const handleSyncPress = () => {
+    if (isSyncing) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onSyncPress?.();
   };
 
-  const handleNotificationPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setShowNotifications(true);
-    setHasUnread(false);
-  };
-
-  const todayDate = new Date().toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  }).toUpperCase();
+  const todayDate = new Date()
+    .toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    })
+    .toUpperCase();
 
   return (
-    <>
-      <View style={styles.container}>
-        <View style={styles.brandContainer}>
-          <View style={styles.titleRow}>
-            <Text style={[styles.brandTitle, { color: theme.colors.textPrimary }]}>
-              GLIMPSE
-            </Text>
-            <View
-              style={[styles.brandDot, { backgroundColor: theme.colors.primary }]}
-            />
-          </View>
-          <Text style={[styles.dateText, { color: theme.colors.textSecondary }]}>
-            {todayDate}
-          </Text>
-        </View>
-
-        <View style={styles.rightActions}>
-          {onSyncPress ? (
-            <Pressable
-              onPress={handleSyncPress}
-              style={({ pressed }) => [
-                styles.syncPill,
-                {
-                  backgroundColor: theme.colors.elevation.level2,
-                  borderColor: theme.colors.outlineVariant,
-                  opacity: pressed ? 0.75 : 1,
-                },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={`${syncsRemaining} syncs remaining. Tap to select mood and sync.`}
-            >
-              <MaterialCommunityIcons
-                name="lightning-bolt"
-                size={15}
-                color={
-                  syncsRemaining > 0 ? theme.colors.gold : theme.colors.textMuted
-                }
-              />
-              <Text
-                style={[
-                  styles.syncText,
-                  {
-                    color:
-                      syncsRemaining > 0
-                        ? theme.colors.textPrimary
-                        : theme.colors.textMuted,
-                  },
-                ]}
-              >
-                {syncsRemaining}
-              </Text>
-            </Pressable>
+    <View className="flex-row items-center justify-between bg-transparent px-5 pt-2 pb-3.5">
+      <View className="flex-1 justify-center mr-3">
+        <GlimpseLogo size="medium" showMark={false} />
+        <Text
+          className="mt-1 text-[10.5px] tracking-[1.2px] font-brandSemiBold text-zinc-400"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {todayDate}
+          {programTheme ? (
+            <>
+              {" · "}
+              <Text className="text-amber-500">{`✦ ${programTheme}`}</Text>
+            </>
           ) : null}
-
-          <Pressable
-            onPress={handleNotificationPress}
-            style={({ pressed }) => [
-              styles.notificationBtn,
-              {
-                backgroundColor: theme.colors.elevation.level2,
-                borderColor: theme.colors.outlineVariant,
-                opacity: pressed ? 0.75 : 1,
-              },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Notifications"
-          >
-            <MaterialCommunityIcons
-              name="bell-outline"
-              size={18}
-              color={theme.colors.textPrimary}
-            />
-            {hasUnread ? (
-              <View
-                style={[
-                  styles.unreadDot,
-                  { backgroundColor: theme.colors.primary },
-                ]}
-              />
-            ) : null}
-          </Pressable>
-        </View>
+        </Text>
       </View>
 
-      <NotificationsDropdown
-        visible={showNotifications}
-        onClose={() => setShowNotifications(false)}
-        syncsRemaining={syncsRemaining}
-      />
-    </>
+      {onSyncPress ? (
+        <Pressable
+          onPress={handleSyncPress}
+          disabled={isSyncing}
+          className={cn(
+            "flex-row items-center gap-[5px] rounded-[18px] border border-white/[0.08] bg-surface-zinc-850 px-3 py-[7px] active:opacity-75",
+            isSyncing && "opacity-75",
+          )}
+          accessibilityRole="button"
+          accessibilityLabel={`${syncsRemaining} syncs remaining. Tap to select mood and sync.`}
+        >
+          {isSyncing ? (
+            <ActivityIndicator size={12} color={theme.colors.primary} />
+          ) : (
+            <MaterialCommunityIcons
+              name="lightning-bolt"
+              size={14}
+              color={
+                syncsRemaining > 0 ? theme.colors.primary : theme.colors.textMuted
+              }
+            />
+          )}
+          <Text
+            className={cn(
+              "text-[11px] tracking-[0.6px] font-brandBold",
+              syncsRemaining > 0 ? "text-white" : "text-zinc-500",
+            )}
+          >
+            {isSyncing
+              ? "SYNCING"
+              : syncsRemaining > 0
+                ? `SYNC · ${syncsRemaining}`
+                : "NO SYNCS"}
+          </Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: "transparent",
-  },
-  brandContainer: {
-    justifyContent: "center",
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    gap: 3,
-  },
-  brandTitle: {
-    fontFamily: "Inter_900Black",
-    fontSize: 22,
-    letterSpacing: 2,
-  },
-  brandDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    marginBottom: 2,
-  },
-  dateText: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 11,
-    letterSpacing: 1,
-    marginTop: 2,
-  },
-  rightActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  syncPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 18,
-    borderWidth: 1,
-  },
-  syncText: {
-    fontFamily: "Inter_700Bold",
-    fontSize: 12,
-  },
-  notificationBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  unreadDot: {
-    position: "absolute",
-    top: 6,
-    right: 7,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-});
