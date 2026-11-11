@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, glimpse-revamp]
+    branches: [master, glimpse-revamp]
   pull_request:
-    branches: [main, glimpse-revamp]
+    branches: [master, glimpse-revamp]
 
 jobs:
   backend-test:
