@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { StyleProp, StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
+import { StyleProp, Text, TextStyle, View, ViewStyle } from "react-native";
 import { ApertureIcon } from "phosphor-react-native";
 import { useAppTheme } from "@/lib/theme";
 
@@ -93,18 +93,16 @@ export default function GlimpseLogo({
   const accentColor = dotColor ?? theme.colors.primary;
 
   return (
-    <View style={[styles.wrapper, style]}>
-      <View style={[styles.mainRow, { gap: metrics.gap }]}>
+    <View className="items-start" style={style}>
+      <View className="flex-row items-center" style={{ gap: metrics.gap }}>
         {showMark ? (
           <View
+            className="items-center justify-center border border-white/[0.08] bg-surface-zinc-850"
             style={[
-              styles.markBadge,
               {
                 width: metrics.badgeSize,
                 height: metrics.badgeSize,
                 borderRadius: metrics.badgeRadius,
-                backgroundColor: theme.colors.elevation.level2,
-                borderColor: theme.colors.outlineVariant,
               },
               markStyle,
             ]}
@@ -118,15 +116,16 @@ export default function GlimpseLogo({
         ) : null}
 
         {showWordmark ? (
-          <View style={styles.wordmarkContainer}>
-            <View style={styles.textRow}>
+          <View className="justify-center">
+            <View className="flex-row items-center gap-[3px]">
               <Text
+                className="font-brandExtraBold"
                 style={[
-                  styles.brandText,
                   {
                     fontSize: metrics.fontSize,
                     letterSpacing: metrics.letterSpacing,
                     color: theme.colors.textPrimary,
+                    includeFontPadding: false,
                   },
                   textStyle,
                 ]}
@@ -134,16 +133,14 @@ export default function GlimpseLogo({
                 GLIMPSE
               </Text>
               <View
-                style={[
-                  styles.brandDot,
-                  {
-                    width: metrics.dotSize,
-                    height: metrics.dotSize,
-                    borderRadius: metrics.dotSize / 2,
-                    marginBottom: metrics.dotMarginBottom,
-                    backgroundColor: accentColor,
-                  },
-                ]}
+                className="self-end"
+                style={{
+                  width: metrics.dotSize,
+                  height: metrics.dotSize,
+                  borderRadius: metrics.dotSize / 2,
+                  marginBottom: metrics.dotMarginBottom,
+                  backgroundColor: accentColor,
+                }}
               />
             </View>
           </View>
@@ -152,13 +149,11 @@ export default function GlimpseLogo({
 
       {tagline ? (
         <Text
-          style={[
-            styles.tagline,
-            {
-              color: theme.colors.textMuted,
-              letterSpacing: Math.round(metrics.letterSpacing * 0.9),
-            },
-          ]}
+          className="mt-1.5 text-center text-[10px] font-brandSemiBold text-zinc-500 uppercase"
+          style={{
+            color: theme.colors.textMuted,
+            letterSpacing: Math.round(metrics.letterSpacing * 0.9),
+          }}
         >
           {tagline}
         </Text>
@@ -167,39 +162,3 @@ export default function GlimpseLogo({
   );
 }
 
-const styles = StyleSheet.create({
-  wrapper: {
-    alignItems: "flex-start",
-  },
-  mainRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  markBadge: {
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  wordmarkContainer: {
-    justifyContent: "center",
-  },
-  textRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-  },
-  brandText: {
-    fontFamily: "PlusJakartaSans_800ExtraBold",
-    includeFontPadding: false,
-  },
-  brandDot: {
-    alignSelf: "flex-end",
-  },
-  tagline: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 10,
-    textTransform: "uppercase",
-    textAlign: "center",
-    marginTop: 6,
-  },
-});

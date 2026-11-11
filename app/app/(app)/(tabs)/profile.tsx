@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  View,
+  Pressable,
+} from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button } from "react-native-paper";
 import {
   CalendarBlankIcon,
   LightningIcon,
@@ -14,10 +19,13 @@ import {
 } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
+import { Button } from "@/components/ui/button";
+import { Text as AppText } from "@/components/ui/text";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
 import { useLogout } from "@/features/auth/hooks/mutations/use-logout";
 import EditPreferencesModal from "@/features/profile/components/edit-preferences-modal";
+import { palette } from "@/lib/theme/colors";
 
 const GENRE_NAMES: Record<number, string> = {
   28: "Action",
@@ -75,69 +83,39 @@ export default function Profile() {
   const syncsRemaining = user?.syncs_remaining ?? 3;
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      edges={["top"]}
-    >
+    <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
       <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: Math.max(insets.bottom, 16) + 80 },
-        ]}
+        contentContainerClassName="flex-grow gap-3.5 px-4 pt-3"
+        contentContainerStyle={{
+          paddingBottom: Math.max(insets.bottom, 16) + 80,
+        }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header / Avatar */}
-        <View style={styles.avatarSection}>
-          <View
-            style={[
-              styles.avatar,
-              {
-                backgroundColor: theme.colors.elevation.level2,
-                borderColor: "rgba(229, 9, 20, 0.4)",
-              },
-            ]}
-          >
-            <Text style={styles.avatarText}>
+        <View className="items-center py-2.5">
+          <View className="mb-2.5 h-16 w-16 items-center justify-center rounded-full border-[1.5px] border-primary/40 bg-surface-zinc-850">
+            <Text className="text-[22px] tracking-[0.5px] font-brandBold text-white">
               {user ? getInitials(user.name) : "?"}
             </Text>
           </View>
 
           {profileLoading ? (
-            <View
-              style={[
-                styles.skeletonName,
-                { backgroundColor: theme.colors.elevation.level2 },
-              ]}
-            />
+            <View className="mt-1 h-[22px] w-[140px] rounded-[6px] bg-surface-zinc-850" />
           ) : (
             <>
-              <Text
-                style={[styles.userName, { color: theme.colors.textPrimary }]}
-              >
+              <Text className="text-[20px] leading-[26px] tracking-[-0.3px] font-brandBold text-white">
                 {user?.name}
               </Text>
-              <Text
-                style={[styles.userEmail, { color: theme.colors.textSecondary }]}
-              >
+              <Text className="mt-0.5 text-[13px] leading-[18px] font-brand text-zinc-400">
                 {user?.email}
               </Text>
               {user?.created_at ? (
-                <View
-                  style={[
-                    styles.memberPill,
-                    {
-                      backgroundColor: theme.colors.elevation.level1,
-                      borderColor: theme.colors.outlineVariant,
-                    },
-                  ]}
-                >
+                <View className="mt-2 flex-row items-center gap-[5px] rounded-[20px] border border-white/[0.08] bg-surface-zinc-900 px-2.5 py-1">
                   <CalendarBlankIcon
                     size={12}
                     color={theme.colors.textMuted}
                   />
-                  <Text
-                    style={[styles.memberSince, { color: theme.colors.textMuted }]}
-                  >
+                  <Text className="text-[11px] font-brand text-zinc-500">
                     Member since {formatDate(user.created_at)}
                   </Text>
                 </View>
@@ -147,49 +125,31 @@ export default function Profile() {
         </View>
 
         {/* Compact Daily Sync Allowance */}
-        <View
-          style={[
-            styles.syncPill,
-            {
-              backgroundColor: theme.colors.elevation.level1,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
+        <View className="flex-row items-center justify-center gap-[7px] rounded-lg border border-white/[0.08] bg-surface-zinc-900 px-3.5 py-[9px]">
           <LightningIcon
             size={14}
             color={theme.colors.gold}
             weight="fill"
           />
-          <Text style={[styles.syncPillText, { color: theme.colors.textPrimary }]}>
+          <Text className="text-[12.5px] font-brandSemiBold text-white">
             {syncsRemaining} of 3 syncs available
           </Text>
-          <Text style={[styles.syncDot, { color: theme.colors.textMuted }]}>·</Text>
-          <Text style={[styles.syncResetText, { color: theme.colors.textMuted }]}>
+          <Text className="text-[12px] font-brand text-zinc-500">·</Text>
+          <Text className="text-[12px] font-brand text-zinc-500">
             Resets at midnight
           </Text>
         </View>
 
         {/* Film Preferences Card */}
-        <View
-          style={[
-            styles.card,
-            {
-              backgroundColor: theme.colors.elevation.level1,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
-          <View style={styles.cardHeaderRow}>
-            <View style={styles.cardHeaderTitle}>
+        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-surface-zinc-900 p-4">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center gap-2">
               <SlidersHorizontalIcon
                 size={16}
                 color={theme.colors.primary}
                 weight="bold"
               />
-              <Text
-                style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
-              >
+              <Text className="text-[15px] tracking-[0.2px] font-brandBold text-white">
                 Film Preferences
               </Text>
             </View>
@@ -198,57 +158,42 @@ export default function Profile() {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setIsEditModalOpen(true);
               }}
-              style={({ pressed }) => [
-                styles.editBtn,
-                {
-                  backgroundColor: theme.colors.elevation.level2,
-                  borderColor: theme.colors.outlineVariant,
-                },
-                pressed && { opacity: 0.7 },
-              ]}
+              className="flex-row items-center gap-[5px] rounded-sm border border-white/[0.08] bg-surface-zinc-850 px-2.5 py-[5px] active:opacity-70"
+              accessibilityRole="button"
+              accessibilityLabel="Edit film preferences"
             >
               <PencilSimpleIcon
                 size={13}
                 color={theme.colors.textSecondary}
               />
-              <Text
-                style={[styles.editBtnText, { color: theme.colors.textSecondary }]}
-              >
+              <Text className="text-[12px] font-brandSemiBold text-zinc-400">
                 Edit
               </Text>
             </Pressable>
           </View>
 
           {prefLoading ? (
-            <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
+            <Text className="py-1.5 text-[13px] font-brand text-zinc-500">
               Loading preferences...
             </Text>
           ) : !pref ? (
-            <Text style={[styles.emptyText, { color: theme.colors.textMuted }]}>
+            <Text className="py-1.5 text-[13px] font-brand text-zinc-500">
               No preferences set yet.
             </Text>
           ) : (
-            <View style={styles.prefContent}>
+            <View className="gap-3.5">
               {pref.favorite_genres.length > 0 && (
-                <View style={styles.prefSection}>
-                  <Text
-                    style={[styles.sectionLabel, { color: theme.colors.textMuted }]}
-                  >
+                <View className="gap-2">
+                  <Text className="text-[10.5px] tracking-[1.2px] font-brandSemiBold text-zinc-500">
                     FAVORITE GENRES
                   </Text>
-                  <View style={styles.chipRow}>
+                  <View className="flex-row flex-wrap gap-[7px]">
                     {pref.favorite_genres.map((id) => (
                       <View
                         key={id}
-                        style={[
-                          styles.chipFavorite,
-                          {
-                            backgroundColor: "rgba(229, 9, 20, 0.12)",
-                            borderColor: "rgba(229, 9, 20, 0.35)",
-                          },
-                        ]}
+                        className="rounded-sm border border-primary/35 bg-primary/[0.12] px-[11px] py-[5px]"
                       >
-                        <Text style={styles.chipFavoriteText}>
+                        <Text className="text-[12px] font-brandSemiBold text-white">
                           {genreName(id)}
                         </Text>
                       </View>
@@ -258,35 +203,22 @@ export default function Profile() {
               )}
 
               {pref.excluded_genres.length > 0 && (
-                <View style={styles.prefSection}>
-                  <Text
-                    style={[styles.sectionLabel, { color: theme.colors.textMuted }]}
-                  >
+                <View className="gap-2">
+                  <Text className="text-[10.5px] tracking-[1.2px] font-brandSemiBold text-zinc-500">
                     EXCLUDED GENRES
                   </Text>
-                  <View style={styles.chipRow}>
+                  <View className="flex-row flex-wrap gap-[7px]">
                     {pref.excluded_genres.map((id) => (
                       <View
                         key={id}
-                        style={[
-                          styles.chipExcluded,
-                          {
-                            backgroundColor: theme.colors.elevation.level2,
-                            borderColor: theme.colors.outlineVariant,
-                          },
-                        ]}
+                        className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-zinc-850 px-2.5 py-[5px]"
                       >
                         <XIcon
                           size={11}
                           color={theme.colors.textMuted}
                           weight="bold"
                         />
-                        <Text
-                          style={[
-                            styles.chipExcludedText,
-                            { color: theme.colors.textSecondary },
-                          ]}
-                        >
+                        <Text className="text-[12px] font-brand text-zinc-400">
                           {genreName(id)}
                         </Text>
                       </View>
@@ -296,23 +228,12 @@ export default function Profile() {
               )}
 
               {/* Filter Metadata Row */}
-              <View
-                style={[
-                  styles.metaRow,
-                  {
-                    borderTopColor: "rgba(255, 255, 255, 0.06)",
-                  },
-                ]}
-              >
-                <View style={styles.metaItem}>
-                  <Text
-                    style={[styles.metaLabel, { color: theme.colors.textMuted }]}
-                  >
+              <View className="flex-row flex-wrap items-start gap-[18px] border-t border-t-white/[0.06] pt-3">
+                <View className="gap-[3px]">
+                  <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-zinc-500">
                     ERA
                   </Text>
-                  <Text
-                    style={[styles.metaValue, { color: theme.colors.textPrimary }]}
-                  >
+                  <Text className="text-[12.5px] font-brandSemiBold text-white">
                     {pref.min_year <= 1888 && pref.max_year >= 2025
                       ? "All Time"
                       : `${pref.min_year} – ${pref.max_year}`}
@@ -320,24 +241,17 @@ export default function Profile() {
                 </View>
 
                 {pref.min_rating > 0 && (
-                  <View style={styles.metaItem}>
-                    <Text
-                      style={[styles.metaLabel, { color: theme.colors.textMuted }]}
-                    >
+                  <View className="gap-[3px]">
+                    <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-zinc-500">
                       MIN RATING
                     </Text>
-                    <View style={styles.ratingValueRow}>
+                    <View className="flex-row items-center gap-1">
                       <StarIcon
                         size={13}
                         color={theme.colors.gold}
                         weight="fill"
                       />
-                      <Text
-                        style={[
-                          styles.metaValue,
-                          { color: theme.colors.textPrimary },
-                        ]}
-                      >
+                      <Text className="text-[12.5px] font-brandSemiBold text-white">
                         {pref.min_rating.toFixed(1)}+ / 10
                       </Text>
                     </View>
@@ -345,15 +259,11 @@ export default function Profile() {
                 )}
 
                 {pref.languages.length > 0 && (
-                  <View style={styles.metaItem}>
-                    <Text
-                      style={[styles.metaLabel, { color: theme.colors.textMuted }]}
-                    >
+                  <View className="gap-[3px]">
+                    <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-zinc-500">
                       LANGUAGES
                     </Text>
-                    <Text
-                      style={[styles.metaValue, { color: theme.colors.textPrimary }]}
-                    >
+                    <Text className="text-[12.5px] font-brandSemiBold text-white">
                       {pref.languages.map((l) => l.toUpperCase()).join(", ")}
                     </Text>
                   </View>
@@ -364,70 +274,48 @@ export default function Profile() {
         </View>
 
         {/* Account Details */}
-        <View
-          style={[
-            styles.card,
-            {
-              backgroundColor: theme.colors.elevation.level1,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
-          <Text
-            style={[styles.cardTitle, { color: theme.colors.textPrimary }]}
-          >
+        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-surface-zinc-900 p-4">
+          <Text className="text-[15px] tracking-[0.2px] font-brandBold text-white">
             Account
           </Text>
 
-          <View style={styles.accountRow}>
+          <View className="flex-row items-center gap-2.5">
             <EnvelopeSimpleIcon
               size={16}
               color={theme.colors.textMuted}
             />
-            <Text
-              style={[
-                styles.accountValue,
-                { color: theme.colors.textSecondary },
-              ]}
-            >
+            <Text className="text-[13px] font-brand text-zinc-400">
               {user?.email}
             </Text>
           </View>
 
-          <View style={styles.accountRow}>
+          <View className="flex-row items-center gap-2.5">
             <FilmStripIcon
               size={16}
               color={theme.colors.textMuted}
             />
-            <Text
-              style={[
-                styles.accountValue,
-                { color: theme.colors.textMuted },
-              ]}
-            >
+            <Text className="text-[13px] font-brand text-zinc-500">
               Glimpse Cinema v1.0.0
             </Text>
           </View>
 
-          <View
-            style={[
-              styles.separator,
-              { backgroundColor: theme.colors.outlineVariant },
-            ]}
-          />
+          <View className="h-px bg-white/[0.08]" />
 
           <Button
-            mode="contained"
+            variant="primary"
+            size="lg"
             onPress={() => logout()}
-            buttonColor={theme.colors.primary}
-            textColor="#FFFFFF"
-            style={styles.logoutButton}
-            contentStyle={styles.logoutContent}
-            labelStyle={styles.logoutLabel}
             disabled={logoutPending}
-            loading={logoutPending}
+            className="mt-0.5 w-full"
           >
-            SIGN OUT
+            <View className="flex-row items-center gap-2">
+              {logoutPending ? (
+                <ActivityIndicator size="small" color={palette.white} />
+              ) : null}
+              <AppText className="text-[13px] tracking-[0.8px] font-brandBold text-white">
+                SIGN OUT
+              </AppText>
+            </View>
           </Button>
         </View>
       </ScrollView>
@@ -441,216 +329,3 @@ export default function Profile() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 40,
-    gap: 14,
-  },
-  avatarSection: {
-    alignItems: "center",
-    paddingVertical: 10,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    borderWidth: 1.5,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  avatarText: {
-    color: "#FFFFFF",
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 22,
-    letterSpacing: 0.5,
-  },
-  userName: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 20,
-    lineHeight: 26,
-    letterSpacing: -0.3,
-  },
-  userEmail: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 2,
-  },
-  memberPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    marginTop: 8,
-  },
-  memberSince: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 11,
-  },
-  skeletonName: {
-    width: 140,
-    height: 22,
-    borderRadius: 6,
-    marginTop: 4,
-  },
-  syncPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 7,
-  },
-  syncPillText: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 12.5,
-  },
-  syncDot: {
-    fontSize: 12,
-  },
-  syncResetText: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 12,
-  },
-  card: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 16,
-    gap: 14,
-  },
-  cardHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  cardHeaderTitle: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  cardTitle: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 15,
-    letterSpacing: 0.2,
-  },
-  editBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  editBtnText: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 12,
-  },
-  emptyText: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 13,
-    paddingVertical: 6,
-  },
-  prefContent: {
-    gap: 14,
-  },
-  prefSection: {
-    gap: 8,
-  },
-  sectionLabel: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 10.5,
-    letterSpacing: 1.2,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 7,
-  },
-  chipFavorite: {
-    paddingHorizontal: 11,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  chipFavoriteText: {
-    color: "#FFFFFF",
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 12,
-  },
-  chipExcluded: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  chipExcludedText: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 12,
-  },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    flexWrap: "wrap",
-    gap: 18,
-    paddingTop: 12,
-    borderTopWidth: 1,
-  },
-  metaItem: {
-    gap: 3,
-  },
-  metaLabel: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 10,
-    letterSpacing: 1,
-  },
-  metaValue: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 12.5,
-  },
-  ratingValueRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  accountRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  accountValue: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 13,
-  },
-  separator: {
-    height: 1,
-  },
-  logoutButton: {
-    borderRadius: 10,
-    marginTop: 2,
-  },
-  logoutContent: {
-    height: 44,
-  },
-  logoutLabel: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 13,
-    letterSpacing: 0.8,
-  },
-});

@@ -8,7 +8,9 @@ export const api = http.extend({
   hooks: {
     beforeRequest: [
       async ({ request, options }) => {
-        console.log("📡 [API REQUEST]", request.method, request.url);
+        if (__DEV__) {
+          console.log("[API]", request.method, request.url);
+        }
         if (options.context?.auth !== false) {
           const token = await getValidAccessToken();
           if (token) {
@@ -19,7 +21,9 @@ export const api = http.extend({
     ],
     afterResponse: [
       async ({ request, options, response, retryCount }) => {
-        console.log("📥 [API RESPONSE]", response.status, request.url);
+        if (__DEV__) {
+          console.log("[API]", response.status, request.url);
+        }
         if (
           response.status === 401 &&
           options.context?.auth !== false &&
@@ -29,8 +33,9 @@ export const api = http.extend({
           if (newToken) {
             const headers = new Headers(request.headers);
             headers.set("Authorization", `Bearer ${newToken}`);
+            const body = await request.clone().arrayBuffer();
             return api.retry({
-              request: new Request(request, { headers }),
+              request: new Request(request, { headers, body }),
             });
           }
         }

@@ -9,7 +9,7 @@ import { useOnboardingStore } from "../../store/onboarding.store";
 import type { FinishOnboardingPayload } from "../../types/onboarding.type";
 import { getErrorMessage } from "@/lib/error";
 import { authKeys } from "@/features/auth/constants/auth.keys";
-import { moviesKeys } from "@/features/movies/consants/movies.keys";
+import { moviesKeys } from "@/features/movies/constants/movies.keys";
 
 export const useFinishOnboarding = () => {
   const queryClient = useQueryClient();

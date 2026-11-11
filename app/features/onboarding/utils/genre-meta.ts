@@ -15,7 +15,6 @@ import {
   MusicNotesIcon,
   PaletteIcon,
   RocketIcon,
-  ShieldIcon,
   SwordIcon,
   TelevisionIcon,
   UsersIcon,

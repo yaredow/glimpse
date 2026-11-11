@@ -5,12 +5,14 @@ import Animated, {
   useAnimatedStyle,
   withRepeat,
   withTiming,
+  useReducedMotion,
+  ReduceMotion,
   Easing,
 } from "react-native-reanimated";
 import { Image, type ImageSource } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
+import { palette } from "@/lib/theme/colors";
 
-const CARD_WIDTH = 116;
 const CARD_HEIGHT = 172;
 const CARD_GAP = 12;
 const ITEM_STRIDE = CARD_HEIGHT + CARD_GAP;
@@ -56,13 +58,19 @@ function MarqueeColumn({ posters, direction, duration }: MarqueeColumnProps) {
   const loopPosters = [...posters, ...posters, ...posters];
   const cycleDistance = posters.length * ITEM_STRIDE;
   const translateY = useSharedValue(direction === "up" ? 0 : -cycleDistance);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
+    if (reduceMotion) {
+      translateY.value = direction === "up" ? 0 : -cycleDistance;
+      return;
+    }
     if (direction === "up") {
       translateY.value = withRepeat(
         withTiming(-cycleDistance, {
           duration,
           easing: Easing.linear,
+          reduceMotion: ReduceMotion.System,
         }),
         -1,
         false,
@@ -72,12 +80,13 @@ function MarqueeColumn({ posters, direction, duration }: MarqueeColumnProps) {
         withTiming(0, {
           duration,
           easing: Easing.linear,
+          reduceMotion: ReduceMotion.System,
         }),
         -1,
         false,
       );
     }
-  }, [cycleDistance, direction, duration, translateY]);
+  }, [cycleDistance, direction, duration, reduceMotion, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -164,8 +173,8 @@ export function TiltedMarqueeHero({ style }: TiltedMarqueeHeroProps) {
           "rgba(12, 12, 14, 0.563)",
           "rgba(12, 12, 14, 0.694)",
           "rgba(12, 12, 14, 0.840)",
-          "#0C0C0E",
-          "#0C0C0E",
+          palette.appBackground,
+          palette.appBackground,
         ]}
         locations={[
           0, 0.047, 0.093, 0.14, 0.187, 0.233, 0.28, 0.327, 0.373, 0.42, 0.467,

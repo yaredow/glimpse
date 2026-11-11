@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -10,8 +9,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useAppTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 import { useRecordInteraction } from "../hooks/mutations/use-record-interactions";
 import type { Movie, MovieInteractionAction } from "../types/movies.type";
+import { palette } from "@/lib/theme/colors";
 
 interface MovieActionsProps {
   movie: Movie;
@@ -131,54 +132,42 @@ export default function MovieActions({
         : "Saved to your Journal.";
 
   return (
-    <View style={styles.container}>
+    <View className="px-4 pt-1 pb-3.5">
       {isFinalized ? (
         <View
-          style={[
-            styles.finalizedCard,
-            {
-              backgroundColor: theme.colors.elevation.level1,
-              borderColor: isLocked
-                ? theme.colors.primary
-                : isWatched
-                  ? theme.colors.success
-                  : theme.colors.outlineVariant,
-            },
-          ]}
+          className={cn(
+            "flex-row items-center gap-3 rounded-[14px] border px-4 py-3",
+            isLocked
+              ? "border-primary bg-surface-zinc-900"
+              : isWatched
+                ? "border-emerald-500 bg-surface-zinc-900"
+                : "border-white/[0.08] bg-surface-zinc-900",
+          )}
         >
           <MaterialCommunityIcons
             name={finalizedIcon}
             size={22}
             color={finalizedIconColor}
           />
-          <View style={styles.finalizedTextContainer}>
-            <Text
-              style={[styles.finalizedTitle, { color: theme.colors.textPrimary }]}
-            >
+          <View className="flex-1">
+            <Text className="text-[13.5px] font-brandBold text-white">
               {finalizedTitle}
             </Text>
-            <Text
-              style={[
-                styles.finalizedSubtitle,
-                { color: theme.colors.textSecondary },
-              ]}
-            >
+            <Text className="mt-0.5 text-[12px] leading-4 text-zinc-400">
               {finalizedSubtitle}
             </Text>
           </View>
         </View>
       ) : (
-        <View style={styles.actionsRow}>
+        <View className="w-full flex-row items-center justify-between gap-2.5">
           {/* Pass */}
           <Pressable
             onPress={() => handleAction("skipped")}
             disabled={!!loadingAction}
-            style={({ pressed }) => [
-              styles.actionBtn,
-              styles.neutralBtn,
-              pressed && { opacity: 0.75 },
-              loadingAction === "skipped" && styles.btnDisabled,
-            ]}
+            className={cn(
+              "h-11 flex-1 flex-row items-center justify-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.05] active:opacity-75",
+              loadingAction === "skipped" && "opacity-55",
+            )}
             accessibilityRole="button"
             accessibilityLabel="Pass this film for today"
           >
@@ -191,12 +180,7 @@ export default function MovieActions({
                   size={17}
                   color={theme.colors.textMuted}
                 />
-                <Text
-                  style={[
-                    styles.actionBtnText,
-                    { color: theme.colors.textSecondary },
-                  ]}
-                >
+                <Text className="text-[13px] font-brandSemiBold text-zinc-400">
                   Pass
                 </Text>
               </>
@@ -207,12 +191,10 @@ export default function MovieActions({
           <Pressable
             onPress={() => handleAction("seen_before")}
             disabled={!!loadingAction}
-            style={({ pressed }) => [
-              styles.actionBtn,
-              styles.neutralBtn,
-              pressed && { opacity: 0.75 },
-              loadingAction === "seen_before" && styles.btnDisabled,
-            ]}
+            className={cn(
+              "h-11 flex-1 flex-row items-center justify-center gap-1.5 rounded-lg border border-white/[0.1] bg-white/[0.05] active:opacity-75",
+              loadingAction === "seen_before" && "opacity-55",
+            )}
             accessibilityRole="button"
             accessibilityLabel="Mark film as already seen"
           >
@@ -225,12 +207,7 @@ export default function MovieActions({
                   size={17}
                   color={theme.colors.textPrimary}
                 />
-                <Text
-                  style={[
-                    styles.actionBtnText,
-                    { color: theme.colors.textPrimary },
-                  ]}
-                >
+                <Text className="text-[13px] font-brandSemiBold text-white">
                   Seen
                 </Text>
               </>
@@ -241,19 +218,13 @@ export default function MovieActions({
           <Pressable
             onPress={() => handleAction(isPick ? "revealed" : "pick_tonight")}
             disabled={!!loadingAction}
-            style={({ pressed }) => [
-              styles.actionBtn,
-              styles.pickBtn,
-              {
-                backgroundColor: isPick
-                  ? theme.colors.cinemaRedHover
-                  : theme.colors.primary,
-              },
-              pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+            className={cn(
+              "h-11 flex-[1.4] flex-row items-center justify-center gap-1.5 rounded-lg active:opacity-90 active:scale-[0.99]",
+              isPick ? "bg-primary-hover" : "bg-primary",
               (loadingAction === "pick_tonight" ||
                 loadingAction === "revealed") &&
-                styles.btnDisabled,
-            ]}
+                "opacity-55",
+            )}
             accessibilityRole="button"
             accessibilityLabel={
               isPick ? "Remove from tonight's pick" : "Pick film for tonight"
@@ -261,15 +232,15 @@ export default function MovieActions({
           >
             {loadingAction === "pick_tonight" ||
             loadingAction === "revealed" ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+              <ActivityIndicator size="small" color={palette.white} />
             ) : (
               <>
                 <MaterialCommunityIcons
                   name={isPick ? "check-circle" : "star"}
                   size={17}
-                  color="#FFFFFF"
+                  color={palette.white}
                 />
-                <Text style={styles.pickBtnText}>
+                <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
                   {isPick ? "Picked" : "Pick"}
                 </Text>
               </>
@@ -280,69 +251,3 @@ export default function MovieActions({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingTop: 4,
-    paddingBottom: 14,
-  },
-  actionsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-    width: "100%",
-  },
-  actionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    height: 44,
-    borderRadius: 12,
-  },
-  neutralBtn: {
-    flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-  },
-  pickBtn: {
-    flex: 1.4,
-  },
-  actionBtnText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  pickBtnText: {
-    color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0.4,
-  },
-  btnDisabled: {
-    opacity: 0.55,
-  },
-  finalizedCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  finalizedTextContainer: {
-    flex: 1,
-  },
-  finalizedTitle: {
-    fontSize: 13.5,
-    fontWeight: "700",
-  },
-  finalizedSubtitle: {
-    fontSize: 12,
-    marginTop: 2,
-    lineHeight: 16,
-  },
-});

@@ -2,12 +2,12 @@ import { useState, useCallback } from "react";
 import { ScrollView, Text, View, Pressable } from "react-native";
 import { Button } from "@/components/ui/button";
 import { typeClasses } from "@/lib/theme/typography";
-import { palette } from "@/lib/theme/colors";
 import { cn } from "@/lib/utils";
 import { XCircleIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { Genre } from "../types/onboarding.type";
 import { getGenreIcon } from "../utils/genre-meta";
+import { palette } from "@/lib/theme/colors";
 
 interface ExcludedGenreSelectorProps {
   genres: Genre[];
@@ -56,6 +56,9 @@ export default function ExcludedGenreSelector({
           return (
             <Pressable
               key={genre.id}
+              accessibilityRole="checkbox"
+              accessibilityLabel={genre.name}
+              accessibilityState={{ checked: isExcluded }}
               onPress={() => toggle(genre.id)}
               className={cn(
                 "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
-import { tmdbImage } from "../consants/images";
+import { tmdbImage } from "../constants/images";
 import type { GridMovie } from "../types/movies.type";
 import { curatorNote, structuredClues } from "../utils/deck";
 
@@ -52,11 +52,16 @@ export default function MysteryCard({
   };
 
   return (
-    <View style={styles.cardOuter}>
+    <View
+      className="h-full w-full overflow-hidden rounded-[24px] border border-white/[0.1] bg-card"
+      style={{
+        boxShadow: "0px 12px 20.0px rgba(0, 0, 0, 0.5)",
+      }}
+    >
       <Pressable
         onPress={handlePress}
         disabled={!isInteractive}
-        style={styles.cardContent}
+        className="flex-1"
         accessibilityRole="button"
         accessibilityLabel={`${movie.title}. Tap for details.`}
       >
@@ -64,32 +69,45 @@ export default function MysteryCard({
         {posterSrc && !posterFailed ? (
           <Image
             source={{ uri: posterSrc }}
-            style={StyleSheet.absoluteFill}
+            style={StyleSheetAbsoluteFill}
             contentFit="cover"
             transition={300}
             cachePolicy="memory-disk"
             onError={() => setPosterFailed(true)}
           />
         ) : (
-          <View style={[styles.fallbackPoster, { backgroundColor: "#18181b" }]}>
+          <View className="absolute inset-0 items-center justify-center bg-surface-zinc-900 p-6">
             <MaterialCommunityIcons
               name="filmstrip"
               size={56}
               color={theme.colors.textMuted}
             />
-            <Text style={styles.fallbackTitle}>{movie.title}</Text>
+            <Text className="mt-3.5 text-center text-[20px] font-brandBold text-white">
+              {movie.title}
+            </Text>
           </View>
         )}
 
         {/* Resolved stamp overlay */}
         {stamp ? (
-          <View style={styles.skippedDimOverlay} pointerEvents="none" />
+          <View
+            className="absolute inset-0 z-10 bg-black/[0.45]"
+            pointerEvents="none"
+          />
         ) : null}
 
         {stamp ? (
-          <View style={styles.cornerRibbonContainer} pointerEvents="none">
-            <View style={styles.cornerRibbon}>
-              <Text style={styles.cornerRibbonText}>{stamp}</Text>
+          <View
+            className="absolute top-0 left-0 z-[25] h-[88px] w-[88px] overflow-hidden rounded-tl-[23px]"
+            pointerEvents="none"
+          >
+            <View
+              className="absolute top-[18px] left-[-28px] h-[22px] w-[114px] items-center justify-center bg-white"
+              style={{ transform: [{ rotate: "-45deg" }] }}
+            >
+              <Text className="text-center text-[9.5px] tracking-[1.2px] font-brandBold text-surface-obsidian">
+                {stamp}
+              </Text>
             </View>
           </View>
         ) : null}
@@ -103,34 +121,51 @@ export default function MysteryCard({
             "#0a0a0c",
           ]}
           locations={[0, 0.25, 0.65, 1]}
-          style={styles.scrim}
+          style={ScrimStyle}
         >
           {/* Genre / Vibe tags */}
           {clues.length > 0 ? (
-            <View style={styles.cluesRow}>
+            <View className="mb-1.5 flex-row gap-1.5">
               {clues.slice(0, 2).map((clue) => (
-                <View key={clue} style={styles.clueBadge}>
-                  <Text style={styles.clueBadgeText}>{clue}</Text>
+                <View
+                  key={clue}
+                  className="rounded-[7px] border border-white/[0.18] bg-black/[0.65] px-2 py-[3.5px]"
+                >
+                  <Text className="text-[10px] tracking-[0.3px] font-brandSemiBold text-white">
+                    {clue}
+                  </Text>
                 </View>
               ))}
             </View>
           ) : null}
 
           {/* Film Title */}
-          <Text style={styles.movieTitle} numberOfLines={2}>
+          <Text
+            className="text-[22px] leading-[26px] tracking-[-0.4px] font-brandBold text-white"
+            numberOfLines={2}
+            style={TitleShadow}
+          >
             {movie.title}
           </Text>
 
           {/* Metadata */}
           {metaLine.length > 0 ? (
-            <Text style={styles.metaLine} numberOfLines={1}>
+            <Text
+              className="mt-1 text-[12px] tracking-[0.2px] font-brandMedium text-white/[0.78]"
+              numberOfLines={1}
+              style={TextShadow}
+            >
               {metaLine}
             </Text>
           ) : null}
 
           {/* Curator Note / Hook */}
           {note ? (
-            <Text style={styles.curatorNote} numberOfLines={2}>
+            <Text
+              className="mt-1.5 text-[12.5px] leading-[17px] font-brand text-white/[0.85]"
+              numberOfLines={2}
+              style={TextShadow}
+            >
               {note}
             </Text>
           ) : null}
@@ -140,127 +175,33 @@ export default function MysteryCard({
   );
 }
 
-const styles = StyleSheet.create({
-  cardOuter: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-    backgroundColor: "#161618",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 8,
-    overflow: "hidden",
-  },
-  cardContent: {
-    flex: 1,
-  },
-  fallbackPoster: {
-    ...StyleSheet.absoluteFill,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
-  fallbackTitle: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 20,
-    color: "#FFFFFF",
-    textAlign: "center",
-    marginTop: 14,
-  },
-  scrim: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "48%",
-    paddingHorizontal: 18,
-    paddingBottom: 18,
-    justifyContent: "flex-end",
-  },
-  cluesRow: {
-    flexDirection: "row",
-    gap: 6,
-    marginBottom: 6,
-  },
-  clueBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 7,
-    backgroundColor: "rgba(0, 0, 0, 0.65)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.18)",
-  },
-  clueBadgeText: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 10,
-    color: "#FFFFFF",
-    letterSpacing: 0.3,
-  },
-  movieTitle: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 22,
-    lineHeight: 26,
-    color: "#FFFFFF",
-    letterSpacing: -0.4,
-    textShadowColor: "rgba(0, 0, 0, 0.95)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
-  },
-  metaLine: {
-    fontFamily: "PlusJakartaSans_500Medium",
-    fontSize: 12,
-    color: "rgba(255, 255, 255, 0.78)",
-    marginTop: 4,
-    letterSpacing: 0.2,
-    textShadowColor: "rgba(0, 0, 0, 0.95)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  curatorNote: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 12.5,
-    lineHeight: 17,
-    color: "rgba(255, 255, 255, 0.85)",
-    marginTop: 6,
-    textShadowColor: "rgba(0, 0, 0, 0.95)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  cornerRibbonContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: 88,
-    height: 88,
-    overflow: "hidden",
-    borderTopLeftRadius: 23,
-    zIndex: 25,
-  },
-  cornerRibbon: {
-    position: "absolute",
-    top: 18,
-    left: -28,
-    width: 114,
-    height: 22,
-    transform: [{ rotate: "-45deg" }],
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cornerRibbonText: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 9.5,
-    letterSpacing: 1.2,
-    color: "#121212",
-    textAlign: "center",
-  },
-  skippedDimOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(0, 0, 0, 0.45)",
-    zIndex: 10,
-  },
-});
+const StyleSheetAbsoluteFill = {
+  position: "absolute" as const,
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+};
+
+const ScrimStyle = {
+  position: "absolute" as const,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  height: "48%" as const,
+  paddingHorizontal: 18,
+  paddingBottom: 18,
+  justifyContent: "flex-end" as const,
+};
+
+const TitleShadow = {
+  textShadowColor: "rgba(0, 0, 0, 0.95)",
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 6,
+};
+
+const TextShadow = {
+  textShadowColor: "rgba(0, 0, 0, 0.95)",
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 4,
+};

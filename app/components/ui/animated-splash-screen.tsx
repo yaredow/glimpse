@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Animated, StyleSheet, View } from "react-native";
+import { Animated, View } from "react-native";
 import { SplashScreen } from "expo-router";
 import GlimpseLogo from "./glimpse-logo";
+import { palette } from "@/lib/theme/colors";
 
 interface AnimatedSplashScreenProps {
   isReady: boolean;
@@ -33,34 +34,28 @@ export default function AnimatedSplashScreen({ isReady }: AnimatedSplashScreenPr
     <Animated.View
       pointerEvents={isReady ? "none" : "auto"}
       style={[
-        StyleSheet.absoluteFill,
-        styles.container,
+        {
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: palette.appBackground,
+          zIndex: 99999,
+          alignItems: "center",
+          justifyContent: "center",
+        },
         { opacity },
       ]}
     >
-      <View style={styles.centerContent}>
+      <View className="items-center justify-center">
         <GlimpseLogo
           size="large"
           tagline="CINEMA DISCOVERY"
-          style={styles.logo}
+          style={{ alignItems: "center" }}
         />
       </View>
     </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#0C0C0E",
-    zIndex: 99999,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  centerContent: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logo: {
-    alignItems: "center",
-  },
-});

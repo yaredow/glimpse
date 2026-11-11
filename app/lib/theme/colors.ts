@@ -1,10 +1,8 @@
-import { MD3DarkTheme } from "react-native-paper";
 import paletteJson from "./palette.json";
 
 export const palette = { ...paletteJson } as const;
 
 export const themeColors = {
-  ...MD3DarkTheme.colors,
   primary: palette.cinemaRed,
   onPrimary: palette.white,
   primaryContainer: palette.cinemaRedHover,
@@ -57,4 +55,4 @@ export const themeColors = {
   textPrimary: palette.white,
   textSecondary: palette.zinc400,
   textMuted: palette.zinc500,
-};
+} as const;

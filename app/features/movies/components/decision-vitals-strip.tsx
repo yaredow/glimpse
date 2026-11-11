@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { Movie } from "../types/movies.type";
 import {
@@ -8,6 +8,7 @@ import {
   formatRuntime,
   ratingBand,
 } from "../utils/deck";
+import { palette } from "@/lib/theme/colors";
 
 interface DecisionVitalsStripProps {
   movie: Movie;
@@ -29,103 +30,58 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
   const audioSubtext = isEnglish ? "Original audio" : "Subtitled";
 
   return (
-    <View style={styles.container}>
+    <View className="mx-4 mt-3 mb-2 flex-row items-center border-y border-white/[0.06] px-1 py-3">
       {/* 1. Schedule & Runtime */}
-      <View style={styles.column}>
-        <View style={styles.headerRow}>
-          <MaterialCommunityIcons name="clock-outline" size={13} color="#71717A" />
-          <Text style={styles.label}>TIME</Text>
+      <View className="flex-1 items-center justify-center px-1">
+        <View className="mb-1 flex-row items-center gap-1">
+          <MaterialCommunityIcons name="clock-outline" size={13} color={palette.zinc500} />
+          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
+            TIME
+          </Text>
         </View>
-        <Text style={styles.primaryText} numberOfLines={1}>
+        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
           {runtimeFormatted}
         </Text>
-        <Text style={styles.secondaryText} numberOfLines={1}>
+        <Text className="mt-0.5 text-[11px] text-zinc-400" numberOfLines={1}>
           {endTime ?? "Tonight's feature"}
         </Text>
       </View>
 
-      <View style={styles.divider} />
+      <View className="h-7 w-px bg-white/[0.07]" />
 
       {/* 2. Rating & Consensus */}
-      <View style={styles.column}>
-        <View style={styles.headerRow}>
-          <MaterialCommunityIcons name="star-outline" size={13} color="#71717A" />
-          <Text style={styles.label}>RATING</Text>
+      <View className="flex-1 items-center justify-center px-1">
+        <View className="mb-1 flex-row items-center gap-1">
+          <MaterialCommunityIcons name="star-outline" size={13} color={palette.zinc500} />
+          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
+            RATING
+          </Text>
         </View>
-        <Text style={styles.primaryText} numberOfLines={1}>
+        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
           {score}
         </Text>
-        <Text style={styles.secondaryText} numberOfLines={1}>
+        <Text className="mt-0.5 text-[11px] text-zinc-400" numberOfLines={1}>
           {scoreBand}
         </Text>
       </View>
 
-      <View style={styles.divider} />
+      <View className="h-7 w-px bg-white/[0.07]" />
 
       {/* 3. Language & Audio */}
-      <View style={styles.column}>
-        <View style={styles.headerRow}>
-          <MaterialCommunityIcons name="translate" size={13} color="#71717A" />
-          <Text style={styles.label}>AUDIO</Text>
+      <View className="flex-1 items-center justify-center px-1">
+        <View className="mb-1 flex-row items-center gap-1">
+          <MaterialCommunityIcons name="translate" size={13} color={palette.zinc500} />
+          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
+            AUDIO
+          </Text>
         </View>
-        <Text style={styles.primaryText} numberOfLines={1}>
+        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
           {language}
         </Text>
-        <Text style={styles.secondaryText} numberOfLines={1}>
+        <Text className="mt-0.5 text-[11px] text-zinc-400" numberOfLines={1}>
           {audioSubtext}
         </Text>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
-  },
-  column: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-  },
-  divider: {
-    width: 1,
-    height: 28,
-    backgroundColor: "rgba(255, 255, 255, 0.07)",
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginBottom: 4,
-  },
-  label: {
-    fontSize: 10,
-    fontWeight: "600",
-    letterSpacing: 0.8,
-    color: "#71717A",
-    textTransform: "uppercase",
-  },
-  primaryText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    letterSpacing: -0.2,
-  },
-  secondaryText: {
-    fontSize: 11,
-    color: "#A1A1AA",
-    marginTop: 2,
-  },
-});
-

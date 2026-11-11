@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { DETAIL_TABS } from "../consants/movies.constants";
+import { Pressable, Text, View } from "react-native";
+import { DETAIL_TABS } from "../constants/movies.constants";
 
 interface MovieDetailTabsProps {
   activeTab: string;
@@ -10,52 +10,32 @@ interface MovieDetailTabsProps {
 export default function MovieDetailTabs({ activeTab, onTabPress, children }: MovieDetailTabsProps) {
   return (
     <View>
-      <View style={styles.tabBar}>
+      <View className="flex-row bg-surface-zinc-900 px-4" accessibilityRole="tablist">
         {DETAIL_TABS.map((tab) => (
           <Pressable
             key={tab}
             onPress={() => onTabPress(tab)}
-            style={styles.tab}
+            className="flex-1 items-center py-3"
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === tab }}
+            accessibilityLabel={tab}
           >
-            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+            <Text
+              className={
+                activeTab === tab
+                  ? "text-[13px] font-brandSemiBold text-white"
+                  : "text-[13px] font-brandSemiBold text-zinc-400"
+              }
+            >
               {tab}
             </Text>
-            {activeTab === tab && <View style={styles.indicator} />}
+            {activeTab === tab ? (
+              <View className="mt-1 h-[3px] w-full rounded-[2px] bg-primary" />
+            ) : null}
           </Pressable>
         ))}
       </View>
-      <View style={styles.content}>{children}</View>
+      <View className="p-4">{children}</View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  tabBar: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    backgroundColor: "#1A1A1A",
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 12,
-  },
-  tabText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#999",
-  },
-  activeTabText: {
-    color: "white",
-  },
-  indicator: {
-    marginTop: 4,
-    width: "100%",
-    height: 3,
-    backgroundColor: "#E50914",
-    borderRadius: 2,
-  },
-  content: {
-    padding: 16,
-  },
-});

@@ -2,11 +2,11 @@ import { useState, useCallback } from "react";
 import { ScrollView, Text, View, Pressable } from "react-native";
 import { Button } from "@/components/ui/button";
 import { typeClasses } from "@/lib/theme/typography";
-import { palette } from "@/lib/theme/colors";
 import { cn } from "@/lib/utils";
 import { CheckIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { Language } from "../types/onboarding.type";
+import { palette } from "@/lib/theme/colors";
 
 interface LanguageRatingSelectorProps {
   languages: Language[];
@@ -90,6 +90,9 @@ export default function LanguageRatingSelector({
               return (
                 <Pressable
                   key={lang.iso_639_1}
+              accessibilityRole="checkbox"
+              accessibilityLabel={lang.name}
+              accessibilityState={{ checked: isSelected }}
                   onPress={() => toggleLanguage(lang.iso_639_1)}
                   className={cn(
                     "flex-row items-center rounded-[20px] border-[1.5px] px-3.5 py-2.5",
@@ -146,6 +149,9 @@ export default function LanguageRatingSelector({
               return (
                 <Pressable
                   key={preset.value}
+              accessibilityRole="radio"
+accessibilityLabel={"{preset.label}"}
+              accessibilityState={{ selected: isSelected }}
                   onPress={() => selectRating(preset.value)}
                   className={cn(
                     "w-[48%] rounded-lg border-[1.5px] p-3.5",

@@ -72,13 +72,6 @@ export interface GridMovie {
   grid_session_id?: string;
 }
 
-export interface MovieFilters {
-  page?: number;
-  pageSize?: number;
-  genre?: string;
-  search?: string;
-}
-
 export interface MovieDetailResponse {
   movie: Movie;
 }
@@ -87,17 +80,6 @@ export interface DealersChoiceResponse {
   movie: GridMovie;
   grid: GridMovie[];
   remaining_candidates: number;
-}
-
-export interface PaginatedResponse<T> {
-  metadata: {
-    current_page: number;
-    first_page: number;
-    last_page: number;
-    page_size: number;
-    total_records: number;
-  };
-  movies: T[];
 }
 
 export interface HistoryMovie {

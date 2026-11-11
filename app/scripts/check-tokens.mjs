@@ -20,6 +20,7 @@ const VAR_TO_TOKEN = {
   "--popover-foreground": "foreground",
   "--primary": "cinemaRed",
   "--primary-foreground": "white",
+  "--primary-hover": "cinemaRedHover",
   "--muted": "mutedSurface",
   "--muted-foreground": "mutedForeground",
   "--accent": "mutedSurface",
@@ -39,15 +40,6 @@ const VAR_TO_TOKEN = {
   "--off-white": "offWhite",
   "--error-container": "errorContainer",
 };
-
-function hexToRgb(hex) {
-  const h = hex.replace("#", "");
-  return [
-    parseInt(h.slice(0, 2), 16),
-    parseInt(h.slice(2, 4), 16),
-    parseInt(h.slice(4, 6), 16),
-  ];
-}
 
 /** The same conversion React Native's colour parser performs. */
 function hslToRgb(h, s, l) {
@@ -107,9 +99,14 @@ const REQUIRED_UTILITIES = [
   "surface-danger",
   "off-white",
   "error-container",
+  "primary-hover",
 ];
 for (const utility of REQUIRED_UTILITIES) {
-  if (!config.includes(`"${utility}"`) && !config.includes(`'${utility}'`)) {
+  const declared =
+    config.includes(`"${utility}"`) ||
+    config.includes(`'${utility}'`) ||
+    config.includes(`hover: "hsl(var(--${utility}))`);
+  if (!declared) {
     console.error(`FAIL  tailwind.config.js is missing the "${utility}" colour`);
     failures++;
   }

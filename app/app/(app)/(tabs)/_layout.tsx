@@ -11,7 +11,6 @@ export default function TabsLayout() {
           position: "absolute",
           backgroundColor: "transparent",
           borderTopWidth: 0,
-          elevation: 0,
         },
       }}
     >

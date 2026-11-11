@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { dealersChoice } from "../../services/movie.service";
-import { moviesKeys } from "../../consants/movies.keys";
+import { moviesKeys } from "../../constants/movies.keys";
 import type { DealersChoiceResponse } from "../../types/movies.type";
 
 export const useDealersChoice = () => {

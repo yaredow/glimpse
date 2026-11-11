@@ -1,7 +1,8 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useAppTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 import GlimpseLogo from "@/components/ui/glimpse-logo";
 
 interface ExploreHeaderProps {
@@ -34,11 +35,11 @@ export default function ExploreHeader({
     .toUpperCase();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.brandContainer}>
+    <View className="flex-row items-center justify-between bg-transparent px-5 pt-2 pb-3.5">
+      <View className="flex-1 justify-center mr-3">
         <GlimpseLogo size="medium" showMark={false} />
         <Text
-          style={[styles.dateText, { color: theme.colors.textSecondary }]}
+          className="mt-1 text-[10.5px] tracking-[1.2px] font-brandSemiBold text-zinc-400"
           numberOfLines={1}
           ellipsizeMode="tail"
         >
@@ -46,9 +47,7 @@ export default function ExploreHeader({
           {programTheme ? (
             <>
               {" · "}
-              <Text style={{ color: theme.colors.gold }}>
-                {`✦ ${programTheme}`}
-              </Text>
+              <Text className="text-amber-500">{`✦ ${programTheme}`}</Text>
             </>
           ) : null}
         </Text>
@@ -58,14 +57,10 @@ export default function ExploreHeader({
         <Pressable
           onPress={handleSyncPress}
           disabled={isSyncing}
-          style={({ pressed }) => [
-            styles.syncPill,
-            {
-              backgroundColor: theme.colors.elevation.level2,
-              borderColor: theme.colors.outlineVariant,
-              opacity: pressed || isSyncing ? 0.75 : 1,
-            },
-          ]}
+          className={cn(
+            "flex-row items-center gap-[5px] rounded-[18px] border border-white/[0.08] bg-surface-zinc-850 px-3 py-[7px] active:opacity-75",
+            isSyncing && "opacity-75",
+          )}
           accessibilityRole="button"
           accessibilityLabel={`${syncsRemaining} syncs remaining. Tap to select mood and sync.`}
         >
@@ -81,15 +76,10 @@ export default function ExploreHeader({
             />
           )}
           <Text
-            style={[
-              styles.syncText,
-              {
-                color:
-                  syncsRemaining > 0
-                    ? theme.colors.textPrimary
-                    : theme.colors.textMuted,
-              },
-            ]}
+            className={cn(
+              "text-[11px] tracking-[0.6px] font-brandBold",
+              syncsRemaining > 0 ? "text-white" : "text-zinc-500",
+            )}
           >
             {isSyncing
               ? "SYNCING"
@@ -102,40 +92,3 @@ export default function ExploreHeader({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 14,
-    backgroundColor: "transparent",
-  },
-  brandContainer: {
-    justifyContent: "center",
-    flex: 1,
-    marginRight: 12,
-  },
-  dateText: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 10.5,
-    letterSpacing: 1.2,
-    marginTop: 4,
-  },
-  syncPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 18,
-    borderWidth: 1,
-  },
-  syncText: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 11,
-    letterSpacing: 0.6,
-  },
-});

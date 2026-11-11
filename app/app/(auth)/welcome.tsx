@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -16,21 +16,21 @@ import BrandLockup from "@/features/auth/components/brand-lockup";
 
 export default function WelcomeScreen() {
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-background">
       <TiltedMarqueeHero />
 
-      <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+      <SafeAreaView className="flex-1" edges={["top", "bottom"]}>
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between" }}
           showsVerticalScrollIndicator={false}
           bounces={false}
         >
-          <View style={styles.posterWindow} />
+          <View className="min-h-[200px] flex-1" />
 
-          <View style={styles.contentBlock}>
+          <View className="w-full max-w-[420px] self-center px-6 pb-3">
             <Animated.View
               entering={FadeInDown.delay(100).duration(500)}
-              style={styles.brandContainer}
+              style={{ alignItems: "center", marginBottom: 6 }}
             >
               <BrandLockup />
             </Animated.View>
@@ -38,10 +38,16 @@ export default function WelcomeScreen() {
             {/* Value Proposition Headline & Copy */}
             <Animated.View
               entering={FadeInDown.delay(220).duration(450)}
-              style={styles.copyContainer}
+              style={{
+                alignItems: "center",
+                paddingHorizontal: 8,
+                marginVertical: 12,
+              }}
             >
-              <Text style={styles.headline}>Escape the infinite scroll.</Text>
-              <Text style={styles.subtitle}>
+              <Text className="mb-1.5 text-center text-[23px] leading-[29px] tracking-[-0.4px] font-brandBold text-white">
+                Escape the infinite scroll.
+              </Text>
+              <Text className="max-w-[320px] text-center text-[13.5px] leading-5 text-zinc-400">
                 Five handpicked films every night, calibrated precisely to your
                 taste.
               </Text>
@@ -50,15 +56,17 @@ export default function WelcomeScreen() {
             {/* Actions: Get Started & Sign In */}
             <Animated.View
               entering={FadeInUp.delay(350).duration(450)}
-              style={styles.actionContainer}
+              style={{ width: "100%", gap: 14, marginTop: 6 }}
             >
               <AuthPrimaryButton
                 label="Get Started"
                 onPress={() => router.push("/(onboarding)")}
               />
 
-              <View style={styles.authRow}>
-                <Text style={styles.authPrompt}>Already have an account?</Text>
+              <View className="flex-row items-center justify-center gap-1.5">
+                <Text className="text-[13px] font-brand text-zinc-500">
+                  Already have an account?
+                </Text>
                 <AuthTextLink label="Sign in" href="/(auth)/login" />
               </View>
             </Animated.View>
@@ -66,9 +74,14 @@ export default function WelcomeScreen() {
             {/* Quiet Cinema Brand Mark */}
             <Animated.View
               entering={FadeIn.delay(500).duration(400)}
-              style={styles.footnoteRow}
+              style={{
+                paddingTop: 18,
+                paddingBottom: 4,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              <Text style={styles.footnoteText}>
+              <Text className="text-center text-[9.5px] tracking-[1.2px] font-brandMedium text-zinc-600 uppercase">
                 A QUIETER WAY TO CHOOSE WHAT TO WATCH.
               </Text>
             </Animated.View>
@@ -78,84 +91,3 @@ export default function WelcomeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0C0C0E",
-  },
-  safeArea: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "space-between",
-  },
-  posterWindow: {
-    minHeight: 200,
-    flex: 1,
-  },
-  contentBlock: {
-    width: "100%",
-    maxWidth: 420,
-    alignSelf: "center",
-    paddingHorizontal: 24,
-    paddingBottom: 12,
-  },
-  brandContainer: {
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  copyContainer: {
-    alignItems: "center",
-    paddingHorizontal: 8,
-    marginVertical: 12,
-  },
-  headline: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 23,
-    lineHeight: 29,
-    letterSpacing: -0.4,
-    color: "#FFFFFF",
-    textAlign: "center",
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 13.5,
-    lineHeight: 20,
-    color: "#A1A1AA",
-    textAlign: "center",
-    maxWidth: 320,
-  },
-  actionContainer: {
-    width: "100%",
-    gap: 14,
-    marginTop: 6,
-  },
-  authRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  authPrompt: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 13,
-    color: "#71717A",
-  },
-  footnoteRow: {
-    paddingTop: 18,
-    paddingBottom: 4,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  footnoteText: {
-    fontFamily: "PlusJakartaSans_500Medium",
-    fontSize: 9.5,
-    letterSpacing: 1.2,
-    color: "#52525B",
-    textTransform: "uppercase",
-    textAlign: "center",
-  },
-});

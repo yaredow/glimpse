@@ -1,6 +1,7 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
+import { palette } from "@/lib/theme/colors";
 
 export default function Index() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -12,21 +13,25 @@ export default function Index() {
 
   if (isError) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Couldn&apos;t load your profile</Text>
-        <Text style={styles.subtitle}>
-          We couldn&apos;t check your film preferences. Check your connection and try
-          again.
+      <View className="flex-1 items-center justify-center gap-2 px-8">
+        <Text className="text-center text-[16px] font-brandBold text-white">
+          Couldn&apos;t load your profile
+        </Text>
+        <Text className="text-center text-[13px] leading-[19px] text-zinc-500">
+          We couldn&apos;t check your film preferences. Check your connection and
+          try again.
         </Text>
         <Pressable
           onPress={() => {
             refetch();
           }}
-          style={styles.retryButton}
+          className="mt-3 min-h-[44px] justify-center px-5"
           accessibilityRole="button"
           accessibilityLabel="Retry loading your profile"
         >
-          <Text style={styles.retryText}>Try again</Text>
+          <Text className="text-[13px] font-brandBold text-primary">
+            Try again
+          </Text>
         </Pressable>
       </View>
     );
@@ -34,44 +39,11 @@ export default function Index() {
 
   if (isPending) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="small" color="#E50914" />
+      <View className="flex-1 items-center justify-center gap-2 px-8">
+        <ActivityIndicator size="small" color={palette.cinemaRed} />
       </View>
     );
   }
 
   return null;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    gap: 8,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: "#71717A",
-    textAlign: "center",
-  },
-  retryButton: {
-    marginTop: 12,
-    minHeight: 44,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-  retryText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#E50914",
-  },
-});

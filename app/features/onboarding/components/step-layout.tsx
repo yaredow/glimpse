@@ -4,10 +4,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { ArrowLeftIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
-import { palette } from "@/lib/theme/colors";
 import { typeClasses } from "@/lib/theme/typography";
 import { cn } from "@/lib/utils";
 import BrandLockup from "@/features/auth/components/brand-lockup";
+import { palette } from "@/lib/theme/colors";
 
 interface StepLayoutProps {
   step: number;
@@ -42,6 +42,9 @@ export default function StepLayout({
           {onBack ? (
             <Pressable
               onPress={handleBack}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+
               hitSlop={12}
               className="rounded-sm p-1"
             >

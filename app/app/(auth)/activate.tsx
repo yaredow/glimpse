@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
@@ -14,6 +14,7 @@ import {
   AuthPrimaryButton,
   AuthTextLink,
 } from "@/features/auth/components/auth-actions";
+import { palette } from "@/lib/theme/colors";
 
 export default function Activate() {
   const { token: tokenParam, email } = useLocalSearchParams<{
@@ -52,12 +53,27 @@ export default function Activate() {
   if (activated) {
     return (
       <AuthShell title="You&apos;re in." subtitle="Your account is activated.">
-        <Animated.View entering={FadeIn.duration(400)} style={styles.successBody}>
+        <Animated.View
+          entering={FadeIn.duration(400)}
+          style={{ alignItems: "center", gap: 16, width: "100%" }}
+        >
           <Animated.View
             entering={ZoomIn.duration(450).springify()}
-            style={styles.successBadge}
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              borderWidth: 1,
+              borderColor: "rgba(16, 185, 129, 0.3)",
+              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: 8,
+              marginBottom: 8,
+              boxShadow: "0px 8px 16.0px rgba(2, 44, 34, 0.4)",
+            }}
           >
-            <CheckCircleIcon size={40} color="#10B981" weight="fill" />
+            <CheckCircleIcon size={40} color={palette.emerald} weight="fill" />
           </Animated.View>
           <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
             Sign in to start your nightly five.
@@ -131,27 +147,3 @@ export default function Activate() {
   );
 }
 
-const styles = StyleSheet.create({
-  successBody: {
-    alignItems: "center",
-    gap: 16,
-    width: "100%",
-  },
-  successBadge: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 1,
-    borderColor: "rgba(16, 185, 129, 0.3)",
-    backgroundColor: "rgba(16, 185, 129, 0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-    marginBottom: 8,
-    shadowColor: "#022C22",
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
-  },
-});

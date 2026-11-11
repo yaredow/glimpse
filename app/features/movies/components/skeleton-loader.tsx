@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,18 +7,28 @@ import Animated, {
   withTiming,
   interpolate,
   Extrapolation,
+  useReducedMotion,
 } from "react-native-reanimated";
 
-const { width: SW } = Dimensions.get("window");
-const CARD_W = Math.round(SW * 0.78);
-const CARD_H = Math.round(CARD_W * 1.54);
-
 export default function SkeletonLoader({ count }: { count: number }) {
+  const { width: SW, height: SH } = useWindowDimensions();
+  const reduceMotion = useReducedMotion();
+
+  const maxAllowedHeight = Math.max(SH - 270, 360);
+  const targetWidth = Math.min(Math.round(SW * 0.88), 356);
+  const targetHeight = Math.min(Math.round(targetWidth * 1.5), maxAllowedHeight);
+  const CARD_W = Math.round(targetHeight / 1.5);
+  const CARD_H = targetHeight;
+
   const shimmer = useSharedValue(0);
 
   useEffect(() => {
+    if (reduceMotion) {
+      shimmer.value = 1;
+      return;
+    }
     shimmer.value = withRepeat(withTiming(1, { duration: 1200 }), -1, true);
-  }, [shimmer]);
+  }, [shimmer, reduceMotion]);
 
   const shimmerStyle = useAnimatedStyle(() => {
     const offset = interpolate(
@@ -31,100 +41,45 @@ export default function SkeletonLoader({ count }: { count: number }) {
   });
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.shimmerClip}>
-          <Animated.View style={[styles.shimmer, shimmerStyle]} />
+    <View className="items-center pt-2.5" style={{ width: SW }}>
+      <View
+        className="overflow-hidden rounded-[28px] border border-white/[0.06] bg-card"
+        style={{ width: CARD_W, height: CARD_H }}
+      >
+        <View className="absolute inset-0 overflow-hidden">
+          <Animated.View
+            style={[
+              {
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: CARD_W * 0.4,
+                backgroundColor: "rgba(255, 255, 255, 0.03)",
+              },
+              shimmerStyle,
+            ]}
+          />
         </View>
-        <View style={styles.placeholderContent}>
-          <View style={styles.circle} />
-          <View style={styles.numberBar} />
-          <View style={styles.hintBar} />
+        <View className="absolute inset-0 items-center justify-center pb-5">
+          <View className="mb-3 h-11 w-11 rounded-[22px] bg-surface-zinc-850" />
+          <View className="mb-3 h-12 w-10 rounded-[6px] bg-surface-zinc-850" />
+          <View className="h-2.5 w-[100px] rounded-[5px] bg-surface-zinc-850" />
         </View>
       </View>
-      <View style={styles.dots}>
+      <View className="mt-[18px] flex-row items-center justify-center gap-1.5">
         {Array.from({ length: count }).map((_, i) => (
           <View
             key={i}
-            style={[styles.dot, i === 0 && styles.dotActive]}
+            className={
+              i === 0
+                ? "h-1 w-5 rounded-[2px] bg-primary/[0.5]"
+                : "h-1 w-[5px] rounded-[2px] bg-white/[0.1]"
+            }
           />
         ))}
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: SW,
-    alignItems: "center",
-    paddingTop: 10,
-  },
-  card: {
-    width: CARD_W,
-    height: CARD_H,
-    borderRadius: 28,
-    backgroundColor: "#161618",
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  shimmerClip: {
-    ...StyleSheet.absoluteFill,
-    overflow: "hidden",
-  },
-  shimmer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: CARD_W * 0.4,
-    backgroundColor: "rgba(255,255,255,0.03)",
-  },
-  placeholderContent: {
-    ...StyleSheet.absoluteFill,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingBottom: 20,
-  },
-  circle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#202024",
-    marginBottom: 12,
-  },
-  numberBar: {
-    width: 40,
-    height: 48,
-    borderRadius: 6,
-    backgroundColor: "#202024",
-    marginBottom: 12,
-  },
-  hintBar: {
-    width: 100,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#202024",
-  },
-  dots: {
-    flexDirection: "row",
-    gap: 6,
-    marginTop: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dot: {
-    width: 5,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-  dotActive: {
-    backgroundColor: "rgba(229,9,20,0.5)",
-    width: 20,
-    height: 4,
-    borderRadius: 2,
-  },
-});

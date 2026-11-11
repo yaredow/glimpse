@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
+  useReducedMotion,
+  ReduceMotion,
 } from "react-native-reanimated";
 import { useForm } from "@tanstack/react-form";
 import { router } from "expo-router";
@@ -25,6 +27,7 @@ import {
   AuthPrimaryButton,
   AuthTextLink,
 } from "@/features/auth/components/auth-actions";
+import { palette } from "@/lib/theme/colors";
 
 export default function ForgotPassword() {
   const requestReset = useRequestPasswordReset();
@@ -32,19 +35,23 @@ export default function ForgotPassword() {
   const [sentTo, setSentTo] = useState<string>();
 
   const pulseAnim = useSharedValue(1);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (sentTo) {
-      pulseAnim.value = withRepeat(
-        withSequence(
-          withTiming(1.06, { duration: 900 }),
-          withTiming(1.0, { duration: 900 })
-        ),
-        -1,
-        true
-      );
+    if (!sentTo) return;
+    if (reduceMotion) {
+      pulseAnim.value = 1;
+      return;
     }
-  }, [sentTo, pulseAnim]);
+    pulseAnim.value = withRepeat(
+      withSequence(
+        withTiming(1.06, { duration: 900, reduceMotion: ReduceMotion.System }),
+        withTiming(1.0, { duration: 900, reduceMotion: ReduceMotion.System })
+      ),
+      -1,
+      true
+    );
+  }, [sentTo, reduceMotion, pulseAnim]);
 
   const animatedPulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseAnim.value }],
@@ -80,8 +87,25 @@ export default function ForgotPassword() {
         }
       >
         <View className="items-center gap-4 w-full">
-          <Animated.View style={[styles.pulseCircle, animatedPulseStyle]}>
-            <EnvelopeSimpleIcon size={32} color="#E50914" weight="fill" />
+          <Animated.View
+            style={[
+              {
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                borderWidth: 1,
+                borderColor: "rgba(229, 9, 20, 0.3)",
+                backgroundColor: "rgba(229, 9, 20, 0.1)",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: 4,
+                marginBottom: 8,
+                boxShadow: "0px 8px 16.0px rgba(69, 10, 10, 0.4)",
+              },
+              animatedPulseStyle,
+            ]}
+          >
+            <EnvelopeSimpleIcon size={32} color={palette.cinemaRed} weight="fill" />
           </Animated.View>
           <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
             Open the link in that email, or use the reset code from the message
@@ -152,22 +176,3 @@ export default function ForgotPassword() {
   );
 }
 
-const styles = StyleSheet.create({
-  pulseCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    borderWidth: 1,
-    borderColor: "rgba(229, 9, 20, 0.3)",
-    backgroundColor: "rgba(229, 9, 20, 0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-    marginBottom: 8,
-    shadowColor: "#450A0A",
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
-  },
-});

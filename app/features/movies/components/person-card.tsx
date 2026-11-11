@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 import { Image } from "expo-image";
-import { tmdbImage } from "../consants/images";
+import { tmdbImage } from "../constants/images";
 
 interface PersonCardProps {
   name: string;
@@ -9,77 +9,36 @@ interface PersonCardProps {
   profilePath?: string | null;
 }
 
-const { width } = Dimensions.get("window");
-const cardWidth = width * 0.22;
-
 export default function PersonCard({ name, character, profilePath }: PersonCardProps) {
+  const { width } = useWindowDimensions();
   const [imageError, setImageError] = useState(false);
   const imageUri = tmdbImage(profilePath, "w185");
 
   return (
-    <View style={styles.card}>
-      <View style={styles.imageWrapper}>
+    <View className="items-center" style={{ width: width * 0.22, marginRight: 12 }}>
+      <View className="h-20 w-20 overflow-hidden rounded-full border border-primary">
         {imageUri && !imageError ? (
           <Image
             source={{ uri: imageUri }}
-            style={styles.image}
+            style={{ width: "100%", height: "100%" }}
             contentFit="cover"
             cachePolicy="memory-disk"
             transition={200}
             onError={() => setImageError(true)}
           />
         ) : (
-          <View style={[styles.image, styles.placeholder]}>
-            <Text style={styles.placeholderText}>
+          <View
+            className="items-center justify-center bg-surface-zinc-700"
+            style={{ width: "100%", height: "100%" }}
+          >
+            <Text className="text-[24px] font-brandBold text-white">
               {name ? name.charAt(0).toUpperCase() : "?"}
             </Text>
           </View>
         )}
       </View>
-      <Text style={styles.name} numberOfLines={1}>{name}</Text>
-      <Text style={styles.character} numberOfLines={1}>{character}</Text>
+      <Text className="mt-2 text-center text-[12px] font-brandBold text-white" numberOfLines={1}>{name}</Text>
+      <Text className="text-center text-[10px] text-primary" numberOfLines={1}>{character}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    width: cardWidth,
-    marginRight: 12,
-    alignItems: "center",
-  },
-  imageWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#E50914",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-  placeholder: {
-    backgroundColor: "#333",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  placeholderText: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  name: {
-    marginTop: 8,
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "white",
-    textAlign: "center",
-  },
-  character: {
-    fontSize: 10,
-    color: "#E50914",
-    textAlign: "center",
-  },
-});

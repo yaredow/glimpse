@@ -2,7 +2,6 @@ import {
   LayoutAnimation,
   Platform,
   Pressable,
-  StyleSheet,
   Text,
   UIManager,
   View,
@@ -14,7 +13,8 @@ import {
   BookmarkSimpleIcon,
   UserIcon,
 } from "phosphor-react-native";
-import { fonts } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+import { palette } from "@/lib/theme/colors";
 
 if (
   Platform.OS === "android" &&
@@ -59,9 +59,15 @@ export function FloatingTabBar({
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.floatingWrapper, { bottom: bottomInset }]}
+      className="absolute left-0 right-0 z-[999] items-center justify-center"
+      style={{ bottom: bottomInset }}
     >
-      <View style={styles.dockContainer}>
+      <View
+        className="flex-row items-center gap-1.5 rounded-[36px] border border-white/[0.08] bg-surface-obsidian/95 px-2 py-1.5"
+        style={{
+          boxShadow: "0px 10px 20.0px rgba(0, 0, 0, 0.5)",
+        }}
+      >
         {state.routes.map((route, index) => {
           const isFocused = state.index === index;
           const descriptor = descriptors[route.key];
@@ -107,22 +113,26 @@ export function FloatingTabBar({
               accessibilityRole="tab"
               accessibilityState={{ selected: isFocused }}
               accessibilityLabel={label}
-              style={({ pressed }) => [
-                styles.tabItem,
-                isFocused ? styles.tabItemActive : styles.tabItemInactive,
-                pressed && styles.tabItemPressed,
-              ]}
+              className={cn(
+                "min-h-[44px] flex-row items-center justify-center rounded-[24px] active:opacity-70",
+                isFocused
+                  ? "gap-2 border border-primary/35 bg-primary/[0.16] px-4 py-2.5"
+                  : "min-w-[44px] border border-transparent px-[18px] py-2.5",
+              )}
             >
               <Icon
                 size={20}
-                color={isFocused ? "#E50914" : "#8E8E93"}
+                color={isFocused ? palette.cinemaRed : "#8E8E93"}
                 weight={isFocused ? "fill" : "regular"}
               />
-              {isFocused && (
-                <Text style={styles.activeLabel} numberOfLines={1}>
+              {isFocused ? (
+                <Text
+                  className="text-[12.5px] tracking-[0.4px] font-brandBold text-white"
+                  numberOfLines={1}
+                >
                   {label}
                 </Text>
-              )}
+              ) : null}
             </Pressable>
           );
         })}
@@ -130,61 +140,3 @@ export function FloatingTabBar({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  floatingWrapper: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 999,
-  },
-  dockContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(18, 18, 22, 0.94)",
-    borderRadius: 36,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 16,
-    gap: 6,
-  },
-  tabItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 24,
-    minHeight: 44,
-  },
-  tabItemActive: {
-    backgroundColor: "rgba(229, 9, 20, 0.16)",
-    borderWidth: 1,
-    borderColor: "rgba(229, 9, 20, 0.35)",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  tabItemInactive: {
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    minWidth: 44,
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  tabItemPressed: {
-    opacity: 0.7,
-  },
-  activeLabel: {
-    color: "#FFFFFF",
-    fontFamily: fonts.bold,
-    fontSize: 12.5,
-    letterSpacing: 0.4,
-  },
-});

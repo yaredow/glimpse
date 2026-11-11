@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { Button, Dialog, Portal, Text } from "react-native-paper";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useAppTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export type ConfirmableAction = "locked_in" | "sync";
 
@@ -86,10 +91,12 @@ const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
     confirmText: "Lock In Selection",
     cancelText: "Not Yet",
     renderDescription: (title) => (
-      <Text style={styles.description}>
-        <Text style={styles.highlightText}>&ldquo;{title}&rdquo;</Text> will be
-        permanently locked as your movie for today. Once locked, your daily
-        selection is final.
+      <Text className="text-center text-[14px] leading-[22px] font-brand text-zinc-400">
+        <Text className="font-brandSemiBold text-white">
+          &ldquo;{title}&rdquo;
+        </Text>{" "}
+        will be permanently locked as your movie for today. Once locked, your
+        daily selection is final.
       </Text>
     ),
   },
@@ -102,9 +109,10 @@ const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
     renderDescription: (_title, syncs = 3) => {
       const remainingAfter = Math.max(0, syncs - 1);
       return (
-        <Text style={styles.description}>
-          This will draw 5 fresh mystery picks tailored to your mood. You will have{" "}
-          <Text style={styles.highlightText}>
+        <Text className="text-center text-[14px] leading-[22px] font-brand text-zinc-400">
+          This will draw 5 fresh mystery picks tailored to your mood. You will
+          have{" "}
+          <Text className="font-brandSemiBold text-white">
             {remainingAfter} {remainingAfter === 1 ? "sync" : "syncs"}
           </Text>{" "}
           remaining today.
@@ -122,7 +130,6 @@ export default function ActionConfirmModal({
   onConfirm,
   onCancel,
 }: ActionConfirmModalProps) {
-  const theme = useAppTheme();
   const [selectedMood, setSelectedMood] = useState<SyncMood>("surprise");
   const [prevVisible, setPrevVisible] = useState(visible);
 
@@ -138,24 +145,16 @@ export default function ActionConfirmModal({
   const config = ACTION_CONFIGS[action];
 
   return (
-    <Portal>
-      <Dialog
-        visible={visible}
-        onDismiss={onCancel}
-        style={[
-          styles.dialog,
-          {
-            backgroundColor: "#18181B",
-            borderColor: "rgba(255, 255, 255, 0.1)",
-          },
-        ]}
-      >
-        <View style={styles.iconContainer}>
+    <Dialog open={visible} onOpenChange={(next) => !next && onCancel()}>
+      <DialogContent className="w-[92%] max-w-[380px] gap-4 rounded-[24px] p-5">
+        <DialogTitle className="text-center text-[18px] leading-7">
+          {config.title}
+        </DialogTitle>
+
+        <View className="items-center gap-3">
           <View
-            style={[
-              styles.iconCircle,
-              { backgroundColor: `${config.iconColor}18` },
-            ]}
+            className="h-14 w-14 items-center justify-center rounded-[28px]"
+            style={{ backgroundColor: `${config.iconColor}18` }}
           >
             <MaterialCommunityIcons
               name={config.icon}
@@ -163,11 +162,7 @@ export default function ActionConfirmModal({
               color={config.iconColor}
             />
           </View>
-        </View>
 
-        <Dialog.Title style={styles.title}>{config.title}</Dialog.Title>
-
-        <Dialog.Content style={styles.content}>
           {action === "sync" ? (
             <>
               {(() => {
@@ -176,24 +171,28 @@ export default function ActionConfirmModal({
                   MOOD_OPTIONS[0];
 
                 return (
-                  <View style={styles.syncDescriptionContainer}>
-                    <Text style={styles.description}>
-                      Draw 5 fresh mystery picks:{" "}
-                      <Text style={styles.highlightText}>
-                        {activeMood.description}
-                      </Text>
-                      .
+                  <Text className="text-center text-[14px] leading-[22px] font-brand text-zinc-400">
+                    Draw 5 fresh mystery picks:{" "}
+                    <Text className="font-brandSemiBold text-white">
+                      {activeMood.description}
                     </Text>
-                  </View>
+                    .
+                  </Text>
                 );
               })()}
 
-              <View style={styles.moodSection}>
-                <Text style={styles.moodHeader}>CHOOSE A VIBE</Text>
+              <View className="w-full">
+                <Text className="mb-2 text-[11px] tracking-[1.2px] font-brandBold text-zinc-500 uppercase">
+                  CHOOSE A VIBE
+                </Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.moodScrollContent}
+                  contentContainerStyle={{
+                    flexDirection: "row",
+                    gap: 8,
+                    paddingVertical: 4,
+                  }}
                 >
                   {MOOD_OPTIONS.map((mood) => {
                     const isSelected = selectedMood === mood.id;
@@ -204,26 +203,26 @@ export default function ActionConfirmModal({
                         accessibilityRole="radio"
                         accessibilityState={{ selected: isSelected }}
                         accessibilityLabel={mood.label}
-                        style={[
-                          styles.moodChip,
+                        className={cn(
+                          "flex-row items-center rounded-[16px] border px-3 py-[7px]",
                           isSelected
-                            ? styles.moodChipSelected
-                            : styles.moodChipUnselected,
-                        ]}
+                            ? "border-white bg-white"
+                            : "border-white/[0.08] bg-surface-zinc-800",
+                        )}
                       >
                         <MaterialCommunityIcons
                           name={mood.icon}
                           size={16}
                           color={isSelected ? "#121212" : "#A1A1AA"}
-                          style={styles.moodIcon}
+                          style={{ marginRight: 6 }}
                         />
                         <Text
-                          style={[
-                            styles.moodLabel,
+                          className={cn(
+                            "text-[12.5px] font-brandSemiBold",
                             isSelected
-                              ? styles.moodLabelSelected
-                              : styles.moodLabelUnselected,
-                          ]}
+                              ? "text-surface-obsidian"
+                              : "text-zinc-400",
+                          )}
                         >
                           {mood.label}
                         </Text>
@@ -236,152 +235,33 @@ export default function ActionConfirmModal({
           ) : (
             config.renderDescription(movieTitle, syncsRemaining)
           )}
-        </Dialog.Content>
+        </View>
 
-        <Dialog.Actions style={styles.actions}>
-          <Button
-            mode="text"
-            onPress={onCancel}
-            textColor={theme.colors.textSecondary}
-            labelStyle={styles.cancelBtnLabel}
-          >
-            {config.cancelText}
-          </Button>
-          <Button
-            mode="contained"
-            onPress={() =>
-              onConfirm(action === "sync" ? selectedMood : undefined)
-            }
-            buttonColor={theme.colors.primary}
-            textColor="#FFFFFF"
-            style={styles.confirmBtn}
-            labelStyle={styles.confirmBtnLabel}
-          >
-            {config.confirmText}
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>
+        <DialogFooter className="border-t border-white/[0.06] px-0 pt-3">
+          <View className="flex-row justify-end gap-2">
+            <Pressable
+              onPress={onCancel}
+              className="min-h-[44px] justify-center px-4"
+              accessibilityRole="button"
+            >
+              <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+                {config.cancelText}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() =>
+                onConfirm(action === "sync" ? selectedMood : undefined)
+              }
+              className="min-h-[44px] justify-center rounded-[12px] bg-primary px-4 active:opacity-90"
+              accessibilityRole="button"
+            >
+              <Text className="text-[13px] font-brandBold text-white">
+                {config.confirmText}
+              </Text>
+            </Pressable>
+          </View>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
-
-const styles = StyleSheet.create({
-  dialog: {
-    borderRadius: 24,
-    borderWidth: 1,
-    paddingTop: 8,
-    paddingBottom: 4,
-    maxWidth: 380,
-    alignSelf: "center",
-    width: "92%",
-  },
-  iconContainer: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    color: "#FFFFFF",
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 20,
-    textAlign: "center",
-    paddingHorizontal: 12,
-    marginTop: 4,
-    marginBottom: 4,
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingBottom: 8,
-  },
-  description: {
-    color: "#A1A1AA",
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 14,
-    lineHeight: 22,
-    textAlign: "center",
-  },
-  highlightText: {
-    color: "#FFFFFF",
-    fontFamily: "PlusJakartaSans_600SemiBold",
-  },
-  syncDescriptionContainer: {
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  moodSection: {
-    width: "100%",
-    marginTop: 6,
-    marginBottom: 4,
-  },
-  moodHeader: {
-    color: "#71717A",
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    letterSpacing: 1.2,
-    fontSize: 11,
-    marginBottom: 8,
-    paddingHorizontal: 2,
-    textTransform: "uppercase",
-  },
-  moodScrollContent: {
-    flexDirection: "row",
-    gap: 8,
-    paddingVertical: 4,
-  },
-  moodChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 16,
-  },
-  moodChipUnselected: {
-    backgroundColor: "#222225",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-  },
-  moodChipSelected: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#FFFFFF",
-  },
-  moodIcon: {
-    marginRight: 6,
-  },
-  moodLabel: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 12.5,
-  },
-  moodLabelUnselected: {
-    color: "#A1A1AA",
-  },
-  moodLabelSelected: {
-    color: "#121212",
-  },
-  actions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  cancelBtnLabel: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 13,
-  },
-  confirmBtn: {
-    borderRadius: 12,
-    paddingHorizontal: 4,
-  },
-  confirmBtnLabel: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 13,
-    letterSpacing: 0.3,
-  },
-});

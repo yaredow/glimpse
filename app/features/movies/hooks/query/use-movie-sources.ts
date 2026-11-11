@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { moviesKeys } from "../../consants/movies.keys";
+import { moviesKeys } from "../../constants/movies.keys";
 import { getMovieSources } from "../../services/movie.service";
 
 export const useMovieSources = (id: number, enabled = true) => {

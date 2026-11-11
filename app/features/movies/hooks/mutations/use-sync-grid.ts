@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { syncGrid } from "../../services/movie.service";
-import { moviesKeys } from "../../consants/movies.keys";
+import { moviesKeys } from "../../constants/movies.keys";
 import { profileKeys } from "@/features/profile/hooks/use-profile";
 
 export const useSyncGrid = () => {

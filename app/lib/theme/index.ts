@@ -1,15 +1,14 @@
 import { createContext, useContext } from "react";
-import { MD3DarkTheme } from "react-native-paper";
 import { themeColors } from "./colors";
 import { themeFonts } from "./typography";
 
 export const glimpseDarkTheme = {
-  ...MD3DarkTheme,
+  dark: true,
+  roundness: 4,
   colors: themeColors,
   fonts: themeFonts,
+  animation: { scale: 1 },
 };
-
-export const netflixTheme = glimpseDarkTheme;
 
 export type AppTheme = typeof glimpseDarkTheme;
 

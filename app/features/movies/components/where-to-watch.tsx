@@ -4,7 +4,6 @@ import {
   Pressable,
   ScrollView,
   Share,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -14,10 +13,18 @@ import { Image } from "expo-image";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { useAppTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 import { useMovieSources } from "../hooks/query/use-movie-sources";
-import { SHOW_TORRENTS } from "../consants/movies.constants";
-import { tmdbImage } from "../consants/images";
+import { SHOW_TORRENTS } from "../constants/movies.constants";
+import { tmdbImage } from "../constants/images";
 import type { TorrentSource, WatchProvider } from "../types/movies.type";
+import { palette } from "@/lib/theme/colors";
+
+const ProviderLogo = {
+  width: 38,
+  height: 38,
+  borderRadius: 10,
+};
 
 interface WhereToWatchProps {
   movieId: number;
@@ -100,9 +107,9 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
 
   if (isPending) {
     return (
-      <View style={styles.loadingBox}>
+      <View className="items-center gap-2.5 py-7">
         <ActivityIndicator size="small" color={theme.colors.primary} />
-        <Text style={[styles.loadingText, { color: theme.colors.textMuted }]}>
+        <Text className="text-[13px] font-brand text-zinc-500">
           Checking streaming availability...
         </Text>
       </View>
@@ -111,8 +118,8 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
 
   if (isError || !sources) {
     return (
-      <View style={styles.errorBox}>
-        <Text style={[styles.errorText, { color: theme.colors.textMuted }]}>
+      <View className="items-center py-4">
+        <Text className="text-[13px] font-brand text-zinc-500">
           Sources currently unavailable. Use universal search below.
         </Text>
       </View>
@@ -120,27 +127,32 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.sectionHeader}>
+    <View className="mt-6 w-full px-5">
+      <View className="mb-4 flex-row items-center gap-2">
         <MaterialCommunityIcons
           name="play-network-outline"
           size={18}
           color={theme.colors.primary}
         />
-        <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>
+        <Text className="text-[18px] tracking-[-0.3px] font-brandBold text-white">
           Where to Watch
         </Text>
       </View>
 
       {cleanProviders.length > 0 ? (
-        <View style={styles.subSection}>
-          <Text style={[styles.subLabel, { color: theme.colors.textSecondary }]}>
+        <View className="mb-6">
+          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-zinc-400">
             {providerLabel}
           </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.providerScroll}
+            contentContainerStyle={{
+              flexDirection: "row",
+              gap: 12,
+              paddingRight: 20,
+              paddingBottom: 4,
+            }}
           >
             {cleanProviders.map((prov: WatchProvider) => {
               const logoUri = tmdbImage(prov.logo_path, "w185");
@@ -150,29 +162,17 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   onPress={() =>
                     handleOpenLink(providers?.justwatch_link || searchLinks?.justwatch || "")
                   }
-                  style={({ pressed }) => [
-                    styles.providerCard,
-                    {
-                      backgroundColor: theme.colors.elevation.level2,
-                      borderColor: theme.colors.outlineVariant,
-                    },
-                    pressed && { opacity: 0.8 },
-                  ]}
+                  className="flex-row items-center gap-3 rounded-2xl border border-white/[0.08] bg-surface-zinc-850 px-4 py-3 active:opacity-80"
                 >
                   {logoUri ? (
                     <Image
                       source={{ uri: logoUri }}
-                      style={styles.providerLogo}
+                      style={ProviderLogo}
                       contentFit="cover"
                       transition={200}
                     />
                   ) : (
-                    <View
-                      style={[
-                        styles.providerLogoFallback,
-                        { backgroundColor: theme.colors.elevation.level3 },
-                      ]}
-                    >
+                    <View className="h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-surface-zinc-800">
                       <MaterialCommunityIcons
                         name="movie-outline"
                         size={20}
@@ -180,19 +180,14 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                       />
                     </View>
                   )}
-                  <View style={styles.providerInfo}>
+                  <View className="justify-center">
                     <Text
-                      style={[styles.providerName, { color: theme.colors.textPrimary }]}
+                      className="text-[13.5px] tracking-[0.1px] font-brandSemiBold text-white"
                       numberOfLines={1}
                     >
                       {prov.name}
                     </Text>
-                    <Text
-                      style={[
-                        styles.providerActionText,
-                        { color: theme.colors.textSecondary },
-                      ]}
-                    >
+                    <Text className="mt-0.5 text-[11px] tracking-[0.2px] font-brandMedium text-zinc-400">
                       {providerLabel === "STREAMING NOW" ? "Stream" : "Rent"}
                     </Text>
                   </View>
@@ -202,89 +197,68 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
           </ScrollView>
         </View>
       ) : (
-        <View
-          style={[
-            styles.noticeCard,
-            {
-              backgroundColor: theme.colors.elevation.level1,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}
-        >
+        <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-surface-zinc-900 px-3.5 py-3">
           <MaterialCommunityIcons
             name="information-outline"
             size={16}
             color={theme.colors.textMuted}
           />
-          <Text style={[styles.noticeText, { color: theme.colors.textMuted }]}>
+          <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-zinc-500">
             Not currently available on major subscription platforms. Try the search links below.
           </Text>
         </View>
       )}
 
       {SHOW_TORRENTS ? (
-      <View style={styles.subSection}>
-        <View style={styles.subLabelRow}>
-          <Text style={[styles.subLabel, { color: theme.colors.textSecondary }]}>
+      <View className="mb-6">
+        <View className="mb-3 flex-row items-center justify-between">
+          <Text className="text-[11px] tracking-[1.2px] font-brandBold text-zinc-400">
             TORRENTS & MAGNETS
           </Text>
           {torrents.length > 0 ? (
-            <View style={styles.livePill}>
-              <View style={styles.liveDot} />
-              <Text style={styles.liveText}>YTS Verified</Text>
+            <View className="flex-row items-center gap-[5px] rounded-[10px] bg-emerald-500/[0.12] px-2 py-[3px]">
+              <View className="h-1.5 w-1.5 rounded-[3px] bg-emerald-500" />
+              <Text className="text-[10px] tracking-[0.3px] font-brandSemiBold text-emerald-500">
+                YTS Verified
+              </Text>
             </View>
           ) : null}
         </View>
 
         {torrents.length > 0 ? (
-          <View style={styles.torrentList}>
+          <View className="gap-2">
             {torrents.map((t, idx) => (
               <View
                 key={`${t.quality}-${t.type}-${idx}`}
-                style={[
-                  styles.torrentCard,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                ]}
+                className="flex-row items-center justify-between rounded-[14px] border border-white/[0.08] bg-surface-zinc-850 px-3.5 py-3"
               >
-                <View style={styles.torrentMeta}>
-                  <View style={styles.qualityRow}>
+                <View className="flex-1">
+                  <View className="flex-row items-center gap-2">
                     <View
-                      style={[
-                        styles.qualityBadge,
+                      className={cn(
+                        "rounded-[6px] px-[7px] py-0.5",
                         t.quality.includes("2160") || t.quality.includes("4K")
-                          ? styles.badge4K
-                          : styles.badgeHD,
-                      ]}
+                          ? "bg-amber-500"
+                          : "bg-white/[0.15]",
+                      )}
                     >
-                      <Text style={styles.qualityText}>{t.quality.toUpperCase()}</Text>
+                      <Text className="text-[11px] tracking-[0.5px] font-brandBold text-white">
+                        {t.quality.toUpperCase()}
+                      </Text>
                     </View>
-                    <Text
-                      style={[styles.torrentType, { color: theme.colors.textSecondary }]}
-                    >
+                    <Text className="text-[12px] tracking-[0.5px] font-brandSemiBold text-zinc-400">
                       {t.type.toUpperCase()}
                     </Text>
                   </View>
-                  <Text
-                    style={[styles.torrentSize, { color: theme.colors.textMuted }]}
-                  >
+                  <Text className="mt-1 text-[12px] font-brand text-zinc-500">
                     {t.size} · {t.seeds} seeds
                   </Text>
                 </View>
 
-                <View style={styles.torrentActions}>
+                <View className="flex-row items-center gap-2">
                   <Pressable
                     onPress={() => handleShareMagnet(t)}
-                    style={({ pressed }) => [
-                      styles.iconActionBtn,
-                      {
-                        backgroundColor: theme.colors.elevation.level3,
-                        borderColor: theme.colors.outlineVariant,
-                      },
-                      pressed && { opacity: 0.7 },
-                    ]}
+                    className="h-9 w-9 items-center justify-center rounded-[10px] border border-white/[0.08] bg-surface-zinc-800 active:opacity-70"
                     accessibilityLabel="Copy or share magnet"
                   >
                     <MaterialCommunityIcons
@@ -296,39 +270,29 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
 
                   <Pressable
                     onPress={() => handleOpenMagnet(t)}
-                    style={({ pressed }) => [
-                      styles.magnetBtn,
-                      { backgroundColor: theme.colors.primary },
-                      pressed && { opacity: 0.85 },
-                    ]}
+                    className="h-9 flex-row items-center gap-[5px] rounded-[10px] bg-primary px-3 active:opacity-85"
                   >
                     <MaterialCommunityIcons
                       name="magnet"
                       size={15}
-                      color="#FFFFFF"
+                      color={palette.white}
                     />
-                    <Text style={styles.magnetBtnText}>MAGNET</Text>
+                    <Text className="text-[11px] tracking-[0.6px] font-brandBold text-white">
+                      MAGNET
+                    </Text>
                   </Pressable>
                 </View>
               </View>
             ))}
           </View>
         ) : (
-          <View
-            style={[
-              styles.noticeCard,
-              {
-                backgroundColor: theme.colors.elevation.level1,
-                borderColor: theme.colors.outlineVariant,
-              },
-            ]}
-          >
+          <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-surface-zinc-900 px-3.5 py-3">
             <MaterialCommunityIcons
               name="cloud-search-outline"
               size={16}
               color={theme.colors.textMuted}
             />
-            <Text style={[styles.noticeText, { color: theme.colors.textMuted }]}>
+            <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-zinc-500">
               No direct torrent releases indexed. Use universal web search below.
             </Text>
           </View>
@@ -337,97 +301,78 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
       ) : null}
 
       {searchLinks ? (
-        <View style={styles.subSection}>
-          <Text style={[styles.subLabel, { color: theme.colors.textSecondary }]}>
+        <View className="mb-6">
+          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-zinc-400">
             UNIVERSAL SEARCH
           </Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.searchPillsRow}
+            contentContainerStyle={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              paddingRight: 20,
+              paddingBottom: 4,
+            }}
           >
             {searchLinks.google ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.google)}
-                style={({ pressed }) => [
-                  styles.searchPill,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                  pressed && { opacity: 0.75 },
-                ]}
+                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="google" size={15} color="#FFFFFF" />
-                <Text style={styles.searchPillText}>Google</Text>
+                <MaterialCommunityIcons name="google" size={15} color={palette.white} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                  Google
+                </Text>
               </Pressable>
             ) : null}
 
             {searchLinks.justwatch ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.justwatch)}
-                style={({ pressed }) => [
-                  styles.searchPill,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                  pressed && { opacity: 0.75 },
-                ]}
+                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="play-box-outline" size={15} color="#F59E0B" />
-                <Text style={styles.searchPillText}>JustWatch</Text>
+                <MaterialCommunityIcons name="play-box-outline" size={15} color={palette.gold} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                  JustWatch
+                </Text>
               </Pressable>
             ) : null}
 
             {searchLinks.letterboxd ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.letterboxd)}
-                style={({ pressed }) => [
-                  styles.searchPill,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                  pressed && { opacity: 0.75 },
-                ]}
+                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="filmstrip" size={15} color="#10B981" />
-                <Text style={styles.searchPillText}>Letterboxd</Text>
+                <MaterialCommunityIcons name="filmstrip" size={15} color={palette.emerald} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                  Letterboxd
+                </Text>
               </Pressable>
             ) : null}
 
             {searchLinks.imdb ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.imdb)}
-                style={({ pressed }) => [
-                  styles.searchPill,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                  pressed && { opacity: 0.75 },
-                ]}
+                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="star-outline" size={15} color="#F59E0B" />
-                <Text style={styles.searchPillText}>IMDb</Text>
+                <MaterialCommunityIcons name="star-outline" size={15} color={palette.gold} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                  IMDb
+                </Text>
               </Pressable>
             ) : null}
 
             {searchLinks.netflix ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.netflix)}
-                style={({ pressed }) => [
-                  styles.searchPill,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                  pressed && { opacity: 0.75 },
-                ]}
+                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="netflix" size={15} color="#E50914" />
-                <Text style={styles.searchPillText}>Netflix</Text>
+                <MaterialCommunityIcons name="netflix" size={15} color={palette.cinemaRed} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                  Netflix
+                </Text>
               </Pressable>
             ) : null}
           </ScrollView>
@@ -437,227 +382,4 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    paddingHorizontal: 20,
-    marginTop: 24,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 18,
-    letterSpacing: -0.3,
-  },
-  subSection: {
-    marginBottom: 24,
-  },
-  subLabelRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  subLabel: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 11,
-    letterSpacing: 1.2,
-    marginBottom: 12,
-  },
-  livePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    backgroundColor: "rgba(16, 185, 129, 0.12)",
-  },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#10B981",
-  },
-  liveText: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 10,
-    color: "#10B981",
-    letterSpacing: 0.3,
-  },
-  providerScroll: {
-    flexDirection: "row",
-    gap: 12,
-    paddingRight: 20,
-    paddingBottom: 4,
-  },
-  providerCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  providerLogo: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-  },
-  providerLogoFallback: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  providerInfo: {
-    justifyContent: "center",
-  },
-  providerName: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 13.5,
-    letterSpacing: 0.1,
-  },
-  providerActionText: {
-    fontFamily: "PlusJakartaSans_500Medium",
-    fontSize: 11,
-    marginTop: 2,
-    letterSpacing: 0.2,
-  },
-  noticeCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  noticeText: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 12.5,
-    lineHeight: 18,
-    flex: 1,
-  },
-  torrentList: {
-    gap: 8,
-  },
-  torrentCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  torrentMeta: {
-    flex: 1,
-  },
-  qualityRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  qualityBadge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  badge4K: {
-    backgroundColor: "#F59E0B",
-  },
-  badgeHD: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-  },
-  qualityText: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 11,
-    color: "#FFFFFF",
-    letterSpacing: 0.5,
-  },
-  torrentType: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  torrentSize: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  torrentActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  iconActionBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  magnetBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 12,
-    height: 36,
-    borderRadius: 10,
-  },
-  magnetBtnText: {
-    color: "#FFFFFF",
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 11,
-    letterSpacing: 0.6,
-  },
-  searchPillsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingRight: 20,
-    paddingBottom: 4,
-  },
-  searchPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 22,
-    borderWidth: 1,
-  },
-  searchPillText: {
-    color: "#FFFFFF",
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 12.5,
-    letterSpacing: 0.2,
-  },
-  loadingBox: {
-    paddingVertical: 28,
-    alignItems: "center",
-    gap: 10,
-  },
-  loadingText: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 13,
-  },
-  errorBox: {
-    paddingVertical: 16,
-    alignItems: "center",
-  },
-  errorText: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 13,
-  },
-});
 

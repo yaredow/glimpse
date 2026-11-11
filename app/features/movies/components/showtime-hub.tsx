@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Dimensions,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,12 +13,13 @@ import * as Linking from "expo-linking";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useAppTheme } from "@/lib/theme";
-import { tmdbImage } from "../consants/images";
+import { tmdbImage } from "../constants/images";
 import { useGetMovie } from "../hooks/query/use-get-movie";
 import { useMovieSources } from "../hooks/query/use-movie-sources";
 import VerdictModal from "./verdict-modal";
 import CinemaTrailerModal from "./cinema-trailer-modal";
 import type { GridMovie, WatchProvider } from "../types/movies.type";
+import { palette } from "@/lib/theme/colors";
 
 interface ShowtimeHubProps {
   movie: GridMovie;
@@ -27,8 +27,13 @@ interface ShowtimeHubProps {
   onOpenDetails: (movie: GridMovie) => void;
 }
 
-const { width: SW } = Dimensions.get("window");
-const HERO_H = Math.round(SW * 0.88);
+const AbsoluteFill = {
+  position: "absolute" as const,
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+};
 
 export default function ShowtimeHub({
   movie,
@@ -36,6 +41,8 @@ export default function ShowtimeHub({
   onOpenDetails,
 }: ShowtimeHubProps) {
   const theme = useAppTheme();
+  const { width: SW } = useWindowDimensions();
+  const HERO_H = Math.round(SW * 0.88);
   const { data: detailData } = useGetMovie(movie.movie_id);
   const movieDetails = detailData?.movie;
 
@@ -195,48 +202,59 @@ export default function ShowtimeHub({
 
   return (
     <ScrollView
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={{ paddingBottom: 60 }}
       showsVerticalScrollIndicator={false}
     >
       {/* 1. CINEMA HERO */}
-      <View style={styles.heroContainer}>
+      <View
+        className="relative justify-end"
+        style={{ width: SW, height: HERO_H }}
+      >
         {backdropSrc ? (
           <Image
             source={{ uri: backdropSrc }}
-            style={StyleSheet.absoluteFill}
+            style={AbsoluteFill}
             contentFit="cover"
             transition={300}
             cachePolicy="memory-disk"
           />
         ) : (
-          <View style={[StyleSheet.absoluteFill, { backgroundColor: "#1c1c1f" }]} />
+          <View style={[AbsoluteFill, { backgroundColor: "#1c1c1f" }]} />
         )}
 
         <LinearGradient
           colors={[
             "rgba(18, 18, 18, 0.15)",
             "rgba(18, 18, 18, 0.65)",
-            "#121212",
+            palette.obsidian,
           ]}
           locations={[0, 0.5, 1]}
-          style={StyleSheet.absoluteFill}
+          style={AbsoluteFill}
         />
 
-        <View style={styles.heroContent}>
-          <View style={styles.featureBadge}>
+        <View className="px-5 pb-5">
+          <View className="mb-2 self-start flex-row items-center gap-1.5 rounded-[7px] bg-amber-500 px-[9px] py-1">
             <MaterialCommunityIcons
               name="movie-open-star"
               size={13}
-              color="#121212"
+              color={palette.obsidian}
             />
-            <Text style={styles.featureBadgeText}>TONIGHT&apos;S FEATURE</Text>
+            <Text className="text-[10px] tracking-[1px] font-brandBold text-surface-obsidian">
+              TONIGHT&apos;S FEATURE
+            </Text>
           </View>
 
-          <Text style={styles.movieTitle}>{movie.title}</Text>
+          <Text className="text-[26px] leading-[31px] tracking-[-0.4px] font-brandExtraBold text-white">
+            {movie.title}
+          </Text>
 
-          {metaString ? <Text style={styles.metaText}>{metaString}</Text> : null}
+          {metaString ? (
+            <Text className="mt-1.5 text-[13px] tracking-[0.2px] font-brandMedium text-white/[0.75]">
+              {metaString}
+            </Text>
+          ) : null}
           {movieDetails?.director ? (
-            <Text style={styles.directorText}>
+            <Text className="mt-[3px] text-[12px] font-brandMedium text-zinc-400">
               Directed by {movieDetails.director}
             </Text>
           ) : null}
@@ -244,23 +262,23 @@ export default function ShowtimeHub({
       </View>
 
       {/* 2. THE LAUNCHPAD (Primary Streaming Action) */}
-      <View style={styles.launcherSection}>
+      <View className="mt-4 px-4">
         {primaryProvider ? (
           <Pressable
             onPress={handleOpenPrimaryProvider}
-            style={({ pressed }) => [
-              styles.primaryLaunchBtn,
-              pressed && { opacity: 0.9, transform: [{ scale: 0.99 }] },
-            ]}
+            className="flex-row items-center justify-between rounded-[14px] bg-primary px-[18px] py-3.5 active:opacity-90 active:scale-[0.99]"
+            style={{
+              boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.35)",
+            }}
           >
-            <View style={styles.playIconCircle}>
-              <MaterialCommunityIcons name="play" size={20} color="#FFFFFF" />
+            <View className="h-[34px] w-[34px] items-center justify-center rounded-[17px] bg-black/25">
+              <MaterialCommunityIcons name="play" size={20} color={palette.white} />
             </View>
-            <View style={styles.launchBtnTexts}>
-              <Text style={styles.launchBtnAction}>
+            <View className="ml-3 flex-1">
+              <Text className="text-[10px] tracking-[0.8px] font-brandBold text-white/[0.8]">
                 {isStreaming ? "STREAM NOW ON" : "RENT NOW ON"}
               </Text>
-              <Text style={styles.launchBtnProvider}>
+              <Text className="text-[16px] tracking-[-0.2px] font-brandExtraBold text-white">
                 {primaryProvider.name.toUpperCase()}
               </Text>
             </View>
@@ -275,21 +293,24 @@ export default function ShowtimeHub({
             onPress={() =>
               handleOpenLink(searchLinks?.justwatch || searchLinks?.google || "")
             }
-            style={({ pressed }) => [
-              styles.primaryLaunchBtn,
-              styles.launchFallbackBtn,
-              pressed && { opacity: 0.9 },
-            ]}
+            className="flex-row items-center justify-center gap-2 rounded-[14px] border border-white/[0.15] bg-white/[0.08] px-[18px] py-3.5 active:opacity-90"
+            style={{
+              boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.35)",
+            }}
           >
-            <MaterialCommunityIcons name="magnify" size={20} color="#FFFFFF" />
-            <Text style={styles.launchFallbackText}>FIND WHERE TO WATCH</Text>
+            <MaterialCommunityIcons name="magnify" size={20} color={palette.white} />
+            <Text className="text-[13px] tracking-[0.6px] font-brandBold text-white">
+              FIND WHERE TO WATCH
+            </Text>
           </Pressable>
         )}
 
         {otherProviders.length > 0 ? (
-          <View style={styles.otherProvidersRow}>
-            <Text style={styles.otherProvidersLabel}>Also on:</Text>
-            <View style={styles.otherProvidersList}>
+          <View className="mt-2.5 flex-row items-center gap-2 px-1">
+            <Text className="text-[11px] font-brandMedium text-zinc-500">
+              Also on:
+            </Text>
+            <View className="flex-row flex-wrap items-center gap-1.5">
               {otherProviders.map((prov) => (
                 <Pressable
                   key={prov.provider_id}
@@ -298,9 +319,11 @@ export default function ShowtimeHub({
                       providers?.justwatch_link || searchLinks?.justwatch || "",
                     )
                   }
-                  style={styles.otherProviderPill}
+                  className="rounded-[6px] border border-white/[0.08] bg-white/[0.06] px-2 py-[3px]"
                 >
-                  <Text style={styles.otherProviderName}>{prov.name}</Text>
+                  <Text className="text-[11px] font-brandSemiBold text-zinc-300">
+                    {prov.name}
+                  </Text>
                 </Pressable>
               ))}
             </View>
@@ -309,86 +332,91 @@ export default function ShowtimeHub({
       </View>
 
       {/* 3. SCHEDULE & PRE-SHOW BAR */}
-      <View style={styles.scheduleCard}>
-        <View style={styles.scheduleInfo}>
+      <View className="mx-4 mt-4 flex-row items-center justify-between rounded-[14px] border border-white/[0.07] bg-white/[0.03] px-3.5 py-3">
+        <View className="flex-1 flex-row items-center gap-2.5">
           <MaterialCommunityIcons
             name="clock-outline"
             size={18}
-            color="#A1A1AA"
+            color={palette.zinc400}
           />
-          <View style={styles.scheduleTexts}>
-            <Text style={styles.scheduleMain}>
+          <View className="flex-1">
+            <Text className="text-[13px] font-brandBold text-white">
               {runtimeFormatted ? `${runtimeFormatted}` : "Runtime TBA"}
               {estimatedEndTime ? ` · Finishes ~${estimatedEndTime}` : ""}
             </Text>
-            <Text style={styles.scheduleSub}>Tonight&apos;s Feature Schedule</Text>
+            <Text className="mt-px text-[11px] text-zinc-500">
+              Tonight&apos;s Feature Schedule
+            </Text>
           </View>
         </View>
 
         {trailerKey ? (
           <Pressable
             onPress={handleOpenTrailer}
-            style={({ pressed }) => [
-              styles.preShowTrailerBtn,
-              pressed && { opacity: 0.8 },
-            ]}
+            className="flex-row items-center gap-1 rounded-[8px] border border-white/[0.12] bg-white/[0.08] px-2.5 py-1.5 active:opacity-80"
             accessibilityLabel="Play pre-show trailer"
           >
             <MaterialCommunityIcons
               name="play-circle-outline"
               size={15}
-              color="#FFFFFF"
+              color={palette.white}
             />
-            <Text style={styles.preShowTrailerText}>PRE-SHOW</Text>
+            <Text className="text-[10px] tracking-[0.6px] font-brandBold text-white">
+              PRE-SHOW
+            </Text>
           </Pressable>
         ) : null}
       </View>
 
       {/* 4. POST-SHOW RITUAL & VERDICT */}
-      <View style={styles.verdictSection}>
-        <View style={styles.verdictCard}>
-          <View style={styles.verdictHeader}>
+      <View className="mt-4 items-center px-4">
+        <View className="w-full rounded-[14px] border border-white/[0.08] bg-white/[0.03] p-4">
+          <View className="mb-2 flex-row items-center gap-1.5">
             <MaterialCommunityIcons
               name="star-box-multiple-outline"
               size={17}
               color={theme.colors.gold}
             />
-            <Text style={styles.verdictTitle}>THE NIGHT&apos;S VERDICT</Text>
+            <Text className="text-[11px] tracking-[1px] font-brandBold text-amber-500">
+              THE NIGHT&apos;S VERDICT
+            </Text>
           </View>
 
           {movie.action === "watched" ? (
-            <View style={styles.loggedState}>
-              <View style={styles.loggedIconRow}>
+            <View className="py-1.5">
+              <View className="mb-1 flex-row items-center gap-2">
                 <MaterialCommunityIcons
                   name="check-decagram"
                   size={22}
                   color={theme.colors.success}
                 />
-                <Text style={styles.loggedTitle}>Verdict Recorded</Text>
+                <Text className="text-[15px] font-brandBold text-white">
+                  Verdict Recorded
+                </Text>
               </View>
-              <Text style={styles.loggedSubtitle}>
+              <Text className="text-[12px] leading-[17px] text-zinc-500">
                 Saved to your Journal and added to your Taste DNA.
               </Text>
             </View>
           ) : (
             <>
-              <Text style={styles.verdictPrompt}>
+              <Text className="mb-3.5 text-[13px] leading-[19px] text-zinc-400">
                 When the credits roll, rate tonight&apos;s feature to close the
                 session and calibrate tomorrow&apos;s reel.
               </Text>
               <Pressable
                 onPress={() => setShowVerdictModal(true)}
-                style={({ pressed }) => [
-                  styles.logVerdictBtn,
-                  pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
-                ]}
+                className="h-[46px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-amber-500 active:opacity-90 active:scale-[0.99]"
+                style={{
+                  boxShadow: "0px 4px 8.0px rgba(245, 158, 11, 0.3)",
+                }}
               >
                 <MaterialCommunityIcons
                   name="star-outline"
                   size={18}
-                  color="#121212"
+                  color={palette.obsidian}
                 />
-                <Text style={styles.logVerdictBtnText}>
+                <Text className="text-[12px] tracking-[0.6px] font-brandExtraBold text-surface-obsidian">
                   FINISHED WATCHING? RATE IT
                 </Text>
               </Pressable>
@@ -396,22 +424,22 @@ export default function ShowtimeHub({
           )}
         </View>
 
-        <View style={styles.countdownRow}>
+        <View className="mt-3.5 flex-row items-center gap-1.5">
           <MaterialCommunityIcons
             name="timer-sand"
             size={14}
-            color="#71717A"
+            color={palette.zinc500}
           />
-          <Text style={styles.countdownText}>
+          <Text className="text-[12px] text-zinc-500">
             Next daily reel drops in {countdown}
           </Text>
         </View>
 
         <Pressable
           onPress={() => onOpenDetails(movie)}
-          style={styles.detailsQuietLink}
+          className="mt-[18px] px-3 py-1.5"
         >
-          <Text style={styles.detailsQuietText}>
+          <Text className="text-[12px] text-zinc-500 underline">
             View full film synopsis &amp; cast &rarr;
           </Text>
         </Pressable>
@@ -439,281 +467,3 @@ export default function ShowtimeHub({
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: 60,
-  },
-  heroContainer: {
-    width: SW,
-    height: HERO_H,
-    justifyContent: "flex-end",
-    position: "relative",
-  },
-  heroContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  featureBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    alignSelf: "flex-start",
-    backgroundColor: "#F59E0B",
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 7,
-    marginBottom: 8,
-  },
-  featureBadgeText: {
-    color: "#121212",
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 1,
-  },
-  movieTitle: {
-    color: "#FFFFFF",
-    fontSize: 26,
-    fontWeight: "800",
-    lineHeight: 31,
-    letterSpacing: -0.4,
-  },
-  metaText: {
-    color: "rgba(255, 255, 255, 0.75)",
-    fontSize: 13,
-    fontWeight: "500",
-    marginTop: 6,
-    letterSpacing: 0.2,
-  },
-  directorText: {
-    color: "#A1A1AA",
-    fontSize: 12,
-    fontWeight: "500",
-    marginTop: 3,
-  },
-  launcherSection: {
-    paddingHorizontal: 16,
-    marginTop: 16,
-  },
-  primaryLaunchBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#E50914",
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    shadowColor: "#E50914",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  launchFallbackBtn: {
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
-    justifyContent: "center",
-    gap: 8,
-  },
-  launchFallbackText: {
-    color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-  },
-  playIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  launchBtnTexts: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  launchBtnAction: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.8,
-  },
-  launchBtnProvider: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "800",
-    letterSpacing: -0.2,
-  },
-  otherProvidersRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 10,
-    gap: 8,
-    paddingHorizontal: 4,
-  },
-  otherProvidersLabel: {
-    fontSize: 11,
-    color: "#71717A",
-    fontWeight: "500",
-  },
-  otherProvidersList: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 6,
-  },
-  otherProviderPill: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-  },
-  otherProviderName: {
-    fontSize: 11,
-    color: "#D4D4D8",
-    fontWeight: "600",
-  },
-  scheduleCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderColor: "rgba(255, 255, 255, 0.07)",
-    borderWidth: 1,
-    borderRadius: 14,
-    marginHorizontal: 16,
-    marginTop: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-  },
-  scheduleInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    flex: 1,
-  },
-  scheduleTexts: {
-    flex: 1,
-  },
-  scheduleMain: {
-    color: "#FFFFFF",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  scheduleSub: {
-    color: "#71717A",
-    fontSize: 11,
-    marginTop: 1,
-  },
-  preShowTrailerBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.12)",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  preShowTrailerText: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-  },
-  verdictSection: {
-    paddingHorizontal: 16,
-    marginTop: 16,
-    alignItems: "center",
-  },
-  verdictCard: {
-    width: "100%",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderColor: "rgba(255, 255, 255, 0.08)",
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 16,
-  },
-  verdictHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 8,
-  },
-  verdictTitle: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1,
-    color: "#F59E0B",
-  },
-  verdictPrompt: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: "#A1A1AA",
-    marginBottom: 14,
-  },
-  logVerdictBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    width: "100%",
-    height: 46,
-    borderRadius: 12,
-    backgroundColor: "#F59E0B",
-    shadowColor: "#F59E0B",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  logVerdictBtnText: {
-    color: "#121212",
-    fontSize: 12,
-    fontWeight: "800",
-    letterSpacing: 0.6,
-  },
-  loggedState: {
-    paddingVertical: 6,
-  },
-  loggedIconRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 4,
-  },
-  loggedTitle: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  loggedSubtitle: {
-    color: "#71717A",
-    fontSize: 12,
-    lineHeight: 17,
-  },
-  countdownRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 14,
-  },
-  countdownText: {
-    fontSize: 12,
-    color: "#71717A",
-  },
-  detailsQuietLink: {
-    marginTop: 18,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  detailsQuietText: {
-    fontSize: 12,
-    color: "#71717A",
-    textDecorationLine: "underline",
-  },
-});

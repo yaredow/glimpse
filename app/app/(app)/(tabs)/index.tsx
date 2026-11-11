@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState, type ComponentProps } from "react";
 import {
   Pressable,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -27,6 +26,11 @@ import ActionConfirmModal, {
 import ShowtimeHub from "@/features/movies/components/showtime-hub";
 import { isResolvedAction } from "@/features/movies/utils/deck";
 import { deriveProgramTheme } from "@/features/movies/utils/program";
+import { palette } from "@/lib/theme/colors";
+
+const PILL_SHADOW = {
+  boxShadow: "0px 4px 8.0px rgba(0, 0, 0, 0.3)",
+};
 
 interface GridStateCardProps {
   icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
@@ -46,46 +50,27 @@ function GridStateCard({
   const theme = useAppTheme();
 
   return (
-    <View
-      style={[
-        styles.gridStateCard,
-        {
-          backgroundColor: theme.colors.elevation.level1,
-          borderColor: theme.colors.outlineVariant,
-        },
-      ]}
-    >
+    <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-surface-zinc-900 px-6 py-8">
       <MaterialCommunityIcons
         name={icon}
         size={42}
         color={theme.colors.primary}
-        style={styles.gridStateIcon}
+        style={{ marginBottom: 4 }}
       />
-      <Text style={[styles.gridStateTitle, { color: theme.colors.textPrimary }]}>
+      <Text className="text-center text-[15px] font-brandBold text-white">
         {title}
       </Text>
-      <Text
-        style={[styles.gridStateSubtitle, { color: theme.colors.textSecondary }]}
-      >
+      <Text className="text-center text-[13px] leading-[19px] font-brand text-zinc-400">
         {subtitle}
       </Text>
       {actionLabel && onAction ? (
         <Pressable
           onPress={onAction}
-          style={({ pressed }) => [
-            styles.gridStateAction,
-            {
-              backgroundColor: theme.colors.elevation.level2,
-              borderColor: theme.colors.outlineVariant,
-            },
-            pressed && { opacity: 0.8 },
-          ]}
+          className="mt-3 min-h-[44px] justify-center rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-5 active:opacity-80"
           accessibilityRole="button"
           accessibilityLabel={actionLabel}
         >
-          <Text
-            style={[styles.gridStateActionText, { color: theme.colors.textPrimary }]}
-          >
+          <Text className="text-[13px] font-brandSemiBold text-white">
             {actionLabel}
           </Text>
         </Pressable>
@@ -174,10 +159,10 @@ export default function TodayTab() {
     setActiveIndex(firstUnresolved >= 0 ? firstUnresolved : 0);
   }
 
-  // Reactive Auto-Advancement: If the active movie was resolved externally
-  // (e.g. passed/seen from detail screen), adjust index during render to the next unresolved card.
-  const currentCard = movies[activeIndex];
-  if (currentCard && isResolvedAction(currentCard.action)) {
+  // Reactive Auto-Advancement: if the active card was resolved elsewhere
+  // (e.g. passed/seen from the detail screen), move to the next unresolved one.
+  const activeCard = movies[activeIndex];
+  if (activeCard && isResolvedAction(activeCard.action)) {
     const nextUnresolved = movies.findIndex(
       (m, idx) => idx >= activeIndex && !isResolvedAction(m.action),
     );
@@ -187,11 +172,7 @@ export default function TodayTab() {
       const anyUnresolved = movies.findIndex(
         (m) => !isResolvedAction(m.action),
       );
-      if (anyUnresolved >= 0) {
-        setActiveIndex(anyUnresolved);
-      } else {
-        setActiveIndex(movies.length);
-      }
+      setActiveIndex(anyUnresolved >= 0 ? anyUnresolved : movies.length);
     }
   }
 
@@ -334,12 +315,12 @@ export default function TodayTab() {
         );
         for (const other of otherPicks) {
           if (other.grid_session_id) {
-            recordInteraction.mutate({
+            void recordInteraction.mutateAsync({
               movie_id: other.movie_id,
               action: "revealed",
               grid_session_id: other.grid_session_id,
               grid_position: other.slot_number,
-            });
+            }).catch(() => {});
           }
         }
       } else {
@@ -379,12 +360,12 @@ export default function TodayTab() {
         );
         for (const other of otherPicks) {
           if (other.grid_session_id) {
-            recordInteraction.mutate({
+            void recordInteraction.mutateAsync({
               movie_id: other.movie_id,
               action: "revealed",
               grid_session_id: other.grid_session_id,
               grid_position: other.slot_number,
-            });
+            }).catch(() => {});
           }
         }
       }
@@ -609,10 +590,7 @@ export default function TodayTab() {
 
   if (!isPending && isShowtimeMode && tonightPick) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-        edges={["top"]}
-      >
+      <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
         <ShowtimeHub
           movie={tonightPick}
           onLogWatched={handleLogWatched}
@@ -623,10 +601,7 @@ export default function TodayTab() {
   }
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-      edges={["top"]}
-    >
+    <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
       <ExploreHeader
         syncsRemaining={syncsRemaining}
         onSyncPress={handlePromptSync}
@@ -635,17 +610,15 @@ export default function TodayTab() {
       />
 
       <View
-        style={[
-          styles.mainContent,
-          { paddingBottom: Math.max(insets.bottom, 16) + 64 },
-        ]}
+        className="flex-1 justify-between"
+        style={{ paddingBottom: Math.max(insets.bottom, 16) + 64 }}
       >
         {isPending ? (
-          <View style={styles.deckContainer}>
+          <View className="flex-1 items-center justify-center">
             <SkeletonLoader count={5} />
           </View>
         ) : isError ? (
-          <View style={styles.deckContainer}>
+          <View className="flex-1 items-center justify-center">
             <GridStateCard
               icon="wifi-off"
               title="Couldn&apos;t load tonight&apos;s reel"
@@ -657,7 +630,7 @@ export default function TodayTab() {
             />
           </View>
         ) : movies.length === 0 ? (
-          <View style={styles.deckContainer}>
+          <View className="flex-1 items-center justify-center">
             <GridStateCard
               icon="filmstrip-off"
               title="Tonight&apos;s reel is empty"
@@ -667,7 +640,7 @@ export default function TodayTab() {
             />
           </View>
         ) : (
-          <View style={styles.deckContainer}>
+          <View className="flex-1 items-center justify-center">
             <DeckStack
               movies={movies}
               activeIndex={activeIndex}
@@ -688,26 +661,26 @@ export default function TodayTab() {
         )}
 
         {tonightPick ? (
-          <View style={styles.bottomDock}>
+          <View className="mb-1.5 min-h-[48px] items-center justify-center px-6">
             {tonightPick.action !== "locked_in" ? (
               isViewingTonightPick ? (
-                <View style={styles.dockColumn}>
+                <View className="w-full max-w-[320px] items-center justify-center gap-2">
                   <Pressable
                     onPress={handlePromptLockIn}
-                    style={({ pressed }) => [
-                      styles.lockInPill,
-                      { backgroundColor: theme.colors.primary },
-                      pressed && { opacity: 0.85 },
-                    ]}
+                    className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] bg-primary px-[22px] py-3 active:opacity-85"
+                    style={PILL_SHADOW}
                     accessibilityRole="button"
                     accessibilityLabel={`Lock in ${tonightPick.title}`}
                   >
                     <MaterialCommunityIcons
                       name="movie-play-outline"
                       size={17}
-                      color="#FFFFFF"
+                      color={palette.white}
                     />
-                    <Text style={styles.lockInPillText} numberOfLines={1}>
+                    <Text
+                      className="text-[12px] tracking-[0.8px] font-brandBold text-white"
+                      numberOfLines={1}
+                    >
                       LOCK IN &quot;{tonightPick.title.toUpperCase()}&quot;
                     </Text>
                   </Pressable>
@@ -715,20 +688,12 @@ export default function TodayTab() {
                   {tonightPick.is_dealers_choice ? (
                     <Pressable
                       onPress={handleKeepBrowsing}
-                      style={({ pressed }) => [
-                        styles.browseOthersLink,
-                        pressed && { opacity: 0.6 },
-                      ]}
+                      className="flex-row items-center justify-center gap-1.5 px-3 py-1 active:opacity-60"
                       accessibilityRole="button"
                       accessibilityLabel="Browse other movies in this batch"
                       hitSlop={{ top: 8, bottom: 8, left: 16, right: 16 }}
                     >
-                      <Text
-                        style={[
-                          styles.browseOthersLinkText,
-                          { color: theme.colors.textSecondary },
-                        ]}
-                      >
+                      <Text className="text-[13px] tracking-[0.2px] font-brandMedium text-zinc-400">
                         Browse other movies
                       </Text>
                       <MaterialCommunityIcons
@@ -742,18 +707,8 @@ export default function TodayTab() {
               ) : (
                 <Pressable
                   onPress={handleReturnToPick}
-                  style={({ pressed }) => [
-                    styles.lockInPill,
-                    styles.returnPill,
-                    {
-                      backgroundColor: theme.colors.elevation.level2,
-                      borderColor: theme.colors.outlineVariant,
-                    },
-                    pressed && {
-                      opacity: 0.85,
-                      backgroundColor: theme.colors.elevation.level3,
-                    },
-                  ]}
+                  className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-zinc-850 px-[22px] py-3 active:bg-surface-zinc-800 active:opacity-85"
+                  style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)" }}
                   accessibilityRole="button"
                   accessibilityLabel={
                     tonightPick.is_dealers_choice
@@ -767,10 +722,7 @@ export default function TodayTab() {
                     color={theme.colors.primary}
                   />
                   <Text
-                    style={[
-                      styles.lockInPillText,
-                      { color: theme.colors.textPrimary },
-                    ]}
+                    className="text-[12px] tracking-[0.8px] font-brandBold text-white"
                     numberOfLines={1}
                   >
                     {tonightPick.is_dealers_choice
@@ -780,26 +732,13 @@ export default function TodayTab() {
                 </Pressable>
               )
             ) : (
-              <View
-                style={[
-                  styles.lockedStatusPill,
-                  {
-                    backgroundColor: theme.colors.elevation.level2,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                ]}
-              >
+              <View className="flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-zinc-850 px-[18px] py-2.5">
                 <MaterialCommunityIcons
                   name="check-circle"
                   size={16}
                   color={theme.colors.success}
                 />
-                <Text
-                  style={[
-                    styles.lockedStatusText,
-                    { color: theme.colors.textPrimary },
-                  ]}
-                >
+                <Text className="text-[13px] tracking-[0.2px] font-brandSemiBold text-white">
                   Locked in for tonight
                 </Text>
               </View>
@@ -822,122 +761,3 @@ export default function TodayTab() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  mainContent: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingBottom: 8,
-  },
-  deckContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  gridStateCard: {
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 32,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    borderWidth: 1,
-    maxWidth: 320,
-    width: "100%",
-  },
-  gridStateIcon: {
-    marginBottom: 4,
-  },
-  gridStateTitle: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 15,
-    textAlign: "center",
-  },
-  gridStateSubtitle: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 13,
-    lineHeight: 19,
-    textAlign: "center",
-  },
-  gridStateAction: {
-    marginTop: 12,
-    minHeight: 44,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    borderRadius: 22,
-    borderWidth: 1,
-  },
-  gridStateActionText: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 13,
-  },
-  bottomDock: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    minHeight: 48,
-    marginBottom: 6,
-  },
-  lockInPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-    borderRadius: 24,
-    width: "100%",
-    maxWidth: 320,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  returnPill: {
-    borderWidth: 1,
-    shadowOpacity: 0.15,
-  },
-  lockInPillText: {
-    color: "#FFFFFF",
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 12,
-    letterSpacing: 0.8,
-  },
-  lockedStatusPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  lockedStatusText: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 13,
-    letterSpacing: 0.2,
-  },
-  dockColumn: {
-    width: "100%",
-    maxWidth: 320,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  browseOthersLink: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-  },
-  browseOthersLinkText: {
-    fontFamily: "PlusJakartaSans_500Medium",
-    fontSize: 13,
-    letterSpacing: 0.2,
-  },
-});

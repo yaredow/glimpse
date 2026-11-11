@@ -2,18 +2,11 @@ import {
   useEffect,
   useRef,
   useState,
-  type ComponentRef,
   type ReactNode,
   type RefObject,
 } from "react";
-import {
-  Pressable,
-  TextInput,
-  type TextInputProps,
-  View,
-} from "react-native";
+import { Pressable, TextInput, View } from "react-native";
 import Animated, {
-  interpolate,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
@@ -30,8 +23,13 @@ import {
   UserIcon,
   WarningCircleIcon,
 } from "phosphor-react-native";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
+import { palette } from "@/lib/theme/colors";
+
+type InputRef = React.ComponentRef<typeof TextInput>;
 
 type SupportedAuthIcon =
   | "email"
@@ -54,13 +52,13 @@ interface AuthFieldProps {
   icon?: SupportedAuthIcon | ReactNode;
   placeholder?: string;
   secure?: boolean;
-  inputRef?: RefObject<ComponentRef<typeof TextInput> | null>;
-  autoComplete?: TextInputProps["autoComplete"];
-  textContentType?: TextInputProps["textContentType"];
-  keyboardType?: TextInputProps["keyboardType"];
-  autoCapitalize?: TextInputProps["autoCapitalize"];
+  inputRef?: RefObject<InputRef | null>;
+  autoComplete?: React.ComponentProps<typeof Input>["autoComplete"];
+  textContentType?: React.ComponentProps<typeof Input>["textContentType"];
+  keyboardType?: React.ComponentProps<typeof Input>["keyboardType"];
+  autoCapitalize?: React.ComponentProps<typeof Input>["autoCapitalize"];
   autoCorrect?: boolean;
-  returnKeyType?: TextInputProps["returnKeyType"];
+  returnKeyType?: React.ComponentProps<typeof Input>["returnKeyType"];
   onSubmitEditing?: () => void;
   accessibilityLabel?: string;
   autoFocus?: boolean;
@@ -91,7 +89,7 @@ export default function AuthField({
   passwordRules,
   className,
 }: AuthFieldProps) {
-  const fallbackRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const fallbackRef = useRef<InputRef>(null);
   const ref = inputRef ?? fallbackRef;
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(secure);
@@ -100,12 +98,10 @@ export default function AuthField({
   const shakeAnim = useSharedValue(0);
   const prevErrorRef = useRef<string | undefined>(undefined);
 
-  // Animate focus transition smoothly
   useEffect(() => {
     focusAnim.value = withTiming(focused ? 1 : 0, { duration: 200 });
   }, [focused, focusAnim]);
 
-  // Trigger error shake + haptic notification when an error appears
   useEffect(() => {
     if (error && error !== prevErrorRef.current) {
       shakeAnim.value = withSequence(
@@ -149,15 +145,16 @@ export default function AuthField({
       [defaultBg, focusedBg],
     );
 
-    const shadowOpacity = interpolate(focusAnim.value, [0, 1], [0, 0.25]);
+    const shadowColor = interpolateColor(
+      focusAnim.value,
+      [0, 1],
+      ["rgba(0, 0, 0, 0)", error ? "#EF4444" : "#E50914"],
+    );
 
     return {
       borderColor,
       backgroundColor,
-      shadowColor: error ? "#EF4444" : "#E50914",
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity,
-      shadowRadius: 8,
+      boxShadow: `0px 0px 8px ${shadowColor}`,
       transform: [{ translateX: shakeAnim.value }],
     };
   });
@@ -192,9 +189,9 @@ export default function AuthField({
 
   return (
     <View className={cn("mb-4", className)}>
-      <Text className="text-zinc-300 text-xs font-brandSemiBold mb-2 px-0.5 tracking-wide">
+      <Label className="mb-2 px-0.5 text-zinc-300 text-xs font-brandSemiBold tracking-wide">
         {label}
-      </Text>
+      </Label>
 
       <Animated.View
         style={[
@@ -212,7 +209,7 @@ export default function AuthField({
       >
         {renderIcon()}
 
-        <TextInput
+        <Input
           ref={ref}
           value={value}
           onChangeText={onChangeText}
@@ -225,7 +222,7 @@ export default function AuthField({
             onBlur?.();
           }}
           placeholder={placeholder}
-          placeholderTextColor="#71717A"
+          placeholderTextColor={palette.zinc500}
           onSubmitEditing={onSubmitEditing}
           secureTextEntry={secure ? hidden : false}
           autoComplete={autoComplete}
@@ -237,7 +234,7 @@ export default function AuthField({
           accessibilityLabel={accessibilityLabel ?? label}
           autoFocus={autoFocus}
           passwordRules={passwordRules}
-          className="flex-1 text-white text-[15px] font-brandMedium h-full py-0"
+          className="h-full flex-1 border-0 bg-transparent px-0 py-0 text-[15px] text-white shadow-none font-brandMedium"
         />
 
         {secure ? (
@@ -252,9 +249,9 @@ export default function AuthField({
             accessibilityLabel={hidden ? "Show password" : "Hide password"}
           >
             {hidden ? (
-              <EyeSlashIcon size={20} color="#71717A" />
+              <EyeSlashIcon size={20} color={palette.zinc500} />
             ) : (
-              <EyeIcon size={20} color="#A1A1AA" />
+              <EyeIcon size={20} color={palette.zinc400} />
             )}
           </Pressable>
         ) : null}
@@ -262,10 +259,10 @@ export default function AuthField({
 
       {error ? (
         <View
-          className="flex-row items-center gap-1.5 mt-2 px-1"
+          className="mt-2 flex-row items-center gap-1.5 px-1"
           accessibilityLiveRegion="polite"
         >
-          <WarningCircleIcon size={14} color="#EF4444" weight="fill" />
+          <WarningCircleIcon size={14} color={palette.error} weight="fill" />
           <Text className="text-destructive text-xs font-brandMedium">
             {error}
           </Text>
@@ -273,7 +270,7 @@ export default function AuthField({
       ) : null}
 
       {hint && !error ? (
-        <Text className="text-zinc-500 text-[11px] mt-1.5 px-1 leading-4">
+        <Text className="mt-1.5 px-1 text-[11px] leading-4 text-zinc-500">
           {hint}
         </Text>
       ) : null}

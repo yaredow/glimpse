@@ -1,14 +1,11 @@
 import { useState, useMemo } from "react";
 import {
-  Modal,
-  StyleSheet,
   View,
   Text,
   Pressable,
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import {
   XIcon,
   StarIcon,
@@ -20,10 +17,16 @@ import * as Haptics from "expo-haptics";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 import { useAppTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { updatePreferences } from "@/features/onboarding/services/onboarding.service";
 import { useOnboardingData } from "@/features/onboarding/hooks/queries/use-onboarding-data";
 import { authKeys } from "@/features/auth/constants/auth.keys";
-import { moviesKeys } from "@/features/movies/consants/movies.keys";
+import { moviesKeys } from "@/features/movies/constants/movies.keys";
 import type {
   UserPreference,
   FinishOnboardingPayload,
@@ -31,6 +34,7 @@ import type {
   EraPreset,
 } from "@/features/onboarding/types/onboarding.type";
 import { getErrorMessage } from "@/lib/error";
+import { palette } from "@/lib/theme/colors";
 
 interface EditPreferencesModalProps {
   visible: boolean;
@@ -70,36 +74,23 @@ export default function EditPreferencesModal({
   onClose,
   currentPreferences,
 }: EditPreferencesModalProps) {
-  const theme = useAppTheme();
-
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
-        <View
-          style={[
-            styles.sheetContainer,
-            { backgroundColor: theme.colors.elevation.level1 },
-          ]}
-        >
-          <SafeAreaView edges={["bottom"]} style={styles.safeArea}>
-            <View style={styles.dragHandle} />
-            {visible ? (
-              <EditPreferencesForm
-                key={visible ? "open" : "closed"}
-                currentPreferences={currentPreferences}
-                onClose={onClose}
-              />
-            ) : null}
-          </SafeAreaView>
-        </View>
-      </View>
-    </Modal>
+    <Dialog open={visible} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent className="w-[92%] max-w-[420px] gap-4 rounded-[24px] p-5">
+        <DialogTitle className="text-center text-[18px] leading-7">
+          Film Preferences
+        </DialogTitle>
+        <ScrollView className="max-h-[70vh]">
+          {visible ? (
+            <EditPreferencesForm
+              key={visible ? "open" : "closed"}
+              currentPreferences={currentPreferences}
+              onClose={onClose}
+            />
+          ) : null}
+        </ScrollView>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -248,19 +239,12 @@ function EditPreferencesForm({
 
   return (
     <>
-      <View style={styles.header}>
+      <View className="flex-row items-center justify-between border-b border-white/[0.06] px-5 py-3.5">
         <View>
-          <Text
-            style={[styles.headerTitle, { color: theme.colors.textPrimary }]}
-          >
+          <Text className="text-[20px] tracking-[-0.3px] font-brandBold text-white">
             Film Preferences
           </Text>
-          <Text
-            style={[
-              styles.headerSubtitle,
-              { color: theme.colors.textSecondary },
-            ]}
-          >
+          <Text className="mt-0.5 text-[12.5px] font-brand text-zinc-400">
             Tune your recommendation engine
           </Text>
         </View>
@@ -268,10 +252,7 @@ function EditPreferencesForm({
         <Pressable
           onPress={onClose}
           hitSlop={12}
-          style={[
-            styles.closeButton,
-            { backgroundColor: theme.colors.elevation.level2 },
-          ]}
+          className="h-8 w-8 items-center justify-center rounded-full bg-surface-zinc-850"
         >
           <XIcon
             size={16}
@@ -282,38 +263,29 @@ function EditPreferencesForm({
       </View>
 
       {dataLoading ? (
-        <View style={styles.loadingContainer}>
+        <View className="items-center justify-center gap-3 py-[60px]">
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text
-            style={[styles.loadingText, { color: theme.colors.textMuted }]}
-          >
+          <Text className="text-[13px] font-brand text-zinc-500">
             Loading preferences...
           </Text>
         </View>
       ) : (
         <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          className="max-h-[520px]"
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 16,
+            paddingBottom: 24,
+            gap: 22,
+          }}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text
-                style={[
-                  styles.sectionTitle,
-                  { color: theme.colors.textPrimary },
-                ]}
-              >
+          <View className="gap-2">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
                 Genre Filters
               </Text>
-              <Text
-                style={[
-                  styles.sectionCounter,
-                  {
-                    color: theme.colors.textMuted,
-                  },
-                ]}
-              >
+              <Text className="text-[12px] font-brandSemiBold text-zinc-500">
                 {genreTab === "favorites"
                   ? `${favorites.length} selected`
                   : `${excluded.length} excluded`}
@@ -321,30 +293,17 @@ function EditPreferencesForm({
             </View>
 
             {/* Segmented Tab Switcher */}
-            <View
-              style={[
-                styles.segmentContainer,
-                {
-                  backgroundColor: theme.colors.elevation.level2,
-                  borderColor: theme.colors.outlineVariant,
-                },
-              ]}
-            >
+            <View className="my-1 flex-row gap-1 rounded-[12px] border border-white/[0.08] bg-surface-zinc-850 p-[3px]">
               <Pressable
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setGenreTab("favorites");
                 }}
-                style={[
-                  styles.segmentTab,
-                  genreTab === "favorites" && [
-                    styles.segmentTabActive,
-                    {
-                      backgroundColor: "rgba(229, 9, 20, 0.18)",
-                      borderColor: "rgba(229, 9, 20, 0.45)",
-                    },
-                  ],
-                ]}
+                className={cn(
+                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-[9px] border border-transparent py-[9px]",
+                  genreTab === "favorites" &&
+                    "border-primary/45 bg-primary/[0.18]",
+                )}
               >
                 <StarIcon
                   size={14}
@@ -356,19 +315,12 @@ function EditPreferencesForm({
                   weight={genreTab === "favorites" ? "fill" : "regular"}
                 />
                 <Text
-                  style={[
-                    styles.segmentTabText,
-                    {
-                      color:
-                        genreTab === "favorites"
-                          ? "#FFFFFF"
-                          : theme.colors.textSecondary,
-                      fontFamily:
-                        genreTab === "favorites"
-                          ? "PlusJakartaSans_600SemiBold"
-                          : "PlusJakartaSans_400Regular",
-                    },
-                  ]}
+                  className={cn(
+                    "text-[12.5px]",
+                    genreTab === "favorites"
+                      ? "font-brandSemiBold text-white"
+                      : "font-brand text-zinc-400",
+                  )}
                 >
                   Favorite ({favorites.length})
                 </Text>
@@ -379,16 +331,11 @@ function EditPreferencesForm({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setGenreTab("excluded");
                 }}
-                style={[
-                  styles.segmentTab,
-                  genreTab === "excluded" && [
-                    styles.segmentTabActive,
-                    {
-                      backgroundColor: "rgba(239, 68, 68, 0.15)",
-                      borderColor: "rgba(239, 68, 68, 0.4)",
-                    },
-                  ],
-                ]}
+                className={cn(
+                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-[9px] border border-transparent py-[9px]",
+                  genreTab === "excluded" &&
+                    "border-destructive/40 bg-destructive/[0.15]",
+                )}
               >
                 <XCircleIcon
                   size={14}
@@ -400,37 +347,25 @@ function EditPreferencesForm({
                   weight={genreTab === "excluded" ? "fill" : "regular"}
                 />
                 <Text
-                  style={[
-                    styles.segmentTabText,
-                    {
-                      color:
-                        genreTab === "excluded"
-                          ? "#FFFFFF"
-                          : theme.colors.textSecondary,
-                      fontFamily:
-                        genreTab === "excluded"
-                          ? "PlusJakartaSans_600SemiBold"
-                          : "PlusJakartaSans_400Regular",
-                    },
-                  ]}
+                  className={cn(
+                    "text-[12.5px]",
+                    genreTab === "excluded"
+                      ? "font-brandSemiBold text-white"
+                      : "font-brand text-zinc-400",
+                  )}
                 >
                   Excluded ({excluded.length})
                 </Text>
               </Pressable>
             </View>
 
-            <Text
-              style={[
-                styles.sectionHint,
-                { color: theme.colors.textSecondary },
-              ]}
-            >
+            <Text className="mb-1 text-[12px] leading-4 font-brand text-zinc-400">
               {genreTab === "favorites"
                 ? "Select the genres you want prioritized in your nightly curation."
                 : "Films tagged with these genres will never be suggested in your reel."}
             </Text>
 
-            <View style={styles.chipGrid}>
+            <View className="flex-row flex-wrap gap-2">
               {genres.map((genre) => {
                 if (genreTab === "favorites") {
                   const isSelected = favorites.includes(genre.id);
@@ -439,50 +374,33 @@ function EditPreferencesForm({
                     <Pressable
                       key={genre.id}
                       onPress={() => toggleFavorite(genre.id)}
-                      style={[
-                        styles.chip,
+                      className={cn(
+                        "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
                         isSelected
-                          ? [
-                              styles.chipActive,
-                              {
-                                borderColor: theme.colors.primary,
-                                backgroundColor: "rgba(229, 9, 20, 0.16)",
-                              },
-                            ]
-                          : [
-                              styles.chipInactive,
-                              {
-                                borderColor: theme.colors.outlineVariant,
-                                backgroundColor: theme.colors.elevation.level2,
-                              },
-                            ],
-                      ]}
+                          ? "border-[1.5px] border-primary bg-primary/[0.16]"
+                          : "border border-white/[0.08] bg-surface-zinc-850",
+                      )}
                     >
                       <Text
-                        style={[
-                          styles.chipText,
-                          {
-                            color: isSelected
-                              ? "#FFFFFF"
-                              : isExcluded
-                              ? theme.colors.textMuted
-                              : theme.colors.textSecondary,
-                            fontFamily: isSelected
-                              ? "PlusJakartaSans_600SemiBold"
-                              : "PlusJakartaSans_400Regular",
-                          },
-                        ]}
+                        className={cn(
+                          "text-[12.5px]",
+                          isSelected
+                            ? "font-brandSemiBold text-white"
+                            : isExcluded
+                              ? "font-brand text-zinc-500"
+                              : "font-brand text-zinc-400",
+                        )}
                       >
                         {genre.name}
                       </Text>
-                      {isSelected && (
+                      {isSelected ? (
                         <CheckIcon
                           size={13}
                           color={theme.colors.primary}
                           weight="bold"
-                          style={styles.chipCheck}
+                          style={{ marginLeft: 2 }}
                         />
-                      )}
+                      ) : null}
                     </Pressable>
                   );
                 } else {
@@ -492,50 +410,33 @@ function EditPreferencesForm({
                     <Pressable
                       key={genre.id}
                       onPress={() => toggleExcluded(genre.id)}
-                      style={[
-                        styles.chip,
+                      className={cn(
+                        "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
                         isExcluded
-                          ? [
-                              styles.chipExcluded,
-                              {
-                                borderColor: "rgba(239, 68, 68, 0.4)",
-                                backgroundColor: "rgba(239, 68, 68, 0.12)",
-                              },
-                            ]
-                          : [
-                              styles.chipInactive,
-                              {
-                                borderColor: theme.colors.outlineVariant,
-                                backgroundColor: theme.colors.elevation.level2,
-                              },
-                            ],
-                      ]}
+                          ? "border-[1.5px] border-destructive/40 bg-destructive/[0.12]"
+                          : "border border-white/[0.08] bg-surface-zinc-850",
+                      )}
                     >
                       <Text
-                        style={[
-                          styles.chipText,
-                          {
-                            color: isExcluded
-                              ? theme.colors.error
-                              : isFav
-                              ? theme.colors.textMuted
-                              : theme.colors.textSecondary,
-                            textDecorationLine: isExcluded
-                              ? "line-through"
-                              : "none",
-                          },
-                        ]}
+                        className={cn(
+                          "text-[12.5px]",
+                          isExcluded
+                            ? "font-brand text-destructive line-through"
+                            : isFav
+                              ? "font-brand text-zinc-500"
+                              : "font-brand text-zinc-400",
+                        )}
                       >
                         {genre.name}
                       </Text>
-                      {isExcluded && (
+                      {isExcluded ? (
                         <XIcon
                           size={13}
                           color={theme.colors.error}
                           weight="bold"
-                          style={styles.chipCheck}
+                          style={{ marginLeft: 2 }}
                         />
-                      )}
+                      ) : null}
                     </Pressable>
                   );
                 }
@@ -543,24 +444,14 @@ function EditPreferencesForm({
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: theme.colors.textPrimary },
-              ]}
-            >
+          <View className="gap-2">
+            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
               Release Era
             </Text>
-            <Text
-              style={[
-                styles.sectionHint,
-                { color: theme.colors.textSecondary },
-              ]}
-            >
+            <Text className="mb-1 text-[12px] leading-4 font-brand text-zinc-400">
               Focus your reel on specific cinematic eras.
             </Text>
-            <View style={styles.pillList}>
+            <View className="gap-2">
               {eras.map((era) => {
                 const isSelected =
                   (minYear === era.min_year && maxYear === era.max_year) ||
@@ -574,47 +465,25 @@ function EditPreferencesForm({
                       setMinYear(era.min_year);
                       setMaxYear(era.max_year);
                     }}
-                    style={[
-                      styles.eraPill,
+                    className={cn(
+                      "flex-row items-center justify-between rounded-[12px] border px-4 py-3",
                       isSelected
-                        ? [
-                            styles.pillActive,
-                            {
-                              borderColor: theme.colors.primary,
-                              backgroundColor: "rgba(229, 9, 20, 0.12)",
-                            },
-                          ]
-                        : [
-                            styles.pillInactive,
-                            {
-                              borderColor: theme.colors.outlineVariant,
-                              backgroundColor: theme.colors.elevation.level2,
-                            },
-                          ],
-                    ]}
+                        ? "border-[1.5px] border-primary bg-primary/[0.12]"
+                        : "border border-white/[0.08] bg-surface-zinc-850",
+                    )}
                   >
-                    <View style={styles.eraTextGroup}>
+                    <View className="flex-1 pr-2">
                       <Text
-                        style={[
-                          styles.pillLabel,
-                          {
-                            color: isSelected
-                              ? "#FFFFFF"
-                              : theme.colors.textPrimary,
-                            fontFamily: isSelected
-                              ? "PlusJakartaSans_600SemiBold"
-                              : "PlusJakartaSans_400Regular",
-                          },
-                        ]}
+                        className={cn(
+                          "text-[13.5px]",
+                          isSelected
+                            ? "font-brandSemiBold text-white"
+                            : "font-brand text-white",
+                        )}
                       >
                         {era.label}
                       </Text>
-                      <Text
-                        style={[
-                          styles.pillDesc,
-                          { color: theme.colors.textMuted },
-                        ]}
-                      >
+                      <Text className="mt-0.5 text-[11px] font-brand text-zinc-500">
                         {desc}
                       </Text>
                     </View>
@@ -631,24 +500,14 @@ function EditPreferencesForm({
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: theme.colors.textPrimary },
-              ]}
-            >
+          <View className="gap-2">
+            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
               Minimum Rating
             </Text>
-            <Text
-              style={[
-                styles.sectionHint,
-                { color: theme.colors.textSecondary },
-              ]}
-            >
+            <Text className="mb-1 text-[12px] leading-4 font-brand text-zinc-400">
               Set a quality threshold based on community and critic ratings.
             </Text>
-            <View style={styles.rowGrid}>
+            <View className="flex-row gap-2">
               {RATING_PRESETS.map((rating) => {
                 const isSelected = minRating === rating.value;
                 return (
@@ -658,37 +517,20 @@ function EditPreferencesForm({
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setMinRating(rating.value);
                     }}
-                    style={[
-                      styles.ratingPill,
+                    className={cn(
+                      "flex-1 items-center justify-center rounded-[10px] border py-[11px]",
                       isSelected
-                        ? [
-                            styles.pillActive,
-                            {
-                              borderColor: theme.colors.gold,
-                              backgroundColor: "rgba(245, 158, 11, 0.15)",
-                            },
-                          ]
-                        : [
-                            styles.pillInactive,
-                            {
-                              borderColor: theme.colors.outlineVariant,
-                              backgroundColor: theme.colors.elevation.level2,
-                            },
-                          ],
-                    ]}
+                        ? "border-[1.5px] border-amber-500 bg-amber-500/[0.15]"
+                        : "border border-white/[0.08] bg-surface-zinc-850",
+                    )}
                   >
                     <Text
-                      style={[
-                        styles.ratingLabel,
-                        {
-                          color: isSelected
-                            ? "#FFFFFF"
-                            : theme.colors.textSecondary,
-                          fontFamily: isSelected
-                            ? "PlusJakartaSans_600SemiBold"
-                            : "PlusJakartaSans_400Regular",
-                        },
-                      ]}
+                      className={cn(
+                        "text-[12.5px]",
+                        isSelected
+                          ? "font-brandSemiBold text-white"
+                          : "font-brand text-zinc-400",
+                      )}
                     >
                       {rating.label}
                     </Text>
@@ -698,72 +540,45 @@ function EditPreferencesForm({
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: theme.colors.textPrimary },
-              ]}
-            >
+          <View className="gap-2">
+            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
               Languages
             </Text>
-            <Text
-              style={[
-                styles.sectionHint,
-                { color: theme.colors.textSecondary },
-              ]}
-            >
+            <Text className="mb-1 text-[12px] leading-4 font-brand text-zinc-400">
               Select the original languages you prefer to watch.
             </Text>
-            <View style={styles.chipGrid}>
+            <View className="flex-row flex-wrap gap-2">
               {availableLanguages.map((lang) => {
                 const isSelected = languages.includes(lang.code);
                 return (
                   <Pressable
                     key={lang.code}
                     onPress={() => toggleLanguage(lang.code)}
-                    style={[
-                      styles.chip,
+                    className={cn(
+                      "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
                       isSelected
-                        ? [
-                            styles.chipActive,
-                            {
-                              borderColor: theme.colors.primary,
-                              backgroundColor: "rgba(229, 9, 20, 0.16)",
-                            },
-                          ]
-                        : [
-                            styles.chipInactive,
-                            {
-                              borderColor: theme.colors.outlineVariant,
-                              backgroundColor: theme.colors.elevation.level2,
-                            },
-                          ],
-                    ]}
+                        ? "border-[1.5px] border-primary bg-primary/[0.16]"
+                        : "border border-white/[0.08] bg-surface-zinc-850",
+                    )}
                   >
                     <Text
-                      style={[
-                        styles.chipText,
-                        {
-                          color: isSelected
-                            ? "#FFFFFF"
-                            : theme.colors.textSecondary,
-                          fontFamily: isSelected
-                            ? "PlusJakartaSans_600SemiBold"
-                            : "PlusJakartaSans_400Regular",
-                        },
-                      ]}
+                      className={cn(
+                        "text-[12.5px]",
+                        isSelected
+                          ? "font-brandSemiBold text-white"
+                          : "font-brand text-zinc-400",
+                      )}
                     >
                       {lang.label}
                     </Text>
-                    {isSelected && (
+                    {isSelected ? (
                       <CheckIcon
                         size={13}
                         color={theme.colors.primary}
                         weight="bold"
-                        style={styles.chipCheck}
+                        style={{ marginLeft: 2 }}
                       />
-                    )}
+                    ) : null}
                   </Pressable>
                 );
               })}
@@ -772,29 +587,24 @@ function EditPreferencesForm({
         </ScrollView>
       )}
 
-      <View
-        style={[
-          styles.footer,
-          {
-            backgroundColor: theme.colors.elevation.level1,
-            borderColor: theme.colors.outlineVariant,
-          },
-        ]}
-      >
+      <View className="border-t border-white/[0.08] bg-surface-zinc-900 px-5 pt-3 pb-2">
         <Pressable
           onPress={handleSave}
           disabled={isPending || dataLoading}
-          style={({ pressed }) => [
-            styles.saveButton,
-            { backgroundColor: theme.colors.primary },
-            pressed && { opacity: 0.9 },
-            (isPending || dataLoading) && { opacity: 0.6 },
-          ]}
+          className={cn(
+            "h-[50px] items-center justify-center rounded-[12px] bg-primary active:opacity-90",
+            (isPending || dataLoading) && "opacity-60",
+          )}
+          accessibilityRole="button"
+          accessibilityLabel="Save preferences"
+          accessibilityState={{ disabled: isPending || dataLoading, busy: isPending }}
         >
           {isPending ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={palette.white} />
           ) : (
-            <Text style={styles.saveButtonText}>SAVE PREFERENCES</Text>
+            <Text className="text-[13.5px] tracking-[0.6px] font-brandBold text-white">
+              SAVE PREFERENCES
+            </Text>
           )}
         </Pressable>
       </View>
@@ -802,212 +612,3 @@ function EditPreferencesForm({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.75)",
-    justifyContent: "flex-end",
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-  },
-  sheetContainer: {
-    maxHeight: "92%",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-  },
-  safeArea: {
-    maxHeight: "100%",
-  },
-  dragHandle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    alignSelf: "center",
-    marginTop: 10,
-    marginBottom: 6,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.06)",
-  },
-  headerTitle: {
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 20,
-    letterSpacing: -0.3,
-  },
-  headerSubtitle: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 12.5,
-    marginTop: 2,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  loadingContainer: {
-    paddingVertical: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  loadingText: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 13,
-  },
-  scroll: {
-    maxHeight: 520,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 24,
-    gap: 22,
-  },
-  section: {
-    gap: 8,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  sectionTitle: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 14,
-    letterSpacing: 0.2,
-  },
-  sectionCounter: {
-    fontFamily: "PlusJakartaSans_600SemiBold",
-    fontSize: 12,
-  },
-  segmentContainer: {
-    flexDirection: "row",
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 3,
-    gap: 4,
-    marginVertical: 4,
-  },
-  segmentTab: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 9,
-    borderRadius: 9,
-    gap: 6,
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  segmentTabActive: {
-    borderWidth: 1,
-  },
-  segmentTabText: {
-    fontSize: 12.5,
-  },
-  sectionHint: {
-    fontFamily: "PlusJakartaSans_400Regular",
-    fontSize: 12,
-    lineHeight: 16,
-    marginBottom: 4,
-  },
-  chipGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 13,
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
-    gap: 5,
-  },
-  chipActive: {
-    borderWidth: 1.5,
-  },
-  chipExcluded: {
-    borderWidth: 1.5,
-  },
-  chipInactive: {},
-  chipText: {
-    fontSize: 12.5,
-  },
-  chipCheck: {
-    marginLeft: 2,
-  },
-  pillList: {
-    gap: 8,
-  },
-  eraPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  eraTextGroup: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  pillActive: {
-    borderWidth: 1.5,
-  },
-  pillInactive: {},
-  pillLabel: {
-    fontSize: 13.5,
-  },
-  pillDesc: {
-    fontSize: 11,
-    marginTop: 2,
-  },
-  rowGrid: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  ratingPill: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 11,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  ratingLabel: {
-    fontSize: 12.5,
-  },
-  footer: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-    borderTopWidth: 1,
-  },
-  saveButton: {
-    height: 50,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  saveButtonText: {
-    color: "#FFFFFF",
-    fontFamily: "PlusJakartaSans_700Bold",
-    fontSize: 13.5,
-    letterSpacing: 0.6,
-  },
-});

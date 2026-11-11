@@ -1,8 +1,8 @@
 import { Stack } from "expo-router";
-import { useTheme } from "react-native-paper";
+import { useAppTheme } from "@/lib/theme";
 
 export default function AppLayout() {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   return (
     <Stack

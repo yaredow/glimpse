@@ -1,8 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { ScrollView, Text, View, Pressable } from "react-native";
 import { Button } from "@/components/ui/button";
 import { typeClasses } from "@/lib/theme/typography";
-import { palette } from "@/lib/theme/colors";
 import { cn } from "@/lib/utils";
 import {
   CassetteTapeIcon,
@@ -16,6 +15,7 @@ import {
 } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { EraPreset } from "../types/onboarding.type";
+import { palette } from "@/lib/theme/colors";
 
 interface EraSelectorProps {
   eras: EraPreset[];
@@ -99,6 +99,9 @@ export default function EraSelector({
           return (
             <Pressable
               key={era.label}
+              accessibilityRole="radio"
+              accessibilityLabel={era.label}
+              accessibilityState={{ selected: isSelected }}
               onPress={() => handleSelect(era)}
               className={cn(
                 "rounded-lg border-[1.5px] p-4",
