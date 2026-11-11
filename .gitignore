@@ -40,3 +40,5 @@ ios/
 Thumbs.db
 *.swp
 *.swo
+.idea/
+*.iml
