@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 18,
     letterSpacing: -0.3,
   },
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   subLabel: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 11,
     letterSpacing: 1.2,
     marginBottom: 12,
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#10B981",
   },
   liveText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 10,
     color: "#10B981",
     letterSpacing: 0.3,
@@ -521,12 +521,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   providerName: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 13.5,
     letterSpacing: 0.1,
   },
   providerActionText: {
-    fontFamily: "Inter_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     fontSize: 11,
     marginTop: 2,
     letterSpacing: 0.2,
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   noticeText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 12.5,
     lineHeight: 18,
     flex: 1,
@@ -578,18 +578,18 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.15)",
   },
   qualityText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 11,
     color: "#FFFFFF",
     letterSpacing: 0.5,
   },
   torrentType: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12,
     letterSpacing: 0.5,
   },
   torrentSize: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 12,
     marginTop: 4,
   },
@@ -616,7 +616,7 @@ const styles = StyleSheet.create({
   },
   magnetBtnText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 11,
     letterSpacing: 0.6,
   },
@@ -638,7 +638,7 @@ const styles = StyleSheet.create({
   },
   searchPillText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12.5,
     letterSpacing: 0.2,
   },
@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   loadingText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
   },
   errorBox: {
@@ -656,7 +656,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   errorText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
   },
 });

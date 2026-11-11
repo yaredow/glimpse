@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 18,
     letterSpacing: -0.3,
   },
@@ -153,17 +153,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statLabel: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 10,
     letterSpacing: 1.2,
     marginBottom: 3,
   },
   statValue: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 17,
   },
   runtimeUnavailable: {
-    fontFamily: "Inter_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     fontSize: 13,
     textAlign: "center",
     paddingBottom: 14,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     height: 28,
   },
   tagline: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 14,
     lineHeight: 20,
     fontStyle: "italic",
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(255, 255, 255, 0.06)",
   },
   synopsis: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
     lineHeight: 19,
     marginTop: 8,
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   genreBadgeText: {
-    fontFamily: "Inter_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     fontSize: 11,
     letterSpacing: 0.2,
   },

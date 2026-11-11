@@ -17,8 +17,8 @@ export default function FavoriteGenresScreen() {
     <StepLayout
       step={0}
       totalSteps={4}
-      title="Your Film DNA"
-      subtitle="Choose at least 2 genres that define what you love to watch"
+      title="Pick your favourites"
+      subtitle="Choose at least two genres - we'll take it from there"
       onBack={() => {
         if (router.canGoBack()) {
           router.back();

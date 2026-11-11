@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   placeholderTitle: {
     color: "#fff",
     fontSize: 20,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     textAlign: "center",
   },
   badgeContainer: {
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   pickBadgeText: {
     color: "#f59e0b",
     fontSize: 11,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     letterSpacing: 0.8,
   },
   lockedBadge: {
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   lockedBadgeText: {
     color: "#f59e0b",
     fontSize: 11,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     letterSpacing: 0.8,
   },
   gradient: {
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   title: {
     color: "#fff",
     fontSize: 24,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     letterSpacing: -0.5,
   },
   metaRow: {
@@ -270,12 +270,12 @@ const styles = StyleSheet.create({
   ratingText: {
     color: "#FFD700",
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   metaYear: {
     color: "#aaa",
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
   },
   metaDot: {
     color: "#666",
@@ -284,13 +284,13 @@ const styles = StyleSheet.create({
   metaSlot: {
     color: "#888",
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
   },
   tagline: {
     color: "#ccc",
     fontSize: 13,
     fontStyle: "italic",
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     lineHeight: 18,
   },
   genreRow: {
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   genreText: {
     color: "#f59e0b",
     fontSize: 10,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   detailsPromptText: {
     color: "#888",
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
   },
   actionsContainer: {
     width: CARD_W,
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   lockInBtnText: {
     color: "#000",
     fontSize: 15,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     letterSpacing: 0.3,
   },
   btnDisabled: {
@@ -367,12 +367,12 @@ const styles = StyleSheet.create({
   syncBtnText: {
     color: "#E50914",
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   noSyncsText: {
     color: "#666",
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
   },
   celebrationBox: {
     width: "100%",
@@ -392,11 +392,11 @@ const styles = StyleSheet.create({
   celebrationTitle: {
     color: "#f59e0b",
     fontSize: 15,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
   celebrationSubtitle: {
     color: "#aaa",
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
   },
 });

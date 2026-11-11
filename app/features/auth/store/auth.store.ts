@@ -7,6 +7,7 @@ interface AuthState {
   refreshToken: string | null;
   isAuthenticated: boolean;
   isRestoring: boolean;
+  hasAuthenticated: boolean;
   setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
   logout: () => Promise<void>;
   restoreToken: () => Promise<void>;
@@ -16,13 +17,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  hasAuthenticated: false,
 
   isRestoring: true,
 
   setTokens: async (accessToken, refreshToken) => {
     await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
     await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
-    set({ accessToken, refreshToken, isAuthenticated: true });
+    set({ accessToken, refreshToken, isAuthenticated: true, hasAuthenticated: true });
   },
 
   logout: async () => {
@@ -35,10 +37,12 @@ export const useAuthStore = create<AuthState>()((set) => ({
     try {
       const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
       const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+      const hasSession = !!accessToken && !!refreshToken;
       set({
         accessToken,
         refreshToken,
-        isAuthenticated: !!accessToken && !!refreshToken,
+        isAuthenticated: hasSession,
+        hasAuthenticated: hasSession,
         isRestoring: false,
       });
     } catch {

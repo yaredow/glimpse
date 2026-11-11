@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   movieTitle: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 16,
     letterSpacing: -0.2,
     textAlign: "center",
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   badgeText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 10,
     letterSpacing: 1,
   },
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: "#D4D4D8",
-    fontFamily: "Inter_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     fontSize: 12,
     letterSpacing: 0.2,
   },
@@ -310,13 +310,13 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 16,
     marginTop: 4,
   },
   errorDescription: {
     color: "#A1A1AA",
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
     textAlign: "center",
     lineHeight: 18,
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   },
   errorDirectText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 12,
     letterSpacing: 0.4,
   },
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
   },
   youtubeAppBtnText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 13,
   },
 });

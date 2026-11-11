@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   screenTitle: {
-    fontFamily: "Inter_900Black",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     fontSize: 22,
     letterSpacing: 2,
   },
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   screenSubtitle: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 12,
     marginTop: 2,
   },
@@ -485,11 +485,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statValue: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 17,
   },
   statLabel: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 10,
     letterSpacing: 0.5,
     marginTop: 2,
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   filterText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12,
   },
   columnWrapper: {
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   placeholderTitle: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 10,
     textAlign: "center",
     marginTop: 4,
@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 9,
   },
   cardInfo: {
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   movieTitle: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 11,
   },
   userRatingRow: {
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   userRatingText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 9,
   },
   centered: {
@@ -592,20 +592,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   loadingText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 14,
   },
   emptyIcon: {
     marginBottom: 12,
   },
   emptyTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 17,
     marginBottom: 6,
     textAlign: "center",
   },
   emptySubtitle: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
     textAlign: "center",
     lineHeight: 19,
@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   exploreBtnText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 13,
   },
 });

@@ -74,7 +74,7 @@ function ReviewCard({ review }: { review: MovieReview }) {
 }
 
 export default function MovieReviews({ movieId }: MovieReviewsProps) {
-  const { data, isPending, isError } = useMovieReviews(movieId);
+  const { data, isPending, isError, refetch } = useMovieReviews(movieId);
   const reviews = data?.reviews ?? [];
 
   if (isPending) {
@@ -86,7 +86,33 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
     );
   }
 
-  if (isError || reviews.length === 0) {
+  if (isError && reviews.length === 0) {
+    return (
+      <View style={styles.emptyBox}>
+        <MaterialCommunityIcons
+          name="alert-circle-outline"
+          size={24}
+          color="#EF4444"
+        />
+        <Text style={styles.emptyTitle}>Couldn&apos;t load reviews</Text>
+        <Text style={styles.emptySubtitle}>
+          Something went wrong fetching the community take.
+        </Text>
+        <Pressable
+          onPress={() => {
+            refetch();
+          }}
+          style={styles.retryButton}
+          accessibilityRole="button"
+          accessibilityLabel="Retry loading reviews"
+        >
+          <Text style={styles.retryText}>Try again</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  if (reviews.length === 0) {
     return (
       <View style={styles.emptyBox}>
         <MaterialCommunityIcons
@@ -104,6 +130,23 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
 
   return (
     <View style={styles.container}>
+      {isError ? (
+        <View style={styles.staleBanner}>
+          <Text style={styles.staleBannerText}>
+            Couldn&apos;t refresh - showing saved reviews.
+          </Text>
+          <Pressable
+            onPress={() => {
+              refetch();
+            }}
+            style={styles.retryButton}
+            accessibilityRole="button"
+            accessibilityLabel="Retry loading reviews"
+          >
+            <Text style={styles.retryText}>Retry</Text>
+          </Pressable>
+        </View>
+      ) : null}
       {reviews.slice(0, 6).map((review) => (
         <ReviewCard key={review.id} review={review} />
       ))}
@@ -146,6 +189,34 @@ const styles = StyleSheet.create({
     color: "#71717A",
     textAlign: "center",
     lineHeight: 18,
+  },
+  retryButton: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  retryText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#E50914",
+  },
+  staleBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: "rgba(239, 68, 68, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(239, 68, 68, 0.25)",
+  },
+  staleBannerText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#FCA5A5",
+    lineHeight: 17,
   },
   card: {
     backgroundColor: "rgba(255, 255, 255, 0.03)",

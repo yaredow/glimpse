@@ -1,4 +1,5 @@
-import { MD3DarkTheme, useTheme } from "react-native-paper";
+import { createContext, useContext } from "react";
+import { MD3DarkTheme } from "react-native-paper";
 import { themeColors } from "./colors";
 import { themeFonts } from "./typography";
 
@@ -12,7 +13,9 @@ export const netflixTheme = glimpseDarkTheme;
 
 export type AppTheme = typeof glimpseDarkTheme;
 
-export const useAppTheme = () => useTheme<AppTheme>();
+export const AppThemeContext = createContext<AppTheme>(glimpseDarkTheme);
+
+export const useAppTheme = () => useContext(AppThemeContext);
 
 export * from "./colors";
 export * from "./typography";

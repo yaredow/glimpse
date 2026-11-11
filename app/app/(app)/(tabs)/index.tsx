@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ComponentProps } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -28,10 +28,76 @@ import ShowtimeHub from "@/features/movies/components/showtime-hub";
 import { isResolvedAction } from "@/features/movies/utils/deck";
 import { deriveProgramTheme } from "@/features/movies/utils/program";
 
+interface GridStateCardProps {
+  icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
+  title: string;
+  subtitle: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+function GridStateCard({
+  icon,
+  title,
+  subtitle,
+  actionLabel,
+  onAction,
+}: GridStateCardProps) {
+  const theme = useAppTheme();
+
+  return (
+    <View
+      style={[
+        styles.gridStateCard,
+        {
+          backgroundColor: theme.colors.elevation.level1,
+          borderColor: theme.colors.outlineVariant,
+        },
+      ]}
+    >
+      <MaterialCommunityIcons
+        name={icon}
+        size={42}
+        color={theme.colors.primary}
+        style={styles.gridStateIcon}
+      />
+      <Text style={[styles.gridStateTitle, { color: theme.colors.textPrimary }]}>
+        {title}
+      </Text>
+      <Text
+        style={[styles.gridStateSubtitle, { color: theme.colors.textSecondary }]}
+      >
+        {subtitle}
+      </Text>
+      {actionLabel && onAction ? (
+        <Pressable
+          onPress={onAction}
+          style={({ pressed }) => [
+            styles.gridStateAction,
+            {
+              backgroundColor: theme.colors.elevation.level2,
+              borderColor: theme.colors.outlineVariant,
+            },
+            pressed && { opacity: 0.8 },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel={actionLabel}
+        >
+          <Text
+            style={[styles.gridStateActionText, { color: theme.colors.textPrimary }]}
+          >
+            {actionLabel}
+          </Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
 export default function TodayTab() {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { data, isPending } = useGetTodaysGrid();
+  const { data, isPending, isError, refetch } = useGetTodaysGrid();
   const { data: profileData } = useProfile();
   const syncsRemaining = profileData?.user.syncs_remaining ?? 3;
   const recordInteraction = useRecordInteraction();
@@ -578,6 +644,28 @@ export default function TodayTab() {
           <View style={styles.deckContainer}>
             <SkeletonLoader count={5} />
           </View>
+        ) : isError ? (
+          <View style={styles.deckContainer}>
+            <GridStateCard
+              icon="wifi-off"
+              title="Couldn&apos;t load tonight&apos;s reel"
+              subtitle="We couldn&apos;t reach the cinema. Check your connection and try again."
+              actionLabel="Try again"
+              onAction={() => {
+                refetch();
+              }}
+            />
+          </View>
+        ) : movies.length === 0 ? (
+          <View style={styles.deckContainer}>
+            <GridStateCard
+              icon="filmstrip-off"
+              title="Tonight&apos;s reel is empty"
+              subtitle="No films were drawn for you yet. Pull a fresh batch to start choosing."
+              actionLabel="Draw a fresh reel"
+              onAction={handlePromptSync}
+            />
+          </View>
         ) : (
           <View style={styles.deckContainer}>
             <DeckStack
@@ -748,6 +836,43 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  gridStateCard: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 32,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    borderWidth: 1,
+    maxWidth: 320,
+    width: "100%",
+  },
+  gridStateIcon: {
+    marginBottom: 4,
+  },
+  gridStateTitle: {
+    fontFamily: "PlusJakartaSans_700Bold",
+    fontSize: 15,
+    textAlign: "center",
+  },
+  gridStateSubtitle: {
+    fontFamily: "PlusJakartaSans_400Regular",
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: "center",
+  },
+  gridStateAction: {
+    marginTop: 12,
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    borderRadius: 22,
+    borderWidth: 1,
+  },
+  gridStateActionText: {
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    fontSize: 13,
+  },
   bottomDock: {
     alignItems: "center",
     justifyContent: "center",
@@ -777,7 +902,7 @@ const styles = StyleSheet.create({
   },
   lockInPillText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 12,
     letterSpacing: 0.8,
   },
@@ -791,7 +916,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   lockedStatusText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 13,
     letterSpacing: 0.2,
   },
@@ -811,7 +936,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   browseOthersLinkText: {
-    fontFamily: "Inter_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     fontSize: 13,
     letterSpacing: 0.2,
   },

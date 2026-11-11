@@ -3,8 +3,8 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
-  StyleSheet,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -18,17 +18,16 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ApertureIcon } from "phosphor-react-native";
+import { ArrowLeftIcon } from "phosphor-react-native";
 import { Text } from "@/components/ui/text";
 import { AuthBackdrop } from "./auth-backdrop";
+import BrandLockup from "./brand-lockup";
 
 interface AuthShellProps {
   title: string;
   subtitle?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
-  icon?: ReactNode;
-  showBack?: boolean;
   onBack?: () => void;
   compact?: boolean;
 }
@@ -38,12 +37,12 @@ export default function AuthShell({
   subtitle,
   children,
   footer,
+  onBack,
   compact = false,
 }: AuthShellProps) {
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
 
-  // Ensure backdrop height accounts for safe area so logo is never behind punch hole/notch
   const initialBackdropHeight = compact
     ? Math.round(insets.top + screenHeight * 0.22)
     : Math.round(insets.top + screenHeight * 0.3);
@@ -93,11 +92,30 @@ export default function AuthShell({
   });
 
   return (
-    <View style={styles.container}>
-      {/* Top Backdrop Zone with Movie Still Atmosphere */}
+    <View className="flex-1 bg-background">
+      {onBack ? (
+        <Pressable
+          onPress={onBack}
+          className="absolute left-4 z-20 h-10 w-10 items-center justify-center rounded-full border border-white/[0.15] bg-black/55 active:opacity-70"
+          style={{ top: Math.max(insets.top, 12) + 8 }}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <ArrowLeftIcon size={18} color="#FFFFFF" weight="bold" />
+        </Pressable>
+      ) : null}
+
       <Animated.View
         style={[
-          styles.backdropZone,
+          {
+            width: "100%",
+            position: "relative",
+            justifyContent: "center",
+            alignItems: "center",
+            overflow: "hidden",
+            paddingBottom: 12,
+          },
           { paddingTop: Math.max(insets.top, 24) + 10 },
           animatedBackdropStyle,
         ]}
@@ -106,64 +124,56 @@ export default function AuthShell({
 
         {/* Hero Logo & Brand Centerpiece (Safely below notch/punch hole) */}
         <Animated.View
-          style={[styles.logoCenterpiece, animatedLogoContentStyle]}
+          style={[
+            {
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 10,
+              paddingHorizontal: 16,
+            },
+            animatedLogoContentStyle,
+          ]}
         >
-          {/* Emblem Badge with Aperture Icon */}
-          <Animated.View
-            entering={FadeIn.delay(100).duration(600)}
-            style={styles.emblemBadge}
-          >
-            <ApertureIcon size={32} color="#E50914" weight="fill" />
-          </Animated.View>
-
-          {/* GLIMPSE Wordmark with Cinema Red Dot */}
-          <Animated.View
-            entering={FadeInDown.delay(250).duration(500)}
-            style={styles.brandRow}
-          >
-            <Text style={styles.brandName}>GLIMPSE</Text>
-            <View style={styles.brandDot} />
-          </Animated.View>
-
-          {/* Brand Tagline */}
-          <Animated.Text
-            entering={FadeIn.delay(450).duration(400)}
-            style={styles.brandTagline}
-          >
-            FIVE FILMS. ONE NIGHT. NO SCROLLING.
-          </Animated.Text>
+          <BrandLockup stagger />
         </Animated.View>
       </Animated.View>
 
       {/* Bottom Form Zone */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.formZone}
+        className="flex-1"
       >
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingBottom: Math.max(insets.bottom + 12, 24) },
-          ]}
+          contentContainerClassName="flex-grow justify-between"
+          contentContainerStyle={{
+            paddingBottom: Math.max(insets.bottom + 12, 24),
+          }}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={
             Platform.OS === "ios" ? "interactive" : "on-drag"
           }
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.formContainer}>
+          <View className="w-full max-w-[420px] self-center px-6 pt-4">
             {/* Title & Subtitle */}
-            <View style={styles.titleBlock}>
+            <View className="mb-2 items-center">
               <Animated.Text
                 entering={FadeInDown.delay(100).duration(350).springify()}
-                className="text-2xl font-bold text-white tracking-tight text-center"
+                style={{
+                  fontFamily: "PlusJakartaSans_700Bold",
+                  fontSize: 24,
+                  lineHeight: 30,
+                  letterSpacing: -0.6,
+                  color: "#FFFFFF",
+                  textAlign: "center",
+                }}
               >
                 {title}
               </Animated.Text>
               {subtitle ? (
                 <Animated.View
                   entering={FadeIn.delay(200).duration(300)}
-                  style={styles.subtitleWrapper}
+                  style={{ marginTop: 6, alignItems: "center" }}
                 >
                   {typeof subtitle === "string" ? (
                     <Text className="text-zinc-400 text-sm text-center leading-relaxed px-4 max-w-sm self-center">
@@ -179,7 +189,7 @@ export default function AuthShell({
             {/* Form Fields & Children */}
             <Animated.View
               entering={FadeInUp.delay(300).duration(400)}
-              style={styles.formBody}
+              style={{ marginTop: 16 }}
             >
               {children}
               {footer ? <View className="mt-4">{footer}</View> : null}
@@ -187,8 +197,8 @@ export default function AuthShell({
           </View>
 
           {/* Bottom Footnote */}
-          <View style={styles.footnoteRow}>
-            <Text style={styles.footnoteText}>
+          <View className="items-center justify-center pb-1.5 pt-6">
+            <Text className="text-center text-[10px] uppercase tracking-[1.2px] text-zinc-600">
               A quieter way to choose what to watch.
             </Text>
           </View>
@@ -197,107 +207,3 @@ export default function AuthShell({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0C0C0E",
-  },
-  backdropZone: {
-    width: "100%",
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-    paddingBottom: 12,
-  },
-  logoCenterpiece: {
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
-    paddingHorizontal: 16,
-  },
-  emblemBadge: {
-    width: 60,
-    height: 60,
-    borderRadius: 18,
-    backgroundColor: "rgba(229, 9, 20, 0.18)",
-    borderWidth: 1.5,
-    borderColor: "rgba(229, 9, 20, 0.35)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-    shadowColor: "#E50914",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-  },
-  brandRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "center",
-  },
-  brandName: {
-    fontFamily: "Inter_900Black",
-    fontSize: 24,
-    lineHeight: 28,
-    letterSpacing: 5,
-    color: "#FFFFFF",
-  },
-  brandDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 3.5,
-    backgroundColor: "#E50914",
-    marginBottom: 5,
-    marginLeft: 3,
-  },
-  brandTagline: {
-    fontFamily: "Inter_600SemiBold",
-    fontSize: 10,
-    letterSpacing: 2.8,
-    color: "#8B8B94",
-    textTransform: "uppercase",
-    marginTop: 6,
-    textAlign: "center",
-  },
-  formZone: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "space-between",
-  },
-  formContainer: {
-    width: "100%",
-    maxWidth: 420,
-    alignSelf: "center",
-    paddingHorizontal: 24,
-    paddingTop: 16,
-  },
-  titleBlock: {
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  subtitleWrapper: {
-    marginTop: 6,
-    alignItems: "center",
-  },
-  formBody: {
-    marginTop: 16,
-  },
-  footnoteRow: {
-    paddingTop: 24,
-    paddingBottom: 6,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  footnoteText: {
-    fontFamily: "Inter_500Medium",
-    fontSize: 10,
-    letterSpacing: 1.2,
-    color: "#52525B",
-    textTransform: "uppercase",
-    textAlign: "center",
-  },
-});

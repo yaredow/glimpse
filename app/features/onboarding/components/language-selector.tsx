@@ -1,7 +1,9 @@
 import { useState, useCallback } from "react";
-import { StyleSheet, ScrollView, View } from "react-native";
-import { Chip, Text, useTheme } from "react-native-paper";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { Button } from "@/components/ui/button";
+import { palette } from "@/lib/theme/colors";
+import { typeClasses } from "@/lib/theme/typography";
+import { cn } from "@/lib/utils";
 import type { Language } from "../types/onboarding.type";
 
 interface LanguageSelectorProps {
@@ -17,7 +19,6 @@ export default function LanguageSelector({
   onNext,
   onBack,
 }: LanguageSelectorProps) {
-  const { colors } = useTheme();
   const [selected, setSelected] = useState<string[]>(initialSelected);
 
   const toggle = useCallback(
@@ -34,56 +35,52 @@ export default function LanguageSelector({
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <Text
-        variant="titleMedium"
-        style={[styles.subtitle, { color: colors.onSurfaceVariant }]}
+        className={cn(typeClasses.titleMedium, "mb-8 text-center")}
+        style={{ color: palette.zinc400 }}
       >
         Choose the languages you prefer for movies.
       </Text>
 
       <ScrollView
-        contentContainerStyle={styles.chipGrid}
+        contentContainerClassName="flex-row flex-wrap gap-3 pb-6"
         showsVerticalScrollIndicator={false}
       >
         {languages.map((lang) => {
           const isSelected = selected.includes(lang.iso_639_1);
           return (
-            <Chip
+            <Pressable
               key={lang.iso_639_1}
-              mode="flat"
-              selected={isSelected}
               onPress={() => toggle(lang.iso_639_1)}
-              style={[
-                styles.chip,
-                {
-                  backgroundColor: isSelected
-                    ? colors.primary
-                    : colors.surfaceVariant,
-                },
-              ]}
-              textStyle={[
-                styles.chipText,
-                {
-                  color: isSelected ? colors.onPrimary : colors.onSurface,
-                },
-              ]}
-              showSelectedOverlay={false}
-              showSelectedCheck={false}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              className={cn(
+                "rounded-sm",
+                isSelected ? "bg-primary" : "bg-surface-zinc-850",
+              )}
             >
-              {lang.english_name}
-            </Chip>
+              <Text
+                className={cn(
+                  typeClasses.default,
+                  "mx-3 my-2 text-[14px] font-semibold",
+                  isSelected ? "text-white" : "text-off-white",
+                )}
+              >
+                {lang.english_name}
+              </Text>
+            </Pressable>
           );
         })}
       </ScrollView>
 
-      <View style={[styles.footer, { borderTopColor: colors.outline }]}>
+      <View className="flex-row items-center justify-between gap-3 border-t border-surface-zinc-750 pt-6">
         <Button
           variant="text"
           onPress={onBack}
-          textColor={colors.onSurfaceVariant}
+          textColor={palette.zinc400}
           haptic="light"
-          style={styles.backButton}
+          className="-ml-4"
         >
           Back
         </Button>
@@ -100,39 +97,3 @@ export default function LanguageSelector({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  subtitle: {
-    textAlign: "center",
-    marginBottom: 32,
-  },
-  chipGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    paddingBottom: 24,
-  },
-  chip: {
-    paddingHorizontal: 0,
-    paddingVertical: 0,
-    borderRadius: 8,
-  },
-  chipText: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginVertical: 8,
-    marginHorizontal: 12,
-  },
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 24,
-    borderTopWidth: 1,
-  },
-  backButton: {
-    marginLeft: -16,
-  },
-});

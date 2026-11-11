@@ -1,10 +1,13 @@
 import type { ReactNode } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
-import { Text, useTheme } from "react-native-paper";
+import { View, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ArrowLeftIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
+import { palette } from "@/lib/theme/colors";
+import { typeClasses } from "@/lib/theme/typography";
+import { cn } from "@/lib/utils";
+import BrandLockup from "@/features/auth/components/brand-lockup";
 
 interface StepLayoutProps {
   step: number;
@@ -23,8 +26,6 @@ export default function StepLayout({
   onBack,
   children,
 }: StepLayoutProps) {
-  const theme = useTheme();
-
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onBack?.();
@@ -32,134 +33,81 @@ export default function StepLayout({
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      className="flex-1 bg-background px-5"
       edges={["top", "bottom"]}
     >
       {/* Top Navigation & Segmented Progress Bar */}
-      <View style={styles.topBar}>
-        <View style={styles.backButtonContainer}>
+      <View className="flex-row items-center justify-between gap-3 py-3">
+        <View className="w-8 items-start">
           {onBack ? (
             <Pressable
               onPress={handleBack}
               hitSlop={12}
-              style={styles.backButton}
+              className="rounded-sm p-1"
             >
-              <MaterialCommunityIcons
-                name="arrow-left"
-                size={22}
-                color={theme.colors.onBackground}
-              />
+              <ArrowLeftIcon size={22} color={palette.offWhite} weight="bold" />
             </Pressable>
           ) : (
-            <View style={{ width: 24 }} />
+            <View className="w-6" />
           )}
         </View>
 
-        <View style={styles.segmentsRow}>
+        <View className="h-1 flex-1 flex-row gap-1.5">
           {Array.from({ length: totalSteps }, (_, i) => {
             const isActive = i <= step;
             return (
               <View
                 key={i}
-                style={[
-                  styles.segment,
-                  {
-                    backgroundColor: isActive
-                      ? theme.colors.primary
-                      : "#27272A",
-                  },
-                ]}
+                className={cn(
+                  "h-1 flex-1 rounded-[2px]",
+                  isActive ? "bg-primary" : "bg-surface-zinc-700",
+                )}
               />
             );
           })}
         </View>
 
-        <Text variant="labelSmall" style={styles.stepBadge}>
+        <Text
+          className={cn(
+            typeClasses.labelSmall,
+            "text-zinc-400 text-[12px] font-bold tracking-[1px] min-w-[28px] text-right",
+          )}
+        >
           {step + 1}/{totalSteps}
         </Text>
       </View>
 
       {/* Screen Title & Header */}
-      <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.title}>
+      <View className="mt-3 mb-5">
+        <BrandLockup variant="compact" />
+
+        <Text
+          className={cn(
+            typeClasses.headlineMedium,
+            "text-[24px] leading-[30px] tracking-[-0.5px] text-white",
+          )}
+        >
           {title}
         </Text>
         {subtitle ? (
-          <Text variant="bodyMedium" style={styles.subtitle}>
+          <Text
+            className={cn(
+              typeClasses.bodyMedium,
+              "mt-1.5 text-[15px] leading-[22px] text-zinc-400",
+            )}
+          >
             {subtitle}
           </Text>
         ) : null}
       </View>
 
-      {/* Animated Screen Content */}
       <Animated.View
         entering={FadeIn.duration(280)}
         exiting={FadeOut.duration(180)}
-        style={styles.content}
+        style={{ flex: 1 }}
       >
         {children}
       </Animated.View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    gap: 12,
-  },
-  backButtonContainer: {
-    width: 32,
-    alignItems: "flex-start",
-  },
-  backButton: {
-    padding: 4,
-    borderRadius: 8,
-  },
-  segmentsRow: {
-    flex: 1,
-    flexDirection: "row",
-    gap: 6,
-    height: 4,
-  },
-  segment: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-  },
-  stepBadge: {
-    color: "#71717A",
-    fontWeight: "700",
-    letterSpacing: 1,
-    minWidth: 28,
-    textAlign: "right",
-    fontSize: 12,
-  },
-  header: {
-    marginTop: 12,
-    marginBottom: 20,
-  },
-  title: {
-    color: "#FFFFFF",
-    fontWeight: "900",
-    fontSize: 26,
-    lineHeight: 32,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    color: "#A1A1AA",
-    marginTop: 6,
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  content: {
-    flex: 1,
-  },
-});

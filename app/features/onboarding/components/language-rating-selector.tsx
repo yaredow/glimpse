@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
-import { StyleSheet, ScrollView, View, Pressable } from "react-native";
-import { Text } from "react-native-paper";
+import { ScrollView, Text, View, Pressable } from "react-native";
 import { Button } from "@/components/ui/button";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { typeClasses } from "@/lib/theme/typography";
+import { palette } from "@/lib/theme/colors";
+import { cn } from "@/lib/utils";
+import { CheckIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { Language } from "../types/onboarding.type";
 
@@ -17,8 +19,8 @@ interface LanguageRatingSelectorProps {
 const RATING_PRESETS = [
   { value: 0, label: "Any Rating", desc: "No minimum filter" },
   { value: 6.0, label: "6.0+", desc: "Above average" },
-  { value: 7.0, label: "7.0+ ★", desc: "Critically acclaimed" },
-  { value: 8.0, label: "8.0+ 🏆", desc: "Masterpieces only" },
+  { value: 7.0, label: "7.0+", desc: "Critically acclaimed" },
+  { value: 8.0, label: "8.0+", desc: "Masterpieces only" },
 ];
 
 export default function LanguageRatingSelector({
@@ -28,7 +30,6 @@ export default function LanguageRatingSelector({
   onNext,
   onBack,
 }: LanguageRatingSelectorProps) {
-  // Default to English if none selected
   const [selectedLangs, setSelectedLangs] = useState<string[]>(() => {
     if (initialLanguages && initialLanguages.length > 0) {
       return initialLanguages;
@@ -36,7 +37,7 @@ export default function LanguageRatingSelector({
     return ["en"];
   });
 
-  const [rating, setRating] = useState<number>(initialRating || 6.0);
+  const [rating, setRating] = useState<number>(initialRating ?? 6.0);
 
   const toggleLanguage = useCallback((code: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -59,47 +60,58 @@ export default function LanguageRatingSelector({
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerClassName="gap-7 pb-6 pt-2"
       >
         {/* Section 1: Preferred Languages */}
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Movie Languages</Text>
-          <Text style={styles.sectionSubtitle}>
+        <View className="gap-2">
+          <Text
+            className={cn(
+              typeClasses.default,
+              "text-[16px] font-extrabold tracking-[-0.3px] text-white",
+            )}
+          >
+            Movie Languages
+          </Text>
+          <Text
+            className={cn(
+              typeClasses.default,
+              "mb-1.5 text-[13px] text-zinc-500",
+            )}
+          >
             Select the audio languages you enjoy watching
           </Text>
 
-          <View style={styles.langGrid}>
+          <View className="flex-row flex-wrap gap-2">
             {languages.map((lang) => {
               const isSelected = selectedLangs.includes(lang.iso_639_1);
               return (
                 <Pressable
                   key={lang.iso_639_1}
                   onPress={() => toggleLanguage(lang.iso_639_1)}
-                  style={[
-                    styles.langChip,
+                  className={cn(
+                    "flex-row items-center rounded-[20px] border-[1.5px] px-3.5 py-2.5",
                     isSelected
-                      ? styles.langChipSelected
-                      : styles.langChipUnselected,
-                  ]}
+                      ? "border-primary bg-surface-brand"
+                      : "border-zinc-800 bg-zinc-900",
+                  )}
                 >
                   <Text
-                    style={[
-                      styles.langText,
-                      isSelected
-                        ? styles.langTextSelected
-                        : styles.langTextUnselected,
-                    ]}
+                    className={cn(
+                      typeClasses.default,
+                      "text-[13px] font-semibold",
+                      isSelected ? "text-white font-bold" : "text-zinc-300",
+                    )}
                   >
                     {lang.english_name}
                   </Text>
                   {isSelected && (
-                    <MaterialCommunityIcons
-                      name="check"
+                    <CheckIcon
                       size={14}
-                      color="#E50914"
+                      color={palette.cinemaRed}
+                      weight="bold"
                       style={{ marginLeft: 4 }}
                     />
                   )}
@@ -110,43 +122,53 @@ export default function LanguageRatingSelector({
         </View>
 
         {/* Section 2: Minimum Quality Standard */}
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Minimum Quality</Text>
-          <Text style={styles.sectionSubtitle}>
+        <View className="gap-2">
+          <Text
+            className={cn(
+              typeClasses.default,
+              "text-[16px] font-extrabold tracking-[-0.3px] text-white",
+            )}
+          >
+            Minimum Quality
+          </Text>
+          <Text
+            className={cn(
+              typeClasses.default,
+              "mb-1.5 text-[13px] text-zinc-500",
+            )}
+          >
             Filter out low-rated films on IMDb
           </Text>
 
-          <View style={styles.ratingGrid}>
+          <View className="flex-row flex-wrap gap-2.5">
             {RATING_PRESETS.map((preset) => {
               const isSelected = rating === preset.value;
               return (
                 <Pressable
                   key={preset.value}
                   onPress={() => selectRating(preset.value)}
-                  style={[
-                    styles.ratingCard,
+                  className={cn(
+                    "w-[48%] rounded-lg border-[1.5px] p-3.5",
                     isSelected
-                      ? styles.ratingCardSelected
-                      : styles.ratingCardUnselected,
-                  ]}
+                      ? "border-primary bg-surface-brand"
+                      : "border-zinc-800 bg-zinc-900",
+                  )}
                 >
                   <Text
-                    style={[
-                      styles.ratingValue,
-                      isSelected
-                        ? styles.ratingValueSelected
-                        : styles.ratingValueUnselected,
-                    ]}
+                    className={cn(
+                      typeClasses.default,
+                      "mb-1 text-[15px] font-extrabold",
+                      isSelected ? "text-white" : "text-zinc-100",
+                    )}
                   >
                     {preset.label}
                   </Text>
                   <Text
-                    style={[
-                      styles.ratingDesc,
-                      isSelected
-                        ? styles.ratingDescSelected
-                        : styles.ratingDescUnselected,
-                    ]}
+                    className={cn(
+                      typeClasses.default,
+                      "text-[12px]",
+                      isSelected ? "text-red-300" : "text-zinc-500",
+                    )}
                   >
                     {preset.desc}
                   </Text>
@@ -158,13 +180,24 @@ export default function LanguageRatingSelector({
       </ScrollView>
 
       {/* Floating Bottom Bar */}
-      <View style={styles.footer}>
+      <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
+        <View className="items-center">
+          <Text
+            className={cn(typeClasses.bodySmall, "text-zinc-400 font-semibold")}
+          >
+            {`${selectedLangs.length} ${
+              selectedLangs.length === 1 ? "language" : "languages"
+            } · ${rating > 0 ? `${rating.toFixed(1)}+ rating` : "Any rating"}`}
+          </Text>
+        </View>
+
         <Button
+          size="xl"
           variant="primary"
           onPress={handleNext}
           disabled={selectedLangs.length === 0}
           haptic="success"
-          style={styles.nextButton}
+          className="w-full"
         >
           Continue
         </Button>
@@ -172,110 +205,3 @@ export default function LanguageRatingSelector({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingTop: 8,
-    paddingBottom: 24,
-    gap: 28,
-  },
-  section: {
-    gap: 8,
-  },
-  sectionHeader: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    letterSpacing: -0.3,
-  },
-  sectionSubtitle: {
-    fontSize: 13,
-    color: "#71717A",
-    marginBottom: 6,
-  },
-  langGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  langChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    borderWidth: 1.5,
-  },
-  langChipUnselected: {
-    backgroundColor: "#18181B",
-    borderColor: "#27272A",
-  },
-  langChipSelected: {
-    backgroundColor: "#201012",
-    borderColor: "#E50914",
-  },
-  langText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  langTextUnselected: {
-    color: "#D4D4D8",
-  },
-  langTextSelected: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-  ratingGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  ratingCard: {
-    width: "48%",
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 1.5,
-  },
-  ratingCardUnselected: {
-    backgroundColor: "#18181B",
-    borderColor: "#27272A",
-  },
-  ratingCardSelected: {
-    backgroundColor: "#201012",
-    borderColor: "#E50914",
-  },
-  ratingValue: {
-    fontSize: 15,
-    fontWeight: "800",
-    marginBottom: 4,
-  },
-  ratingValueUnselected: {
-    color: "#F4F4F5",
-  },
-  ratingValueSelected: {
-    color: "#FFFFFF",
-  },
-  ratingDesc: {
-    fontSize: 12,
-  },
-  ratingDescUnselected: {
-    color: "#71717A",
-  },
-  ratingDescSelected: {
-    color: "#FCA5A5",
-  },
-  footer: {
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#27272A",
-    marginTop: "auto",
-  },
-  nextButton: {
-    width: "100%",
-    borderRadius: 8,
-  },
-});
-

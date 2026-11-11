@@ -44,7 +44,7 @@ export default function DislikedGenresScreen() {
     <StepLayout
       step={3}
       totalSteps={4}
-      title="Any Dealbreakers?"
+      title="Anything to avoid?"
       subtitle="Select genres you want completely excluded from your recommendations"
       onBack={() => router.back()}
     >

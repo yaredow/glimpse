@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
+import { View, type StyleProp, type ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,6 +14,14 @@ const CARD_WIDTH = 116;
 const CARD_HEIGHT = 172;
 const CARD_GAP = 12;
 const ITEM_STRIDE = CARD_HEIGHT + CARD_GAP;
+
+const ABSOLUTE_FILL = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+} as const;
 
 // Bundled local movie posters (0 network latency, 0 empty cards, offline-ready)
 const COLUMN_1_POSTERS: ImageSource[] = [
@@ -57,7 +65,7 @@ function MarqueeColumn({ posters, direction, duration }: MarqueeColumnProps) {
           easing: Easing.linear,
         }),
         -1,
-        false
+        false,
       );
     } else {
       translateY.value = withRepeat(
@@ -66,7 +74,7 @@ function MarqueeColumn({ posters, direction, duration }: MarqueeColumnProps) {
           easing: Easing.linear,
         }),
         -1,
-        false
+        false,
       );
     }
   }, [cycleDistance, direction, duration, translateY]);
@@ -76,17 +84,20 @@ function MarqueeColumn({ posters, direction, duration }: MarqueeColumnProps) {
   }));
 
   return (
-    <View style={styles.columnClip}>
-      <Animated.View style={[styles.columnList, animatedStyle]}>
+    <View className="w-[116px]">
+      <Animated.View style={[{ gap: CARD_GAP }, animatedStyle]}>
         {loopPosters.map((source, index) => (
-          <View key={index} style={styles.cardContainer}>
+          <View
+            key={index}
+            className="h-[172px] w-[116px] overflow-hidden rounded-lg bg-zinc-900"
+          >
             <Image
               source={source}
-              style={styles.cardImage}
+              style={{ width: "100%", height: "100%" }}
               contentFit="cover"
               transition={200}
             />
-            <View style={styles.cardBorder} />
+            <View className="absolute inset-0 rounded-lg border border-white/[0.08]" />
           </View>
         ))}
       </Animated.View>
@@ -101,11 +112,15 @@ interface TiltedMarqueeHeroProps {
 export function TiltedMarqueeHero({ style }: TiltedMarqueeHeroProps) {
   return (
     <View
-      style={[styles.container, style]}
+      className="absolute inset-0 overflow-hidden bg-background"
+      style={style}
       pointerEvents="none"
     >
       {/* Tilted Marquee Columns spanning the full canvas */}
-      <View style={styles.tiltedCanvas}>
+      <View
+        className="absolute inset-0 flex-row justify-center gap-3"
+        style={{ transform: [{ rotate: "-12deg" }, { scale: 1.35 }] }}
+      >
         <MarqueeColumn
           posters={COLUMN_1_POSTERS}
           direction="up"
@@ -123,75 +138,43 @@ export function TiltedMarqueeHero({ style }: TiltedMarqueeHeroProps) {
         />
       </View>
 
-      {/* Top subtle vignette to soften status bar boundary */}
       <LinearGradient
         colors={["rgba(12, 12, 14, 0.65)", "transparent"]}
         locations={[0, 1]}
-        style={styles.topVignette}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 80,
+        }}
       />
 
-      {/* Full-screen progressive cinema dissolve:
-          Posters stay clear at top, heavily soften from 20%, and reach pitch black before the logo */}
       <LinearGradient
         colors={[
           "transparent",
-          "rgba(12, 12, 14, 0.10)",
-          "rgba(12, 12, 14, 0.48)",
-          "rgba(12, 12, 14, 0.85)",
-          "rgba(12, 12, 14, 0.98)",
+          "rgba(12, 12, 14, 0.007)",
+          "rgba(12, 12, 14, 0.028)",
+          "rgba(12, 12, 14, 0.063)",
+          "rgba(12, 12, 14, 0.111)",
+          "rgba(12, 12, 14, 0.174)",
+          "rgba(12, 12, 14, 0.250)",
+          "rgba(12, 12, 14, 0.340)",
+          "rgba(12, 12, 14, 0.444)",
+          "rgba(12, 12, 14, 0.563)",
+          "rgba(12, 12, 14, 0.694)",
+          "rgba(12, 12, 14, 0.840)",
           "#0C0C0E",
           "#0C0C0E",
         ]}
-        locations={[0, 0.16, 0.28, 0.38, 0.46, 0.52, 1]}
-        style={StyleSheet.absoluteFill}
+        locations={[
+          0, 0.047, 0.093, 0.14, 0.187, 0.233, 0.28, 0.327, 0.373, 0.42, 0.467,
+          0.513, 0.56, 1,
+        ]}
+        style={ABSOLUTE_FILL}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFill,
-    overflow: "hidden",
-    backgroundColor: "#0C0C0E",
-  },
-  tiltedCanvas: {
-    ...StyleSheet.absoluteFill,
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: CARD_GAP,
-    transform: [{ rotate: "-12deg" }, { scale: 1.35 }],
-  },
-  columnClip: {
-    width: CARD_WIDTH,
-  },
-  columnList: {
-    gap: CARD_GAP,
-  },
-  cardContainer: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#18181B",
-  },
-  cardImage: {
-    width: "100%",
-    height: "100%",
-  },
-  cardBorder: {
-    ...StyleSheet.absoluteFill,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
-  },
-  topVignette: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-  },
-});
 
 export default TiltedMarqueeHero;

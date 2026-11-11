@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { StyleProp, StyleSheet, Text, TextStyle, View, ViewStyle } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ApertureIcon } from "phosphor-react-native";
 import { useAppTheme } from "@/lib/theme";
 
 interface GlimpseLogoProps {
@@ -109,10 +109,10 @@ export default function GlimpseLogo({
               markStyle,
             ]}
           >
-            <MaterialCommunityIcons
-              name="camera-iris"
+            <ApertureIcon
               size={metrics.iconSize}
               color={accentColor}
+              weight="fill"
             />
           </View>
         ) : null}
@@ -189,14 +189,14 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   brandText: {
-    fontFamily: "Inter_900Black",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     includeFontPadding: false,
   },
   brandDot: {
     alignSelf: "flex-end",
   },
   tagline: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 10,
     textTransform: "uppercase",
     textAlign: "center",

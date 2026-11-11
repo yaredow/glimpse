@@ -1,31 +1,7 @@
 import { MD3DarkTheme } from "react-native-paper";
+import paletteJson from "./palette.json";
 
-export const palette = {
-  cinemaRed: "#E50914",
-  cinemaRedHover: "#B20710",
-  cinemaRedMuted: "rgba(229, 9, 20, 0.15)",
-  gold: "#F59E0B",
-  emerald: "#10B981",
-  emeraldContainer: "#06281E",
-  obsidian: "#121212",
-  charcoal: "#141414",
-  zinc900: "#181818",
-  zinc850: "#1E1E1E",
-  zinc800: "#242424",
-  zinc750: "#2A2A2A",
-  zinc700: "#333333",
-  zinc500: "#71717A",
-  zinc400: "#A1A1AA",
-  zinc300: "#D4D4D8",
-  white: "#FFFFFF",
-  offWhite: "#F5F5F1",
-  glassBorder: "rgba(255, 255, 255, 0.08)",
-  glassBorderMedium: "rgba(255, 255, 255, 0.15)",
-  glassSurface: "rgba(255, 255, 255, 0.04)",
-  glassSurfaceHover: "rgba(255, 255, 255, 0.08)",
-  errorContainer: "#3B070A",
-  onErrorContainer: "#FCA5A5",
-};
+export const palette = { ...paletteJson } as const;
 
 export const themeColors = {
   ...MD3DarkTheme.colors,
@@ -33,12 +9,14 @@ export const themeColors = {
   onPrimary: palette.white,
   primaryContainer: palette.cinemaRedHover,
   onPrimaryContainer: palette.offWhite,
-  secondary: "#831010",
+  secondary: palette.secondary,
   onSecondary: palette.white,
-  secondaryContainer: "#260406",
+  secondaryContainer: palette.secondaryContainer,
   onSecondaryContainer: palette.offWhite,
   tertiary: palette.zinc700,
   onTertiary: palette.white,
+  tertiaryContainer: palette.tertiaryContainer,
+  onTertiaryContainer: palette.onTertiaryContainer,
   background: palette.obsidian,
   onBackground: palette.offWhite,
   surface: palette.charcoal,
@@ -47,7 +25,7 @@ export const themeColors = {
   onSurfaceVariant: palette.zinc400,
   outline: palette.zinc750,
   outlineVariant: palette.glassBorder,
-  error: "#EF4444",
+  error: palette.error,
   onError: palette.white,
   errorContainer: palette.errorContainer,
   onErrorContainer: palette.onErrorContainer,
@@ -57,7 +35,7 @@ export const themeColors = {
     level2: palette.zinc850,
     level3: palette.zinc800,
     level4: palette.zinc750,
-    level5: "#323232",
+    level5: palette.zinc700,
   },
   surfaceDisabled: "rgba(245, 245, 241, 0.12)",
   onSurfaceDisabled: palette.zinc500,
@@ -80,4 +58,3 @@ export const themeColors = {
   textSecondary: palette.zinc400,
   textMuted: palette.zinc500,
 };
-

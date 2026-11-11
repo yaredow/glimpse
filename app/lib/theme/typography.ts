@@ -8,6 +8,17 @@ export const fonts = {
   extraBold: "PlusJakartaSans_800ExtraBold",
 } as const;
 
+export const typeClasses = {
+  default: "font-brand",
+  labelSmall: "font-brandMedium text-[11px] leading-4 tracking-[0.5px] font-medium",
+  labelLarge: "font-brandMedium text-[14px] leading-5 tracking-[0.1px] font-medium",
+  bodySmall: "font-brand text-[12px] leading-4 tracking-[0.4px]",
+  bodyMedium: "font-brand text-[14px] leading-5 tracking-[0.25px]",
+  titleMedium: "font-brandSemiBold text-[16px] leading-6 tracking-[0.15px] font-medium",
+  headlineMedium: "font-brandBold text-[28px] leading-9 tracking-normal",
+  displayLarge: "font-brandExtraBold text-[57px] leading-[64px] tracking-normal",
+} as const;
+
 export const themeFonts = {
   ...MD3DarkTheme.fonts,
   displayLarge: {

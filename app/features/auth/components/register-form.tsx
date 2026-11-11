@@ -132,20 +132,16 @@ export const RegisterForm = () => {
       <View className="mt-8 items-center">
         <View className="mb-4 flex-row items-center gap-3 w-full max-w-[280px]">
           <View className="flex-1 h-px bg-white/[0.08]" />
-          <Text className="text-[11px] text-zinc-500 font-medium tracking-wider">
+          <Text className="text-[11px] text-zinc-500 font-brandMedium tracking-wider">
             OR
           </Text>
           <View className="flex-1 h-px bg-white/[0.08]" />
         </View>
         <View className="flex-row items-center gap-1.5">
-          <Text className="text-zinc-400 text-xs font-normal">
+          <Text className="text-zinc-400 text-xs font-brand">
             Already have an account?
           </Text>
-          <AuthTextLink
-            label="Sign in"
-            href="/(auth)/login"
-            onPress={() => router.replace("/(auth)/login")}
-          />
+          <AuthTextLink label="Sign in" href="/(auth)/login" />
         </View>
       </View>
     </View>

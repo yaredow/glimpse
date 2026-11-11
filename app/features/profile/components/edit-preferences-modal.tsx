@@ -365,8 +365,8 @@ function EditPreferencesForm({
                           : theme.colors.textSecondary,
                       fontFamily:
                         genreTab === "favorites"
-                          ? "Inter_600SemiBold"
-                          : "Inter_400Regular",
+                          ? "PlusJakartaSans_600SemiBold"
+                          : "PlusJakartaSans_400Regular",
                     },
                   ]}
                 >
@@ -409,8 +409,8 @@ function EditPreferencesForm({
                           : theme.colors.textSecondary,
                       fontFamily:
                         genreTab === "excluded"
-                          ? "Inter_600SemiBold"
-                          : "Inter_400Regular",
+                          ? "PlusJakartaSans_600SemiBold"
+                          : "PlusJakartaSans_400Regular",
                     },
                   ]}
                 >
@@ -468,8 +468,8 @@ function EditPreferencesForm({
                               ? theme.colors.textMuted
                               : theme.colors.textSecondary,
                             fontFamily: isSelected
-                              ? "Inter_600SemiBold"
-                              : "Inter_400Regular",
+                              ? "PlusJakartaSans_600SemiBold"
+                              : "PlusJakartaSans_400Regular",
                           },
                         ]}
                       >
@@ -602,8 +602,8 @@ function EditPreferencesForm({
                               ? "#FFFFFF"
                               : theme.colors.textPrimary,
                             fontFamily: isSelected
-                              ? "Inter_600SemiBold"
-                              : "Inter_400Regular",
+                              ? "PlusJakartaSans_600SemiBold"
+                              : "PlusJakartaSans_400Regular",
                           },
                         ]}
                       >
@@ -685,8 +685,8 @@ function EditPreferencesForm({
                             ? "#FFFFFF"
                             : theme.colors.textSecondary,
                           fontFamily: isSelected
-                            ? "Inter_600SemiBold"
-                            : "Inter_400Regular",
+                            ? "PlusJakartaSans_600SemiBold"
+                            : "PlusJakartaSans_400Regular",
                         },
                       ]}
                     >
@@ -749,8 +749,8 @@ function EditPreferencesForm({
                             ? "#FFFFFF"
                             : theme.colors.textSecondary,
                           fontFamily: isSelected
-                            ? "Inter_600SemiBold"
-                            : "Inter_400Regular",
+                            ? "PlusJakartaSans_600SemiBold"
+                            : "PlusJakartaSans_400Regular",
                         },
                       ]}
                     >
@@ -840,12 +840,12 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(255, 255, 255, 0.06)",
   },
   headerTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 20,
     letterSpacing: -0.3,
   },
   headerSubtitle: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 12.5,
     marginTop: 2,
   },
@@ -863,7 +863,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   loadingText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
   },
   scroll: {
@@ -884,12 +884,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   sectionTitle: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 14,
     letterSpacing: 0.2,
   },
   sectionCounter: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12,
   },
   segmentContainer: {
@@ -918,7 +918,7 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
   },
   sectionHint: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 12,
     lineHeight: 16,
     marginBottom: 4,
@@ -1006,7 +1006,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 13.5,
     letterSpacing: 0.6,
   },

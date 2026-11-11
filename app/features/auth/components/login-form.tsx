@@ -1,7 +1,6 @@
 import { useRef, useState, type ComponentRef } from "react";
 import { TextInput, View } from "react-native";
 import { useForm } from "@tanstack/react-form";
-import { router } from "expo-router";
 import { Text } from "@/components/ui/text";
 import { getErrorMessage } from "@/lib/error";
 import { loginSchema, type LoginFormData } from "../schemas/auth.schema";
@@ -14,14 +13,14 @@ import {
   AuthTextLink,
 } from "./auth-actions";
 
-export const LoginForm = () => {
+export const LoginForm = ({ initialEmail }: { initialEmail?: string }) => {
   const loginMutation = useLogin();
   const passwordRef = useRef<ComponentRef<typeof TextInput>>(null);
   const [serverError, setServerError] = useState<string>();
 
   const form = useForm({
     defaultValues: {
-      email: "",
+      email: initialEmail ?? "",
       password: "",
     } as LoginFormData,
     validators: {
@@ -93,13 +92,6 @@ export const LoginForm = () => {
           align="flex-end"
           tone="muted"
           href="/(auth)/forgot-password"
-          onPress={() => {
-            try {
-              router.push("/(auth)/forgot-password");
-            } catch {
-              router.push("/forgot-password");
-            }
-          }}
         />
       </View>
 
@@ -110,7 +102,6 @@ export const LoginForm = () => {
             label="Activate your account"
             align="flex-start"
             href="/(auth)/activate"
-            onPress={() => router.push("/(auth)/activate")}
           />
         </View>
       ) : null}
@@ -124,20 +115,16 @@ export const LoginForm = () => {
       <View className="mt-8 items-center">
         <View className="mb-4 flex-row items-center gap-3 w-full max-w-[280px]">
           <View className="flex-1 h-px bg-white/[0.08]" />
-          <Text className="text-[11px] text-zinc-500 font-medium tracking-wider">
+          <Text className="text-[11px] text-zinc-500 font-brandMedium tracking-wider">
             OR
           </Text>
           <View className="flex-1 h-px bg-white/[0.08]" />
         </View>
         <View className="flex-row items-center gap-1.5">
-          <Text className="text-zinc-400 text-xs font-normal">
+          <Text className="text-zinc-400 text-xs font-brand">
             New to Glimpse?
           </Text>
-          <AuthTextLink
-            label="Create an account"
-            href="/(auth)/register"
-            onPress={() => router.push("/(auth)/register")}
-          />
+          <AuthTextLink label="Create an account" href="/(auth)/register" />
         </View>
       </View>
     </View>

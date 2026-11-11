@@ -8,7 +8,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "tokens:check": "node scripts/check-tokens.mjs",
+    "styles:check": "node scripts/check-tokens.mjs && node scripts/check-classnames.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

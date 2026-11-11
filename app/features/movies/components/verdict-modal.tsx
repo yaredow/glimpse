@@ -65,7 +65,7 @@ export default function VerdictModal({
           <Text style={styles.description}>
             Log your verdict for{" "}
             <Text style={styles.highlightText}>&ldquo;{movieTitle}&rdquo;</Text> to
-            complete today&apos;s ritual and record it in your Journal.
+            log it and it lands in your Journal.
           </Text>
 
           <View style={styles.starsRow}>
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 20,
     textAlign: "center",
     paddingHorizontal: 12,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   description: {
     color: "#A1A1AA",
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 14,
     lineHeight: 21,
     textAlign: "center",
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   highlightText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   starsRow: {
     flexDirection: "row",
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   ratingHint: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 13,
     color: "#FFFFFF",
     marginTop: 4,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   cancelBtnLabel: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 13,
   },
   confirmBtn: {
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   confirmBtnLabel: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 13,
     letterSpacing: 0.3,
   },

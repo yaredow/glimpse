@@ -117,7 +117,7 @@ function DialogFooter({ className, ...props }: ViewProps) {
 function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn('text-foreground text-lg font-semibold leading-none', className)}
+      className={cn('text-foreground text-lg font-brandSemiBold leading-none', className)}
       {...props}
     />
   );

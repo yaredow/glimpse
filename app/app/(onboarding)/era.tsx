@@ -21,7 +21,7 @@ export default function EraScreen() {
     <StepLayout
       step={1}
       totalSteps={4}
-      title="Movie Era"
+      title="Set the era"
       subtitle="Select the release period that matches your taste"
       onBack={() => router.back()}
     >
@@ -29,7 +29,6 @@ export default function EraScreen() {
         eras={ONBOARDING_ERAS}
         initialSelected={initialEra}
         onNext={handleNext}
-        onBack={() => router.back()}
       />
     </StepLayout>
   );

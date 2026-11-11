@@ -338,7 +338,7 @@ export default function Profile() {
                           { color: theme.colors.textPrimary },
                         ]}
                       >
-                        {pref.min_rating.toFixed(1)}+
+                        {pref.min_rating.toFixed(1)}+ / 10
                       </Text>
                     </View>
                   </View>
@@ -468,18 +468,18 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 22,
     letterSpacing: 0.5,
   },
   userName: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 20,
     lineHeight: 26,
     letterSpacing: -0.3,
   },
   userEmail: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
     lineHeight: 18,
     marginTop: 2,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   memberSince: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 11,
   },
   skeletonName: {
@@ -515,14 +515,14 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   syncPillText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12.5,
   },
   syncDot: {
     fontSize: 12,
   },
   syncResetText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 12,
   },
   card: {
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 15,
     letterSpacing: 0.2,
   },
@@ -556,11 +556,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   editBtnText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12,
   },
   emptyText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
     paddingVertical: 6,
   },
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sectionLabel: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 10.5,
     letterSpacing: 1.2,
   },
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
   },
   chipFavoriteText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12,
   },
   chipExcluded: {
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   chipExcludedText: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 12,
   },
   metaRow: {
@@ -616,12 +616,12 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   metaLabel: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 10,
     letterSpacing: 1,
   },
   metaValue: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12.5,
   },
   ratingValueRow: {
@@ -635,7 +635,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   accountValue: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
   },
   separator: {
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     height: 44,
   },
   logoutLabel: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 13,
     letterSpacing: 0.8,
   },

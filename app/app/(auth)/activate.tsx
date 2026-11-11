@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
@@ -25,17 +25,14 @@ export default function Activate() {
   const [serverError, setServerError] = useState<string>();
   const [activated, setActivated] = useState(false);
 
-  useEffect(() => {
-    if (activated) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
-        () => {}
-      );
-      const timer = setTimeout(() => {
-        router.replace("/(auth)/login");
-      }, 2400);
-      return () => clearTimeout(timer);
-    }
-  }, [activated]);
+  const activatedEmail = activateMutation.data?.email ?? email;
+
+  const handleActivation = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
+      () => {}
+    );
+    setActivated(true);
+  };
 
   const handleActivate = () => {
     if (!token.trim()) {
@@ -45,7 +42,7 @@ export default function Activate() {
 
     setServerError(undefined);
     activateMutation.mutate(token.trim(), {
-      onSuccess: () => setActivated(true),
+      onSuccess: handleActivation,
       onError: async (error) => {
         setServerError(await getErrorMessage(error));
       },
@@ -54,17 +51,11 @@ export default function Activate() {
 
   if (activated) {
     return (
-      <AuthShell
-        title="You're in."
-        subtitle="Your account is activated. Redirecting you to sign in..."
-      >
-        <Animated.View
-          entering={FadeIn.duration(400)}
-          className="items-center gap-4 w-full"
-        >
+      <AuthShell title="You&apos;re in." subtitle="Your account is activated.">
+        <Animated.View entering={FadeIn.duration(400)} style={styles.successBody}>
           <Animated.View
             entering={ZoomIn.duration(450).springify()}
-            className="w-20 h-20 rounded-full border border-emerald-500/30 bg-emerald-500/10 items-center justify-center mt-2 mb-2 shadow-lg shadow-emerald-950/40"
+            style={styles.successBadge}
           >
             <CheckCircleIcon size={40} color="#10B981" weight="fill" />
           </Animated.View>
@@ -73,7 +64,12 @@ export default function Activate() {
           </Text>
           <AuthPrimaryButton
             label="Sign in now"
-            onPress={() => router.replace("/(auth)/login")}
+            onPress={() =>
+              router.replace({
+                pathname: "/(auth)/login",
+                params: activatedEmail ? { email: activatedEmail } : undefined,
+              })
+            }
           />
         </Animated.View>
       </AuthShell>
@@ -87,6 +83,9 @@ export default function Activate() {
         email
           ? `Enter the activation code sent to ${email}.`
           : "Enter the activation code sent to your email."
+      }
+      onBack={() =>
+        router.canGoBack() ? router.back() : router.replace("/(auth)/login")
       }
     >
       <AuthField
@@ -120,9 +119,39 @@ export default function Activate() {
         </Text>
         <AuthTextLink
           label="Back to sign in"
-          onPress={() => router.replace("/(auth)/login")}
+          onPress={() =>
+            router.replace({
+              pathname: "/(auth)/login",
+              params: email ? { email } : undefined,
+            })
+          }
         />
       </View>
     </AuthShell>
   );
 }
+
+const styles = StyleSheet.create({
+  successBody: {
+    alignItems: "center",
+    gap: 16,
+    width: "100%",
+  },
+  successBadge: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor: "rgba(16, 185, 129, 0.3)",
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    marginBottom: 8,
+    shadowColor: "#022C22",
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+});

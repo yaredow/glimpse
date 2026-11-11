@@ -20,7 +20,7 @@ export default function LanguageScreen() {
     <StepLayout
       step={2}
       totalSteps={4}
-      title="Languages & Quality"
+      title="Languages & quality"
       subtitle="Set your spoken language preferences and minimum rating standard"
       onBack={() => router.back()}
     >

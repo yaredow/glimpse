@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   fallbackTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 20,
     color: "#FFFFFF",
     textAlign: "center",
@@ -195,13 +195,13 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.18)",
   },
   clueBadgeText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 10,
     color: "#FFFFFF",
     letterSpacing: 0.3,
   },
   movieTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 22,
     lineHeight: 26,
     color: "#FFFFFF",
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 6,
   },
   metaLine: {
-    fontFamily: "Inter_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     fontSize: 12,
     color: "rgba(255, 255, 255, 0.78)",
     marginTop: 4,
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   curatorNote: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 12.5,
     lineHeight: 17,
     color: "rgba(255, 255, 255, 0.85)",
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   cornerRibbonText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 9.5,
     letterSpacing: 1.2,
     color: "#121212",

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { useForm } from "@tanstack/react-form";
 import { router, useLocalSearchParams } from "expo-router";
@@ -22,22 +22,20 @@ import {
 } from "@/features/auth/components/auth-actions";
 
 export default function ResetPassword() {
-  const { token: tokenParam } = useLocalSearchParams<{ token?: string }>();
+  const { token: tokenParam, email } = useLocalSearchParams<{
+    token?: string;
+    email?: string;
+  }>();
   const resetPassword = useResetPassword();
   const [serverError, setServerError] = useState<string>();
   const [updated, setUpdated] = useState(false);
 
-  useEffect(() => {
-    if (updated) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
-        () => {}
-      );
-      const timer = setTimeout(() => {
-        router.replace("/(auth)/login");
-      }, 2400);
-      return () => clearTimeout(timer);
-    }
-  }, [updated]);
+  const handleUpdated = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
+      () => {}
+    );
+    setUpdated(true);
+  };
 
   const form = useForm({
     defaultValues: {
@@ -53,7 +51,7 @@ export default function ResetPassword() {
       resetPassword.mutate(
         { token: value.token, newPassword: value.password },
         {
-          onSuccess: () => setUpdated(true),
+          onSuccess: handleUpdated,
           onError: async (error) => {
             setServerError(await getErrorMessage(error));
           },
@@ -64,17 +62,11 @@ export default function ResetPassword() {
 
   if (updated) {
     return (
-      <AuthShell
-        title="Password updated."
-        subtitle="Your new password is ready. Redirecting you to sign in..."
-      >
-        <Animated.View
-          entering={FadeIn.duration(400)}
-          className="items-center gap-4 w-full"
-        >
+      <AuthShell title="Password updated." subtitle="Your new password is ready.">
+        <Animated.View entering={FadeIn.duration(400)} style={styles.successBody}>
           <Animated.View
             entering={ZoomIn.duration(450).springify()}
-            className="w-20 h-20 rounded-full border border-emerald-500/30 bg-emerald-500/10 items-center justify-center mt-2 mb-2 shadow-lg shadow-emerald-950/40"
+            style={styles.successBadge}
           >
             <CheckCircleIcon size={40} color="#10B981" weight="fill" />
           </Animated.View>
@@ -83,7 +75,12 @@ export default function ResetPassword() {
           </Text>
           <AuthPrimaryButton
             label="Sign in now"
-            onPress={() => router.replace("/(auth)/login")}
+            onPress={() =>
+              router.replace({
+                pathname: "/(auth)/login",
+                params: email ? { email } : undefined,
+              })
+            }
           />
         </Animated.View>
       </AuthShell>
@@ -94,6 +91,11 @@ export default function ResetPassword() {
     <AuthShell
       title="Choose a new password."
       subtitle="Use the reset code from your email, then set a new password."
+      onBack={() =>
+        router.canGoBack()
+          ? router.back()
+          : router.replace("/(auth)/forgot-password")
+      }
     >
       <form.Field name="token">
         {(field) => (
@@ -159,3 +161,28 @@ export default function ResetPassword() {
     </AuthShell>
   );
 }
+
+const styles = StyleSheet.create({
+  successBody: {
+    alignItems: "center",
+    gap: 16,
+    width: "100%",
+  },
+  successBadge: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor: "rgba(16, 185, 129, 0.3)",
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    marginBottom: 8,
+    shadowColor: "#022C22",
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+});

@@ -107,13 +107,13 @@ const styles = StyleSheet.create({
   },
   title: {
     color: themeColors.onSurface,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 14,
     letterSpacing: 0.1,
   },
   message: {
     color: themeColors.onSurfaceVariant,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 13,
     lineHeight: 18,
     marginTop: 2,

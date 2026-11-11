@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 20,
     textAlign: "center",
     paddingHorizontal: 12,
@@ -302,14 +302,14 @@ const styles = StyleSheet.create({
   },
   description: {
     color: "#A1A1AA",
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 14,
     lineHeight: 22,
     textAlign: "center",
   },
   highlightText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
   },
   syncDescriptionContainer: {
     alignItems: "center",
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   moodHeader: {
     color: "#71717A",
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     letterSpacing: 1.2,
     fontSize: 11,
     marginBottom: 8,
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   moodLabel: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12.5,
   },
   moodLabelUnselected: {
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   cancelBtnLabel: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 13,
   },
   confirmBtn: {
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   confirmBtnLabel: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 13,
     letterSpacing: 0.3,
   },

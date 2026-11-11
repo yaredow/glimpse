@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   dealersChoiceText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 10.5,
     letterSpacing: 0.4,
   },
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   progressText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 10.5,
     letterSpacing: 1.1,
   },
@@ -655,13 +655,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   reelClosedTitle: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 20,
     textAlign: "center",
     marginBottom: 8,
   },
   reelClosedSubtitle: {
-    fontFamily: "Inter_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
@@ -678,7 +678,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   reshuffleBtnText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 13,
   },
   backgroundLayer1: {
@@ -727,12 +727,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   actionBtnText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 13,
   },
   pickBtnText: {
     color: "#FFFFFF",
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 13,
     letterSpacing: 0.4,
   },

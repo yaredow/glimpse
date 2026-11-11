@@ -25,14 +25,14 @@ export function AuthPrimaryButton({
 
   return (
     <Button
-      size="lg"
+      size="xl"
       disabled={isDisabled}
       onPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
         onPress();
       }}
       className={cn(
-        "w-full h-[54px] rounded-2xl bg-primary active:opacity-90 shadow-md shadow-red-900/40 mt-3",
+        "w-full mt-3",
         isDisabled && "opacity-50",
         className
       )}
@@ -42,7 +42,7 @@ export function AuthPrimaryButton({
       {loading ? (
         <ActivityIndicator size="small" color="#FFFFFF" />
       ) : (
-        <Text className="text-white font-bold text-[15px] tracking-wide">
+        <Text className="text-white font-brandBold text-[15px] tracking-wide">
           {label}
         </Text>
       )}
@@ -71,7 +71,7 @@ export function AuthTextLink({
     <Pressable
       onPress={() => {
         Haptics.selectionAsync().catch(() => {});
-        onPress?.();
+        if (!href) onPress?.();
       }}
       hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
       accessibilityRole="link"
@@ -86,7 +86,7 @@ export function AuthTextLink({
       {({ pressed }) => (
         <Text
           className={cn(
-            "font-semibold text-xs tracking-wide",
+            "font-brandSemiBold text-xs tracking-wide",
             tone === "primary" ? "text-primary" : "text-zinc-400",
             pressed && "opacity-50"
           )}
@@ -121,7 +121,7 @@ export function AuthErrorBanner({ message }: { message: string }) {
         weight="fill"
         style={{ marginTop: 1 }}
       />
-      <Text className="flex-1 text-destructive text-xs leading-5 font-medium">
+      <Text className="flex-1 text-destructive text-xs leading-5 font-brandMedium">
         {message}
       </Text>
     </View>

@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   label: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 12,
     letterSpacing: 0.4,
   },

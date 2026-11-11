@@ -16,7 +16,7 @@ import { useOnlineManager } from "@/hooks/use-online-manager";
 import { useEffect } from "react";
 import { PaperProvider } from "react-native-paper";
 import { ThemeProvider } from "@react-navigation/native";
-import { glimpseDarkTheme, glimpseNavigationTheme, toastConfig } from "@/lib/theme";
+import { glimpseDarkTheme, glimpseNavigationTheme, toastConfig, AppThemeContext } from "@/lib/theme";
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
@@ -29,20 +29,14 @@ void SystemUI.setBackgroundColorAsync("#0C0C0E");
 
 export default function RootLayout() {
   useOnlineManager();
-  const { isAuthenticated, isRestoring, restoreToken } = useAuthStore();
+  const { isAuthenticated, isRestoring, hasAuthenticated, restoreToken } =
+    useAuthStore();
   const [loaded, error] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
-
-    // Aliased to Plus Jakarta Sans for instant app-wide upgrade
-    Inter_400Regular: PlusJakartaSans_400Regular,
-    Inter_500Medium: PlusJakartaSans_500Medium,
-    Inter_600SemiBold: PlusJakartaSans_600SemiBold,
-    Inter_700Bold: PlusJakartaSans_700Bold,
-    Inter_900Black: PlusJakartaSans_800ExtraBold,
   });
 
   useEffect(() => {
@@ -53,23 +47,36 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#0C0C0E" }}>
-      <QueryProvider>
-        <PaperProvider theme={glimpseDarkTheme}>
-          <ThemeProvider value={glimpseNavigationTheme}>
-            {isReady ? <RootNavigator isAuthenticated={isAuthenticated} /> : null}
-            <AnimatedSplashScreen isReady={isReady} />
-            <Toast config={toastConfig} />
-          </ThemeProvider>
-        </PaperProvider>
-      </QueryProvider>
+      <AppThemeContext.Provider value={glimpseDarkTheme}>
+        <QueryProvider>
+          <PaperProvider theme={glimpseDarkTheme}>
+            <ThemeProvider value={glimpseNavigationTheme}>
+              {isReady ? (
+                <RootNavigator
+                  isAuthenticated={isAuthenticated}
+                  hasAuthenticated={hasAuthenticated}
+                />
+              ) : null}
+              <AnimatedSplashScreen isReady={isReady} />
+              <Toast config={toastConfig} />
+            </ThemeProvider>
+          </PaperProvider>
+        </QueryProvider>
+      </AppThemeContext.Provider>
     </GestureHandlerRootView>
   );
 }
 
-function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
+function RootNavigator({
+  isAuthenticated,
+  hasAuthenticated,
+}: {
+  isAuthenticated: boolean;
+  hasAuthenticated: boolean;
+}) {
   const segments = useSegments();
   const currentGroup = segments[0];
-  const { data, isFetched: isPreferenceFetched } =
+  const { data, isFetched: isPreferenceFetched, isError: isPreferencesError } =
     useGetPreferences(isAuthenticated);
   const isOnboarded = !!data?.preference?.favorite_genres?.length;
 
@@ -113,11 +120,15 @@ function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
   useEffect(() => {
     if (!isAuthenticated) {
       if (currentGroup === "(auth)" || currentGroup === "(onboarding)") return;
-      router.replace("/(auth)/welcome");
+      router.replace(
+        hasAuthenticated ? "/(auth)/login" : "/(auth)/welcome",
+      );
       return;
     }
 
     if (hasCompletedLocalOnboarding || isSyncing) return;
+
+    if (isPreferencesError) return;
 
     if (!isPreferenceFetched) return;
 
@@ -131,7 +142,9 @@ function RootNavigator({ isAuthenticated }: { isAuthenticated: boolean }) {
   }, [
     currentGroup,
     isAuthenticated,
+    hasAuthenticated,
     isPreferenceFetched,
+    isPreferencesError,
     isOnboarded,
     hasCompletedLocalOnboarding,
     isSyncing,

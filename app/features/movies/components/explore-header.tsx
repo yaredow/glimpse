@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   dateText: {
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     fontSize: 10.5,
     letterSpacing: 1.2,
     marginTop: 4,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   syncText: {
-    fontFamily: "Inter_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     fontSize: 11,
     letterSpacing: 0.6,
   },

@@ -1,8 +1,19 @@
-import { useState } from "react";
-import { StyleSheet, View, Pressable, ScrollView } from "react-native";
-import { Text } from "react-native-paper";
+import { useState, useCallback } from "react";
+import { ScrollView, Text, View, Pressable } from "react-native";
 import { Button } from "@/components/ui/button";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { typeClasses } from "@/lib/theme/typography";
+import { palette } from "@/lib/theme/colors";
+import { cn } from "@/lib/utils";
+import {
+  CassetteTapeIcon,
+  CheckCircleIcon,
+  DiscIcon,
+  FilmSlateIcon,
+  GlobeIcon,
+  RadioIcon,
+  RocketIcon,
+  type Icon,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { EraPreset } from "../types/onboarding.type";
 
@@ -13,14 +24,23 @@ interface EraSelectorProps {
   onBack?: () => void;
 }
 
-const ERA_ICONS: Record<string, string> = {
-  "Modern Hits": "rocket-launch-outline",
-  "The New Millennium": "disc",
-  "90s Nostalgia": "cassette",
-  "Retro Classics": "radio",
-  "Timeless Cinema": "filmstrip",
-  Everything: "earth",
+const ERA_ICONS: Record<string, Icon> = {
+  "Modern Hits": RocketIcon,
+  "The New Millennium": DiscIcon,
+  "90s Nostalgia": CassetteTapeIcon,
+  "Retro Classics": RadioIcon,
+  "Timeless Cinema": FilmSlateIcon,
+  Everything: GlobeIcon,
 };
+
+function widestEra(eras: EraPreset[]): EraPreset | undefined {
+  return eras.reduce<EraPreset | undefined>((widest, era) => {
+    if (!widest) return era;
+    return era.max_year - era.min_year > widest.max_year - widest.min_year
+      ? era
+      : widest;
+  }, undefined);
+}
 
 export default function EraSelector({
   eras,
@@ -30,15 +50,16 @@ export default function EraSelector({
 }: EraSelectorProps) {
   const [selected, setSelected] = useState<EraPreset | null>(() => {
     if (!initialSelected) {
-      // Default to "Everything" or first
-      return eras.find((e) => e.min_year === 1888) || eras[0] || null;
+      return widestEra(eras) || eras[0] || null;
     }
     return (
       eras.find(
         (e) =>
           e.min_year === initialSelected.min_year &&
           e.max_year === initialSelected.max_year,
-      ) || eras[0] || null
+      ) ||
+      eras[0] ||
+      null
     );
   });
 
@@ -53,10 +74,18 @@ export default function EraSelector({
     }
   };
 
+  const widestSpan = eras.reduce(
+    (span, era) => Math.max(span, era.max_year - era.min_year),
+    0,
+  );
+  const isAllTime = selected
+    ? selected.max_year - selected.min_year === widestSpan
+    : false;
+
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <ScrollView
-        contentContainerStyle={styles.grid}
+        contentContainerClassName="gap-3 pb-6 pt-2"
         showsVerticalScrollIndicator={false}
       >
         {eras.map((era) => {
@@ -65,54 +94,56 @@ export default function EraSelector({
             selected?.max_year === era.max_year;
 
           const title = era.label.split(" (")[0];
-          const icon = ERA_ICONS[title] || "movie-outline";
+          const EraIcon = ERA_ICONS[title] ?? FilmSlateIcon;
 
           return (
             <Pressable
               key={era.label}
               onPress={() => handleSelect(era)}
-              style={[
-                styles.card,
-                isSelected ? styles.cardSelected : styles.cardUnselected,
-              ]}
+              className={cn(
+                "rounded-lg border-[1.5px] p-4",
+                isSelected
+                  ? "border-primary bg-surface-brand"
+                  : "border-zinc-800 bg-zinc-900",
+              )}
             >
-              <View style={styles.cardHeader}>
+              <View className="mb-2 flex-row items-center justify-between">
                 <View
-                  style={[
-                    styles.iconBox,
-                    isSelected
-                      ? styles.iconBoxSelected
-                      : styles.iconBoxUnselected,
-                  ]}
+                  className={cn(
+                    "h-9 w-9 items-center justify-center rounded-sm",
+                    isSelected ? "bg-primary/15" : "bg-zinc-800",
+                  )}
                 >
-                  <MaterialCommunityIcons
-                    name={icon as any}
+                  <EraIcon
                     size={20}
-                    color={isSelected ? "#E50914" : "#A1A1AA"}
+                    color={isSelected ? palette.cinemaRed : palette.zinc400}
+                    weight="bold"
                   />
                 </View>
                 {isSelected && (
-                  <MaterialCommunityIcons
-                    name="check-circle"
+                  <CheckCircleIcon
                     size={18}
-                    color="#E50914"
+                    color={palette.cinemaRed}
+                    weight="fill"
                   />
                 )}
               </View>
 
               <Text
-                style={[
-                  styles.title,
-                  isSelected ? styles.titleSelected : styles.titleUnselected,
-                ]}
+                className={cn(
+                  typeClasses.default,
+                  "mb-1 text-[16px] font-bold",
+                  isSelected ? "text-white" : "text-zinc-100",
+                )}
               >
                 {title}
               </Text>
               <Text
-                style={[
-                  styles.years,
-                  isSelected ? styles.yearsSelected : styles.yearsUnselected,
-                ]}
+                className={cn(
+                  typeClasses.default,
+                  "text-[13px] font-medium",
+                  isSelected ? "text-red-300" : "text-zinc-500",
+                )}
               >
                 {era.min_year === 1888
                   ? "All Time"
@@ -124,13 +155,26 @@ export default function EraSelector({
       </ScrollView>
 
       {/* Floating Bottom Bar */}
-      <View style={styles.footer}>
+      <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
+        <View className="items-center">
+          <Text
+            className={cn(typeClasses.bodySmall, "text-zinc-400 font-semibold")}
+          >
+            {selected
+              ? isAllTime
+                ? "All time"
+                : `${selected.min_year} – ${selected.max_year}`
+              : "Pick a range"}
+          </Text>
+        </View>
+
         <Button
+          size="xl"
           variant="primary"
           onPress={handleNext}
           disabled={!selected}
           haptic="success"
-          style={styles.nextButton}
+          className="w-full"
         >
           Continue
         </Button>
@@ -138,77 +182,3 @@ export default function EraSelector({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  grid: {
-    paddingTop: 8,
-    paddingBottom: 24,
-    gap: 12,
-  },
-  card: {
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1.5,
-  },
-  cardUnselected: {
-    backgroundColor: "#18181B",
-    borderColor: "#27272A",
-  },
-  cardSelected: {
-    backgroundColor: "#201012",
-    borderColor: "#E50914",
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconBoxUnselected: {
-    backgroundColor: "#27272A",
-  },
-  iconBoxSelected: {
-    backgroundColor: "rgba(229, 9, 20, 0.15)",
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  titleUnselected: {
-    color: "#F4F4F5",
-  },
-  titleSelected: {
-    color: "#FFFFFF",
-  },
-  years: {
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  yearsUnselected: {
-    color: "#71717A",
-  },
-  yearsSelected: {
-    color: "#FCA5A5",
-  },
-  footer: {
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#27272A",
-    marginTop: "auto",
-  },
-  nextButton: {
-    width: "100%",
-    borderRadius: 8,
-  },
-});

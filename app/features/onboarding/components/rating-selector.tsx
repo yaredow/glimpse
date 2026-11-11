@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Text, useTheme } from "react-native-paper";
+import { Text, View } from "react-native";
 import { Button } from "@/components/ui/button";
+import { palette } from "@/lib/theme/colors";
+import { typeClasses } from "@/lib/theme/typography";
+import { cn } from "@/lib/utils";
 
 interface RatingSelectorProps {
   initialRating: number;
@@ -16,7 +18,6 @@ export default function RatingSelector({
   onBack,
   isSubmitting,
 }: RatingSelectorProps) {
-  const { colors } = useTheme();
   const [rating, setRating] = useState(initialRating || 5);
 
   const handleRatingChange = (value: number) => {
@@ -31,45 +32,50 @@ export default function RatingSelector({
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <Text
-        variant="titleMedium"
-        style={[styles.subtitle, { color: colors.onSurfaceVariant }]}
+        className={cn(typeClasses.titleMedium, "mb-12 text-center")}
       >
         Only show movies with a rating above:
       </Text>
 
-      <View style={styles.ratingContainer}>
-        <Text variant="displayLarge" style={[styles.ratingText, { color: colors.primary }]}>
+      <View className="mb-12 items-center">
+        <Text
+          className={cn(
+            typeClasses.displayLarge,
+            "text-[80px] leading-[80px] font-black",
+          )}
+          style={{ color: palette.cinemaRed }}
+        >
           {rating.toFixed(1)}
         </Text>
-        <Text variant="labelLarge" style={{ color: colors.onSurfaceVariant }}>
+        <Text className={typeClasses.labelLarge} style={{ color: palette.zinc400 }}>
           Minimum IMDb Rating
         </Text>
       </View>
 
-      <View style={styles.buttonGrid}>
-         {[0, 2.5, 5, 7.5, 9].map((val) => (
-           <Button 
+      <View className="flex-row flex-wrap justify-center gap-3">
+        {[0, 2.5, 5, 7.5, 9].map((val) => (
+          <Button
             key={val}
-            variant={rating === val ? "primary" : "outline"} 
+            variant={rating === val ? "primary" : "outline"}
             size="small"
             onPress={() => handleRatingChange(val)}
-            style={styles.ratingButton}
+            className="min-w-[80px]"
             haptic="light"
-           >
-             {val === 0 ? "Any" : `${val}+`}
-           </Button>
-         ))}
+          >
+            {val === 0 ? "Any" : `${val}+`}
+          </Button>
+        ))}
       </View>
 
-      <View style={[styles.footer, { borderTopColor: colors.outline }]}>
+      <View className="mt-auto flex-row items-center justify-between gap-3 border-t border-surface-zinc-750 pt-6">
         <Button
           variant="text"
           onPress={onBack}
-          textColor={colors.onSurfaceVariant}
+          textColor={palette.zinc400}
           haptic="light"
-          style={styles.backButton}
+          className="-ml-4"
         >
           Back
         </Button>
@@ -86,42 +92,3 @@ export default function RatingSelector({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  subtitle: {
-    textAlign: "center",
-    marginBottom: 48,
-  },
-  ratingContainer: {
-    alignItems: "center",
-    marginBottom: 48,
-  },
-  ratingText: {
-    fontWeight: "900",
-    fontSize: 80,
-    lineHeight: 80,
-  },
-  buttonGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'center'
-  },
-  ratingButton: {
-    minWidth: 80
-  },
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 24,
-    borderTopWidth: 1,
-    marginTop: "auto",
-  },
-  backButton: {
-    marginLeft: -16,
-  },
-});

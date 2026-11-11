@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -42,7 +42,7 @@ export default function CheckEmail() {
         email ? (
           <Text className="text-zinc-400 text-sm text-center leading-relaxed">
             We sent an activation link to{"\n"}
-            <Text className="text-white font-semibold">{email}</Text>
+            <Text className="text-white font-brandSemiBold">{email}</Text>
           </Text>
         ) : (
           "We sent you an activation link."
@@ -50,10 +50,7 @@ export default function CheckEmail() {
       }
     >
       <View className="items-center gap-4 w-full">
-        <Animated.View
-          style={animatedPulseStyle}
-          className="w-16 h-16 rounded-full border border-primary/30 bg-primary/10 items-center justify-center mt-1 mb-2 shadow-lg shadow-red-950/40"
-        >
+        <Animated.View style={[styles.pulseCircle, animatedPulseStyle]}>
           <EnvelopeSimpleIcon size={32} color="#E50914" weight="fill" />
         </Animated.View>
 
@@ -73,9 +70,34 @@ export default function CheckEmail() {
         />
         <AuthTextLink
           label="Back to sign in"
-          onPress={() => router.replace("/(auth)/login")}
+          onPress={() =>
+            router.replace({
+              pathname: "/(auth)/login",
+              params: email ? { email } : undefined,
+            })
+          }
         />
       </View>
     </AuthShell>
   );
 }
+
+const styles = StyleSheet.create({
+  pulseCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: "rgba(229, 9, 20, 0.3)",
+    backgroundColor: "rgba(229, 9, 20, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
+    marginBottom: 8,
+    shadowColor: "#450A0A",
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+});

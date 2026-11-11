@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -74,16 +74,13 @@ export default function ForgotPassword() {
         subtitle={
           <Text className="text-zinc-400 text-sm text-center leading-relaxed">
             We sent a reset link to{"\n"}
-            <Text className="text-white font-semibold">{sentTo}</Text>{" "}
+            <Text className="text-white font-brandSemiBold">{sentTo}</Text>{" "}
             if an account exists.
           </Text>
         }
       >
         <View className="items-center gap-4 w-full">
-          <Animated.View
-            style={animatedPulseStyle}
-            className="w-16 h-16 rounded-full border border-primary/30 bg-primary/10 items-center justify-center mt-1 mb-2 shadow-lg shadow-red-950/40"
-          >
+          <Animated.View style={[styles.pulseCircle, animatedPulseStyle]}>
             <EnvelopeSimpleIcon size={32} color="#E50914" weight="fill" />
           </Animated.View>
           <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
@@ -92,7 +89,12 @@ export default function ForgotPassword() {
           </Text>
           <AuthPrimaryButton
             label="I have a reset code"
-            onPress={() => router.push("/(auth)/reset-password")}
+            onPress={() =>
+              router.push({
+                pathname: "/(auth)/reset-password",
+                params: sentTo ? { email: sentTo } : undefined,
+              })
+            }
           />
           <AuthTextLink
             label="Back to sign in"
@@ -107,6 +109,7 @@ export default function ForgotPassword() {
     <AuthShell
       title="Reset your password."
       subtitle="Enter the email on your account and we'll send a reset link."
+      onBack={() => router.replace("/(auth)/login")}
     >
       <form.Field name="email">
         {(field) => (
@@ -148,3 +151,23 @@ export default function ForgotPassword() {
     </AuthShell>
   );
 }
+
+const styles = StyleSheet.create({
+  pulseCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: "rgba(229, 9, 20, 0.3)",
+    backgroundColor: "rgba(229, 9, 20, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
+    marginBottom: 8,
+    shadowColor: "#450A0A",
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+});

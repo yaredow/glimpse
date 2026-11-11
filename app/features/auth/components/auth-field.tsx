@@ -113,10 +113,10 @@ export default function AuthField({
         withTiming(5, { duration: 40 }),
         withTiming(-3, { duration: 40 }),
         withTiming(3, { duration: 40 }),
-        withTiming(0, { duration: 40 })
+        withTiming(0, { duration: 40 }),
       );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(
-        () => {}
+        () => {},
       );
     }
     prevErrorRef.current = error;
@@ -140,13 +140,13 @@ export default function AuthField({
     const borderColor = interpolateColor(
       focusAnim.value,
       [0, 1],
-      [defaultBorder, focusedBorder]
+      [defaultBorder, focusedBorder],
     );
 
     const backgroundColor = interpolateColor(
       focusAnim.value,
       [0, 1],
-      [defaultBg, focusedBg]
+      [defaultBg, focusedBg],
     );
 
     const shadowOpacity = interpolate(focusAnim.value, [0, 1], [0, 0.25]);
@@ -192,13 +192,23 @@ export default function AuthField({
 
   return (
     <View className={cn("mb-4", className)}>
-      <Text className="text-zinc-300 text-xs font-semibold mb-2 px-0.5 tracking-wide">
+      <Text className="text-zinc-300 text-xs font-brandSemiBold mb-2 px-0.5 tracking-wide">
         {label}
       </Text>
 
       <Animated.View
-        style={animatedInputStyle}
-        className="flex-row items-center px-4 h-[54px] rounded-2xl border gap-3"
+        style={[
+          {
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 16,
+            height: 54,
+            borderRadius: 16,
+            borderWidth: 1,
+            gap: 12,
+          },
+          animatedInputStyle,
+        ]}
       >
         {renderIcon()}
 
@@ -227,7 +237,7 @@ export default function AuthField({
           accessibilityLabel={accessibilityLabel ?? label}
           autoFocus={autoFocus}
           passwordRules={passwordRules}
-          className="flex-1 text-white text-[15px] font-medium h-full py-0"
+          className="flex-1 text-white text-[15px] font-brandMedium h-full py-0"
         />
 
         {secure ? (
@@ -256,7 +266,9 @@ export default function AuthField({
           accessibilityLiveRegion="polite"
         >
           <WarningCircleIcon size={14} color="#EF4444" weight="fill" />
-          <Text className="text-destructive text-xs font-medium">{error}</Text>
+          <Text className="text-destructive text-xs font-brandMedium">
+            {error}
+          </Text>
         </View>
       ) : null}
 
