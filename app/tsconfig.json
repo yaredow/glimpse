@@ -8,7 +8,11 @@
         "./*"
       ]
     },
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "6.0",
+    "types": [
+      "expo/types",
+      "nativewind/types"
+    ]
   },
   "include": [
     "**/*.ts",
