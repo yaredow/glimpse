@@ -1,6 +1,6 @@
 # Dependency & Lockfile Hygiene
 
-**Status:** ready to implement — PR 1 of 4
+**Status:** ready to implement — PR 1 of 5
 **Owner:** unassigned
 **Depends on:** clean working tree (`README.md` §2)
 **Blocks:** nothing (run first so the tooling is stable)
