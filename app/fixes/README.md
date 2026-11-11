@@ -1,7 +1,7 @@
 # Design System Fixes — Index
 
 **Status:** decisions locked. Execute top to bottom.
-**Branch:** `refactor/design-system`
+**Base branch:** `master` (default). `glimpse-revamp` merges into it first.
 **Prerequisite:** the working tree must be clean before starting (see §2).
 
 | Order | File | PR | First phase | Last phase |
@@ -38,28 +38,30 @@ Consolidation targets for VA-2 (not part of the mechanical phases):
 
 Do not start VA-2 early, and do not "fix" a value while doing a rename.
 
-### 1.2 Delivery model: one branch, four sequential PRs
+### 1.2 Delivery model: short-lived branch per PR
+
+The default branch is **`master`**. `glimpse-revamp` is the migration baseline and must land on `master` first; all fix branches are cut from the updated `master`, one at a time.
 
 ```
-glimpse-revamp
-└── refactor/design-system
-    ├── PR 1  chore/dependency-hygiene
-    ├── PR 2  refactor/token-layer
-    ├── PR 3  refactor/typography
-    └── PR 4  refactor/visual-adaptation
+master
+├── PR 1  chore/dependency-hygiene
+├── PR 2  refactor/token-layer        (cut after PR 1 merges)
+├── PR 3  refactor/typography         (cut after PR 2 merges)
+├── PR 4  refactor/visual-adaptation  (cut after PR 3 merges)
+└── PR 5  chore/ci-coverage           (cut after PR 4 merges)
 ```
 
 Rules:
 
-1. **Commit the pending 109-file migration first.** The current tree is dirty. Screenshot-identical gates are meaningless on a dirty tree, and a token migration on top of uncommitted work cannot be reverted cleanly. Make one baseline commit (or stash), confirm `git status` is clean, then branch.
-2. **One PR per doc, merged before the next starts.** Not one giant PR (unreviewable, ~100+ files) and not one PR per phase (20 tiny PRs that keep rebasing `tailwind.config.js`, `global.css`, and `text.tsx`).
+1. **Baseline first.** Merge `glimpse-revamp` into `master` and confirm CI is green on both jobs. No fix branch starts before that. The pre-migration working tree is already committed: `074022d`, `20cc6df`, `9f7e048`, `522d9b5`.
+2. **One branch, one PR, one doc.** Cut from the updated `master` — not from the previous feature branch — merge it, delete it, then cut the next. Branches never stay open in parallel.
 3. **One commit per phase**, message prefixed with the phase id:
    `refactor(tokens): TL-1 expand css contract, keep aliases`.
    Each commit must pass its own **Gate** before the next phase starts.
 4. **PR 2 and PR 3 are pixel-identical.** Only PR 4 may change what the user sees. If a screenshot in PR 2/3 differs, it is a bug.
 5. **Shared files are sequenced, never parallelised:** `global.css` (PR 2), `tailwind.config.js` (PR 2, PR 3), `components/ui/text.tsx` (PR 3, PR 4). Finish and merge PR 2 before starting PR 3.
-6. **DH-4 (CI expansion) runs last**, after PR 4, because expanding lint to `app components features lib` will surface errors that the migrations are expected to remove. Doing it first would block every PR on pre-existing debt.
-7. **No dependency upgrades** inside PR 2–4 except the ones listed in PR 1.
+6. **DH-4 (CI expansion) is its own final PR**, because expanding lint to `app components features lib` will surface errors that the migrations are expected to remove. Doing it earlier would block every PR on pre-existing debt.
+7. **No dependency upgrades** inside PR 2–5 except the ones listed in PR 1.
 
 If a PR grows past ~40 changed files, split by phase into stacked PRs **within the same doc** — never across docs.
 
@@ -79,9 +81,15 @@ If a fix does not fit one row, it belongs in `visual-adaptation.md` and waits.
 ## 2. Start here
 
 ```bash
-cd app
-git status                      # must be clean before branching
-git switch -c refactor/design-system
+# once, before anything else
+git switch master
+git pull
+git merge --ff-only glimpse-revamp        # or merge the PR with rebase-and-merge
+git push
+
+# then, for each PR
+git switch master && git pull
+git switch -c chore/dependency-hygiene
 ```
 
 Then open `dependency-lockfile-hygiene.md` and run DH-0.
