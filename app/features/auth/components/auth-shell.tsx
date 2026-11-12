@@ -20,6 +20,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeftIcon } from "phosphor-react-native";
 import { Text } from "@/components/ui/text";
+import fontFamilies from "@/lib/theme/fonts.json";
 import { AuthBackdrop } from "./auth-backdrop";
 import BrandLockup from "./brand-lockup";
 import { colors } from "@/lib/theme/tokens.generated";
@@ -161,7 +162,7 @@ export default function AuthShell({
               <Animated.Text
                 entering={FadeInDown.delay(100).duration(350).springify()}
                 style={{
-                  fontFamily: "PlusJakartaSans_700Bold",
+                  fontFamily: fontFamilies.bold,
                   fontSize: 24,
                   lineHeight: 30,
                   letterSpacing: -0.6,

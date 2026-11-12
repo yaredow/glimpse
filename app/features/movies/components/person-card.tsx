@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Text, View, useWindowDimensions } from "react-native";
+import { View, useWindowDimensions } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Image } from "expo-image";
 import { tmdbImage } from "../constants/images";
 

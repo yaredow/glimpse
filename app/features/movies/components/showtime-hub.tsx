@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Pressable,
   ScrollView,
-  Text,
   View,
   useWindowDimensions,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";

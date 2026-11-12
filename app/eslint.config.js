@@ -27,4 +27,25 @@ module.exports = defineConfig([
       'tailwindcss/no-custom-classname': 'error',
     },
   },
+  {
+    // All UI text goes through the shared primitive so the type ramp stays in
+    // one place. `components/ui/text.tsx` is the only place allowed to touch
+    // the React Native primitive.
+    files: ['app/**/*.{ts,tsx}', 'features/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}'],
+    ignores: ['components/ui/text.tsx'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react-native',
+              importNames: ['Text'],
+              message: "Import Text from '@/components/ui/text' instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);

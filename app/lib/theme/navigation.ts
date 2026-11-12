@@ -3,7 +3,7 @@ import {
   type Theme,
 } from "@react-navigation/native";
 import { colors } from "./tokens.generated";
-import { themeFonts } from "./typography";
+import fontFamilies from "./fonts.json";
 
 export const glimpseNavigationTheme: Theme = {
   ...NavigationDarkTheme,
@@ -19,9 +19,9 @@ export const glimpseNavigationTheme: Theme = {
   },
   fonts: {
     ...NavigationDarkTheme.fonts,
-    regular: { ...NavigationDarkTheme.fonts.regular, fontFamily: themeFonts.default.fontFamily },
-    medium: { ...NavigationDarkTheme.fonts.medium, fontFamily: themeFonts.bodyMedium.fontFamily },
-    bold: { ...NavigationDarkTheme.fonts.bold, fontFamily: themeFonts.titleMedium.fontFamily },
-    heavy: { ...NavigationDarkTheme.fonts.heavy, fontFamily: themeFonts.headlineMedium.fontFamily },
+    regular: { ...NavigationDarkTheme.fonts.regular, fontFamily: fontFamilies.regular },
+    medium: { ...NavigationDarkTheme.fonts.medium, fontFamily: fontFamilies.regular },
+    bold: { ...NavigationDarkTheme.fonts.bold, fontFamily: fontFamilies.semiBold },
+    heavy: { ...NavigationDarkTheme.fonts.heavy, fontFamily: fontFamilies.bold },
   },
 };

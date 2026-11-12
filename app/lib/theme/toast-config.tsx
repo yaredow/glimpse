@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ToastConfig, ToastConfigParams } from "react-native-toast-message";
 import { colors } from "./tokens.generated";

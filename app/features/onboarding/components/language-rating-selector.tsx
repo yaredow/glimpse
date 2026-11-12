@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { ScrollView, Text, View, Pressable } from "react-native";
+import { ScrollView, View, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
-import { typeClasses } from "@/lib/theme/typography";
 import { cn } from "@/lib/utils";
 import { CheckIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
@@ -67,20 +67,10 @@ export default function LanguageRatingSelector({
       >
         {/* Section 1: Preferred Languages */}
         <View className="gap-2">
-          <Text
-            className={cn(
-              typeClasses.default,
-              "text-[16px] font-extrabold tracking-[-0.3px] text-white",
-            )}
-          >
+          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-white">
             Movie Languages
           </Text>
-          <Text
-            className={cn(
-              typeClasses.default,
-              "mb-1.5 text-[13px] text-zinc-500",
-            )}
-          >
+          <Text className="mb-1.5 text-[13px] text-zinc-500 font-brand">
             Select the audio languages you enjoy watching
           </Text>
 
@@ -103,9 +93,10 @@ export default function LanguageRatingSelector({
                 >
                   <Text
                     className={cn(
-                      typeClasses.default,
-                      "text-[13px] font-semibold",
-                      isSelected ? "text-white font-bold" : "text-zinc-300",
+                      "text-[13px]",
+                      isSelected
+                        ? "text-white font-brandBold"
+                        : "text-zinc-300 font-brandSemiBold",
                     )}
                   >
                     {lang.english_name}
@@ -126,20 +117,10 @@ export default function LanguageRatingSelector({
 
         {/* Section 2: Minimum Quality Standard */}
         <View className="gap-2">
-          <Text
-            className={cn(
-              typeClasses.default,
-              "text-[16px] font-extrabold tracking-[-0.3px] text-white",
-            )}
-          >
+          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-white">
             Minimum Quality
           </Text>
-          <Text
-            className={cn(
-              typeClasses.default,
-              "mb-1.5 text-[13px] text-zinc-500",
-            )}
-          >
+          <Text className="mb-1.5 text-[13px] text-zinc-500 font-brand">
             Filter out low-rated films on IMDb
           </Text>
 
@@ -162,8 +143,7 @@ accessibilityLabel={"{preset.label}"}
                 >
                   <Text
                     className={cn(
-                      typeClasses.default,
-                      "mb-1 text-[15px] font-extrabold",
+                      "mb-1 text-[15px] font-brandExtraBold",
                       isSelected ? "text-white" : "text-zinc-100",
                     )}
                   >
@@ -171,8 +151,7 @@ accessibilityLabel={"{preset.label}"}
                   </Text>
                   <Text
                     className={cn(
-                      typeClasses.default,
-                      "text-[12px]",
+                      "text-[12px] font-brand",
                       isSelected ? "text-red-300" : "text-zinc-500",
                     )}
                   >
@@ -188,9 +167,7 @@ accessibilityLabel={"{preset.label}"}
       {/* Floating Bottom Bar */}
       <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
         <View className="items-center">
-          <Text
-            className={cn(typeClasses.bodySmall, "text-zinc-400 font-semibold")}
-          >
+          <Text className="font-brandSemiBold text-body-sm text-zinc-400">
             {`${selectedLangs.length} ${
               selectedLangs.length === 1 ? "language" : "languages"
             } · ${rating > 0 ? `${rating.toFixed(1)}+ rating` : "Any rating"}`}

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { ScrollView, Text, View, Pressable } from "react-native";
+import { ScrollView, View, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
-import { typeClasses } from "@/lib/theme/typography";
 import { cn } from "@/lib/utils";
 import {
   CassetteTapeIcon,
@@ -134,8 +134,7 @@ export default function EraSelector({
 
               <Text
                 className={cn(
-                  typeClasses.default,
-                  "mb-1 text-[16px] font-bold",
+                  "mb-1 text-[16px] font-brandBold",
                   isSelected ? "text-white" : "text-zinc-100",
                 )}
               >
@@ -143,8 +142,7 @@ export default function EraSelector({
               </Text>
               <Text
                 className={cn(
-                  typeClasses.default,
-                  "text-[13px] font-medium",
+                  "text-[13px] font-brandMedium",
                   isSelected ? "text-red-300" : "text-zinc-500",
                 )}
               >
@@ -160,9 +158,7 @@ export default function EraSelector({
       {/* Floating Bottom Bar */}
       <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
         <View className="items-center">
-          <Text
-            className={cn(typeClasses.bodySmall, "text-zinc-400 font-semibold")}
-          >
+          <Text className="font-brandSemiBold text-body-sm text-zinc-400">
             {selected
               ? isAllTime
                 ? "All time"

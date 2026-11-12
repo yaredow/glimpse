@@ -4,9 +4,9 @@ import {
   Pressable,
   ScrollView,
   Share,
-  Text,
   View,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import * as Linking from "expo-linking";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";

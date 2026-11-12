@@ -1,11 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+  ActivityIndicator, Pressable, View, useWindowDimensions } from "react-native";
+import { Text } from "@/components/ui/text";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, {

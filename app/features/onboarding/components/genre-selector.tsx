@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { ScrollView, Text, View, Pressable } from "react-native";
+import { ScrollView, View, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
-import { typeClasses } from "@/lib/theme/typography";
 import { cn } from "@/lib/utils";
 import { CheckIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
@@ -71,9 +71,10 @@ export default function GenreSelector({
               />
               <Text
                 className={cn(
-                  typeClasses.default,
-                  "text-[14px] font-semibold tracking-[0.2px]",
-                  isSelected ? "text-white font-bold" : "text-zinc-300",
+                  "text-[14px] tracking-[0.2px]",
+                  isSelected
+                    ? "text-white font-brandBold"
+                    : "text-zinc-300 font-brandSemiBold",
                 )}
               >
                 {genre.name}
@@ -93,9 +94,7 @@ export default function GenreSelector({
 
       <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
         <View className="items-center">
-          <Text
-            className={cn(typeClasses.bodySmall, "text-zinc-400 font-semibold")}
-          >
+          <Text className="font-brandSemiBold text-body-sm text-zinc-400">
             {selected.length >= minSelection
               ? `${selected.length} genres selected`
               : `Select at least ${remaining} more`}
