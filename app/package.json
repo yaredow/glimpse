@@ -7,8 +7,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "lint": "expo lint",
-    "styles:check": "node scripts/check-tokens.mjs && node scripts/check-classnames.mjs",
-    "tokens:check": "node scripts/check-tokens.mjs",
+    "styles:check": "node scripts/check-tokens.mjs && node scripts/gen-tokens.mjs --check && node scripts/check-classnames.mjs",
+    "tokens:generate": "node scripts/gen-tokens.mjs",
+    "tokens:check": "node scripts/gen-tokens.mjs --check",
     "web": "expo start --web"
   },
   "dependencies": {
@@ -67,6 +68,7 @@
     "eslint": "^9.25.0",
     "eslint-config-expo": "~58.0.4",
     "eslint-plugin-tailwindcss": "3.18.3",
+    "postcss": "^8.5.32",
     "typescript": "~6.0.3"
   },
   "private": true
