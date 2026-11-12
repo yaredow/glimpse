@@ -1,6 +1,6 @@
 # Token Layer Collapse
 
-**Status:** ready to implement — values locked in `README.md` §1.1
+**Status:** implemented — PR 2 awaiting merge
 **Owner:** unassigned
 **Depends on:** `dependency-lockfile-hygiene.md` DH-0…DH-3 (PR 1 merged)
 **Blocks:** `typography.md`; `visual-adaptation.md`; shares `tailwind.config.js` with `typography.md`
@@ -255,12 +255,14 @@ Rename the token fragment and keep prefix/opacity suffix:
 
 ### TL-6 · Enforce and document
 
-- [ ] Add `tokens:check` and `styles:check` to `.github/workflows/ci.yaml`.
-- [ ] Do not expand the global lint scope here; `dependency-lockfile-hygiene.md` DH-4 owns it.
-- [ ] Add `scripts/check-no-legacy-tokens.mjs` (or ESLint `no-restricted-imports`) forbidding:
-  `@/lib/theme/colors`, `palette.json`, `useAppTheme`, `themeColors`, `AppThemeContext`.
-- [ ] Convert `app.json` → `app.config.ts` (or add a check) so splash/adaptive-icon backgrounds use `colors.background`.
-- [ ] Link this file from `AGENT.md`.
+- [x] Add `styles:check` to `.github/workflows/ci.yaml` (it runs `tokens:check`, token coverage, the legacy guard, and the className check).
+- [x] Do not expand the global lint scope here; `dependency-lockfile-hygiene.md` DH-4 owns it.
+- [x] Add `scripts/check-no-legacy-tokens.mjs` and `scripts/check-token-coverage.mjs` forbidding
+  `@/lib/theme/colors`, `palette.json`, `useAppTheme`, `themeColors`, `AppThemeContext` and flagging
+  CSS/Tailwind colour drift.
+- [x] Convert `app.json` → `app.config.ts` so splash/adaptive-icon backgrounds use `colors.background`
+  (via the generated JSON mirror, since Expo's config loader cannot require the TS module).
+- [x] Link this file from `AGENT.md`.
 
 **Gate:** a deliberate CSS value change makes CI fail; revert.
 

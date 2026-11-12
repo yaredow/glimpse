@@ -91,27 +91,56 @@ export type ColorToken = keyof typeof colors;
 `;
 }
 
+/** JSON mirror for Node-time consumers such as app.config.ts. */
+export function renderTokensJson(tokens) {
+  const value = Object.fromEntries(tokens.map(({ key, hex }) => [key, hex]));
+  return JSON.stringify(value, null, 2) + "\n";
+}
+
 export function generate({
   cssPath = DEFAULT_CSS_PATH,
   outPath = DEFAULT_OUT_PATH,
+  jsonPath = outPath.replace(/\.ts$/, ".json"),
   check = false,
 } = {}) {
   const tokens = parseColorTokens(fs.readFileSync(cssPath, "utf8"));
   const content = renderTokensModule(tokens);
+  const jsonContent = renderTokensJson(tokens);
 
   if (check) {
     let current = null;
+    let currentJson = null;
     try {
       current = fs.readFileSync(outPath, "utf8");
     } catch {
       current = null;
     }
-    return { ok: current === content, tokens, content, current };
+    try {
+      currentJson = fs.readFileSync(jsonPath, "utf8");
+    } catch {
+      currentJson = null;
+    }
+    return {
+      ok: current === content && currentJson === jsonContent,
+      tokens,
+      content,
+      jsonContent,
+      current,
+      currentJson,
+    };
   }
 
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, content);
-  return { ok: true, tokens, content, current: content };
+  fs.writeFileSync(jsonPath, jsonContent);
+  return {
+    ok: true,
+    tokens,
+    content,
+    jsonContent,
+    current: content,
+    currentJson: jsonContent,
+  };
 }
 
 const entry = process.argv[1]
@@ -125,17 +154,17 @@ if (entry === import.meta.url) {
   if (check) {
     if (!result.ok) {
       console.error(
-        `tokens.generated.ts is stale (${result.tokens.length} tokens in global.css).`,
+        `Generated tokens are stale (${result.tokens.length} tokens in global.css).`,
       );
       console.error("Run `bun run tokens:generate` and commit the result.");
       process.exit(1);
     }
     console.log(
-      `tokens.generated.ts is current (${result.tokens.length} tokens).`,
+      `Generated tokens are current (${result.tokens.length} tokens).`,
     );
   } else {
     console.log(
-      `Wrote ${path.relative(root, DEFAULT_OUT_PATH)} (${result.tokens.length} tokens).`,
+      `Wrote tokens.generated.ts + tokens.generated.json (${result.tokens.length} tokens).`,
     );
   }
 }

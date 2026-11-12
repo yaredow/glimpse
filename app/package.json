@@ -7,7 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "lint": "expo lint",
-    "styles:check": "node scripts/gen-tokens.mjs --check && node scripts/check-classnames.mjs",
+    "styles:check": "node scripts/gen-tokens.mjs --check && node scripts/check-token-coverage.mjs && node scripts/check-no-legacy-tokens.mjs && node scripts/check-classnames.mjs",
     "tokens:generate": "node scripts/gen-tokens.mjs",
     "tokens:check": "node scripts/gen-tokens.mjs --check",
     "web": "expo start --web"

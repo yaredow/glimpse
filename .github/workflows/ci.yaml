@@ -48,3 +48,7 @@ jobs:
       - name: ESLint Check
         working-directory: app
         run: bun x eslint features/movies "app/(app)"
+
+      - name: Design Tokens & Styles
+        working-directory: app
+        run: bun run styles:check

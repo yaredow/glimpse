@@ -8,6 +8,7 @@ import {
   generate,
   hslTripletToHex,
   parseColorTokens,
+  renderTokensJson,
   renderTokensModule,
 } from "./gen-tokens.mjs";
 
@@ -67,10 +68,23 @@ test("renderTokensModule emits a typed, generated header", () => {
   assert.match(output, /export type ColorToken = keyof typeof colors;/);
 });
 
+test("renderTokensJson mirrors the generated module", () => {
+  const output = renderTokensJson([
+    { key: "primary", hex: "#E50914" },
+    { key: "surface1", hex: "#121212" },
+  ]);
+
+  assert.deepEqual(JSON.parse(output), {
+    primary: "#E50914",
+    surface1: "#121212",
+  });
+});
+
 test("generate writes the file and --check detects drift", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "glimpse-tokens-"));
   const cssPath = path.join(dir, "global.css");
   const outPath = path.join(dir, "tokens.generated.ts");
+  const jsonPath = path.join(dir, "tokens.generated.json");
 
   try {
     fs.writeFileSync(cssPath, ":root { --primary: 357 92.4% 46.7%; --radius: 0.75rem; }");
@@ -78,12 +92,20 @@ test("generate writes the file and --check detects drift", () => {
     const first = generate({ cssPath, outPath });
     assert.equal(first.ok, true);
     assert.match(fs.readFileSync(outPath, "utf8"), /primary: "#E50914"/);
+    assert.deepEqual(JSON.parse(fs.readFileSync(jsonPath, "utf8")), {
+      primary: "#E50914",
+    });
     assert.equal(generate({ cssPath, outPath, check: true }).ok, true);
 
     fs.writeFileSync(cssPath, ":root { --primary: 0 0% 100%; --radius: 0.75rem; }");
     assert.equal(generate({ cssPath, outPath, check: true }).ok, false);
 
+    assert.equal(generate({ cssPath, outPath }).ok, true);
     fs.rmSync(outPath);
+    assert.equal(generate({ cssPath, outPath, check: true }).ok, false);
+
+    assert.equal(generate({ cssPath, outPath }).ok, true);
+    fs.rmSync(jsonPath);
     assert.equal(generate({ cssPath, outPath, check: true }).ok, false);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
