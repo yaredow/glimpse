@@ -8,7 +8,7 @@ import {
   formatRuntime,
   ratingBand,
 } from "../utils/deck";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface DecisionVitalsStripProps {
   movie: Movie;
@@ -34,7 +34,7 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       {/* 1. Schedule & Runtime */}
       <View className="flex-1 items-center justify-center px-1">
         <View className="mb-1 flex-row items-center gap-1">
-          <MaterialCommunityIcons name="clock-outline" size={13} color={palette.zinc500} />
+          <MaterialCommunityIcons name="clock-outline" size={13} color={colors.faintForeground} />
           <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
             TIME
           </Text>
@@ -52,7 +52,7 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       {/* 2. Rating & Consensus */}
       <View className="flex-1 items-center justify-center px-1">
         <View className="mb-1 flex-row items-center gap-1">
-          <MaterialCommunityIcons name="star-outline" size={13} color={palette.zinc500} />
+          <MaterialCommunityIcons name="star-outline" size={13} color={colors.faintForeground} />
           <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
             RATING
           </Text>
@@ -70,7 +70,7 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       {/* 3. Language & Audio */}
       <View className="flex-1 items-center justify-center px-1">
         <View className="mb-1 flex-row items-center gap-1">
-          <MaterialCommunityIcons name="translate" size={13} color={palette.zinc500} />
+          <MaterialCommunityIcons name="translate" size={13} color={colors.faintForeground} />
           <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
             AUDIO
           </Text>

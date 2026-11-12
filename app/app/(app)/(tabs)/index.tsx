@@ -9,7 +9,6 @@ import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
-import { useAppTheme } from "@/lib/theme";
 import { useGetTodaysGrid } from "@/features/movies/hooks/query/use-today-grid";
 import { useRecordInteraction } from "@/features/movies/hooks/mutations/use-record-interactions";
 import { useSyncGrid } from "@/features/movies/hooks/mutations/use-sync-grid";
@@ -26,7 +25,7 @@ import ActionConfirmModal, {
 import ShowtimeHub from "@/features/movies/components/showtime-hub";
 import { isResolvedAction } from "@/features/movies/utils/deck";
 import { deriveProgramTheme } from "@/features/movies/utils/program";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 const PILL_SHADOW = {
   boxShadow: "0px 4px 8.0px rgba(0, 0, 0, 0.3)",
@@ -47,14 +46,12 @@ function GridStateCard({
   actionLabel,
   onAction,
 }: GridStateCardProps) {
-  const theme = useAppTheme();
-
   return (
     <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-surface-zinc-900 px-6 py-8">
       <MaterialCommunityIcons
         name={icon}
         size={42}
-        color={theme.colors.primary}
+        color={colors.primary}
         style={{ marginBottom: 4 }}
       />
       <Text className="text-center text-[15px] font-brandBold text-white">
@@ -80,7 +77,6 @@ function GridStateCard({
 }
 
 export default function TodayTab() {
-  const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { data, isPending, isError, refetch } = useGetTodaysGrid();
   const { data: profileData } = useProfile();
@@ -675,7 +671,7 @@ export default function TodayTab() {
                     <MaterialCommunityIcons
                       name="movie-play-outline"
                       size={17}
-                      color={palette.white}
+                      color={colors.white}
                     />
                     <Text
                       className="text-[12px] tracking-[0.8px] font-brandBold text-white"
@@ -699,7 +695,7 @@ export default function TodayTab() {
                       <MaterialCommunityIcons
                         name="arrow-right"
                         size={14}
-                        color={theme.colors.textSecondary}
+                        color={colors.subtleForeground}
                       />
                     </Pressable>
                   ) : null}
@@ -719,7 +715,7 @@ export default function TodayTab() {
                   <MaterialCommunityIcons
                     name="arrow-u-left-top"
                     size={17}
-                    color={theme.colors.primary}
+                    color={colors.primary}
                   />
                   <Text
                     className="text-[12px] tracking-[0.8px] font-brandBold text-white"
@@ -736,7 +732,7 @@ export default function TodayTab() {
                 <MaterialCommunityIcons
                   name="check-circle"
                   size={16}
-                  color={theme.colors.success}
+                  color={colors.success}
                 />
                 <Text className="text-[13px] tracking-[0.2px] font-brandSemiBold text-white">
                   Locked in for tonight

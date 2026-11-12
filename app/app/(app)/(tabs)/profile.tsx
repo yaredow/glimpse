@@ -18,14 +18,13 @@ import {
   FilmStripIcon,
 } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
-import { useAppTheme } from "@/lib/theme";
 import { Button } from "@/components/ui/button";
 import { Text as AppText } from "@/components/ui/text";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
 import { useLogout } from "@/features/auth/hooks/mutations/use-logout";
 import EditPreferencesModal from "@/features/profile/components/edit-preferences-modal";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 const GENRE_NAMES: Record<number, string> = {
   28: "Action",
@@ -71,7 +70,6 @@ function genreName(id: number): string {
 }
 
 export default function Profile() {
-  const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { data: profileData, isPending: profileLoading } = useProfile(true);
   const { data: prefData, isPending: prefLoading } = useGetPreferences(true);
@@ -113,7 +111,7 @@ export default function Profile() {
                 <View className="mt-2 flex-row items-center gap-[5px] rounded-[20px] border border-white/[0.08] bg-surface-zinc-900 px-2.5 py-1">
                   <CalendarBlankIcon
                     size={12}
-                    color={theme.colors.textMuted}
+                    color={colors.faintForeground}
                   />
                   <Text className="text-[11px] font-brand text-zinc-500">
                     Member since {formatDate(user.created_at)}
@@ -128,7 +126,7 @@ export default function Profile() {
         <View className="flex-row items-center justify-center gap-[7px] rounded-lg border border-white/[0.08] bg-surface-zinc-900 px-3.5 py-[9px]">
           <LightningIcon
             size={14}
-            color={theme.colors.gold}
+            color={colors.gold}
             weight="fill"
           />
           <Text className="text-[12.5px] font-brandSemiBold text-white">
@@ -146,7 +144,7 @@ export default function Profile() {
             <View className="flex-row items-center gap-2">
               <SlidersHorizontalIcon
                 size={16}
-                color={theme.colors.primary}
+                color={colors.primary}
                 weight="bold"
               />
               <Text className="text-[15px] tracking-[0.2px] font-brandBold text-white">
@@ -164,7 +162,7 @@ export default function Profile() {
             >
               <PencilSimpleIcon
                 size={13}
-                color={theme.colors.textSecondary}
+                color={colors.subtleForeground}
               />
               <Text className="text-[12px] font-brandSemiBold text-zinc-400">
                 Edit
@@ -215,7 +213,7 @@ export default function Profile() {
                       >
                         <XIcon
                           size={11}
-                          color={theme.colors.textMuted}
+                          color={colors.faintForeground}
                           weight="bold"
                         />
                         <Text className="text-[12px] font-brand text-zinc-400">
@@ -248,7 +246,7 @@ export default function Profile() {
                     <View className="flex-row items-center gap-1">
                       <StarIcon
                         size={13}
-                        color={theme.colors.gold}
+                        color={colors.gold}
                         weight="fill"
                       />
                       <Text className="text-[12.5px] font-brandSemiBold text-white">
@@ -282,7 +280,7 @@ export default function Profile() {
           <View className="flex-row items-center gap-2.5">
             <EnvelopeSimpleIcon
               size={16}
-              color={theme.colors.textMuted}
+              color={colors.faintForeground}
             />
             <Text className="text-[13px] font-brand text-zinc-400">
               {user?.email}
@@ -292,7 +290,7 @@ export default function Profile() {
           <View className="flex-row items-center gap-2.5">
             <FilmStripIcon
               size={16}
-              color={theme.colors.textMuted}
+              color={colors.faintForeground}
             />
             <Text className="text-[13px] font-brand text-zinc-500">
               Glimpse Cinema v1.0.0
@@ -310,7 +308,7 @@ export default function Profile() {
           >
             <View className="flex-row items-center gap-2">
               {logoutPending ? (
-                <ActivityIndicator size="small" color={palette.white} />
+                <ActivityIndicator size="small" color={colors.white} />
               ) : null}
               <AppText className="text-[13px] tracking-[0.8px] font-brandBold text-white">
                 SIGN OUT

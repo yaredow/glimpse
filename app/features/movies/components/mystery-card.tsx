@@ -4,10 +4,10 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useAppTheme } from "@/lib/theme";
 import { tmdbImage } from "../constants/images";
 import type { GridMovie } from "../types/movies.type";
 import { curatorNote, structuredClues } from "../utils/deck";
+import { colors } from "@/lib/theme/tokens.generated";
 
 export type CardStamp = "PASSED" | "SEEN" | null;
 
@@ -29,7 +29,6 @@ export default function MysteryCard({
   stamp = null,
   onViewDetails,
 }: MysteryCardProps) {
-  const theme = useAppTheme();
   const [posterFailed, setPosterFailed] = useState(false);
   const posterSrc = tmdbImage(movie.poster_path || movie.backdrop_path, "w780");
   const note = curatorNote(movie);
@@ -80,7 +79,7 @@ export default function MysteryCard({
             <MaterialCommunityIcons
               name="filmstrip"
               size={56}
-              color={theme.colors.textMuted}
+              color={colors.faintForeground}
             />
             <Text className="mt-3.5 text-center text-[20px] font-brandBold text-white">
               {movie.title}

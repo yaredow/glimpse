@@ -15,12 +15,11 @@ import Animated, {
   withSequence,
   withSpring,
 } from "react-native-reanimated";
-import { useAppTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import MysteryCard, { CardStamp } from "./mystery-card";
 import type { GridMovie } from "../types/movies.type";
 import { isResolvedAction } from "../utils/deck";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface DeckStackProps {
   movies: GridMovie[];
@@ -115,7 +114,6 @@ export default function DeckStack({
   isDealersChoiceLoading,
   isShuffling = false,
 }: DeckStackProps) {
-  const theme = useAppTheme();
   const { width: SW, height: SH } = useWindowDimensions();
 
   const maxAllowedHeight = Math.max(SH - 270, 360);
@@ -273,14 +271,14 @@ export default function DeckStack({
               {isDealersChoiceLoading || isShuffling ? (
                 <ActivityIndicator
                   size="small"
-                  color={theme.colors.primary}
+                  color={colors.primary}
                   style={{ width: 14, height: 14 }}
                 />
               ) : (
                 <MaterialCommunityIcons
                   name="dice-multiple"
                   size={14}
-                  color={theme.colors.primary}
+                  color={colors.primary}
                 />
               )}
               <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-white">
@@ -294,7 +292,7 @@ export default function DeckStack({
               <MaterialCommunityIcons
                 name="dice-multiple"
                 size={14}
-                color={theme.colors.textMuted}
+                color={colors.faintForeground}
               />
               <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-zinc-500">
                 Dealer&apos;s Pick Active
@@ -320,7 +318,7 @@ export default function DeckStack({
             <MaterialCommunityIcons
               name="filmstrip-off"
               size={48}
-              color={theme.colors.primary}
+              color={colors.primary}
               style={{ marginBottom: 16 }}
             />
             <Text className="mb-2 text-center text-[20px] font-brandBold text-white">
@@ -339,7 +337,7 @@ export default function DeckStack({
                 <MaterialCommunityIcons
                   name="sync"
                   size={16}
-                  color={theme.colors.textPrimary}
+                  color={colors.white}
                 />
                 <Text className="text-[13px] font-brandSemiBold text-white">
                   {closedContent.buttonText}
@@ -457,7 +455,7 @@ export default function DeckStack({
               <MaterialCommunityIcons
                 name="close"
                 size={18}
-                color={theme.colors.textMuted}
+                color={colors.faintForeground}
               />
               <Text className="text-[13px] font-brandSemiBold text-zinc-400">
                 Pass
@@ -474,7 +472,7 @@ export default function DeckStack({
               <MaterialCommunityIcons
                 name="eye-outline"
                 size={18}
-                color={theme.colors.textPrimary}
+                color={colors.white}
               />
               <Text className="text-[13px] font-brandSemiBold text-white">
                 Seen
@@ -497,7 +495,7 @@ export default function DeckStack({
               <MaterialCommunityIcons
                 name={isPicked ? "check-circle" : "star"}
                 size={18}
-                color={palette.white}
+                color={colors.white}
               />
               <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
                 {isPicked ? "Picked" : "Pick"}

@@ -13,9 +13,8 @@ import * as Haptics from "expo-haptics";
 import YoutubeIframe from "react-native-youtube-iframe";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAppTheme } from "@/lib/theme";
 import { tmdbImage } from "../constants/images";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface CinemaTrailerModalProps {
   visible: boolean;
@@ -34,7 +33,6 @@ export default function CinemaTrailerModal({
   posterPath,
   onClose,
 }: CinemaTrailerModalProps) {
-  const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const VIDEO_HEIGHT = Math.round(SCREEN_WIDTH * (9 / 16));
@@ -83,7 +81,7 @@ export default function CinemaTrailerModal({
             className="h-10 w-10 items-center justify-center rounded-full bg-surface-zinc-850 active:opacity-70"
             accessibilityLabel="Close trailer"
           >
-            <MaterialCommunityIcons name="arrow-left" size={22} color={palette.white} />
+            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.white} />
           </Pressable>
 
           <View className="mx-3 flex-1 items-center">
@@ -97,7 +95,7 @@ export default function CinemaTrailerModal({
               <MaterialCommunityIcons
                 name="movie-play-outline"
                 size={12}
-                color={theme.colors.gold}
+                color={colors.gold}
               />
               <Text className="text-[10px] tracking-[1px] font-brandBold text-amber-500">
                 OFFICIAL TRAILER
@@ -134,7 +132,7 @@ export default function CinemaTrailerModal({
                   transition={200}
                 />
                 <View className="absolute inset-0 items-center justify-center gap-2.5 bg-background/[0.75]">
-                  <ActivityIndicator size="small" color={theme.colors.primary} />
+                  <ActivityIndicator size="small" color={colors.primary} />
                   <Text className="text-[12px] tracking-[0.2px] font-brandMedium text-zinc-300">
                     Connecting cinema reel...
                   </Text>
@@ -184,7 +182,7 @@ export default function CinemaTrailerModal({
                   onPress={handleOpenYouTube}
                   className="flex-row items-center gap-1.5 rounded-[20px] bg-primary px-4 py-2.5 active:opacity-85"
                 >
-                  <MaterialCommunityIcons name="open-in-new" size={16} color={palette.white} />
+                  <MaterialCommunityIcons name="open-in-new" size={16} color={colors.white} />
                   <Text className="text-[12px] tracking-[0.4px] font-brandBold text-white">
                     WATCH ON YOUTUBE
                   </Text>
@@ -210,7 +208,7 @@ export default function CinemaTrailerModal({
               <MaterialCommunityIcons
                 name="arrow-top-right"
                 size={16}
-                color={theme.colors.textSecondary}
+                color={colors.subtleForeground}
               />
             </Pressable>
           ) : null}

@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 type InputRef = React.ComponentRef<typeof TextInput>;
 
@@ -222,7 +222,7 @@ export default function AuthField({
             onBlur?.();
           }}
           placeholder={placeholder}
-          placeholderTextColor={palette.zinc500}
+          placeholderTextColor={colors.faintForeground}
           onSubmitEditing={onSubmitEditing}
           secureTextEntry={secure ? hidden : false}
           autoComplete={autoComplete}
@@ -249,9 +249,9 @@ export default function AuthField({
             accessibilityLabel={hidden ? "Show password" : "Hide password"}
           >
             {hidden ? (
-              <EyeSlashIcon size={20} color={palette.zinc500} />
+              <EyeSlashIcon size={20} color={colors.faintForeground} />
             ) : (
-              <EyeIcon size={20} color={palette.zinc400} />
+              <EyeIcon size={20} color={colors.subtleForeground} />
             )}
           </Pressable>
         ) : null}
@@ -262,7 +262,7 @@ export default function AuthField({
           className="mt-2 flex-row items-center gap-1.5 px-1"
           accessibilityLiveRegion="polite"
         >
-          <WarningCircleIcon size={14} color={palette.error} weight="fill" />
+          <WarningCircleIcon size={14} color={colors.destructive} weight="fill" />
           <Text className="text-destructive text-xs font-brandMedium">
             {error}
           </Text>

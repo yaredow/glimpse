@@ -7,7 +7,7 @@ import * as Haptics from "expo-haptics";
 import { typeClasses } from "@/lib/theme/typography";
 import { cn } from "@/lib/utils";
 import BrandLockup from "@/features/auth/components/brand-lockup";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface StepLayoutProps {
   step: number;
@@ -48,7 +48,7 @@ export default function StepLayout({
               hitSlop={12}
               className="rounded-sm p-1"
             >
-              <ArrowLeftIcon size={22} color={palette.offWhite} weight="bold" />
+              <ArrowLeftIcon size={22} color={colors.offWhite} weight="bold" />
             </Pressable>
           ) : (
             <View className="w-6" />

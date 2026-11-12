@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { CheckIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { Language } from "../types/onboarding.type";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface LanguageRatingSelectorProps {
   languages: Language[];
@@ -113,7 +113,7 @@ export default function LanguageRatingSelector({
                   {isSelected && (
                     <CheckIcon
                       size={14}
-                      color={palette.cinemaRed}
+                      color={colors.primary}
                       weight="bold"
                       style={{ marginLeft: 4 }}
                     />

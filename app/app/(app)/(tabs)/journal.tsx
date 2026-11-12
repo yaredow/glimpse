@@ -12,11 +12,10 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useAppTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { useGetHistory } from "@/features/movies/hooks/query/use-get-history";
 import type { HistoryMovie } from "@/features/movies/types/movies.type";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342";
 const COLUMN_GAP = 10;
@@ -25,7 +24,6 @@ const PADDING = 16;
 type FilterTab = "all" | "watched" | "pick_tonight";
 
 export default function Journal() {
-  const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
@@ -121,7 +119,7 @@ export default function Journal() {
             <MaterialCommunityIcons
               name="filmstrip"
               size={28}
-              color={theme.colors.textMuted}
+              color={colors.faintForeground}
             />
             <Text
               className="mt-1 text-center text-[10px] font-brandSemiBold text-zinc-400"
@@ -138,7 +136,7 @@ export default function Journal() {
               <MaterialCommunityIcons
                 name="star"
                 size={11}
-                color={theme.colors.gold}
+                color={colors.gold}
               />
               <Text className="text-[9px] font-brandBold text-white">
                 {item.vote_average.toFixed(1)}
@@ -155,7 +153,7 @@ export default function Journal() {
             <MaterialCommunityIcons
               name={item.action === "watched" ? "check" : "bookmark"}
               size={10}
-              color={palette.white}
+              color={colors.white}
             />
             <Text className="text-[9px] font-brandBold text-white">
               {formatDate(item.acted_at)}
@@ -175,7 +173,7 @@ export default function Journal() {
               <MaterialCommunityIcons
                 name="star"
                 size={9}
-                color={theme.colors.gold}
+                color={colors.gold}
               />
               <Text className="text-[9px] font-brandBold text-amber-500">
                 {item.rating}/5
@@ -318,7 +316,7 @@ export default function Journal() {
           <MaterialCommunityIcons
             name="movie-open-outline"
             size={48}
-            color={theme.colors.textMuted}
+            color={colors.faintForeground}
             style={{ marginBottom: 12 }}
           />
           <Text className="mb-1.5 text-center text-[17px] font-brandBold text-white">
@@ -364,7 +362,7 @@ export default function Journal() {
               onRefresh={() => {
                 refetch();
               }}
-              tintColor={theme.colors.primary}
+              tintColor={colors.primary}
             />
           }
         />

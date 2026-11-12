@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { tmdbImage } from "../constants/images";
 import type { Movie } from "../types/movies.type";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface MovieHeaderProps {
   movie: Movie;
@@ -38,7 +38,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
         <View className="absolute inset-0 bg-surface-zinc-850" />
       )}
       <LinearGradient
-        colors={["transparent", "rgba(20, 20, 20, 0.65)", palette.charcoal]}
+        colors={["transparent", "rgba(20, 20, 20, 0.65)", colors.surface2]}
         locations={[0, 0.6, 1]}
         style={StyleSheetAbsoluteFill}
         pointerEvents="none"
@@ -88,7 +88,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
               accessibilityRole="button"
               accessibilityLabel="Watch trailer"
             >
-              <MaterialCommunityIcons name="play" size={14} color={palette.white} />
+              <MaterialCommunityIcons name="play" size={14} color={colors.white} />
               <Text className="text-[11px] tracking-[0.6px] font-brandBold text-white">
                 TRAILER
               </Text>

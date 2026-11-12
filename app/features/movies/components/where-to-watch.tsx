@@ -12,13 +12,12 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
-import { useAppTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { useMovieSources } from "../hooks/query/use-movie-sources";
 import { SHOW_TORRENTS } from "../constants/movies.constants";
 import { tmdbImage } from "../constants/images";
 import type { TorrentSource, WatchProvider } from "../types/movies.type";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 const ProviderLogo = {
   width: 38,
@@ -32,7 +31,6 @@ interface WhereToWatchProps {
 }
 
 export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps) {
-  const theme = useAppTheme();
   const { data, isPending, isError } = useMovieSources(movieId);
 
   const sources = data?.sources;
@@ -108,7 +106,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
   if (isPending) {
     return (
       <View className="items-center gap-2.5 py-7">
-        <ActivityIndicator size="small" color={theme.colors.primary} />
+        <ActivityIndicator size="small" color={colors.primary} />
         <Text className="text-[13px] font-brand text-zinc-500">
           Checking streaming availability...
         </Text>
@@ -132,7 +130,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
         <MaterialCommunityIcons
           name="play-network-outline"
           size={18}
-          color={theme.colors.primary}
+          color={colors.primary}
         />
         <Text className="text-[18px] tracking-[-0.3px] font-brandBold text-white">
           Where to Watch
@@ -176,7 +174,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                       <MaterialCommunityIcons
                         name="movie-outline"
                         size={20}
-                        color={theme.colors.textMuted}
+                        color={colors.faintForeground}
                       />
                     </View>
                   )}
@@ -201,7 +199,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
           <MaterialCommunityIcons
             name="information-outline"
             size={16}
-            color={theme.colors.textMuted}
+            color={colors.faintForeground}
           />
           <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-zinc-500">
             Not currently available on major subscription platforms. Try the search links below.
@@ -264,7 +262,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                     <MaterialCommunityIcons
                       name="share-variant-outline"
                       size={16}
-                      color={theme.colors.textPrimary}
+                      color={colors.white}
                     />
                   </Pressable>
 
@@ -275,7 +273,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                     <MaterialCommunityIcons
                       name="magnet"
                       size={15}
-                      color={palette.white}
+                      color={colors.white}
                     />
                     <Text className="text-[11px] tracking-[0.6px] font-brandBold text-white">
                       MAGNET
@@ -290,7 +288,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             <MaterialCommunityIcons
               name="cloud-search-outline"
               size={16}
-              color={theme.colors.textMuted}
+              color={colors.faintForeground}
             />
             <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-zinc-500">
               No direct torrent releases indexed. Use universal web search below.
@@ -321,7 +319,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.google)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="google" size={15} color={palette.white} />
+                <MaterialCommunityIcons name="google" size={15} color={colors.white} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   Google
                 </Text>
@@ -333,7 +331,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.justwatch)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="play-box-outline" size={15} color={palette.gold} />
+                <MaterialCommunityIcons name="play-box-outline" size={15} color={colors.gold} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   JustWatch
                 </Text>
@@ -345,7 +343,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.letterboxd)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="filmstrip" size={15} color={palette.emerald} />
+                <MaterialCommunityIcons name="filmstrip" size={15} color={colors.success} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   Letterboxd
                 </Text>
@@ -357,7 +355,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.imdb)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="star-outline" size={15} color={palette.gold} />
+                <MaterialCommunityIcons name="star-outline" size={15} color={colors.gold} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   IMDb
                 </Text>
@@ -369,7 +367,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.netflix)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="netflix" size={15} color={palette.cinemaRed} />
+                <MaterialCommunityIcons name="netflix" size={15} color={colors.primary} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   Netflix
                 </Text>

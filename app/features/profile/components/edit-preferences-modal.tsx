@@ -16,7 +16,6 @@ import {
 import * as Haptics from "expo-haptics";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
-import { useAppTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -34,7 +33,7 @@ import type {
   EraPreset,
 } from "@/features/onboarding/types/onboarding.type";
 import { getErrorMessage } from "@/lib/error";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface EditPreferencesModalProps {
   visible: boolean;
@@ -101,7 +100,6 @@ function EditPreferencesForm({
   currentPreferences?: UserPreference;
   onClose: () => void;
 }) {
-  const theme = useAppTheme();
   const queryClient = useQueryClient();
   const { data: onboardingData, isLoading: dataLoading } = useOnboardingData();
 
@@ -256,7 +254,7 @@ function EditPreferencesForm({
         >
           <XIcon
             size={16}
-            color={theme.colors.textSecondary}
+            color={colors.subtleForeground}
             weight="bold"
           />
         </Pressable>
@@ -264,7 +262,7 @@ function EditPreferencesForm({
 
       {dataLoading ? (
         <View className="items-center justify-center gap-3 py-[60px]">
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
           <Text className="text-[13px] font-brand text-zinc-500">
             Loading preferences...
           </Text>
@@ -309,8 +307,8 @@ function EditPreferencesForm({
                   size={14}
                   color={
                     genreTab === "favorites"
-                      ? theme.colors.primary
-                      : theme.colors.textMuted
+                      ? colors.primary
+                      : colors.faintForeground
                   }
                   weight={genreTab === "favorites" ? "fill" : "regular"}
                 />
@@ -341,8 +339,8 @@ function EditPreferencesForm({
                   size={14}
                   color={
                     genreTab === "excluded"
-                      ? theme.colors.error
-                      : theme.colors.textMuted
+                      ? colors.destructive
+                      : colors.faintForeground
                   }
                   weight={genreTab === "excluded" ? "fill" : "regular"}
                 />
@@ -396,7 +394,7 @@ function EditPreferencesForm({
                       {isSelected ? (
                         <CheckIcon
                           size={13}
-                          color={theme.colors.primary}
+                          color={colors.primary}
                           weight="bold"
                           style={{ marginLeft: 2 }}
                         />
@@ -432,7 +430,7 @@ function EditPreferencesForm({
                       {isExcluded ? (
                         <XIcon
                           size={13}
-                          color={theme.colors.error}
+                          color={colors.destructive}
                           weight="bold"
                           style={{ marginLeft: 2 }}
                         />
@@ -490,7 +488,7 @@ function EditPreferencesForm({
                     {isSelected && (
                       <CheckCircleIcon
                         size={18}
-                        color={theme.colors.primary}
+                        color={colors.primary}
                         weight="fill"
                       />
                     )}
@@ -574,7 +572,7 @@ function EditPreferencesForm({
                     {isSelected ? (
                       <CheckIcon
                         size={13}
-                        color={theme.colors.primary}
+                        color={colors.primary}
                         weight="bold"
                         style={{ marginLeft: 2 }}
                       />
@@ -600,7 +598,7 @@ function EditPreferencesForm({
           accessibilityState={{ disabled: isPending || dataLoading, busy: isPending }}
         >
           {isPending ? (
-            <ActivityIndicator size="small" color={palette.white} />
+            <ActivityIndicator size="small" color={colors.white} />
           ) : (
             <Text className="text-[13.5px] tracking-[0.6px] font-brandBold text-white">
               SAVE PREFERENCES

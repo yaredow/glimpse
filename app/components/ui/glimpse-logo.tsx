@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { StyleProp, Text, TextStyle, View, ViewStyle } from "react-native";
 import { ApertureIcon } from "phosphor-react-native";
-import { useAppTheme } from "@/lib/theme";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface GlimpseLogoProps {
   size?: "small" | "medium" | "large" | "hero" | number;
@@ -24,8 +24,6 @@ export default function GlimpseLogo({
   markStyle,
   dotColor,
 }: GlimpseLogoProps) {
-  const theme = useAppTheme();
-
   const metrics = useMemo(() => {
     if (typeof size === "number") {
       const badgeSize = Math.round(size * 1.35);
@@ -90,7 +88,7 @@ export default function GlimpseLogo({
     }
   }, [size]);
 
-  const accentColor = dotColor ?? theme.colors.primary;
+  const accentColor = dotColor ?? colors.primary;
 
   return (
     <View className="items-start" style={style}>
@@ -124,7 +122,7 @@ export default function GlimpseLogo({
                   {
                     fontSize: metrics.fontSize,
                     letterSpacing: metrics.letterSpacing,
-                    color: theme.colors.textPrimary,
+                    color: colors.white,
                     includeFontPadding: false,
                   },
                   textStyle,
@@ -151,7 +149,7 @@ export default function GlimpseLogo({
         <Text
           className="mt-1.5 text-center text-[10px] font-brandSemiBold text-zinc-500 uppercase"
           style={{
-            color: theme.colors.textMuted,
+            color: colors.faintForeground,
             letterSpacing: Math.round(metrics.letterSpacing * 0.9),
           }}
         >

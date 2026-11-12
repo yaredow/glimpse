@@ -16,17 +16,17 @@ import { useOnlineManager } from "@/hooks/use-online-manager";
 import { useEffect } from "react";
 import { ThemeProvider } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
-import { glimpseDarkTheme, glimpseNavigationTheme, toastConfig, AppThemeContext } from "@/lib/theme";
+import { glimpseNavigationTheme, toastConfig } from "@/lib/theme";
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
 import { useOnboardingStore } from "@/features/onboarding/store/onboarding.store";
 import { useFinishOnboarding } from "@/features/onboarding/hooks/mutations/use-finish-onboarding";
 import AnimatedSplashScreen from "@/components/ui/animated-splash-screen";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 SplashScreen.preventAutoHideAsync();
-void SystemUI.setBackgroundColorAsync(palette.appBackground);
+void SystemUI.setBackgroundColorAsync(colors.background);
 
 export default function RootLayout() {
   useOnlineManager();
@@ -47,22 +47,20 @@ export default function RootLayout() {
   const isReady = !isRestoring && (loaded || !!error);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: palette.appBackground }}>
-      <AppThemeContext.Provider value={glimpseDarkTheme}>
-        <QueryProvider>
-          <ThemeProvider value={glimpseNavigationTheme}>
-            {isReady ? (
-              <RootNavigator
-                isAuthenticated={isAuthenticated}
-                hasAuthenticated={hasAuthenticated}
-              />
-            ) : null}
-            <AnimatedSplashScreen isReady={isReady} />
-            <Toast config={toastConfig} />
-            <PortalHost />
-          </ThemeProvider>
-        </QueryProvider>
-      </AppThemeContext.Provider>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+      <QueryProvider>
+        <ThemeProvider value={glimpseNavigationTheme}>
+          {isReady ? (
+            <RootNavigator
+              isAuthenticated={isAuthenticated}
+              hasAuthenticated={hasAuthenticated}
+            />
+          ) : null}
+          <AnimatedSplashScreen isReady={isReady} />
+          <Toast config={toastConfig} />
+          <PortalHost />
+        </ThemeProvider>
+      </QueryProvider>
     </GestureHandlerRootView>
   );
 }
@@ -156,7 +154,7 @@ function RootNavigator({
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: palette.appBackground },
+          contentStyle: { backgroundColor: colors.background },
         }}
       >
         <Stack.Screen name="index" />

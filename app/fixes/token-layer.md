@@ -225,12 +225,12 @@ Rename the token fragment and keep prefix/opacity suffix:
 
 ### TL-3 · Migrate JS consumers
 
-- [ ] Replace `theme.colors.*` using the §4 map in the 14 files that call `useAppTheme()`.
-- [ ] Replace `palette.*` in the 35 consumer files.
-- [ ] Update `lib/theme/navigation.ts`, `lib/theme/toast-config.tsx`, `app/_layout.tsx`, `app/(app)/_layout.tsx` to read from `tokens.generated.ts`.
-- [ ] Remove `AppThemeContext.Provider` and `glimpseDarkTheme` from `app/_layout.tsx`.
-- [ ] Remove `const theme = useAppTheme()` and unused imports.
-- [ ] Use a mapping-driven script with `--dry-run` for the repetitive renames; review the diff.
+- [x] Replace `theme.colors.*` using the §4 map in the 14 files that call `useAppTheme()`.
+- [x] Replace `palette.*` in the 35 consumer files.
+- [x] Update `lib/theme/navigation.ts`, `lib/theme/toast-config.tsx`, `app/_layout.tsx`, `app/(app)/_layout.tsx` to read from `tokens.generated.ts`.
+- [x] Remove `AppThemeContext.Provider` and `glimpseDarkTheme` from `app/_layout.tsx`.
+- [x] Remove `const theme = useAppTheme()` and unused imports.
+- [x] Use a mapping-driven script with `--dry-run` for the repetitive renames; review the diff.
 
 **Gate:** no `useAppTheme`, `theme.colors`, or `palette.` outside `lib/theme`; `tsc`; screenshots identical.
 

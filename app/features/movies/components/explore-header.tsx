@@ -1,8 +1,8 @@
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useAppTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+import { colors } from "@/lib/theme/tokens.generated";
 import GlimpseLogo from "@/components/ui/glimpse-logo";
 
 interface ExploreHeaderProps {
@@ -18,8 +18,6 @@ export default function ExploreHeader({
   isSyncing = false,
   programTheme,
 }: ExploreHeaderProps) {
-  const theme = useAppTheme();
-
   const handleSyncPress = () => {
     if (isSyncing) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -65,13 +63,13 @@ export default function ExploreHeader({
           accessibilityLabel={`${syncsRemaining} syncs remaining. Tap to select mood and sync.`}
         >
           {isSyncing ? (
-            <ActivityIndicator size={12} color={theme.colors.primary} />
+            <ActivityIndicator size={12} color={colors.primary} />
           ) : (
             <MaterialCommunityIcons
               name="lightning-bolt"
               size={14}
               color={
-                syncsRemaining > 0 ? theme.colors.primary : theme.colors.textMuted
+                syncsRemaining > 0 ? colors.primary : colors.faintForeground
               }
             />
           )}

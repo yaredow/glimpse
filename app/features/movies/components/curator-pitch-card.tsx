@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { Movie } from "../types/movies.type";
 import { curatorNote, whyThisIsHere } from "../utils/deck";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface CuratorPitchCardProps {
   movie: Movie;
@@ -20,7 +20,7 @@ export default function CuratorPitchCard({ movie }: CuratorPitchCardProps) {
           <MaterialCommunityIcons
             name="compass-outline"
             size={14}
-            color={palette.cinemaRed}
+            color={colors.primary}
           />
         </View>
         <Text className="flex-1 text-[11px] tracking-[1px] font-brandBold text-primary">
@@ -42,7 +42,7 @@ export default function CuratorPitchCard({ movie }: CuratorPitchCardProps) {
           <MaterialCommunityIcons
             name="star-four-points"
             size={12}
-            color={palette.zinc400}
+            color={colors.subtleForeground}
           />
           <Text className="flex-1 text-[12px] text-zinc-400">{rationale}</Text>
         </View>

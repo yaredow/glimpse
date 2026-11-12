@@ -22,7 +22,7 @@ import { ArrowLeftIcon } from "phosphor-react-native";
 import { Text } from "@/components/ui/text";
 import { AuthBackdrop } from "./auth-backdrop";
 import BrandLockup from "./brand-lockup";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface AuthShellProps {
   title: string;
@@ -103,7 +103,7 @@ export default function AuthShell({
           accessibilityRole="button"
           accessibilityLabel="Go back"
         >
-          <ArrowLeftIcon size={18} color={palette.white} weight="bold" />
+          <ArrowLeftIcon size={18} color={colors.white} weight="bold" />
         </Pressable>
       ) : null}
 
@@ -165,7 +165,7 @@ export default function AuthShell({
                   fontSize: 24,
                   lineHeight: 30,
                   letterSpacing: -0.6,
-                  color: palette.white,
+                  color: colors.white,
                   textAlign: "center",
                 }}
               >

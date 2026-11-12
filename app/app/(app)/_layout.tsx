@@ -1,15 +1,13 @@
 import { Stack } from "expo-router";
-import { useAppTheme } from "@/lib/theme";
+import { colors } from "@/lib/theme/tokens.generated";
 
 export default function AppLayout() {
-  const theme = useAppTheme();
-
   return (
     <Stack
       screenOptions={{
-        contentStyle: { backgroundColor: theme.colors.background },
-        headerStyle: { backgroundColor: theme.colors.elevation.level2 },
-        headerTintColor: theme.colors.onSurface,
+        contentStyle: { backgroundColor: colors.surface1 },
+        headerStyle: { backgroundColor: colors.surface5 },
+        headerTintColor: colors.offWhite,
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

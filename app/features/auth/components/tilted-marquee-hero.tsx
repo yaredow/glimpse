@@ -11,7 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Image, type ImageSource } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 const CARD_HEIGHT = 172;
 const CARD_GAP = 12;
@@ -173,8 +173,8 @@ export function TiltedMarqueeHero({ style }: TiltedMarqueeHeroProps) {
           "rgba(12, 12, 14, 0.563)",
           "rgba(12, 12, 14, 0.694)",
           "rgba(12, 12, 14, 0.840)",
-          palette.appBackground,
-          palette.appBackground,
+          colors.background,
+          colors.background,
         ]}
         locations={[
           0, 0.047, 0.093, 0.14, 0.187, 0.233, 0.28, 0.327, 0.373, 0.42, 0.467,

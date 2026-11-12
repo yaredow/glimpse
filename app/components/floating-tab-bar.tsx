@@ -14,7 +14,7 @@ import {
   UserIcon,
 } from "phosphor-react-native";
 import { cn } from "@/lib/utils";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 if (
   Platform.OS === "android" &&
@@ -122,7 +122,7 @@ export function FloatingTabBar({
             >
               <Icon
                 size={20}
-                color={isFocused ? palette.cinemaRed : "#8E8E93"}
+                color={isFocused ? colors.primary : "#8E8E93"}
                 weight={isFocused ? "fill" : "regular"}
               />
               {isFocused ? (

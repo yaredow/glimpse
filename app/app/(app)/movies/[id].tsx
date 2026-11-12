@@ -24,7 +24,7 @@ import MovieDetailTabs from "@/features/movies/components/movie-detail-tabs";
 import DecisionVitalsStrip from "@/features/movies/components/decision-vitals-strip";
 import CuratorPitchCard from "@/features/movies/components/curator-pitch-card";
 import WhereToWatch from "@/features/movies/components/where-to-watch";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 const HEADER_THRESHOLD = 300;
 
@@ -75,7 +75,7 @@ export default function MovieDetail() {
   if (isPending) {
     return (
       <View className="flex-1 items-center justify-center gap-4 bg-surface-charcoal">
-        <ActivityIndicator size="large" color={palette.cinemaRed} />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -122,7 +122,7 @@ export default function MovieDetail() {
             zIndex: 10,
             height: 90,
           },
-          { paddingTop: insets.top, backgroundColor: palette.charcoal },
+          { paddingTop: insets.top, backgroundColor: colors.surface2 },
           headerAnimatedStyle,
         ]}
         pointerEvents="box-none"
