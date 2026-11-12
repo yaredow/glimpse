@@ -14,6 +14,7 @@ import {
 import * as Haptics from "expo-haptics";
 import Animated, {
   ReduceMotion,
+  runOnJS,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -221,11 +222,14 @@ export default function DeckStack({
       opacityVal.value = withTiming(
         0,
         { duration: 200, reduceMotion: ReduceMotion.System },
-        () => {
+        (finished) => {
+          "worklet";
           translateX.value = 0;
           rotateDeg.value = 0;
           opacityVal.value = 1;
-          onFinish();
+          if (finished) {
+            runOnJS(onFinish)();
+          }
         },
       );
       /* eslint-enable react-hooks/immutability */
