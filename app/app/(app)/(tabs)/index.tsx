@@ -32,9 +32,10 @@ import ShowtimeHub from "@/features/movies/components/showtime-hub";
 import { isResolvedAction } from "@/features/movies/utils/deck";
 import { deriveProgramTheme } from "@/features/movies/utils/program";
 import { colors } from "@/lib/theme/tokens.generated";
+import { shadows } from "@/lib/theme/shadows";
 
 const PILL_SHADOW = {
-  boxShadow: "0px 4px 8.0px rgba(0, 0, 0, 0.3)",
+  boxShadow: shadows.raised,
 };
 
 interface GridStateCardProps {
@@ -68,7 +69,7 @@ function GridStateCard({
       {actionLabel && onAction ? (
         <Pressable
           onPress={onAction}
-          className="mt-3 min-h-[44px] justify-center rounded-[22px] border border-white/[0.08] bg-surface-5 px-5 active:opacity-80"
+          className="mt-3 min-h-[44px] justify-center rounded-full border border-white/[0.08] bg-surface-5 px-5 active:opacity-80"
           accessibilityRole="button"
           accessibilityLabel={actionLabel}
         >
@@ -668,7 +669,7 @@ export default function TodayTab() {
                 <View className="w-full max-w-[320px] items-center justify-center gap-2">
                   <Pressable
                     onPress={handlePromptLockIn}
-                    className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] bg-primary px-[22px] py-3 active:opacity-85"
+                    className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 active:opacity-85"
                     style={PILL_SHADOW}
                     accessibilityRole="button"
                     accessibilityLabel={`Lock in ${tonightPick.title}`}
@@ -706,8 +707,8 @@ export default function TodayTab() {
               ) : (
                 <Pressable
                   onPress={handleReturnToPick}
-                  className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-5 px-[22px] py-3 active:bg-surface-6 active:opacity-85"
-                  style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)" }}
+                  className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-5 py-3 active:bg-surface-6 active:opacity-85"
+                  style={{ boxShadow: shadows.subtle }}
                   accessibilityRole="button"
                   accessibilityLabel={
                     tonightPick.is_dealers_choice
@@ -730,7 +731,7 @@ export default function TodayTab() {
                 </Pressable>
               )
             ) : (
-              <View className="flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-5 px-[18px] py-2.5">
+              <View className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5">
                 <CheckCircleIcon
                   size={16}
                   color={colors.success}

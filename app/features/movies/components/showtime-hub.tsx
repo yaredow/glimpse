@@ -30,6 +30,7 @@ import CinemaTrailerModal from "./cinema-trailer-modal";
 import type { GridMovie, WatchProvider } from "../types/movies.type";
 import { colors } from "@/lib/theme/tokens.generated";
 import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 interface ShowtimeHubProps {
   movie: GridMovie;
@@ -241,8 +242,8 @@ export default function ShowtimeHub({
           style={AbsoluteFill}
         />
 
-        <View className="px-5 pb-5">
-          <View className="mb-2 self-start flex-row items-center gap-1.5 rounded-[7px] bg-amber-500 px-[9px] py-1">
+        <View className="px-4 pb-5">
+          <View className="mb-2 self-start flex-row items-center gap-1.5 rounded-md bg-gold px-2 py-1">
             <FilmSlateIcon
               size={13}
               color={colors.surface1}
@@ -262,7 +263,7 @@ export default function ShowtimeHub({
             </Text>
           ) : null}
           {movieDetails?.director ? (
-            <Text className="mt-[3px] text-[12px] font-brandMedium text-subtle-foreground">
+            <Text className="mt-1 text-[12px] font-brandMedium text-subtle-foreground">
               Directed by {movieDetails.director}
             </Text>
           ) : null}
@@ -274,12 +275,12 @@ export default function ShowtimeHub({
         {primaryProvider ? (
           <Pressable
             onPress={handleOpenPrimaryProvider}
-            className="flex-row items-center justify-between rounded-[14px] bg-primary px-[18px] py-3.5 active:opacity-90 active:scale-[0.99]"
+            className="flex-row items-center justify-between rounded-xl bg-primary px-4 py-3.5 active:opacity-90 active:scale-[0.99]"
             style={{
-              boxShadow: `0px 4px 10.0px ${withAlpha(colors.primary, 0.35)}`,
+              boxShadow: shadows.glow,
             }}
           >
-            <View className="h-[34px] w-[34px] items-center justify-center rounded-[17px] bg-black/25">
+            <View className="h-[34px] w-[34px] items-center justify-center rounded-full bg-black/25">
               <PlayIcon size={20} color={colors.white} />
             </View>
             <View className="ml-3 flex-1">
@@ -300,9 +301,9 @@ export default function ShowtimeHub({
             onPress={() =>
               handleOpenLink(searchLinks?.justwatch || searchLinks?.google || "")
             }
-            className="flex-row items-center justify-center gap-2 rounded-[14px] border border-white/[0.15] bg-white/[0.08] px-[18px] py-3.5 active:opacity-90"
+            className="flex-row items-center justify-center gap-2 rounded-xl border border-white/[0.15] bg-white/[0.08] px-4 py-3.5 active:opacity-90"
             style={{
-              boxShadow: `0px 4px 10.0px ${withAlpha(colors.primary, 0.35)}`,
+              boxShadow: shadows.glow,
             }}
           >
             <MagnifyingGlassIcon size={20} color={colors.white} />
@@ -326,7 +327,7 @@ export default function ShowtimeHub({
                       providers?.justwatch_link || searchLinks?.justwatch || "",
                     )
                   }
-                  className="rounded-[6px] border border-white/[0.08] bg-white/[0.06] px-2 py-[3px]"
+                  className="rounded border border-white/[0.08] bg-white/[0.06] px-2 py-0.5"
                 >
                   <Text className="text-[11px] font-brandSemiBold text-foreground">
                     {prov.name}
@@ -339,7 +340,7 @@ export default function ShowtimeHub({
       </View>
 
       {/* 3. SCHEDULE & PRE-SHOW BAR */}
-      <View className="mx-4 mt-4 flex-row items-center justify-between rounded-[14px] border border-white/[0.07] bg-white/[0.03] px-3.5 py-3">
+      <View className="mx-4 mt-4 flex-row items-center justify-between rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 py-3">
         <View className="flex-1 flex-row items-center gap-2.5">
           <ClockIcon
             size={18}
@@ -359,7 +360,7 @@ export default function ShowtimeHub({
         {trailerKey ? (
           <Pressable
             onPress={handleOpenTrailer}
-            className="flex-row items-center gap-1 rounded-[8px] border border-white/[0.12] bg-white/[0.08] px-2.5 py-1.5 active:opacity-80"
+            className="flex-row items-center gap-1 rounded-sm border border-white/[0.12] bg-white/[0.08] px-2.5 py-1.5 active:opacity-80"
             accessibilityLabel="Play pre-show trailer"
           >
             <PlayCircleIcon
@@ -375,7 +376,7 @@ export default function ShowtimeHub({
 
       {/* 4. POST-SHOW RITUAL & VERDICT */}
       <View className="mt-4 items-center px-4">
-        <View className="w-full rounded-[14px] border border-white/[0.08] bg-white/[0.03] p-4">
+        <View className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
           <View className="mb-2 flex-row items-center gap-1.5">
             <StarIcon
               size={17}
@@ -411,7 +412,7 @@ export default function ShowtimeHub({
                 onPress={() => setShowVerdictModal(true)}
                 className="h-[46px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-gold active:opacity-90 active:scale-[0.99]"
                 style={{
-                  boxShadow: `0px 4px 8.0px ${withAlpha(colors.gold, 0.3)}`,
+                  boxShadow: shadows.goldGlow,
                 }}
               >
                 <StarIcon
@@ -438,7 +439,7 @@ export default function ShowtimeHub({
 
         <Pressable
           onPress={() => onOpenDetails(movie)}
-          className="mt-[18px] px-3 py-1.5"
+          className="mt-4 px-3 py-1.5"
         >
           <Text className="text-[12px] text-faint-foreground underline">
             View full film synopsis &amp; cast &rarr;

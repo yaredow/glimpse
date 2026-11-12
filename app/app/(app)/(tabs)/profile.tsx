@@ -97,7 +97,7 @@ export default function Profile() {
           </View>
 
           {profileLoading ? (
-            <View className="mt-1 h-[22px] w-[140px] rounded-[6px] bg-surface-5" />
+            <View className="mt-1 h-[22px] w-[140px] rounded bg-surface-5" />
           ) : (
             <>
               <Text className="text-[20px] leading-[26px] tracking-[-0.3px] font-brandBold text-white">
@@ -107,7 +107,7 @@ export default function Profile() {
                 {user?.email}
               </Text>
               {user?.created_at ? (
-                <View className="mt-2 flex-row items-center gap-[5px] rounded-[20px] border border-white/[0.08] bg-card px-2.5 py-1">
+                <View className="mt-2 flex-row items-center gap-1 rounded-full border border-white/[0.08] bg-card px-2.5 py-1">
                   <CalendarBlankIcon
                     size={12}
                     color={colors.faintForeground}
@@ -122,7 +122,7 @@ export default function Profile() {
         </View>
 
         {/* Compact Daily Sync Allowance */}
-        <View className="flex-row items-center justify-center gap-[7px] rounded-lg border border-white/[0.08] bg-card px-3.5 py-[9px]">
+        <View className="flex-row items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-card px-3.5 py-2">
           <LightningIcon
             size={14}
             color={colors.gold}
@@ -155,7 +155,7 @@ export default function Profile() {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setIsEditModalOpen(true);
               }}
-              className="flex-row items-center gap-[5px] rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-[5px] active:opacity-70"
+              className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-1 active:opacity-70"
               accessibilityRole="button"
               accessibilityLabel="Edit film preferences"
             >
@@ -184,11 +184,11 @@ export default function Profile() {
                   <Text className="text-[10.5px] tracking-[1.2px] font-brandSemiBold text-faint-foreground">
                     FAVORITE GENRES
                   </Text>
-                  <View className="flex-row flex-wrap gap-[7px]">
+                  <View className="flex-row flex-wrap gap-1.5">
                     {pref.favorite_genres.map((id) => (
                       <View
                         key={id}
-                        className="rounded-sm border border-primary/35 bg-primary/[0.12] px-[11px] py-[5px]"
+                        className="rounded-sm border border-primary/35 bg-primary/[0.12] px-3 py-1"
                       >
                         <Text className="text-[12px] font-brandSemiBold text-white">
                           {genreName(id)}
@@ -204,11 +204,11 @@ export default function Profile() {
                   <Text className="text-[10.5px] tracking-[1.2px] font-brandSemiBold text-faint-foreground">
                     EXCLUDED GENRES
                   </Text>
-                  <View className="flex-row flex-wrap gap-[7px]">
+                  <View className="flex-row flex-wrap gap-1.5">
                     {pref.excluded_genres.map((id) => (
                       <View
                         key={id}
-                        className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-[5px]"
+                        className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-1"
                       >
                         <XIcon
                           size={11}
@@ -225,8 +225,8 @@ export default function Profile() {
               )}
 
               {/* Filter Metadata Row */}
-              <View className="flex-row flex-wrap items-start gap-[18px] border-t border-t-white/[0.06] pt-3">
-                <View className="gap-[3px]">
+              <View className="flex-row flex-wrap items-start gap-4 border-t border-t-white/[0.06] pt-3">
+                <View className="gap-1">
                   <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-faint-foreground">
                     ERA
                   </Text>
@@ -238,7 +238,7 @@ export default function Profile() {
                 </View>
 
                 {pref.min_rating > 0 && (
-                  <View className="gap-[3px]">
+                  <View className="gap-1">
                     <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-faint-foreground">
                       MIN RATING
                     </Text>
@@ -256,7 +256,7 @@ export default function Profile() {
                 )}
 
                 {pref.languages.length > 0 && (
-                  <View className="gap-[3px]">
+                  <View className="gap-1">
                     <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-faint-foreground">
                       LANGUAGES
                     </Text>

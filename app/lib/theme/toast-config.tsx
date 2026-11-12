@@ -9,6 +9,7 @@ import {
 } from "phosphor-react-native";
 import type { ToastConfig, ToastConfigParams } from "react-native-toast-message";
 import { colors } from "./tokens.generated";
+import { shadows } from "./shadows";
 
 interface CinemaToastProps {
   text1?: string;
@@ -33,10 +34,10 @@ const CinemaToast = ({
       accessibilityRole="button"
       accessibilityLabel={text1}
 
-      className="w-[92%] max-w-[420px] flex-row items-center gap-3 rounded-[14px] border border-l-4 border-white/[0.08] bg-surface-6 px-4 py-3"
+      className="w-[92%] max-w-[420px] flex-row items-center gap-3 rounded-xl border border-l-4 border-white/[0.08] bg-surface-6 px-4 py-3"
       style={{
         borderLeftColor: accentBorderColor,
-        boxShadow: "0px 6px 10.0px rgba(0, 0, 0, 0.4)",
+        boxShadow: shadows.raised,
       }}
     >
       <View className="items-center justify-center">

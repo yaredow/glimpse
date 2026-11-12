@@ -71,7 +71,7 @@ export default function EditPreferencesModal({
 }: EditPreferencesModalProps) {
   return (
     <Dialog open={visible} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="w-[92%] max-w-[420px] gap-4 rounded-[24px] p-5">
+      <DialogContent className="w-[92%] max-w-[420px] gap-4 rounded-3xl p-5">
         <DialogTitle className="text-center text-[18px] leading-7">
           Film Preferences
         </DialogTitle>
@@ -257,7 +257,7 @@ function EditPreferencesForm({
       </View>
 
       {dataLoading ? (
-        <View className="items-center justify-center gap-3 py-[60px]">
+        <View className="items-center justify-center gap-3 py-16">
           <ActivityIndicator size="large" color={colors.primary} />
           <Text className="text-[13px] font-brand text-faint-foreground">
             Loading preferences...
@@ -287,14 +287,14 @@ function EditPreferencesForm({
             </View>
 
             {/* Segmented Tab Switcher */}
-            <View className="my-1 flex-row gap-1 rounded-[12px] border border-white/[0.08] bg-surface-5 p-[3px]">
+            <View className="my-1 flex-row gap-1 rounded-lg border border-white/[0.08] bg-surface-5 p-1">
               <Pressable
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setGenreTab("favorites");
                 }}
                 className={cn(
-                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-[9px] border border-transparent py-[9px]",
+                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-md border border-transparent py-2",
                   genreTab === "favorites" &&
                     "border-primary/45 bg-primary/[0.18]",
                 )}
@@ -326,7 +326,7 @@ function EditPreferencesForm({
                   setGenreTab("excluded");
                 }}
                 className={cn(
-                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-[9px] border border-transparent py-[9px]",
+                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-md border border-transparent py-2",
                   genreTab === "excluded" &&
                     "border-destructive/40 bg-destructive/[0.15]",
                 )}
@@ -369,7 +369,7 @@ function EditPreferencesForm({
                       key={genre.id}
                       onPress={() => toggleFavorite(genre.id)}
                       className={cn(
-                        "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
+                        "flex-row items-center gap-1.5 rounded-md border px-3 py-2",
                         isSelected
                           ? "border-[1.5px] border-primary bg-primary/[0.16]"
                           : "border border-white/[0.08] bg-surface-5",
@@ -405,7 +405,7 @@ function EditPreferencesForm({
                       key={genre.id}
                       onPress={() => toggleExcluded(genre.id)}
                       className={cn(
-                        "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
+                        "flex-row items-center gap-1.5 rounded-md border px-3 py-2",
                         isExcluded
                           ? "border-[1.5px] border-destructive/40 bg-destructive/[0.12]"
                           : "border border-white/[0.08] bg-surface-5",
@@ -460,7 +460,7 @@ function EditPreferencesForm({
                       setMaxYear(era.max_year);
                     }}
                     className={cn(
-                      "flex-row items-center justify-between rounded-[12px] border px-4 py-3",
+                      "flex-row items-center justify-between rounded-lg border px-4 py-3",
                       isSelected
                         ? "border-[1.5px] border-primary bg-primary/[0.12]"
                         : "border border-white/[0.08] bg-surface-5",
@@ -512,7 +512,7 @@ function EditPreferencesForm({
                       setMinRating(rating.value);
                     }}
                     className={cn(
-                      "flex-1 items-center justify-center rounded-[10px] border py-[11px]",
+                      "flex-1 items-center justify-center rounded-md border py-2.5",
                       isSelected
                         ? "border-[1.5px] border-amber-500 bg-amber-500/[0.15]"
                         : "border border-white/[0.08] bg-surface-5",
@@ -549,7 +549,7 @@ function EditPreferencesForm({
                     key={lang.code}
                     onPress={() => toggleLanguage(lang.code)}
                     className={cn(
-                      "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
+                      "flex-row items-center gap-1.5 rounded-md border px-3 py-2",
                       isSelected
                         ? "border-[1.5px] border-primary bg-primary/[0.16]"
                         : "border border-white/[0.08] bg-surface-5",
@@ -586,7 +586,7 @@ function EditPreferencesForm({
           onPress={handleSave}
           disabled={isPending || dataLoading}
           className={cn(
-            "h-[50px] items-center justify-center rounded-[12px] bg-primary active:opacity-90",
+            "h-[50px] items-center justify-center rounded-lg bg-primary active:opacity-90",
             (isPending || dataLoading) && "opacity-60",
           )}
           accessibilityRole="button"

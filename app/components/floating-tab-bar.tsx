@@ -15,6 +15,7 @@ import {
 } from "phosphor-react-native";
 import { cn } from "@/lib/utils";
 import { colors } from "@/lib/theme/tokens.generated";
+import { shadows } from "@/lib/theme/shadows";
 
 if (
   Platform.OS === "android" &&
@@ -63,9 +64,9 @@ export function FloatingTabBar({
       style={{ bottom: bottomInset }}
     >
       <View
-        className="flex-row items-center gap-1.5 rounded-[36px] border border-white/[0.08] bg-surface-1/95 px-2 py-1.5"
+        className="flex-row items-center gap-1.5 rounded-full border border-white/[0.08] bg-surface-1/95 px-2 py-1.5"
         style={{
-          boxShadow: "0px 10px 20.0px rgba(0, 0, 0, 0.5)",
+          boxShadow: shadows.deck,
         }}
       >
         {state.routes.map((route, index) => {
@@ -114,10 +115,10 @@ export function FloatingTabBar({
               accessibilityState={{ selected: isFocused }}
               accessibilityLabel={label}
               className={cn(
-                "min-h-[44px] flex-row items-center justify-center rounded-[24px] active:opacity-70",
+                "min-h-[44px] flex-row items-center justify-center rounded-full active:opacity-70",
                 isFocused
                   ? "gap-2 border border-primary/35 bg-primary/[0.16] px-4 py-2.5"
-                  : "min-w-[44px] border border-transparent px-[18px] py-2.5",
+                  : "min-w-[44px] border border-transparent px-4 py-2.5",
               )}
             >
               <Icon

@@ -106,11 +106,11 @@ Targets are locked in `README.md` §1.1. This is the only phase allowed to chang
 
 ### VA-3 · Spacing, radius, shadows
 
-- [ ] Standardize the screen gutter (VA-0 decision) across `app/`, `features/`, `components/`.
-- [ ] Replace arbitrary spacing values with the Tailwind scale where they are equivalent.
-- [ ] Replace arbitrary `rounded-[Npx]` with `rounded-sm/md/lg/xl/2xl/full` unless the value is a deliberate one-off.
-- [ ] Replace inline `boxShadow` strings with `lib/theme/shadows.ts` (or a Tailwind `boxShadow` token) and delete unused shadow values.
-- [ ] Delete `lib/theme/shadows.ts` if it stays unused after the sweep.
+- [x] Standardize the screen gutter (VA-0 decision) across `app/`, `features/`, `components/`.
+- [x] Replace arbitrary spacing values with the Tailwind scale where they are equivalent.
+- [x] Replace arbitrary `rounded-[Npx]` with `rounded-sm/md/lg/xl/2xl/full` unless the value is a deliberate one-off.
+- [x] Replace inline `boxShadow` strings with `lib/theme/shadows.ts` (or a Tailwind `boxShadow` token) and delete unused shadow values.
+- [x] Delete `lib/theme/shadows.ts` if it stays unused after the sweep.
 
 **Gate:** arbitrary radius/spacing count is at or below the documented exception list; visual review.
 

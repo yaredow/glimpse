@@ -29,6 +29,7 @@ import {
 } from "@/features/auth/components/auth-actions";
 import { colors } from "@/lib/theme/tokens.generated";
 import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 export default function ForgotPassword() {
   const requestReset = useRequestPasswordReset();
@@ -101,7 +102,7 @@ export default function ForgotPassword() {
                 justifyContent: "center",
                 marginTop: 4,
                 marginBottom: 8,
-                boxShadow: `0px 8px 16.0px ${withAlpha(colors.errorContainer, 0.4)}`,
+                boxShadow: shadows.errorGlow,
               },
               animatedPulseStyle,
             ]}

@@ -5,6 +5,7 @@ import { Text } from "@/components/ui/text";
 import fontFamilies from "@/lib/theme/fonts.json";
 import { colors } from "@/lib/theme/tokens.generated";
 import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 interface BrandLockupProps {
   stagger?: boolean;
@@ -18,7 +19,7 @@ export default function BrandLockup({
   if (variant === "compact") {
     return (
       <View className="mb-3 flex-row items-center gap-2">
-        <View className="h-7 w-7 items-center justify-center rounded-[9px] border border-primary/[0.35] bg-primary/[0.18]">
+        <View className="h-7 w-7 items-center justify-center rounded-md border border-primary/[0.35] bg-primary/[0.18]">
           <ApertureIcon size={16} color={colors.primary} weight="fill" />
         </View>
         <Text className="font-brandExtraBold text-[13px] leading-4 tracking-[2.6px] text-white">
@@ -44,7 +45,7 @@ export default function BrandLockup({
           alignItems: "center",
           justifyContent: "center",
           marginBottom: 10,
-          boxShadow: `0px 4px 10.0px ${withAlpha(colors.primary, 0.25)}`,
+          boxShadow: shadows.glow,
         }}
       >
         <ApertureIcon size={32} color={colors.primary} weight="fill" />

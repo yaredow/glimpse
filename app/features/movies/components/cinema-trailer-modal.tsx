@@ -92,7 +92,7 @@ export default function CinemaTrailerModal({
             >
               {movieTitle}
             </Text>
-            <View className="mt-[3px] flex-row items-center gap-1">
+            <View className="mt-1 flex-row items-center gap-1">
               <PlayCircleIcon
                 size={12}
                 color={colors.gold}
@@ -117,7 +117,7 @@ export default function CinemaTrailerModal({
         </View>
 
         <View className="relative w-full items-center justify-center">
-          <View className="absolute h-full w-[90%] rounded-[30px] bg-primary/[0.08] blur-[40px]" />
+          <View className="absolute h-full w-[90%] rounded-full bg-primary/[0.08] blur-[40px]" />
 
           <View
             className="w-full items-center justify-center overflow-hidden bg-black"
@@ -180,7 +180,7 @@ export default function CinemaTrailerModal({
                 </Text>
                 <Pressable
                   onPress={handleOpenYouTube}
-                  className="flex-row items-center gap-1.5 rounded-[20px] bg-primary px-4 py-2.5 active:opacity-85"
+                  className="flex-row items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 active:opacity-85"
                 >
                   <ArrowSquareOutIcon size={16} color={colors.white} />
                   <Text className="text-[12px] tracking-[0.4px] font-brandBold text-white">
@@ -193,13 +193,13 @@ export default function CinemaTrailerModal({
         </View>
 
         <View
-          className="items-center px-5"
+          className="items-center px-4"
           style={{ paddingBottom: insets.bottom + 20 }}
         >
           {trailerKey && !playerError ? (
             <Pressable
               onPress={handleOpenYouTube}
-              className="w-full max-w-[280px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-5 px-5 py-3 active:opacity-80"
+              className="w-full max-w-[280px] flex-row items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-5 py-3 active:opacity-80"
             >
               <YoutubeLogoIcon size={20} color="#FF0000" />
               <Text className="text-[13px] font-brandSemiBold text-white">

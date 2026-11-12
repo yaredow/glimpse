@@ -45,7 +45,7 @@ export default function SkeletonLoader({ count }: { count: number }) {
   return (
     <View className="items-center pt-2.5" style={{ width: SW }}>
       <View
-        className="overflow-hidden rounded-[28px] border border-white/[0.06] bg-card"
+        className="overflow-hidden rounded-3xl border border-white/[0.06] bg-card"
         style={{ width: CARD_W, height: CARD_H }}
       >
         <View className="absolute inset-0 overflow-hidden">
@@ -65,19 +65,19 @@ export default function SkeletonLoader({ count }: { count: number }) {
           />
         </View>
         <View className="absolute inset-0 items-center justify-center pb-5">
-          <View className="mb-3 h-11 w-11 rounded-[22px] bg-surface-5" />
-          <View className="mb-3 h-12 w-10 rounded-[6px] bg-surface-5" />
-          <View className="h-2.5 w-[100px] rounded-[5px] bg-surface-5" />
+          <View className="mb-3 h-11 w-11 rounded-full bg-surface-5" />
+          <View className="mb-3 h-12 w-10 rounded bg-surface-5" />
+          <View className="h-2.5 w-[100px] rounded bg-surface-5" />
         </View>
       </View>
-      <View className="mt-[18px] flex-row items-center justify-center gap-1.5">
+      <View className="mt-4 flex-row items-center justify-center gap-1.5">
         {Array.from({ length: count }).map((_, i) => (
           <View
             key={i}
             className={
               i === 0
-                ? "h-1 w-5 rounded-[2px] bg-primary/[0.5]"
-                : "h-1 w-[5px] rounded-[2px] bg-white/[0.1]"
+                ? "h-1 w-5 rounded-full bg-primary/[0.5]"
+                : "h-1 w-[5px] rounded-full bg-white/[0.1]"
             }
           />
         ))}

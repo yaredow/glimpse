@@ -10,6 +10,7 @@ import type { GridMovie } from "../types/movies.type";
 import { curatorNote, structuredClues } from "../utils/deck";
 import { colors } from "@/lib/theme/tokens.generated";
 import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 export type CardStamp = "PASSED" | "SEEN" | null;
 
@@ -54,9 +55,9 @@ export default function MysteryCard({
 
   return (
     <View
-      className="h-full w-full overflow-hidden rounded-[24px] border border-white/[0.1] bg-card"
+      className="h-full w-full overflow-hidden rounded-3xl border border-white/[0.1] bg-card"
       style={{
-        boxShadow: "0px 12px 20.0px rgba(0, 0, 0, 0.5)",
+        boxShadow: shadows.deck,
       }}
     >
       <Pressable
@@ -102,7 +103,7 @@ export default function MysteryCard({
             pointerEvents="none"
           >
             <View
-              className="absolute top-[18px] left-[-28px] h-[22px] w-[114px] items-center justify-center bg-white"
+              className="absolute top-4 left-[-28px] h-[22px] w-[114px] items-center justify-center bg-white"
               style={{ transform: [{ rotate: "-45deg" }] }}
             >
               <Text className="text-center text-[9.5px] tracking-[1.2px] font-brandBold text-surface-1">
@@ -129,7 +130,7 @@ export default function MysteryCard({
               {clues.slice(0, 2).map((clue) => (
                 <View
                   key={clue}
-                  className="rounded-[7px] border border-white/[0.18] bg-black/[0.65] px-2 py-[3.5px]"
+                  className="rounded border border-white/[0.18] bg-black/[0.65] px-2 py-1"
                 >
                   <Text className="text-[10px] tracking-[0.3px] font-brandSemiBold text-white">
                     {clue}

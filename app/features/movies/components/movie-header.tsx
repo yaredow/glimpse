@@ -53,7 +53,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
               {movie.genres.slice(0, 2).map((genre) => (
                 <View
                   key={genre}
-                  className="rounded-[6px] border border-white/[0.12] bg-white/[0.08] px-2 py-[3px]"
+                  className="rounded border border-white/[0.12] bg-white/[0.08] px-2 py-0.5"
                 >
                   <Text className="text-[10px] tracking-[0.3px] font-brandBold text-foreground">
                     {genre}
@@ -85,7 +85,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
 
           {movie.trailer_key ? (
             <Pressable
-              className="flex-row items-center gap-[5px] self-start rounded-[8px] bg-primary/[0.9] px-3 py-1.5 active:opacity-80"
+              className="flex-row items-center gap-1 self-start rounded-sm bg-primary/[0.9] px-3 py-1.5 active:opacity-80"
               onPress={onTrailerPress}
               accessibilityRole="button"
               accessibilityLabel="Watch trailer"
@@ -107,7 +107,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
             transition={300}
           />
         ) : (
-          <View className="h-36 w-24 items-center justify-center rounded-[8px] border border-white/[0.2] bg-surface-6">
+          <View className="h-36 w-24 items-center justify-center rounded-sm border border-white/[0.2] bg-surface-6">
             <FilmStripIcon size={32} color={colors.faintForeground} />
           </View>
         )}

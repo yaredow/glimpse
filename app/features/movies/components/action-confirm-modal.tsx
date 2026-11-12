@@ -158,14 +158,14 @@ export default function ActionConfirmModal({
 
   return (
     <Dialog open={visible} onOpenChange={(next) => !next && onCancel()}>
-      <DialogContent className="w-[92%] max-w-[380px] gap-4 rounded-[24px] p-5">
+      <DialogContent className="w-[92%] max-w-[380px] gap-4 rounded-3xl p-5">
         <DialogTitle className="text-center text-[18px] leading-7">
           {config.title}
         </DialogTitle>
 
         <View className="items-center gap-3">
           <View
-            className="h-14 w-14 items-center justify-center rounded-[28px]"
+            className="h-14 w-14 items-center justify-center rounded-full"
             style={{ backgroundColor: `${config.iconColor}18` }}
           >
             <config.Icon
@@ -215,7 +215,7 @@ export default function ActionConfirmModal({
                         accessibilityState={{ selected: isSelected }}
                         accessibilityLabel={mood.label}
                         className={cn(
-                          "flex-row items-center rounded-[16px] border px-3 py-[7px]",
+                          "flex-row items-center rounded-2xl border px-3 py-1.5",
                           isSelected
                             ? "border-white bg-white"
                             : "border-white/[0.08] bg-surface-6",
@@ -262,7 +262,7 @@ export default function ActionConfirmModal({
               onPress={() =>
                 onConfirm(action === "sync" ? selectedMood : undefined)
               }
-              className="min-h-[44px] justify-center rounded-[12px] bg-primary px-4 active:opacity-90"
+              className="min-h-[44px] justify-center rounded-lg bg-primary px-4 active:opacity-90"
               accessibilityRole="button"
             >
               <Text className="text-[13px] font-brandBold text-white">

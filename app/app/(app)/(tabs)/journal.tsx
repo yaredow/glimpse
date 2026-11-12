@@ -132,7 +132,7 @@ export default function Journal() {
 
         <View className="absolute left-1.5 right-1.5 top-1.5 flex-row justify-between">
           {item.vote_average > 0 ? (
-            <View className="flex-row items-center gap-[3px] rounded-md bg-black/75 px-[5px] py-0.5">
+            <View className="flex-row items-center gap-1 rounded-md bg-black/75 px-1.5 py-0.5">
               <StarIcon
                 size={11}
                 color={colors.gold}
@@ -145,7 +145,7 @@ export default function Journal() {
 
           <View
             className={cn(
-              "flex-row items-center gap-[3px] rounded-md px-[5px] py-0.5",
+              "flex-row items-center gap-1 rounded-md px-1.5 py-0.5",
               item.action === "watched" ? "bg-emerald-500/85" : "bg-primary/85",
             )}
           >
@@ -168,7 +168,7 @@ export default function Journal() {
             {item.title}
           </Text>
           {item.rating ? (
-            <View className="mt-[3px] flex-row items-center gap-[3px]">
+            <View className="mt-1 flex-row items-center gap-1">
               <StarIcon
                 size={9}
                 color={colors.gold}
@@ -186,7 +186,7 @@ export default function Journal() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <View className="px-4 pb-3 pt-2">
-        <View className="flex-row items-baseline gap-[3px]">
+        <View className="flex-row items-baseline gap-1">
           <Text className="text-[22px] tracking-[2px] font-brandExtraBold text-white">
             JOURNAL
           </Text>
@@ -236,7 +236,7 @@ export default function Journal() {
           accessibilityLabel={`All, ${allHistory.length} entries`}
           onPress={() => handleTabPress("all")}
           className={cn(
-            "rounded-[18px] px-3.5 py-1.5",
+            "rounded-full px-3.5 py-1.5",
             activeFilter === "all"
               ? "bg-white"
               : "border border-white/[0.08] bg-surface-5",
@@ -258,7 +258,7 @@ export default function Journal() {
           accessibilityLabel={`Watched, ${stats.watchedCount} entries`}
           onPress={() => handleTabPress("watched")}
           className={cn(
-            "rounded-[18px] px-3.5 py-1.5",
+            "rounded-full px-3.5 py-1.5",
             activeFilter === "watched"
               ? "bg-white"
               : "border border-white/[0.08] bg-surface-5",
@@ -280,7 +280,7 @@ export default function Journal() {
           accessibilityLabel={`Picks, ${stats.picksCount} entries`}
           onPress={() => handleTabPress("pick_tonight")}
           className={cn(
-            "rounded-[18px] px-3.5 py-1.5",
+            "rounded-full px-3.5 py-1.5",
             activeFilter === "pick_tonight"
               ? "bg-white"
               : "border border-white/[0.08] bg-surface-5",
@@ -330,7 +330,7 @@ export default function Journal() {
             accessibilityRole="button"
             accessibilityLabel="Explore today's batch"
             onPress={() => router.push("/(app)/(tabs)")}
-            className="rounded-lg border border-white/[0.08] bg-surface-6 px-[18px] py-2.5"
+            className="rounded-lg border border-white/[0.08] bg-surface-6 px-4 py-2.5"
           >
             <Text className="text-[13px] font-brandSemiBold text-white">
               Explore Today&apos;s Batch

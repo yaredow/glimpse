@@ -16,6 +16,7 @@ import {
 } from "@/features/auth/components/auth-actions";
 import { colors } from "@/lib/theme/tokens.generated";
 import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 export default function Activate() {
   const { token: tokenParam, email } = useLocalSearchParams<{
@@ -71,7 +72,7 @@ export default function Activate() {
               justifyContent: "center",
               marginTop: 8,
               marginBottom: 8,
-              boxShadow: `0px 8px 16.0px ${withAlpha(colors.successContainer, 0.4)}`,
+              boxShadow: shadows.successGlow,
             }}
           >
             <CheckCircleIcon size={40} color={colors.success} weight="fill" />

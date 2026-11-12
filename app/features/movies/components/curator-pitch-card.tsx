@@ -15,9 +15,9 @@ export default function CuratorPitchCard({ movie }: CuratorPitchCardProps) {
   const rationale = whyThisIsHere(movie);
 
   return (
-    <View className="mx-4 mt-3.5 mb-2 rounded-[14px] border border-primary/[0.2] bg-primary/[0.04] p-4">
+    <View className="mx-4 mt-3.5 mb-2 rounded-xl border border-primary/[0.2] bg-primary/[0.04] p-4">
       <View className="mb-2.5 flex-row items-center gap-2">
-        <View className="h-[22px] w-[22px] items-center justify-center rounded-[11px] bg-primary/[0.12]">
+        <View className="h-[22px] w-[22px] items-center justify-center rounded-full bg-primary/[0.12]">
           <CompassIcon
             size={14}
             color={colors.primary}
@@ -26,7 +26,7 @@ export default function CuratorPitchCard({ movie }: CuratorPitchCardProps) {
         <Text className="flex-1 text-[11px] tracking-[1px] font-brandBold text-primary">
           CURATOR&apos;S TAKE
         </Text>
-        <View className="rounded-[6px] bg-white/[0.06] px-2 py-0.5">
+        <View className="rounded bg-white/[0.06] px-2 py-0.5">
           <Text className="text-[9px] tracking-[0.6px] font-brandSemiBold text-subtle-foreground">
             TONIGHT&apos;S REEL
           </Text>

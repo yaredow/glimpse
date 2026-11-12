@@ -34,7 +34,7 @@ export default function ExploreHeader({
     .toUpperCase();
 
   return (
-    <View className="flex-row items-center justify-between bg-transparent px-5 pt-2 pb-3.5">
+    <View className="flex-row items-center justify-between bg-transparent px-4 pt-2 pb-3.5">
       <View className="flex-1 justify-center mr-3">
         <GlimpseLogo size="medium" showMark={false} />
         <Text
@@ -57,7 +57,7 @@ export default function ExploreHeader({
           onPress={handleSyncPress}
           disabled={isSyncing}
           className={cn(
-            "flex-row items-center gap-[5px] rounded-[18px] border border-white/[0.08] bg-surface-5 px-3 py-[7px] active:opacity-75",
+            "flex-row items-center gap-1.5 rounded-full border border-white/[0.08] bg-surface-5 px-3 py-1.5 active:opacity-75",
             isSyncing && "opacity-75",
           )}
           accessibilityRole="button"

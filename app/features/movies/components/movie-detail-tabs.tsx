@@ -31,7 +31,7 @@ export default function MovieDetailTabs({ activeTab, onTabPress, children }: Mov
               {tab}
             </Text>
             {activeTab === tab ? (
-              <View className="mt-1 h-[3px] w-full rounded-[2px] bg-primary" />
+              <View className="mt-1 h-[3px] w-full rounded-full bg-primary" />
             ) : null}
           </Pressable>
         ))}

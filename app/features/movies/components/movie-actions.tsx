@@ -139,7 +139,7 @@ export default function MovieActions({
       {isFinalized ? (
         <View
           className={cn(
-            "flex-row items-center gap-3 rounded-[14px] border px-4 py-3",
+            "flex-row items-center gap-3 rounded-xl border px-4 py-3",
             isLocked
               ? "border-primary bg-card"
               : isWatched

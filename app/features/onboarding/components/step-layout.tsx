@@ -33,7 +33,7 @@ export default function StepLayout({
 
   return (
     <SafeAreaView
-      className="flex-1 bg-background px-5"
+      className="flex-1 bg-background px-4"
       edges={["top", "bottom"]}
     >
       {/* Top Navigation & Segmented Progress Bar */}
@@ -48,7 +48,7 @@ export default function StepLayout({
               hitSlop={12}
               className="rounded-sm p-1"
             >
-              <ArrowLeftIcon size={22} color={colors.offWhite} weight="bold" />
+              <ArrowLeftIcon size={22} color={colors.foreground} weight="bold" />
             </Pressable>
           ) : (
             <View className="w-6" />
@@ -62,7 +62,7 @@ export default function StepLayout({
               <View
                 key={i}
                 className={cn(
-                  "h-1 flex-1 rounded-[2px]",
+                  "h-1 flex-1 rounded-full",
                   isActive ? "bg-primary" : "bg-surface-8",
                 )}
               />

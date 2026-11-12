@@ -47,13 +47,13 @@ export default function VerdictModal({
 
   return (
     <Dialog open={visible} onOpenChange={(next) => !next && onCancel()}>
-      <DialogContent className="w-[92%] max-w-[380px] gap-4 rounded-[24px] p-5">
+      <DialogContent className="w-[92%] max-w-[380px] gap-4 rounded-3xl p-5">
         <DialogTitle className="text-center text-[18px] leading-7">
           Movie Finished?
         </DialogTitle>
 
         <View className="items-center gap-4">
-          <View className="h-14 w-14 items-center justify-center rounded-[28px] bg-emerald-500/[0.15]">
+          <View className="h-14 w-14 items-center justify-center rounded-full bg-emerald-500/[0.15]">
             <CheckCircleIcon
               size={30}
               color={colors.success}
@@ -118,7 +118,7 @@ export default function VerdictModal({
             </Pressable>
             <Pressable
               onPress={handleConfirm}
-              className="min-h-[44px] justify-center rounded-[12px] bg-emerald-500 px-4 active:opacity-90"
+              className="min-h-[44px] justify-center rounded-lg bg-emerald-500 px-4 active:opacity-90"
               accessibilityRole="button"
             >
               <Text className="text-[13px] font-brandBold text-white">

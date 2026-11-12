@@ -93,7 +93,7 @@ function DialogContent({
       <DialogOverlay className={overlayClassName}>
         <DialogPrimitive.Content
           className={cn(
-            'bg-card border-white/[0.08] z-50 mx-auto flex w-full max-w-[calc(100%-2rem)] flex-col gap-4 rounded-[24px] border p-6 sm:max-w-[380px]',
+            'bg-card border-white/[0.08] z-50 mx-auto flex w-full flex-col gap-4 rounded-3xl border p-6 sm:max-w-[380px]',
             className
           )}
           {...props}>

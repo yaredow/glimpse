@@ -85,7 +85,7 @@ export default function LanguageRatingSelector({
               accessibilityState={{ checked: isSelected }}
                   onPress={() => toggleLanguage(lang.iso_639_1)}
                   className={cn(
-                    "flex-row items-center rounded-[20px] border-[1.5px] px-3.5 py-2.5",
+                    "flex-row items-center rounded-full border-[1.5px] px-3.5 py-2.5",
                     isSelected
                       ? "border-primary bg-brand-surface"
                       : "border-border bg-card",

@@ -116,7 +116,7 @@ export default function GlimpseLogo({
 
         {showWordmark ? (
           <View className="justify-center">
-            <View className="flex-row items-center gap-[3px]">
+            <View className="flex-row items-center gap-1">
               <Text
                 className="font-brandExtraBold"
                 style={[
