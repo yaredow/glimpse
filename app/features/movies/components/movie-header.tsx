@@ -35,7 +35,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
           transition={300}
         />
       ) : (
-        <View className="absolute inset-0 bg-surface-zinc-850" />
+        <View className="absolute inset-0 bg-surface-5" />
       )}
       <LinearGradient
         colors={["transparent", "rgba(20, 20, 20, 0.65)", colors.surface2]}
@@ -105,7 +105,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
             transition={300}
           />
         ) : (
-          <View className="h-36 w-24 items-center justify-center rounded-[8px] border border-white/[0.2] bg-surface-zinc-800">
+          <View className="h-36 w-24 items-center justify-center rounded-[8px] border border-white/[0.2] bg-surface-6">
             <MaterialCommunityIcons name="filmstrip" size={32} color="#666" />
           </View>
         )}

@@ -63,7 +63,7 @@ export default function StepLayout({
                 key={i}
                 className={cn(
                   "h-1 flex-1 rounded-[2px]",
-                  isActive ? "bg-primary" : "bg-surface-zinc-700",
+                  isActive ? "bg-primary" : "bg-surface-8",
                 )}
               />
             );

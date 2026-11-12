@@ -63,7 +63,7 @@ export default function ExcludedGenreSelector({
               className={cn(
                 "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
                 isExcluded
-                  ? "border-destructive bg-surface-danger"
+                  ? "border-destructive bg-danger-surface"
                   : "border-zinc-800 bg-zinc-900",
               )}
             >

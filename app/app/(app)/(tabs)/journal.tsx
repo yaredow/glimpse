@@ -100,7 +100,7 @@ export default function Journal() {
     return (
       <Pressable
         onPress={() => handleMoviePress(item)}
-        className="overflow-hidden rounded-md border border-white/[0.08] bg-surface-zinc-900 active:opacity-80"
+        className="overflow-hidden rounded-md border border-white/[0.08] bg-surface-4 active:opacity-80"
         accessibilityRole="button"
         accessibilityLabel={item.title}
       >
@@ -113,7 +113,7 @@ export default function Journal() {
           />
         ) : (
           <View
-            className="w-full items-center justify-center bg-surface-zinc-850 p-1.5"
+            className="w-full items-center justify-center bg-surface-5 p-1.5"
             style={{ height: cardHeight }}
           >
             <MaterialCommunityIcons
@@ -186,7 +186,7 @@ export default function Journal() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
       <View className="px-4 pb-3 pt-2">
         <View className="flex-row items-baseline gap-[3px]">
           <Text className="text-[22px] tracking-[2px] font-brandExtraBold text-white">
@@ -200,7 +200,7 @@ export default function Journal() {
       </View>
 
       <View className="mb-3 flex-row gap-2 px-4">
-        <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-zinc-850 px-2 py-2.5">
+        <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-5 px-2 py-2.5">
           <Text className="text-[17px] font-brandBold text-primary">
             {stats.watchedCount}
           </Text>
@@ -209,7 +209,7 @@ export default function Journal() {
           </Text>
         </View>
 
-        <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-zinc-850 px-2 py-2.5">
+        <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-5 px-2 py-2.5">
           <Text className="text-[17px] font-brandBold text-amber-500">
             {stats.picksCount}
           </Text>
@@ -218,7 +218,7 @@ export default function Journal() {
           </Text>
         </View>
 
-        <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-zinc-850 px-2 py-2.5">
+        <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-5 px-2 py-2.5">
           <Text
             className="text-[17px] font-brandBold text-white"
             numberOfLines={1}
@@ -241,13 +241,13 @@ export default function Journal() {
             "rounded-[18px] px-3.5 py-1.5",
             activeFilter === "all"
               ? "bg-white"
-              : "border border-white/[0.08] bg-surface-zinc-850",
+              : "border border-white/[0.08] bg-surface-5",
           )}
         >
           <Text
             className={cn(
               "text-[12px] font-brandSemiBold",
-              activeFilter === "all" ? "text-surface-obsidian" : "text-zinc-400",
+              activeFilter === "all" ? "text-surface-1" : "text-zinc-400",
             )}
           >
             All ({allHistory.length})
@@ -263,13 +263,13 @@ export default function Journal() {
             "rounded-[18px] px-3.5 py-1.5",
             activeFilter === "watched"
               ? "bg-white"
-              : "border border-white/[0.08] bg-surface-zinc-850",
+              : "border border-white/[0.08] bg-surface-5",
           )}
         >
           <Text
             className={cn(
               "text-[12px] font-brandSemiBold",
-              activeFilter === "watched" ? "text-surface-obsidian" : "text-zinc-400",
+              activeFilter === "watched" ? "text-surface-1" : "text-zinc-400",
             )}
           >
             Watched ({stats.watchedCount})
@@ -285,13 +285,13 @@ export default function Journal() {
             "rounded-[18px] px-3.5 py-1.5",
             activeFilter === "pick_tonight"
               ? "bg-white"
-              : "border border-white/[0.08] bg-surface-zinc-850",
+              : "border border-white/[0.08] bg-surface-5",
           )}
         >
           <Text
             className={cn(
               "text-[12px] font-brandSemiBold",
-              activeFilter === "pick_tonight" ? "text-surface-obsidian" : "text-zinc-400",
+              activeFilter === "pick_tonight" ? "text-surface-1" : "text-zinc-400",
             )}
           >
             Picks ({stats.picksCount})
@@ -333,7 +333,7 @@ export default function Journal() {
             accessibilityRole="button"
             accessibilityLabel="Explore today's batch"
             onPress={() => router.push("/(app)/(tabs)")}
-            className="rounded-lg border border-white/[0.08] bg-surface-zinc-800 px-[18px] py-2.5"
+            className="rounded-lg border border-white/[0.08] bg-surface-6 px-[18px] py-2.5"
           >
             <Text className="text-[13px] font-brandSemiBold text-white">
               Explore Today&apos;s Batch

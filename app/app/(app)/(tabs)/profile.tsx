@@ -81,7 +81,7 @@ export default function Profile() {
   const syncsRemaining = user?.syncs_remaining ?? 3;
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
       <ScrollView
         contentContainerClassName="flex-grow gap-3.5 px-4 pt-3"
         contentContainerStyle={{
@@ -91,14 +91,14 @@ export default function Profile() {
       >
         {/* Header / Avatar */}
         <View className="items-center py-2.5">
-          <View className="mb-2.5 h-16 w-16 items-center justify-center rounded-full border-[1.5px] border-primary/40 bg-surface-zinc-850">
+          <View className="mb-2.5 h-16 w-16 items-center justify-center rounded-full border-[1.5px] border-primary/40 bg-surface-5">
             <Text className="text-[22px] tracking-[0.5px] font-brandBold text-white">
               {user ? getInitials(user.name) : "?"}
             </Text>
           </View>
 
           {profileLoading ? (
-            <View className="mt-1 h-[22px] w-[140px] rounded-[6px] bg-surface-zinc-850" />
+            <View className="mt-1 h-[22px] w-[140px] rounded-[6px] bg-surface-5" />
           ) : (
             <>
               <Text className="text-[20px] leading-[26px] tracking-[-0.3px] font-brandBold text-white">
@@ -108,7 +108,7 @@ export default function Profile() {
                 {user?.email}
               </Text>
               {user?.created_at ? (
-                <View className="mt-2 flex-row items-center gap-[5px] rounded-[20px] border border-white/[0.08] bg-surface-zinc-900 px-2.5 py-1">
+                <View className="mt-2 flex-row items-center gap-[5px] rounded-[20px] border border-white/[0.08] bg-surface-4 px-2.5 py-1">
                   <CalendarBlankIcon
                     size={12}
                     color={colors.faintForeground}
@@ -123,7 +123,7 @@ export default function Profile() {
         </View>
 
         {/* Compact Daily Sync Allowance */}
-        <View className="flex-row items-center justify-center gap-[7px] rounded-lg border border-white/[0.08] bg-surface-zinc-900 px-3.5 py-[9px]">
+        <View className="flex-row items-center justify-center gap-[7px] rounded-lg border border-white/[0.08] bg-surface-4 px-3.5 py-[9px]">
           <LightningIcon
             size={14}
             color={colors.gold}
@@ -139,7 +139,7 @@ export default function Profile() {
         </View>
 
         {/* Film Preferences Card */}
-        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-surface-zinc-900 p-4">
+        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-surface-4 p-4">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <SlidersHorizontalIcon
@@ -156,7 +156,7 @@ export default function Profile() {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setIsEditModalOpen(true);
               }}
-              className="flex-row items-center gap-[5px] rounded-sm border border-white/[0.08] bg-surface-zinc-850 px-2.5 py-[5px] active:opacity-70"
+              className="flex-row items-center gap-[5px] rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-[5px] active:opacity-70"
               accessibilityRole="button"
               accessibilityLabel="Edit film preferences"
             >
@@ -209,7 +209,7 @@ export default function Profile() {
                     {pref.excluded_genres.map((id) => (
                       <View
                         key={id}
-                        className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-zinc-850 px-2.5 py-[5px]"
+                        className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-[5px]"
                       >
                         <XIcon
                           size={11}
@@ -272,7 +272,7 @@ export default function Profile() {
         </View>
 
         {/* Account Details */}
-        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-surface-zinc-900 p-4">
+        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-surface-4 p-4">
           <Text className="text-[15px] tracking-[0.2px] font-brandBold text-white">
             Account
           </Text>

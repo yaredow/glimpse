@@ -75,7 +75,7 @@ export default function MysteryCard({
             onError={() => setPosterFailed(true)}
           />
         ) : (
-          <View className="absolute inset-0 items-center justify-center bg-surface-zinc-900 p-6">
+          <View className="absolute inset-0 items-center justify-center bg-surface-4 p-6">
             <MaterialCommunityIcons
               name="filmstrip"
               size={56}
@@ -104,7 +104,7 @@ export default function MysteryCard({
               className="absolute top-[18px] left-[-28px] h-[22px] w-[114px] items-center justify-center bg-white"
               style={{ transform: [{ rotate: "-45deg" }] }}
             >
-              <Text className="text-center text-[9.5px] tracking-[1.2px] font-brandBold text-surface-obsidian">
+              <Text className="text-center text-[9.5px] tracking-[1.2px] font-brandBold text-surface-1">
                 {stamp}
               </Text>
             </View>

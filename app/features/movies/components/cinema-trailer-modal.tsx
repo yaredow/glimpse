@@ -78,7 +78,7 @@ export default function CinemaTrailerModal({
         >
           <Pressable
             onPress={handleClose}
-            className="h-10 w-10 items-center justify-center rounded-full bg-surface-zinc-850 active:opacity-70"
+            className="h-10 w-10 items-center justify-center rounded-full bg-surface-5 active:opacity-70"
             accessibilityLabel="Close trailer"
           >
             <MaterialCommunityIcons name="arrow-left" size={22} color={colors.white} />
@@ -106,7 +106,7 @@ export default function CinemaTrailerModal({
           {trailerKey ? (
             <Pressable
               onPress={handleOpenYouTube}
-              className="h-10 w-10 items-center justify-center rounded-full bg-surface-zinc-850 active:opacity-70"
+              className="h-10 w-10 items-center justify-center rounded-full bg-surface-5 active:opacity-70"
               accessibilityLabel="Open in YouTube"
             >
               <MaterialCommunityIcons name="youtube" size={22} color="#FF0000" />
@@ -169,7 +169,7 @@ export default function CinemaTrailerModal({
             ) : null}
 
             {playerError ? (
-              <View className="absolute inset-0 items-center justify-center gap-2 bg-surface-charcoal px-6">
+              <View className="absolute inset-0 items-center justify-center gap-2 bg-surface-2 px-6">
                 <MaterialCommunityIcons name="youtube" size={44} color="#FF0000" />
                 <Text className="mt-1 text-[16px] font-brandBold text-white">
                   Studio Restricted Playback
@@ -199,7 +199,7 @@ export default function CinemaTrailerModal({
           {trailerKey && !playerError ? (
             <Pressable
               onPress={handleOpenYouTube}
-              className="w-full max-w-[280px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-zinc-850 px-5 py-3 active:opacity-80"
+              className="w-full max-w-[280px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-5 px-5 py-3 active:opacity-80"
             >
               <MaterialCommunityIcons name="youtube" size={20} color="#FF0000" />
               <Text className="text-[13px] font-brandSemiBold text-white">

@@ -74,7 +74,7 @@ export default function MovieDetail() {
 
   if (isPending) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-surface-charcoal">
+      <View className="flex-1 items-center justify-center gap-4 bg-surface-2">
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -82,7 +82,7 @@ export default function MovieDetail() {
 
   if (isError) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-surface-charcoal">
+      <View className="flex-1 items-center justify-center gap-4 bg-surface-2">
         <Text className="text-[16px] text-white">Couldn&apos;t load movie</Text>
         <Pressable
           onPress={() => refetch()}
@@ -99,14 +99,14 @@ export default function MovieDetail() {
 
   if (!movie) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-surface-charcoal">
+      <View className="flex-1 items-center justify-center gap-4 bg-surface-2">
         <Text className="text-[16px] text-white">Movie not found</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-surface-charcoal">
+    <View className="flex-1 bg-surface-2">
       <Animated.View
         style={[
           {

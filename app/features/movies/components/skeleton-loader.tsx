@@ -63,9 +63,9 @@ export default function SkeletonLoader({ count }: { count: number }) {
           />
         </View>
         <View className="absolute inset-0 items-center justify-center pb-5">
-          <View className="mb-3 h-11 w-11 rounded-[22px] bg-surface-zinc-850" />
-          <View className="mb-3 h-12 w-10 rounded-[6px] bg-surface-zinc-850" />
-          <View className="h-2.5 w-[100px] rounded-[5px] bg-surface-zinc-850" />
+          <View className="mb-3 h-11 w-11 rounded-[22px] bg-surface-5" />
+          <View className="mb-3 h-12 w-10 rounded-[6px] bg-surface-5" />
+          <View className="h-2.5 w-[100px] rounded-[5px] bg-surface-5" />
         </View>
       </View>
       <View className="mt-[18px] flex-row items-center justify-center gap-1.5">

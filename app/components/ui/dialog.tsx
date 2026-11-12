@@ -93,7 +93,7 @@ function DialogContent({
       <DialogOverlay className={overlayClassName}>
         <DialogPrimitive.Content
           className={cn(
-            'bg-surface-zinc-900 border-white/[0.08] z-50 mx-auto flex w-full max-w-[calc(100%-2rem)] flex-col gap-4 rounded-[24px] border p-6 sm:max-w-[380px]',
+            'bg-surface-4 border-white/[0.08] z-50 mx-auto flex w-full max-w-[calc(100%-2rem)] flex-col gap-4 rounded-[24px] border p-6 sm:max-w-[380px]',
             className
           )}
           {...props}>
@@ -101,7 +101,7 @@ function DialogContent({
           {showCloseButton ? (
             <DialogPrimitive.Close
               className={cn(
-                'absolute right-3 top-3 rounded-full bg-surface-zinc-850 p-1.5 opacity-80 active:opacity-100',
+                'absolute right-3 top-3 rounded-full bg-surface-5 p-1.5 opacity-80 active:opacity-100',
                 Platform.select({
                   web: 'ring-offset-background focus:ring-ring data-[state=open]:bg-accent transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2',
                 })

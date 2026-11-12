@@ -106,7 +106,7 @@ export default function EraSelector({
               className={cn(
                 "rounded-lg border-[1.5px] p-4",
                 isSelected
-                  ? "border-primary bg-surface-brand"
+                  ? "border-primary bg-brand-surface"
                   : "border-zinc-800 bg-zinc-900",
               )}
             >

@@ -95,7 +95,7 @@ export default function GlimpseLogo({
       <View className="flex-row items-center" style={{ gap: metrics.gap }}>
         {showMark ? (
           <View
-            className="items-center justify-center border border-white/[0.08] bg-surface-zinc-850"
+            className="items-center justify-center border border-white/[0.08] bg-surface-5"
             style={[
               {
                 width: metrics.badgeSize,

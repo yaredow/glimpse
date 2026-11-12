@@ -136,10 +136,10 @@ export default function MovieActions({
           className={cn(
             "flex-row items-center gap-3 rounded-[14px] border px-4 py-3",
             isLocked
-              ? "border-primary bg-surface-zinc-900"
+              ? "border-primary bg-surface-4"
               : isWatched
-                ? "border-emerald-500 bg-surface-zinc-900"
-                : "border-white/[0.08] bg-surface-zinc-900",
+                ? "border-emerald-500 bg-surface-4"
+                : "border-white/[0.08] bg-surface-4",
           )}
         >
           <MaterialCommunityIcons

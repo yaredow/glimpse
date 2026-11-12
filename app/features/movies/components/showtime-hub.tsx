@@ -237,7 +237,7 @@ export default function ShowtimeHub({
               size={13}
               color={colors.surface1}
             />
-            <Text className="text-[10px] tracking-[1px] font-brandBold text-surface-obsidian">
+            <Text className="text-[10px] tracking-[1px] font-brandBold text-surface-1">
               TONIGHT&apos;S FEATURE
             </Text>
           </View>
@@ -414,7 +414,7 @@ export default function ShowtimeHub({
                   size={18}
                   color={colors.surface1}
                 />
-                <Text className="text-[12px] tracking-[0.6px] font-brandExtraBold text-surface-obsidian">
+                <Text className="text-[12px] tracking-[0.6px] font-brandExtraBold text-surface-1">
                   FINISHED WATCHING? RATE IT
                 </Text>
               </Pressable>

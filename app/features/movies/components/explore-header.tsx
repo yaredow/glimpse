@@ -56,7 +56,7 @@ export default function ExploreHeader({
           onPress={handleSyncPress}
           disabled={isSyncing}
           className={cn(
-            "flex-row items-center gap-[5px] rounded-[18px] border border-white/[0.08] bg-surface-zinc-850 px-3 py-[7px] active:opacity-75",
+            "flex-row items-center gap-[5px] rounded-[18px] border border-white/[0.08] bg-surface-5 px-3 py-[7px] active:opacity-75",
             isSyncing && "opacity-75",
           )}
           accessibilityRole="button"

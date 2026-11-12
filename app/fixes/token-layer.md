@@ -236,9 +236,9 @@ Rename the token fragment and keep prefix/opacity suffix:
 
 ### TL-4 · Migrate className consumers
 
-- [ ] Rename only the surface/brand/danger tokens from §4 in `.tsx` files.
-- [ ] Preserve prefixes and opacity suffixes (`bg-`, `text-`, `border-`, `/95`).
-- [ ] Do not touch `text-white`, `text-zinc-*`, or `border-white/[0.08]`; those are visual decisions.
+- [x] Rename only the surface/brand/danger tokens from §4 in `.tsx` files.
+- [x] Preserve prefixes and opacity suffixes (`bg-`, `text-`, `border-`, `/95`).
+- [x] Do not touch `text-white`, `text-zinc-*`, or `border-white/[0.08]`; those are visual decisions.
 
 **Gate:** `grep -rn "surface-zinc\|surface-obsidian\|surface-charcoal" app components features` is empty; ESLint; screenshots identical.
 

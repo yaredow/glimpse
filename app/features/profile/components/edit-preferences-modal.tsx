@@ -250,7 +250,7 @@ function EditPreferencesForm({
         <Pressable
           onPress={onClose}
           hitSlop={12}
-          className="h-8 w-8 items-center justify-center rounded-full bg-surface-zinc-850"
+          className="h-8 w-8 items-center justify-center rounded-full bg-surface-5"
         >
           <XIcon
             size={16}
@@ -291,7 +291,7 @@ function EditPreferencesForm({
             </View>
 
             {/* Segmented Tab Switcher */}
-            <View className="my-1 flex-row gap-1 rounded-[12px] border border-white/[0.08] bg-surface-zinc-850 p-[3px]">
+            <View className="my-1 flex-row gap-1 rounded-[12px] border border-white/[0.08] bg-surface-5 p-[3px]">
               <Pressable
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -376,7 +376,7 @@ function EditPreferencesForm({
                         "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
                         isSelected
                           ? "border-[1.5px] border-primary bg-primary/[0.16]"
-                          : "border border-white/[0.08] bg-surface-zinc-850",
+                          : "border border-white/[0.08] bg-surface-5",
                       )}
                     >
                       <Text
@@ -412,7 +412,7 @@ function EditPreferencesForm({
                         "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
                         isExcluded
                           ? "border-[1.5px] border-destructive/40 bg-destructive/[0.12]"
-                          : "border border-white/[0.08] bg-surface-zinc-850",
+                          : "border border-white/[0.08] bg-surface-5",
                       )}
                     >
                       <Text
@@ -467,7 +467,7 @@ function EditPreferencesForm({
                       "flex-row items-center justify-between rounded-[12px] border px-4 py-3",
                       isSelected
                         ? "border-[1.5px] border-primary bg-primary/[0.12]"
-                        : "border border-white/[0.08] bg-surface-zinc-850",
+                        : "border border-white/[0.08] bg-surface-5",
                     )}
                   >
                     <View className="flex-1 pr-2">
@@ -519,7 +519,7 @@ function EditPreferencesForm({
                       "flex-1 items-center justify-center rounded-[10px] border py-[11px]",
                       isSelected
                         ? "border-[1.5px] border-amber-500 bg-amber-500/[0.15]"
-                        : "border border-white/[0.08] bg-surface-zinc-850",
+                        : "border border-white/[0.08] bg-surface-5",
                     )}
                   >
                     <Text
@@ -556,7 +556,7 @@ function EditPreferencesForm({
                       "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
                       isSelected
                         ? "border-[1.5px] border-primary bg-primary/[0.16]"
-                        : "border border-white/[0.08] bg-surface-zinc-850",
+                        : "border border-white/[0.08] bg-surface-5",
                     )}
                   >
                     <Text
@@ -585,7 +585,7 @@ function EditPreferencesForm({
         </ScrollView>
       )}
 
-      <View className="border-t border-white/[0.08] bg-surface-zinc-900 px-5 pt-3 pb-2">
+      <View className="border-t border-white/[0.08] bg-surface-4 px-5 pt-3 pb-2">
         <Pressable
           onPress={handleSave}
           disabled={isPending || dataLoading}

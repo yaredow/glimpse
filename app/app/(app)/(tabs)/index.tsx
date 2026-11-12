@@ -47,7 +47,7 @@ function GridStateCard({
   onAction,
 }: GridStateCardProps) {
   return (
-    <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-surface-zinc-900 px-6 py-8">
+    <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-surface-4 px-6 py-8">
       <MaterialCommunityIcons
         name={icon}
         size={42}
@@ -63,7 +63,7 @@ function GridStateCard({
       {actionLabel && onAction ? (
         <Pressable
           onPress={onAction}
-          className="mt-3 min-h-[44px] justify-center rounded-[22px] border border-white/[0.08] bg-surface-zinc-850 px-5 active:opacity-80"
+          className="mt-3 min-h-[44px] justify-center rounded-[22px] border border-white/[0.08] bg-surface-5 px-5 active:opacity-80"
           accessibilityRole="button"
           accessibilityLabel={actionLabel}
         >
@@ -586,7 +586,7 @@ export default function TodayTab() {
 
   if (!isPending && isShowtimeMode && tonightPick) {
     return (
-      <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
+      <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
         <ShowtimeHub
           movie={tonightPick}
           onLogWatched={handleLogWatched}
@@ -597,7 +597,7 @@ export default function TodayTab() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-obsidian" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
       <ExploreHeader
         syncsRemaining={syncsRemaining}
         onSyncPress={handlePromptSync}
@@ -703,7 +703,7 @@ export default function TodayTab() {
               ) : (
                 <Pressable
                   onPress={handleReturnToPick}
-                  className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-zinc-850 px-[22px] py-3 active:bg-surface-zinc-800 active:opacity-85"
+                  className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-5 px-[22px] py-3 active:bg-surface-6 active:opacity-85"
                   style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)" }}
                   accessibilityRole="button"
                   accessibilityLabel={
@@ -728,7 +728,7 @@ export default function TodayTab() {
                 </Pressable>
               )
             ) : (
-              <View className="flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-zinc-850 px-[18px] py-2.5">
+              <View className="flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-5 px-[18px] py-2.5">
                 <MaterialCommunityIcons
                   name="check-circle"
                   size={16}

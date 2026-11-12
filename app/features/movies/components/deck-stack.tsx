@@ -248,7 +248,7 @@ export default function DeckStack({
         )}
         style={{ width: cardWidth, marginBottom: 8 }}
       >
-        <View className="rounded-[8px] border border-white/[0.08] bg-surface-zinc-850 px-3 py-[5px]">
+        <View className="rounded-[8px] border border-white/[0.08] bg-surface-5 px-3 py-[5px]">
           <Text className="text-[10.5px] tracking-[1.1px] font-brandBold text-zinc-400">
             {isDeckCompleted
               ? "ALL REELS RESOLVED"
@@ -262,7 +262,7 @@ export default function DeckStack({
               onPress={onDealersChoice}
               disabled={isDealersChoiceLoading || isShuffling}
               className={cn(
-                "flex-row items-center gap-1.5 rounded-[8px] border border-white/[0.08] bg-surface-zinc-850 px-2.5 py-[5px] active:bg-surface-zinc-800 active:opacity-75",
+                "flex-row items-center gap-1.5 rounded-[8px] border border-white/[0.08] bg-surface-5 px-2.5 py-[5px] active:bg-surface-6 active:opacity-75",
                 (isDealersChoiceLoading || isShuffling) && "opacity-60",
               )}
               accessibilityRole="button"
@@ -288,7 +288,7 @@ export default function DeckStack({
               </Text>
             </Pressable>
           ) : (
-            <View className="flex-row items-center gap-1.5 rounded-[8px] border border-white/[0.08] bg-surface-zinc-900 px-2.5 py-[5px] opacity-55">
+            <View className="flex-row items-center gap-1.5 rounded-[8px] border border-white/[0.08] bg-surface-4 px-2.5 py-[5px] opacity-55">
               <MaterialCommunityIcons
                 name="dice-multiple"
                 size={14}
@@ -308,7 +308,7 @@ export default function DeckStack({
       >
         {isDeckCompleted ? (
           <View
-            className="absolute top-0 items-center justify-center rounded-[24px] border border-white/[0.08] bg-surface-zinc-900 p-6"
+            className="absolute top-0 items-center justify-center rounded-[24px] border border-white/[0.08] bg-surface-4 p-6"
             style={{
               width: cardWidth,
               height: cardHeight,
@@ -330,7 +330,7 @@ export default function DeckStack({
             {onReshuffle && closedContent.canReshuffle && closedContent.buttonText ? (
               <Pressable
                 onPress={onReshuffle}
-                className="mt-[22px] flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-zinc-850 px-[18px] py-3 active:opacity-80"
+                className="mt-[22px] flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-5 px-[18px] py-3 active:opacity-80"
                 accessibilityRole="button"
                 accessibilityLabel={closedContent.buttonText}
               >
@@ -448,7 +448,7 @@ export default function DeckStack({
             {/* Pass */}
             <Pressable
               onPress={handlePass}
-              className="min-h-[46px] flex-1 flex-row items-center justify-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-zinc-850 py-3 active:opacity-75"
+              className="min-h-[46px] flex-1 flex-row items-center justify-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-5 py-3 active:opacity-75"
               accessibilityRole="button"
               accessibilityLabel="Pass this film for today"
             >
@@ -465,7 +465,7 @@ export default function DeckStack({
             {/* Seen */}
             <Pressable
               onPress={handleSeen}
-              className="min-h-[46px] flex-1 flex-row items-center justify-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-zinc-850 py-3 active:opacity-75"
+              className="min-h-[46px] flex-1 flex-row items-center justify-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-5 py-3 active:opacity-75"
               accessibilityRole="button"
               accessibilityLabel="Mark film as already seen"
             >
