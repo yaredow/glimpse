@@ -221,7 +221,7 @@ export default function MovieActions({
             onPress={() => handleAction(isPick ? "revealed" : "pick_tonight")}
             disabled={!!loadingAction}
             className={cn(
-              "h-11 flex-[1.4] flex-row items-center justify-center gap-1.5 rounded-lg active:opacity-90 active:scale-[0.99]",
+              "h-11 flex-[1.4] flex-row items-center justify-center gap-1.5 rounded-lg active:opacity-90",
               isPick ? "bg-primary-hover" : "bg-primary",
               (loadingAction === "pick_tonight" ||
                 loadingAction === "revealed") &&

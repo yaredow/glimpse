@@ -274,8 +274,9 @@ export default function ShowtimeHub({
       <View className="mt-4 px-4">
         {primaryProvider ? (
           <Pressable
+            key="primary-provider"
             onPress={handleOpenPrimaryProvider}
-            className="flex-row items-center justify-between rounded-xl bg-primary px-4 py-3.5 active:opacity-90 active:scale-[0.99]"
+            className="flex-row items-center justify-between rounded-xl bg-primary px-4 py-3.5 active:opacity-90"
             style={{
               boxShadow: shadows.glow,
             }}
@@ -298,6 +299,7 @@ export default function ShowtimeHub({
           </Pressable>
         ) : (
           <Pressable
+            key="find-where-to-watch"
             onPress={() =>
               handleOpenLink(searchLinks?.justwatch || searchLinks?.google || "")
             }
@@ -413,7 +415,7 @@ export default function ShowtimeHub({
               </Text>
               <Pressable
                 onPress={() => setShowVerdictModal(true)}
-                className="h-[46px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-gold active:opacity-90 active:scale-[0.99]"
+                className="h-[46px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-gold active:opacity-90"
                 style={{
                   boxShadow: shadows.goldGlow,
                 }}
