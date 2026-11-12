@@ -3,7 +3,7 @@ import * as tokens from "./lib/theme/tokens.generated.json";
 
 const config: ExpoConfig = {
   name: "GLIMPSE",
-  slug: "glimpse-app",
+  slug: "glimpse",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
