@@ -54,7 +54,7 @@ export default function ShowtimeHub({
 }: ShowtimeHubProps) {
   const insets = useSafeAreaInsets();
   const { width: SW } = useWindowDimensions();
-  const HERO_H = Math.round(SW * 0.72) + insets.top;
+  const HERO_H = Math.round(SW * 0.88) + insets.top;
   const { data: detailData } = useGetMovie(movie.movie_id);
   const movieDetails = detailData?.movie;
 
@@ -215,7 +215,7 @@ export default function ShowtimeHub({
   return (
     <ScrollView
       contentContainerStyle={{
-        paddingBottom: Math.max(insets.bottom, 16) + 40,
+        paddingBottom: Math.max(insets.bottom, 16) + 84,
       }}
       showsVerticalScrollIndicator={false}
     >
@@ -247,28 +247,28 @@ export default function ShowtimeHub({
           style={AbsoluteFill}
         />
 
-        <View className="px-4 pb-3">
-          <View className="mb-1.5 self-start flex-row items-center gap-1.5 rounded-md bg-gold px-2 py-0.5">
+        <View className="px-4 pb-5">
+          <View className="mb-2 self-start flex-row items-center gap-1.5 rounded-md bg-gold px-2 py-1">
             <FilmSlateIcon
-              size={12}
+              size={13}
               color={colors.surface1}
             />
-            <Text className="text-[9.5px] tracking-[1px] font-brandBold text-surface-1">
+            <Text className="text-[10px] tracking-[1px] font-brandBold text-surface-1">
               TONIGHT&apos;S FEATURE
             </Text>
           </View>
 
-          <Text className="text-[25px] leading-[30px] tracking-[-0.4px] font-brandExtraBold text-white">
+          <Text className="text-[26px] leading-[31px] tracking-[-0.4px] font-brandExtraBold text-white">
             {movie.title}
           </Text>
 
           {metaString ? (
-            <Text className="mt-1 text-[12.5px] tracking-[0.2px] font-brandMedium text-white/[0.75]">
+            <Text className="mt-1.5 text-[13px] tracking-[0.2px] font-brandMedium text-white/[0.75]">
               {metaString}
             </Text>
           ) : null}
           {movieDetails?.director ? (
-            <Text className="mt-0.5 text-[11.5px] font-brandMedium text-subtle-foreground">
+            <Text className="mt-1 text-[12px] font-brandMedium text-subtle-foreground">
               Directed by {movieDetails.director}
             </Text>
           ) : null}
@@ -276,29 +276,29 @@ export default function ShowtimeHub({
       </View>
 
       {/* 2. THE LAUNCHPAD (Primary Streaming Action) */}
-      <View className="mt-2.5 px-4">
+      <View className="mt-4 px-4">
         {primaryProvider ? (
           <Pressable
             key="primary-provider"
             onPress={handleOpenPrimaryProvider}
-            className="flex-row items-center justify-between rounded-xl bg-primary px-3.5 py-2.5 active:opacity-90"
+            className="flex-row items-center justify-between rounded-xl bg-primary px-4 py-3.5 active:opacity-90"
             style={{
               boxShadow: shadows.glow,
             }}
           >
-            <View className="h-[32px] w-[32px] items-center justify-center rounded-full bg-black/25">
-              <PlayIcon size={18} color={colors.white} />
+            <View className="h-[34px] w-[34px] items-center justify-center rounded-full bg-black/25">
+              <PlayIcon size={20} color={colors.white} />
             </View>
             <View className="ml-3 flex-1">
-              <Text className="text-[9.5px] tracking-[0.8px] font-brandBold text-white/[0.8]">
+              <Text className="text-[10px] tracking-[0.8px] font-brandBold text-white/[0.8]">
                 {isStreaming ? "STREAM NOW ON" : "RENT NOW ON"}
               </Text>
-              <Text className="text-[15px] tracking-[-0.2px] font-brandExtraBold text-white">
+              <Text className="text-[16px] tracking-[-0.2px] font-brandExtraBold text-white">
                 {primaryProvider.name.toUpperCase()}
               </Text>
             </View>
             <ArrowSquareOutIcon
-              size={17}
+              size={18}
               color={withAlpha(colors.white, 0.7)}
             />
           </Pressable>
@@ -308,21 +308,21 @@ export default function ShowtimeHub({
             onPress={() =>
               handleOpenLink(searchLinks?.justwatch || searchLinks?.google || "")
             }
-            className="flex-row items-center justify-center gap-2 rounded-xl border border-white/[0.15] bg-white/[0.08] px-4 py-2.5 active:opacity-90"
+            className="flex-row items-center justify-center gap-2 rounded-xl border border-white/[0.15] bg-white/[0.08] px-4 py-3.5 active:opacity-90"
             style={{
               boxShadow: shadows.glow,
             }}
           >
-            <MagnifyingGlassIcon size={18} color={colors.white} />
-            <Text className="text-[12.5px] tracking-[0.6px] font-brandBold text-white">
+            <MagnifyingGlassIcon size={20} color={colors.white} />
+            <Text className="text-[13px] tracking-[0.6px] font-brandBold text-white">
               FIND WHERE TO WATCH
             </Text>
           </Pressable>
         )}
 
         {otherProviders.length > 0 ? (
-          <View className="mt-2 flex-row items-center gap-2 px-1">
-            <Text className="text-[10.5px] font-brandMedium text-faint-foreground">
+          <View className="mt-2.5 flex-row items-center gap-2 px-1">
+            <Text className="text-[11px] font-brandMedium text-faint-foreground">
               Also on:
             </Text>
             <View className="flex-row flex-wrap items-center gap-1.5">
@@ -339,7 +339,7 @@ export default function ShowtimeHub({
                   hitSlop={8}
                   className="rounded border border-white/[0.08] bg-white/[0.06] px-2 py-0.5"
                 >
-                  <Text className="text-[10.5px] font-brandSemiBold text-foreground">
+                  <Text className="text-[11px] font-brandSemiBold text-foreground">
                     {prov.name}
                   </Text>
                 </Pressable>
@@ -350,18 +350,18 @@ export default function ShowtimeHub({
       </View>
 
       {/* 3. SCHEDULE & PRE-SHOW BAR */}
-      <View className="mx-4 mt-2.5 flex-row items-center justify-between rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 py-2">
+      <View className="mx-4 mt-4 flex-row items-center justify-between rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 py-3">
         <View className="flex-1 flex-row items-center gap-2.5">
           <ClockIcon
-            size={17}
+            size={18}
             color={colors.subtleForeground}
           />
           <View className="flex-1">
-            <Text className="text-[12.5px] font-brandBold text-white">
+            <Text className="text-[13px] font-brandBold text-white">
               {runtimeFormatted ? `${runtimeFormatted}` : "Runtime TBA"}
               {estimatedEndTime ? ` · Finishes ~${estimatedEndTime}` : ""}
             </Text>
-            <Text className="mt-px text-[10.5px] text-faint-foreground">
+            <Text className="mt-px text-[11px] text-faint-foreground">
               Tonight&apos;s Feature Schedule
             </Text>
           </View>
@@ -370,14 +370,14 @@ export default function ShowtimeHub({
         {trailerKey ? (
           <Pressable
             onPress={handleOpenTrailer}
-            className="flex-row items-center gap-1 rounded-sm border border-white/[0.12] bg-white/[0.08] px-2.5 py-1 active:opacity-80"
+            className="flex-row items-center gap-1 rounded-sm border border-white/[0.12] bg-white/[0.08] px-2.5 py-1.5 active:opacity-80"
             accessibilityLabel="Play pre-show trailer"
           >
             <PlayCircleIcon
-              size={14}
+              size={15}
               color={colors.white}
             />
-            <Text className="text-[9.5px] tracking-[0.6px] font-brandBold text-white">
+            <Text className="text-[10px] tracking-[0.6px] font-brandBold text-white">
               PRE-SHOW
             </Text>
           </Pressable>
@@ -385,51 +385,51 @@ export default function ShowtimeHub({
       </View>
 
       {/* 4. POST-SHOW RITUAL & VERDICT */}
-      <View className="mt-2.5 items-center px-4">
-        <View className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
-          <View className="mb-1.5 flex-row items-center gap-1.5">
+      <View className="mt-4 items-center px-4">
+        <View className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
+          <View className="mb-2 flex-row items-center gap-1.5">
             <StarIcon
-              size={16}
+              size={17}
               color={colors.gold}
             />
-            <Text className="text-[10.5px] tracking-[1px] font-brandBold text-amber-500">
+            <Text className="text-[11px] tracking-[1px] font-brandBold text-amber-500">
               THE NIGHT&apos;S VERDICT
             </Text>
           </View>
 
           {movie.action === "watched" ? (
-            <View className="py-1">
+            <View className="py-1.5">
               <View className="mb-1 flex-row items-center gap-2">
                 <SealCheckIcon
-                  size={20}
+                  size={22}
                   color={colors.success}
                 />
-                <Text className="text-[14px] font-brandBold text-white">
+                <Text className="text-[15px] font-brandBold text-white">
                   Verdict Recorded
                 </Text>
               </View>
-              <Text className="text-[11.5px] leading-[16px] text-faint-foreground">
+              <Text className="text-[12px] leading-[17px] text-faint-foreground">
                 Saved to your Journal and added to your Taste DNA.
               </Text>
             </View>
           ) : (
             <>
-              <Text className="mb-2.5 text-[12px] leading-[17px] text-subtle-foreground">
+              <Text className="mb-3.5 text-[13px] leading-[19px] text-subtle-foreground">
                 When the credits roll, rate tonight&apos;s feature to close the
                 session and calibrate tomorrow&apos;s reel.
               </Text>
               <Pressable
                 onPress={() => setShowVerdictModal(true)}
-                className="h-[42px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-gold active:opacity-90"
+                className="h-[46px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-gold active:opacity-90"
                 style={{
                   boxShadow: shadows.goldGlow,
                 }}
               >
                 <StarIcon
-                  size={17}
+                  size={18}
                   color={colors.surface1}
                 />
-                <Text className="text-[11.5px] tracking-[0.6px] font-brandExtraBold text-surface-1">
+                <Text className="text-[12px] tracking-[0.6px] font-brandExtraBold text-surface-1">
                   FINISHED WATCHING? RATE IT
                 </Text>
               </Pressable>
@@ -437,12 +437,12 @@ export default function ShowtimeHub({
           )}
         </View>
 
-        <View className="mt-2 flex-row items-center gap-1.5">
+        <View className="mt-3.5 flex-row items-center gap-1.5">
           <HourglassIcon
-            size={13}
+            size={14}
             color={colors.faintForeground}
           />
-          <Text className="text-[11px] text-faint-foreground">
+          <Text className="text-[12px] text-faint-foreground">
             Next daily reel drops in {countdown}
           </Text>
         </View>
@@ -451,10 +451,9 @@ export default function ShowtimeHub({
           onPress={() => onOpenDetails(movie)}
           accessibilityRole="button"
           accessibilityLabel="View full film synopsis and cast"
-          hitSlop={8}
-          className="mt-1 min-h-[36px] justify-center px-3 py-1"
+          className="mt-4 min-h-[44px] justify-center px-3 py-1.5"
         >
-          <Text className="text-[11.5px] text-faint-foreground underline">
+          <Text className="text-[12px] text-faint-foreground underline">
             View full film synopsis &amp; cast &rarr;
           </Text>
         </Pressable>
