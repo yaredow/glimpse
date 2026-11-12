@@ -19,7 +19,17 @@ export const useFinishOnboarding = () => {
   return useMutation({
     mutationFn: (data: FinishOnboardingPayload) =>
       mode === "edit" ? updatePreferences(data) : submitPreferences(data),
-    onSuccess: async () => {
+    onSuccess: async (_data, variables) => {
+      queryClient.setQueryData(authKeys.preferences(), {
+        preference: {
+          favorite_genres: variables.favorite_genres,
+          excluded_genres: variables.excluded_genres,
+          languages: variables.languages,
+          min_year: variables.min_year,
+          max_year: variables.max_year,
+          min_rating: variables.min_rating,
+        },
+      });
       reset();
       await queryClient.invalidateQueries({ queryKey: authKeys.preferences() });
       await queryClient.invalidateQueries({ queryKey: moviesKeys.todayGrid() });

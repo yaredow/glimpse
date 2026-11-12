@@ -14,8 +14,20 @@ import {
 } from "@/features/auth/components/auth-actions";
 import { TiltedMarqueeHero } from "@/features/auth/components/tilted-marquee-hero";
 import BrandLockup from "@/features/auth/components/brand-lockup";
+import { useAuthStore } from "@/features/auth/store/auth.store";
 
 export default function WelcomeScreen() {
+  const setHasSeenWelcome = useAuthStore((s) => s.setHasSeenWelcome);
+
+  const handleGetStarted = () => {
+    void setHasSeenWelcome(true);
+    router.push("/(onboarding)");
+  };
+
+  const handleSignIn = () => {
+    void setHasSeenWelcome(true);
+    router.push("/(auth)/login");
+  };
   return (
     <View className="flex-1 bg-background">
       <TiltedMarqueeHero />
@@ -61,14 +73,14 @@ export default function WelcomeScreen() {
             >
               <AuthPrimaryButton
                 label="Get Started"
-                onPress={() => router.push("/(onboarding)")}
+                onPress={handleGetStarted}
               />
 
               <View className="flex-row items-center justify-center gap-1.5">
                 <Text className="text-[13px] font-brand text-faint-foreground">
                   Already have an account?
                 </Text>
-                <AuthTextLink label="Sign in" href="/(auth)/login" />
+                <AuthTextLink label="Sign in" onPress={handleSignIn} />
               </View>
             </Animated.View>
 
