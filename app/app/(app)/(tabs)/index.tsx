@@ -53,7 +53,7 @@ function GridStateCard({
   onAction,
 }: GridStateCardProps) {
   return (
-    <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-surface-4 px-6 py-8">
+    <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-card px-6 py-8">
       <Icon
         size={42}
         color={colors.primary}
@@ -62,7 +62,7 @@ function GridStateCard({
       <Text className="text-center text-[15px] font-brandBold text-white">
         {title}
       </Text>
-      <Text className="text-center text-[13px] leading-[19px] font-brand text-zinc-400">
+      <Text className="text-center text-[13px] leading-[19px] font-brand text-subtle-foreground">
         {subtitle}
       </Text>
       {actionLabel && onAction ? (
@@ -591,7 +591,7 @@ export default function TodayTab() {
 
   if (!isPending && isShowtimeMode && tonightPick) {
     return (
-      <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
+      <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
         <ShowtimeHub
           movie={tonightPick}
           onLogWatched={handleLogWatched}
@@ -602,7 +602,7 @@ export default function TodayTab() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <ExploreHeader
         syncsRemaining={syncsRemaining}
         onSyncPress={handlePromptSync}
@@ -693,7 +693,7 @@ export default function TodayTab() {
                       accessibilityLabel="Browse other movies in this batch"
                       hitSlop={{ top: 8, bottom: 8, left: 16, right: 16 }}
                     >
-                      <Text className="text-[13px] tracking-[0.2px] font-brandMedium text-zinc-400">
+                      <Text className="text-[13px] tracking-[0.2px] font-brandMedium text-subtle-foreground">
                         Browse other movies
                       </Text>
                       <ArrowRightIcon

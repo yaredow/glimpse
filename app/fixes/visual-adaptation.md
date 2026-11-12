@@ -86,11 +86,11 @@ Known bugs:
 
 Targets are locked in `README.md` §1.1. This is the only phase allowed to change a rendered color.
 
-- [ ] Unify the app canvas: `bg-background` (`#0C0C0E`) for every screen root; `surface-1`/`surface-2` only for an intentional inset, documented in the file that uses it.
-- [ ] Collapse near-duplicate blacks (`#141414`, `#161618`, `#181818`) to `--card` `#161618` in `global.css`, then update the screens that used the removed tokens. Review screenshots before and after.
-- [ ] Unify the text ramp: `text-foreground` (`#FAFAFA`) for body, `text-subtle-foreground` (`#A1A1AA`) for secondary, `text-faint-foreground` (`#71717A`) for tertiary, `text-white` only where true white is intended. Retire `text-off-white`, `text-muted-foreground`, and `text-zinc-*` from screens.
-- [ ] Fix `text-error-container` → `text-error-container-foreground` in `movie-reviews.tsx`.
-- [ ] Replace remaining hardcoded colors:
+- [x] Unify the app canvas: `bg-background` (`#0C0C0E`) for every screen root; `surface-1`/`surface-2` only for an intentional inset, documented in the file that uses it.
+- [x] Collapse near-duplicate blacks (`#141414`, `#161618`, `#181818`) to `--card` `#161618` in `global.css`, then update the screens that used the removed tokens. Review screenshots before and after.
+- [x] Unify the text ramp: `text-foreground` (`#FAFAFA`) for body, `text-subtle-foreground` (`#A1A1AA`) for secondary, `text-faint-foreground` (`#71717A`) for tertiary, `text-white` only where true white is intended. Retire `text-off-white`, `text-muted-foreground`, and `text-zinc-*` from screens.
+- [x] Fix `text-error-container` → `text-error-container-foreground` in `movie-reviews.tsx`.
+- [x] Replace remaining hardcoded colors:
   - `#EF4444` → `colors.destructive` / `text-destructive`;
   - `#E50914` → `colors.primary`;
   - `#FFFFFF` → `colors.white` / `text-primary-foreground`;
@@ -99,8 +99,8 @@ Targets are locked in `README.md` §1.1. This is the only phase allowed to chang
   - `#121212` → `colors.surface1`;
   - `#0a0a0c`, `#1c1c1f`, `#666` → nearest semantic token;
   - YouTube `#FF0000` → documented literal.
-- [ ] Add `lib/theme/color.ts` with `withAlpha(hex, alpha)` for animated/gradient colors; use it instead of new rgba tokens.
-- [ ] Replace `rgba(255,255,255,0.08)` with `border-hairline/10` or `bg-hairline/10` where equivalent.
+- [x] Add `lib/theme/color.ts` with `withAlpha(hex, alpha)` for animated/gradient colors; use it instead of new rgba tokens.
+- [x] Replace `rgba(255,255,255,0.08)` with `border-hairline/10` or `bg-hairline/10` where equivalent.
 
 **Gate:** a grep for hex/rgba outside `lib/theme` returns only the documented literal list; screenshots reviewed.
 

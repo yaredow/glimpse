@@ -44,12 +44,12 @@ const CinemaToast = ({
       </View>
       <View className="flex-1">
         {text1 ? (
-          <Text className="text-[14px] tracking-[0.1px] font-brandSemiBold text-off-white" numberOfLines={2}>
+          <Text className="text-[14px] tracking-[0.1px] font-brandSemiBold text-foreground" numberOfLines={2}>
             {text1}
           </Text>
         ) : null}
         {text2 ? (
-          <Text className="mt-0.5 text-[13px] leading-[18px] font-brand text-zinc-400" numberOfLines={3}>
+          <Text className="mt-0.5 text-[13px] leading-[18px] font-brand text-subtle-foreground" numberOfLines={3}>
             {text2}
           </Text>
         ) : null}

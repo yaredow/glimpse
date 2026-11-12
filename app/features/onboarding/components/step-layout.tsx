@@ -70,7 +70,7 @@ export default function StepLayout({
           })}
         </View>
 
-        <Text className="font-brandBold text-[12px] leading-4 tracking-[1px] text-zinc-400 min-w-[28px] text-right">
+        <Text className="font-brandBold text-[12px] leading-4 tracking-[1px] text-subtle-foreground min-w-[28px] text-right">
           {step + 1}/{totalSteps}
         </Text>
       </View>
@@ -83,7 +83,7 @@ export default function StepLayout({
           {title}
         </Text>
         {subtitle ? (
-          <Text className="font-brand mt-1.5 text-[15px] leading-[22px] tracking-[0.25px] text-zinc-400">
+          <Text className="font-brand mt-1.5 text-[15px] leading-[22px] tracking-[0.25px] text-subtle-foreground">
             {subtitle}
           </Text>
         ) : null}

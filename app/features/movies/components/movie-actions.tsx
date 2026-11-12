@@ -141,10 +141,10 @@ export default function MovieActions({
           className={cn(
             "flex-row items-center gap-3 rounded-[14px] border px-4 py-3",
             isLocked
-              ? "border-primary bg-surface-4"
+              ? "border-primary bg-card"
               : isWatched
-                ? "border-emerald-500 bg-surface-4"
-                : "border-white/[0.08] bg-surface-4",
+                ? "border-emerald-500 bg-card"
+                : "border-white/[0.08] bg-card",
           )}
         >
           <FinalizedIcon
@@ -155,7 +155,7 @@ export default function MovieActions({
             <Text className="text-[13.5px] font-brandBold text-white">
               {finalizedTitle}
             </Text>
-            <Text className="mt-0.5 text-[12px] leading-4 text-zinc-400">
+            <Text className="mt-0.5 text-[12px] leading-4 text-subtle-foreground">
               {finalizedSubtitle}
             </Text>
           </View>
@@ -181,7 +181,7 @@ export default function MovieActions({
                   size={17}
                   color={colors.faintForeground}
                 />
-                <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+                <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                   Pass
                 </Text>
               </>

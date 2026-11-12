@@ -101,7 +101,7 @@ export default function Journal() {
     return (
       <Pressable
         onPress={() => handleMoviePress(item)}
-        className="overflow-hidden rounded-md border border-white/[0.08] bg-surface-4 active:opacity-80"
+        className="overflow-hidden rounded-md border border-white/[0.08] bg-card active:opacity-80"
         accessibilityRole="button"
         accessibilityLabel={item.title}
       >
@@ -122,7 +122,7 @@ export default function Journal() {
               color={colors.faintForeground}
             />
             <Text
-              className="mt-1 text-center text-[10px] font-brandSemiBold text-zinc-400"
+              className="mt-1 text-center text-[10px] font-brandSemiBold text-subtle-foreground"
               numberOfLines={2}
             >
               {item.title}
@@ -184,7 +184,7 @@ export default function Journal() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <View className="px-4 pb-3 pt-2">
         <View className="flex-row items-baseline gap-[3px]">
           <Text className="text-[22px] tracking-[2px] font-brandExtraBold text-white">
@@ -192,7 +192,7 @@ export default function Journal() {
           </Text>
           <View className="mb-0.5 h-[5px] w-[5px] rounded-full bg-primary" />
         </View>
-        <Text className="mt-0.5 text-[12px] font-brand text-zinc-400">
+        <Text className="mt-0.5 text-[12px] font-brand text-subtle-foreground">
           Your lifetime cinema archive and history
         </Text>
       </View>
@@ -202,7 +202,7 @@ export default function Journal() {
           <Text className="text-[17px] font-brandBold text-primary">
             {stats.watchedCount}
           </Text>
-          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-zinc-400">
+          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-subtle-foreground">
             Watched
           </Text>
         </View>
@@ -211,7 +211,7 @@ export default function Journal() {
           <Text className="text-[17px] font-brandBold text-amber-500">
             {stats.picksCount}
           </Text>
-          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-zinc-400">
+          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-subtle-foreground">
             Picks
           </Text>
         </View>
@@ -223,7 +223,7 @@ export default function Journal() {
           >
             {stats.topGenre}
           </Text>
-          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-zinc-400">
+          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-subtle-foreground">
             Top Vibe
           </Text>
         </View>
@@ -245,7 +245,7 @@ export default function Journal() {
           <Text
             className={cn(
               "text-[12px] font-brandSemiBold",
-              activeFilter === "all" ? "text-surface-1" : "text-zinc-400",
+              activeFilter === "all" ? "text-surface-1" : "text-subtle-foreground",
             )}
           >
             All ({allHistory.length})
@@ -267,7 +267,7 @@ export default function Journal() {
           <Text
             className={cn(
               "text-[12px] font-brandSemiBold",
-              activeFilter === "watched" ? "text-surface-1" : "text-zinc-400",
+              activeFilter === "watched" ? "text-surface-1" : "text-subtle-foreground",
             )}
           >
             Watched ({stats.watchedCount})
@@ -289,7 +289,7 @@ export default function Journal() {
           <Text
             className={cn(
               "text-[12px] font-brandSemiBold",
-              activeFilter === "pick_tonight" ? "text-surface-1" : "text-zinc-400",
+              activeFilter === "pick_tonight" ? "text-surface-1" : "text-subtle-foreground",
             )}
           >
             Picks ({stats.picksCount})
@@ -302,7 +302,7 @@ export default function Journal() {
           className="flex-1 items-center justify-center px-8"
           style={{ paddingBottom: Math.max(insets.bottom, 16) + 60 }}
         >
-          <Text className="text-[14px] font-brand text-zinc-400">
+          <Text className="text-[14px] font-brand text-subtle-foreground">
             Loading cinema archive...
           </Text>
         </View>
@@ -323,7 +323,7 @@ export default function Journal() {
               ? "No picks saved yet"
               : "Your journal is empty"}
           </Text>
-          <Text className="mb-5 text-center text-[13px] leading-[19px] font-brand text-zinc-500">
+          <Text className="mb-5 text-center text-[13px] leading-[19px] font-brand text-faint-foreground">
             Movies you mark as watched or select as your daily pick will be collected here.
           </Text>
           <Pressable

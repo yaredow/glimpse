@@ -148,7 +148,7 @@ export default function GlimpseLogo({
 
       {tagline ? (
         <Text
-          className="mt-1.5 text-center text-[10px] font-brandSemiBold text-zinc-500 uppercase"
+          className="mt-1.5 text-center text-[10px] font-brandSemiBold text-faint-foreground uppercase"
           style={{
             color: colors.faintForeground,
             letterSpacing: Math.round(metrics.letterSpacing * 0.9),

@@ -4,6 +4,7 @@ import { ApertureIcon } from "phosphor-react-native";
 import { Text } from "@/components/ui/text";
 import fontFamilies from "@/lib/theme/fonts.json";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 interface BrandLockupProps {
   stagger?: boolean;
@@ -37,13 +38,13 @@ export default function BrandLockup({
           width: 60,
           height: 60,
           borderRadius: 18,
-          backgroundColor: "rgba(229, 9, 20, 0.18)",
+          backgroundColor: withAlpha(colors.primary, 0.18),
           borderWidth: 1.5,
-          borderColor: "rgba(229, 9, 20, 0.35)",
+          borderColor: withAlpha(colors.primary, 0.35),
           alignItems: "center",
           justifyContent: "center",
           marginBottom: 10,
-          boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.25)",
+          boxShadow: `0px 4px 10.0px ${withAlpha(colors.primary, 0.25)}`,
         }}
       >
         <ApertureIcon size={32} color={colors.primary} weight="fill" />
@@ -70,7 +71,7 @@ export default function BrandLockup({
           fontSize: 10,
           lineHeight: 14,
           letterSpacing: 2.8,
-          color: "#8B8B94",
+          color: colors.faintForeground,
           textTransform: "uppercase",
           marginTop: 6,
           textAlign: "center",

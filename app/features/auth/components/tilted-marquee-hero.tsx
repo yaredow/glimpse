@@ -12,6 +12,7 @@ import Animated, {
 import { Image, type ImageSource } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 const CARD_HEIGHT = 172;
 const CARD_GAP = 12;
@@ -98,7 +99,7 @@ function MarqueeColumn({ posters, direction, duration }: MarqueeColumnProps) {
         {loopPosters.map((source, index) => (
           <View
             key={index}
-            className="h-[172px] w-[116px] overflow-hidden rounded-lg bg-zinc-900"
+            className="h-[172px] w-[116px] overflow-hidden rounded-lg bg-card"
           >
             <Image
               source={source}
@@ -148,7 +149,7 @@ export function TiltedMarqueeHero({ style }: TiltedMarqueeHeroProps) {
       </View>
 
       <LinearGradient
-        colors={["rgba(12, 12, 14, 0.65)", "transparent"]}
+        colors={[withAlpha(colors.background, 0.65), "transparent"]}
         locations={[0, 1]}
         style={{
           position: "absolute",
@@ -162,17 +163,17 @@ export function TiltedMarqueeHero({ style }: TiltedMarqueeHeroProps) {
       <LinearGradient
         colors={[
           "transparent",
-          "rgba(12, 12, 14, 0.007)",
-          "rgba(12, 12, 14, 0.028)",
-          "rgba(12, 12, 14, 0.063)",
-          "rgba(12, 12, 14, 0.111)",
-          "rgba(12, 12, 14, 0.174)",
-          "rgba(12, 12, 14, 0.250)",
-          "rgba(12, 12, 14, 0.340)",
-          "rgba(12, 12, 14, 0.444)",
-          "rgba(12, 12, 14, 0.563)",
-          "rgba(12, 12, 14, 0.694)",
-          "rgba(12, 12, 14, 0.840)",
+          withAlpha(colors.background, 0.007),
+          withAlpha(colors.background, 0.028),
+          withAlpha(colors.background, 0.063),
+          withAlpha(colors.background, 0.111),
+          withAlpha(colors.background, 0.174),
+          withAlpha(colors.background, 0.25),
+          withAlpha(colors.background, 0.34),
+          withAlpha(colors.background, 0.444),
+          withAlpha(colors.background, 0.563),
+          withAlpha(colors.background, 0.694),
+          withAlpha(colors.background, 0.84),
           colors.background,
           colors.background,
         ]}

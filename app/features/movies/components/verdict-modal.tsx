@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 interface VerdictModalProps {
   visible: boolean;
@@ -59,7 +60,7 @@ export default function VerdictModal({
             />
           </View>
 
-          <Text className="text-center text-[14px] leading-[21px] font-brand text-zinc-400">
+          <Text className="text-center text-[14px] leading-[21px] font-brand text-subtle-foreground">
             Log your verdict for{" "}
             <Text className="font-brandSemiBold text-white">
               &ldquo;{movieTitle}&rdquo;
@@ -83,7 +84,7 @@ export default function VerdictModal({
                     size={36}
                     weight={isFilled ? "fill" : "regular"}
                     color={
-                      isFilled ? colors.gold : "rgba(255, 255, 255, 0.2)"
+                      isFilled ? colors.gold : withAlpha(colors.white, 0.2)
                     }
                   />
                 </Pressable>
@@ -111,7 +112,7 @@ export default function VerdictModal({
               className="min-h-[44px] justify-center px-4"
               accessibilityRole="button"
             >
-              <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+              <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                 Not Yet
               </Text>
             </Pressable>

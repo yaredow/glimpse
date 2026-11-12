@@ -88,7 +88,7 @@ export function AuthTextLink({
         <Text
           className={cn(
             "font-brandSemiBold text-xs tracking-wide",
-            tone === "primary" ? "text-primary" : "text-zinc-400",
+            tone === "primary" ? "text-primary" : "text-subtle-foreground",
             pressed && "opacity-50"
           )}
         >

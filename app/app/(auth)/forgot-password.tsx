@@ -28,6 +28,7 @@ import {
   AuthTextLink,
 } from "@/features/auth/components/auth-actions";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 export default function ForgotPassword() {
   const requestReset = useRequestPasswordReset();
@@ -79,7 +80,7 @@ export default function ForgotPassword() {
       <AuthShell
         title="Check your inbox."
         subtitle={
-          <Text className="text-zinc-400 text-sm text-center leading-relaxed">
+          <Text className="text-subtle-foreground text-sm text-center leading-relaxed">
             We sent a reset link to{"\n"}
             <Text className="text-white font-brandSemiBold">{sentTo}</Text>{" "}
             if an account exists.
@@ -94,20 +95,20 @@ export default function ForgotPassword() {
                 height: 64,
                 borderRadius: 32,
                 borderWidth: 1,
-                borderColor: "rgba(229, 9, 20, 0.3)",
-                backgroundColor: "rgba(229, 9, 20, 0.1)",
+                borderColor: withAlpha(colors.primary, 0.3),
+                backgroundColor: withAlpha(colors.primary, 0.1),
                 alignItems: "center",
                 justifyContent: "center",
                 marginTop: 4,
                 marginBottom: 8,
-                boxShadow: "0px 8px 16.0px rgba(69, 10, 10, 0.4)",
+                boxShadow: `0px 8px 16.0px ${withAlpha(colors.errorContainer, 0.4)}`,
               },
               animatedPulseStyle,
             ]}
           >
             <EnvelopeSimpleIcon size={32} color={colors.primary} weight="fill" />
           </Animated.View>
-          <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
+          <Text className="text-subtle-foreground text-xs leading-5 text-center px-4">
             Open the link in that email, or use the reset code from the message
             on the next screen.
           </Text>

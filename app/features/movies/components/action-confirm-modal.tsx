@@ -13,6 +13,7 @@ import {
   type IconProps,
 } from "phosphor-react-native";
 import { cn } from "@/lib/utils";
+import { colors } from "@/lib/theme/tokens.generated";
 import {
   Dialog,
   DialogContent,
@@ -97,12 +98,12 @@ interface ActionModalConfig {
 const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
   locked_in: {
     Icon: PlayCircleIcon,
-    iconColor: "#E50914",
+    iconColor: colors.primary,
     title: "Lock In Today's Movie?",
     confirmText: "Lock In Selection",
     cancelText: "Not Yet",
     renderDescription: (title) => (
-      <Text className="text-center text-[14px] leading-[22px] font-brand text-zinc-400">
+      <Text className="text-center text-[14px] leading-[22px] font-brand text-subtle-foreground">
         <Text className="font-brandSemiBold text-white">
           &ldquo;{title}&rdquo;
         </Text>{" "}
@@ -113,14 +114,14 @@ const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
   },
   sync: {
     Icon: ArrowsClockwiseIcon,
-    iconColor: "#E50914",
+    iconColor: colors.primary,
     title: "Sync a Fresh Batch?",
     confirmText: "Sync Fresh Reel",
     cancelText: "Keep Current",
     renderDescription: (_title, syncs = 3) => {
       const remainingAfter = Math.max(0, syncs - 1);
       return (
-        <Text className="text-center text-[14px] leading-[22px] font-brand text-zinc-400">
+        <Text className="text-center text-[14px] leading-[22px] font-brand text-subtle-foreground">
           This will draw 5 fresh mystery picks tailored to your mood. You will
           have{" "}
           <Text className="font-brandSemiBold text-white">
@@ -181,7 +182,7 @@ export default function ActionConfirmModal({
                   MOOD_OPTIONS[0];
 
                 return (
-                  <Text className="text-center text-[14px] leading-[22px] font-brand text-zinc-400">
+                  <Text className="text-center text-[14px] leading-[22px] font-brand text-subtle-foreground">
                     Draw 5 fresh mystery picks:{" "}
                     <Text className="font-brandSemiBold text-white">
                       {activeMood.description}
@@ -192,7 +193,7 @@ export default function ActionConfirmModal({
               })()}
 
               <View className="w-full">
-                <Text className="mb-2 text-[11px] tracking-[1.2px] font-brandBold text-zinc-500 uppercase">
+                <Text className="mb-2 text-[11px] tracking-[1.2px] font-brandBold text-faint-foreground uppercase">
                   CHOOSE A VIBE
                 </Text>
                 <ScrollView
@@ -222,7 +223,7 @@ export default function ActionConfirmModal({
                       >
                         <mood.Icon
                           size={16}
-                          color={isSelected ? "#121212" : "#A1A1AA"}
+                          color={isSelected ? colors.surface1 : colors.subtleForeground}
                           style={{ marginRight: 6 }}
                         />
                         <Text
@@ -230,7 +231,7 @@ export default function ActionConfirmModal({
                             "text-[12.5px] font-brandSemiBold",
                             isSelected
                               ? "text-surface-1"
-                              : "text-zinc-400",
+                              : "text-subtle-foreground",
                           )}
                         >
                           {mood.label}
@@ -253,7 +254,7 @@ export default function ActionConfirmModal({
               className="min-h-[44px] justify-center px-4"
               accessibilityRole="button"
             >
-              <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+              <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                 {config.cancelText}
               </Text>
             </Pressable>

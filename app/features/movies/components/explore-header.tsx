@@ -38,7 +38,7 @@ export default function ExploreHeader({
       <View className="flex-1 justify-center mr-3">
         <GlimpseLogo size="medium" showMark={false} />
         <Text
-          className="mt-1 text-[10.5px] tracking-[1.2px] font-brandSemiBold text-zinc-400"
+          className="mt-1 text-[10.5px] tracking-[1.2px] font-brandSemiBold text-subtle-foreground"
           numberOfLines={1}
           ellipsizeMode="tail"
         >
@@ -76,7 +76,7 @@ export default function ExploreHeader({
           <Text
             className={cn(
               "text-[11px] tracking-[0.6px] font-brandBold",
-              syncsRemaining > 0 ? "text-white" : "text-zinc-500",
+              syncsRemaining > 0 ? "text-white" : "text-faint-foreground",
             )}
           >
             {isSyncing

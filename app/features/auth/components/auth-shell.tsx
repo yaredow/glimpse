@@ -178,7 +178,7 @@ export default function AuthShell({
                   style={{ marginTop: 6, alignItems: "center" }}
                 >
                   {typeof subtitle === "string" ? (
-                    <Text className="text-zinc-400 text-sm text-center leading-relaxed px-4 max-w-sm self-center">
+                    <Text className="text-subtle-foreground text-sm text-center leading-relaxed px-4 max-w-sm self-center">
                       {subtitle}
                     </Text>
                   ) : (
@@ -200,7 +200,7 @@ export default function AuthShell({
 
           {/* Bottom Footnote */}
           <View className="items-center justify-center pb-1.5 pt-6">
-            <Text className="text-center text-[10px] uppercase tracking-[1.2px] text-zinc-600">
+            <Text className="text-center text-[10px] uppercase tracking-[1.2px] text-faint-foreground">
               A quieter way to choose what to watch.
             </Text>
           </View>

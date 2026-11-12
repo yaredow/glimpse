@@ -64,7 +64,7 @@ export default function ExcludedGenreSelector({
                 "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
                 isExcluded
                   ? "border-destructive bg-danger-surface"
-                  : "border-zinc-800 bg-zinc-900",
+                  : "border-border bg-card",
               )}
             >
               <GenreIcon
@@ -78,7 +78,7 @@ export default function ExcludedGenreSelector({
                   "text-[14px]",
                   isExcluded
                     ? "text-red-300 font-brandBold line-through"
-                    : "text-zinc-300 font-brandSemiBold",
+                    : "text-foreground font-brandSemiBold",
                 )}
               >
                 {genre.name}
@@ -97,9 +97,9 @@ export default function ExcludedGenreSelector({
       </ScrollView>
 
       {/* Floating Bottom Action Area */}
-      <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
+      <View className="mt-auto gap-3 border-t border-hairline/10 pt-4">
         <View className="items-center">
-          <Text className="font-brandSemiBold text-body-sm text-zinc-400">
+          <Text className="font-brandSemiBold text-body-sm text-subtle-foreground">
             {selected.length > 0
               ? `${selected.length} ${
                   selected.length === 1 ? "genre" : "genres"

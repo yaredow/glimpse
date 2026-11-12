@@ -1,5 +1,6 @@
 import { Text as AppText, TextClassContext } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
+import { colors } from '@/lib/theme/tokens.generated';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Platform, Pressable, ActivityIndicator } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -166,7 +167,7 @@ function Button({
         {...props}
       >
         {loading ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
+          <ActivityIndicator size="small" color={colors.primaryForeground} />
         ) : isPlainTextContent(children) ? (
           <AppText style={textColor ? { color: textColor } : undefined}>
             {children as React.ReactNode}

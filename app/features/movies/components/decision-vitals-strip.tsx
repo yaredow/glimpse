@@ -40,14 +40,14 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       <View className="flex-1 items-center justify-center px-1">
         <View className="mb-1 flex-row items-center gap-1">
           <ClockIcon size={13} color={colors.faintForeground} />
-          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
+          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-faint-foreground uppercase">
             TIME
           </Text>
         </View>
         <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
           {runtimeFormatted}
         </Text>
-        <Text className="mt-0.5 text-[11px] text-zinc-400" numberOfLines={1}>
+        <Text className="mt-0.5 text-[11px] text-subtle-foreground" numberOfLines={1}>
           {endTime ?? "Tonight's feature"}
         </Text>
       </View>
@@ -58,14 +58,14 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       <View className="flex-1 items-center justify-center px-1">
         <View className="mb-1 flex-row items-center gap-1">
           <StarIcon size={13} color={colors.faintForeground} />
-          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
+          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-faint-foreground uppercase">
             RATING
           </Text>
         </View>
         <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
           {score}
         </Text>
-        <Text className="mt-0.5 text-[11px] text-zinc-400" numberOfLines={1}>
+        <Text className="mt-0.5 text-[11px] text-subtle-foreground" numberOfLines={1}>
           {scoreBand}
         </Text>
       </View>
@@ -76,14 +76,14 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       <View className="flex-1 items-center justify-center px-1">
         <View className="mb-1 flex-row items-center gap-1">
           <TranslateIcon size={13} color={colors.faintForeground} />
-          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
+          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-faint-foreground uppercase">
             AUDIO
           </Text>
         </View>
         <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
           {language}
         </Text>
-        <Text className="mt-0.5 text-[11px] text-zinc-400" numberOfLines={1}>
+        <Text className="mt-0.5 text-[11px] text-subtle-foreground" numberOfLines={1}>
           {audioSubtext}
         </Text>
       </View>

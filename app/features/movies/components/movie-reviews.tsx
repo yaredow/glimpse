@@ -34,7 +34,7 @@ function ReviewCard({ review }: { review: MovieReview }) {
       <View className="mb-2.5 flex-row items-center justify-between">
         <View className="flex-1 flex-row items-center gap-2">
           <View className="h-7 w-7 items-center justify-center rounded-[14px] bg-white/[0.08]">
-            <Text className="text-[12px] font-brandBold text-zinc-300">
+            <Text className="text-[12px] font-brandBold text-foreground">
               {(review.author?.[0] ?? "U").toUpperCase()}
             </Text>
           </View>
@@ -43,7 +43,7 @@ function ReviewCard({ review }: { review: MovieReview }) {
               {review.author}
             </Text>
             {dateFormatted ? (
-              <Text className="mt-px text-[10px] text-zinc-500">{dateFormatted}</Text>
+              <Text className="mt-px text-[10px] text-faint-foreground">{dateFormatted}</Text>
             ) : null}
           </View>
         </View>
@@ -59,7 +59,7 @@ function ReviewCard({ review }: { review: MovieReview }) {
       </View>
 
       <Text
-        className="text-[13px] leading-5 text-zinc-300"
+        className="text-[13px] leading-5 text-foreground"
         numberOfLines={isExpanded ? undefined : 4}
       >
         {review.content.trim()}
@@ -87,7 +87,7 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
     return (
       <View className="items-center gap-2 py-7">
         <ActivityIndicator size="small" color={colors.primary} />
-        <Text className="text-[12px] text-zinc-500">
+        <Text className="text-[12px] text-faint-foreground">
           Fetching community reviews...
         </Text>
       </View>
@@ -101,10 +101,10 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
           size={24}
           color={colors.destructive}
         />
-        <Text className="mt-1 text-[14px] font-brandBold text-zinc-300">
+        <Text className="mt-1 text-[14px] font-brandBold text-foreground">
           Couldn&apos;t load reviews
         </Text>
-        <Text className="text-center text-[12px] leading-[18px] text-zinc-500">
+        <Text className="text-center text-[12px] leading-[18px] text-faint-foreground">
           Something went wrong fetching the community take.
         </Text>
         <Pressable
@@ -130,10 +130,10 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
           size={24}
           color={colors.faintForeground}
         />
-        <Text className="mt-1 text-[14px] font-brandBold text-zinc-300">
+        <Text className="mt-1 text-[14px] font-brandBold text-foreground">
           No community reviews yet
         </Text>
-        <Text className="text-center text-[12px] leading-[18px] text-zinc-500">
+        <Text className="text-center text-[12px] leading-[18px] text-faint-foreground">
           Be the first to log your thoughts after tonight&apos;s feature.
         </Text>
       </View>
@@ -144,7 +144,7 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
     <View className="gap-3">
       {isError ? (
         <View className="flex-row items-center justify-between gap-3 rounded-[10px] border border-destructive/25 bg-destructive/[0.08] px-3 py-2.5">
-          <Text className="flex-1 text-[12px] leading-[17px] text-error-container">
+          <Text className="flex-1 text-[12px] leading-[17px] text-error-container-foreground">
             Couldn&apos;t refresh - showing saved reviews.
           </Text>
           <Pressable

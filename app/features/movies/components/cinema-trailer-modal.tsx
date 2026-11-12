@@ -133,7 +133,7 @@ export default function CinemaTrailerModal({
                 />
                 <View className="absolute inset-0 items-center justify-center gap-2.5 bg-background/[0.75]">
                   <ActivityIndicator size="small" color={colors.primary} />
-                  <Text className="text-[12px] tracking-[0.2px] font-brandMedium text-zinc-300">
+                  <Text className="text-[12px] tracking-[0.2px] font-brandMedium text-foreground">
                     Connecting cinema reel...
                   </Text>
                 </View>
@@ -169,12 +169,12 @@ export default function CinemaTrailerModal({
             ) : null}
 
             {playerError ? (
-              <View className="absolute inset-0 items-center justify-center gap-2 bg-surface-2 px-6">
+              <View className="absolute inset-0 items-center justify-center gap-2 bg-background px-6">
                 <YoutubeLogoIcon size={44} color="#FF0000" />
                 <Text className="mt-1 text-[16px] font-brandBold text-white">
                   Studio Restricted Playback
                 </Text>
-                <Text className="mb-1.5 text-center text-[13px] leading-[18px] font-brand text-zinc-400">
+                <Text className="mb-1.5 text-center text-[13px] leading-[18px] font-brand text-subtle-foreground">
                   This distributor restricts embedded mobile playback. You can
                   view the full trailer directly in YouTube.
                 </Text>

@@ -93,7 +93,7 @@ function DialogContent({
       <DialogOverlay className={overlayClassName}>
         <DialogPrimitive.Content
           className={cn(
-            'bg-surface-4 border-white/[0.08] z-50 mx-auto flex w-full max-w-[calc(100%-2rem)] flex-col gap-4 rounded-[24px] border p-6 sm:max-w-[380px]',
+            'bg-card border-white/[0.08] z-50 mx-auto flex w-full max-w-[calc(100%-2rem)] flex-col gap-4 rounded-[24px] border p-6 sm:max-w-[380px]',
             className
           )}
           {...props}>
@@ -112,7 +112,7 @@ function DialogContent({
               <Icon
                 as={XIcon}
                 className={cn(
-                  'text-zinc-400 web:pointer-events-none size-4 shrink-0'
+                  'text-subtle-foreground web:pointer-events-none size-4 shrink-0'
                 )}
               />
             </DialogPrimitive.Close>
@@ -165,7 +165,7 @@ function DialogDescription({
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
-      className={cn('text-muted-foreground text-sm', className)}
+      className={cn('text-subtle-foreground text-sm', className)}
       {...props}
     />
   );

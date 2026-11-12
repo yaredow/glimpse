@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { View, useWindowDimensions } from "react-native";
+import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -56,7 +58,7 @@ export default function SkeletonLoader({ count }: { count: number }) {
                 right: 0,
                 bottom: 0,
                 width: CARD_W * 0.4,
-                backgroundColor: "rgba(255, 255, 255, 0.03)",
+                backgroundColor: withAlpha(colors.white, 0.03),
               },
               shimmerStyle,
             ]}

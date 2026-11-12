@@ -119,7 +119,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
     return (
       <View className="items-center gap-2.5 py-7">
         <ActivityIndicator size="small" color={colors.primary} />
-        <Text className="text-[13px] font-brand text-zinc-500">
+        <Text className="text-[13px] font-brand text-faint-foreground">
           Checking streaming availability...
         </Text>
       </View>
@@ -129,7 +129,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
   if (isError || !sources) {
     return (
       <View className="items-center py-4">
-        <Text className="text-[13px] font-brand text-zinc-500">
+        <Text className="text-[13px] font-brand text-faint-foreground">
           Sources currently unavailable. Use universal search below.
         </Text>
       </View>
@@ -150,7 +150,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
 
       {cleanProviders.length > 0 ? (
         <View className="mb-6">
-          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-zinc-400">
+          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-subtle-foreground">
             {providerLabel}
           </Text>
           <ScrollView
@@ -195,7 +195,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                     >
                       {prov.name}
                     </Text>
-                    <Text className="mt-0.5 text-[11px] tracking-[0.2px] font-brandMedium text-zinc-400">
+                    <Text className="mt-0.5 text-[11px] tracking-[0.2px] font-brandMedium text-subtle-foreground">
                       {providerLabel === "STREAMING NOW" ? "Stream" : "Rent"}
                     </Text>
                   </View>
@@ -205,12 +205,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
           </ScrollView>
         </View>
       ) : (
-        <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-surface-4 px-3.5 py-3">
+        <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-card px-3.5 py-3">
           <InfoIcon
             size={16}
             color={colors.faintForeground}
           />
-          <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-zinc-500">
+          <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-faint-foreground">
             Not currently available on major subscription platforms. Try the search links below.
           </Text>
         </View>
@@ -219,7 +219,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
       {SHOW_TORRENTS ? (
       <View className="mb-6">
         <View className="mb-3 flex-row items-center justify-between">
-          <Text className="text-[11px] tracking-[1.2px] font-brandBold text-zinc-400">
+          <Text className="text-[11px] tracking-[1.2px] font-brandBold text-subtle-foreground">
             TORRENTS & MAGNETS
           </Text>
           {torrents.length > 0 ? (
@@ -253,11 +253,11 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                         {t.quality.toUpperCase()}
                       </Text>
                     </View>
-                    <Text className="text-[12px] tracking-[0.5px] font-brandSemiBold text-zinc-400">
+                    <Text className="text-[12px] tracking-[0.5px] font-brandSemiBold text-subtle-foreground">
                       {t.type.toUpperCase()}
                     </Text>
                   </View>
-                  <Text className="mt-1 text-[12px] font-brand text-zinc-500">
+                  <Text className="mt-1 text-[12px] font-brand text-faint-foreground">
                     {t.size} · {t.seeds} seeds
                   </Text>
                 </View>
@@ -291,12 +291,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             ))}
           </View>
         ) : (
-          <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-surface-4 px-3.5 py-3">
+          <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-card px-3.5 py-3">
             <CloudSlashIcon
               size={16}
               color={colors.faintForeground}
             />
-            <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-zinc-500">
+            <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-faint-foreground">
               No direct torrent releases indexed. Use universal web search below.
             </Text>
           </View>
@@ -306,7 +306,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
 
       {searchLinks ? (
         <View className="mb-6">
-          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-zinc-400">
+          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-subtle-foreground">
             UNIVERSAL SEARCH
           </Text>
           <ScrollView

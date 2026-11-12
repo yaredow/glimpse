@@ -122,7 +122,7 @@ export function FloatingTabBar({
             >
               <Icon
                 size={20}
-                color={isFocused ? colors.primary : "#8E8E93"}
+                color={isFocused ? colors.primary : colors.mutedForeground}
                 weight={isFocused ? "fill" : "regular"}
               />
               {isFocused ? (

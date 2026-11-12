@@ -9,6 +9,7 @@ import { tmdbImage } from "../constants/images";
 import type { GridMovie } from "../types/movies.type";
 import { curatorNote, structuredClues } from "../utils/deck";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 export type CardStamp = "PASSED" | "SEEN" | null;
 
@@ -76,7 +77,7 @@ export default function MysteryCard({
             onError={() => setPosterFailed(true)}
           />
         ) : (
-          <View className="absolute inset-0 items-center justify-center bg-surface-4 p-6">
+          <View className="absolute inset-0 items-center justify-center bg-card p-6">
             <FilmStripIcon
               size={56}
               color={colors.faintForeground}
@@ -115,9 +116,9 @@ export default function MysteryCard({
         <LinearGradient
           colors={[
             "transparent",
-            "rgba(10, 10, 14, 0.45)",
-            "rgba(10, 10, 14, 0.92)",
-            "#0a0a0c",
+            withAlpha(colors.background, 0.45),
+            withAlpha(colors.background, 0.92),
+            colors.background,
           ]}
           locations={[0, 0.25, 0.65, 1]}
           style={ScrimStyle}

@@ -29,6 +29,7 @@ import VerdictModal from "./verdict-modal";
 import CinemaTrailerModal from "./cinema-trailer-modal";
 import type { GridMovie, WatchProvider } from "../types/movies.type";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 interface ShowtimeHubProps {
   movie: GridMovie;
@@ -227,14 +228,14 @@ export default function ShowtimeHub({
             cachePolicy="memory-disk"
           />
         ) : (
-          <View style={[AbsoluteFill, { backgroundColor: "#1c1c1f" }]} />
+          <View style={[AbsoluteFill, { backgroundColor: colors.card }]} />
         )}
 
         <LinearGradient
           colors={[
-            "rgba(18, 18, 18, 0.15)",
-            "rgba(18, 18, 18, 0.65)",
-            colors.surface1,
+            withAlpha(colors.background, 0.15),
+            withAlpha(colors.background, 0.65),
+            colors.background,
           ]}
           locations={[0, 0.5, 1]}
           style={AbsoluteFill}
@@ -261,7 +262,7 @@ export default function ShowtimeHub({
             </Text>
           ) : null}
           {movieDetails?.director ? (
-            <Text className="mt-[3px] text-[12px] font-brandMedium text-zinc-400">
+            <Text className="mt-[3px] text-[12px] font-brandMedium text-subtle-foreground">
               Directed by {movieDetails.director}
             </Text>
           ) : null}
@@ -275,7 +276,7 @@ export default function ShowtimeHub({
             onPress={handleOpenPrimaryProvider}
             className="flex-row items-center justify-between rounded-[14px] bg-primary px-[18px] py-3.5 active:opacity-90 active:scale-[0.99]"
             style={{
-              boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.35)",
+              boxShadow: `0px 4px 10.0px ${withAlpha(colors.primary, 0.35)}`,
             }}
           >
             <View className="h-[34px] w-[34px] items-center justify-center rounded-[17px] bg-black/25">
@@ -291,7 +292,7 @@ export default function ShowtimeHub({
             </View>
             <ArrowSquareOutIcon
               size={18}
-              color="rgba(255, 255, 255, 0.7)"
+              color={withAlpha(colors.white, 0.7)}
             />
           </Pressable>
         ) : (
@@ -301,7 +302,7 @@ export default function ShowtimeHub({
             }
             className="flex-row items-center justify-center gap-2 rounded-[14px] border border-white/[0.15] bg-white/[0.08] px-[18px] py-3.5 active:opacity-90"
             style={{
-              boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.35)",
+              boxShadow: `0px 4px 10.0px ${withAlpha(colors.primary, 0.35)}`,
             }}
           >
             <MagnifyingGlassIcon size={20} color={colors.white} />
@@ -313,7 +314,7 @@ export default function ShowtimeHub({
 
         {otherProviders.length > 0 ? (
           <View className="mt-2.5 flex-row items-center gap-2 px-1">
-            <Text className="text-[11px] font-brandMedium text-zinc-500">
+            <Text className="text-[11px] font-brandMedium text-faint-foreground">
               Also on:
             </Text>
             <View className="flex-row flex-wrap items-center gap-1.5">
@@ -327,7 +328,7 @@ export default function ShowtimeHub({
                   }
                   className="rounded-[6px] border border-white/[0.08] bg-white/[0.06] px-2 py-[3px]"
                 >
-                  <Text className="text-[11px] font-brandSemiBold text-zinc-300">
+                  <Text className="text-[11px] font-brandSemiBold text-foreground">
                     {prov.name}
                   </Text>
                 </Pressable>
@@ -349,7 +350,7 @@ export default function ShowtimeHub({
               {runtimeFormatted ? `${runtimeFormatted}` : "Runtime TBA"}
               {estimatedEndTime ? ` · Finishes ~${estimatedEndTime}` : ""}
             </Text>
-            <Text className="mt-px text-[11px] text-zinc-500">
+            <Text className="mt-px text-[11px] text-faint-foreground">
               Tonight&apos;s Feature Schedule
             </Text>
           </View>
@@ -396,21 +397,21 @@ export default function ShowtimeHub({
                   Verdict Recorded
                 </Text>
               </View>
-              <Text className="text-[12px] leading-[17px] text-zinc-500">
+              <Text className="text-[12px] leading-[17px] text-faint-foreground">
                 Saved to your Journal and added to your Taste DNA.
               </Text>
             </View>
           ) : (
             <>
-              <Text className="mb-3.5 text-[13px] leading-[19px] text-zinc-400">
+              <Text className="mb-3.5 text-[13px] leading-[19px] text-subtle-foreground">
                 When the credits roll, rate tonight&apos;s feature to close the
                 session and calibrate tomorrow&apos;s reel.
               </Text>
               <Pressable
                 onPress={() => setShowVerdictModal(true)}
-                className="h-[46px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-amber-500 active:opacity-90 active:scale-[0.99]"
+                className="h-[46px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-gold active:opacity-90 active:scale-[0.99]"
                 style={{
-                  boxShadow: "0px 4px 8.0px rgba(245, 158, 11, 0.3)",
+                  boxShadow: `0px 4px 8.0px ${withAlpha(colors.gold, 0.3)}`,
                 }}
               >
                 <StarIcon
@@ -430,7 +431,7 @@ export default function ShowtimeHub({
             size={14}
             color={colors.faintForeground}
           />
-          <Text className="text-[12px] text-zinc-500">
+          <Text className="text-[12px] text-faint-foreground">
             Next daily reel drops in {countdown}
           </Text>
         </View>
@@ -439,7 +440,7 @@ export default function ShowtimeHub({
           onPress={() => onOpenDetails(movie)}
           className="mt-[18px] px-3 py-1.5"
         >
-          <Text className="text-[12px] text-zinc-500 underline">
+          <Text className="text-[12px] text-faint-foreground underline">
             View full film synopsis &amp; cast &rarr;
           </Text>
         </Pressable>

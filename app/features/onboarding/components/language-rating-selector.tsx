@@ -70,7 +70,7 @@ export default function LanguageRatingSelector({
           <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-white">
             Movie Languages
           </Text>
-          <Text className="mb-1.5 text-[13px] text-zinc-500 font-brand">
+          <Text className="mb-1.5 text-[13px] text-faint-foreground font-brand">
             Select the audio languages you enjoy watching
           </Text>
 
@@ -88,7 +88,7 @@ export default function LanguageRatingSelector({
                     "flex-row items-center rounded-[20px] border-[1.5px] px-3.5 py-2.5",
                     isSelected
                       ? "border-primary bg-brand-surface"
-                      : "border-zinc-800 bg-zinc-900",
+                      : "border-border bg-card",
                   )}
                 >
                   <Text
@@ -96,7 +96,7 @@ export default function LanguageRatingSelector({
                       "text-[13px]",
                       isSelected
                         ? "text-white font-brandBold"
-                        : "text-zinc-300 font-brandSemiBold",
+                        : "text-foreground font-brandSemiBold",
                     )}
                   >
                     {lang.english_name}
@@ -120,7 +120,7 @@ export default function LanguageRatingSelector({
           <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-white">
             Minimum Quality
           </Text>
-          <Text className="mb-1.5 text-[13px] text-zinc-500 font-brand">
+          <Text className="mb-1.5 text-[13px] text-faint-foreground font-brand">
             Filter out low-rated films on IMDb
           </Text>
 
@@ -138,13 +138,13 @@ accessibilityLabel={"{preset.label}"}
                     "w-[48%] rounded-lg border-[1.5px] p-3.5",
                     isSelected
                       ? "border-primary bg-brand-surface"
-                      : "border-zinc-800 bg-zinc-900",
+                      : "border-border bg-card",
                   )}
                 >
                   <Text
                     className={cn(
                       "mb-1 text-[15px] font-brandExtraBold",
-                      isSelected ? "text-white" : "text-zinc-100",
+                      isSelected ? "text-white" : "text-foreground",
                     )}
                   >
                     {preset.label}
@@ -152,7 +152,7 @@ accessibilityLabel={"{preset.label}"}
                   <Text
                     className={cn(
                       "text-[12px] font-brand",
-                      isSelected ? "text-red-300" : "text-zinc-500",
+                      isSelected ? "text-red-300" : "text-faint-foreground",
                     )}
                   >
                     {preset.desc}
@@ -165,9 +165,9 @@ accessibilityLabel={"{preset.label}"}
       </ScrollView>
 
       {/* Floating Bottom Bar */}
-      <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
+      <View className="mt-auto gap-3 border-t border-hairline/10 pt-4">
         <View className="items-center">
-          <Text className="font-brandSemiBold text-body-sm text-zinc-400">
+          <Text className="font-brandSemiBold text-body-sm text-subtle-foreground">
             {`${selectedLangs.length} ${
               selectedLangs.length === 1 ? "language" : "languages"
             } · ${rating > 0 ? `${rating.toFixed(1)}+ rating` : "Any rating"}`}

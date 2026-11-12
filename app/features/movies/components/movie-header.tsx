@@ -6,6 +6,7 @@ import { FilmStripIcon, PlayIcon } from "phosphor-react-native";
 import { tmdbImage } from "../constants/images";
 import type { Movie } from "../types/movies.type";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 interface MovieHeaderProps {
   movie: Movie;
@@ -39,7 +40,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
         <View className="absolute inset-0 bg-surface-5" />
       )}
       <LinearGradient
-        colors={["transparent", "rgba(20, 20, 20, 0.65)", colors.surface2]}
+        colors={["transparent", withAlpha(colors.card, 0.65), colors.background]}
         locations={[0, 0.6, 1]}
         style={StyleSheetAbsoluteFill}
         pointerEvents="none"
@@ -54,7 +55,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
                   key={genre}
                   className="rounded-[6px] border border-white/[0.12] bg-white/[0.08] px-2 py-[3px]"
                 >
-                  <Text className="text-[10px] tracking-[0.3px] font-brandBold text-zinc-200">
+                  <Text className="text-[10px] tracking-[0.3px] font-brandBold text-foreground">
                     {genre}
                   </Text>
                 </View>
@@ -68,15 +69,15 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
 
           <View className="mb-2.5 flex-row flex-nowrap items-center">
             {year ? (
-              <Text className="text-[13px] font-brandSemiBold text-zinc-300">
+              <Text className="text-[13px] font-brandSemiBold text-foreground">
                 {year}
               </Text>
             ) : null}
             {year && movie.director ? (
-              <Text className="mx-1.5 text-[13px] text-zinc-500">•</Text>
+              <Text className="mx-1.5 text-[13px] text-faint-foreground">•</Text>
             ) : null}
             {movie.director ? (
-              <Text className="shrink text-[13px] font-brandMedium text-zinc-400" numberOfLines={1}>
+              <Text className="shrink text-[13px] font-brandMedium text-subtle-foreground" numberOfLines={1}>
                 Dir. {movie.director}
               </Text>
             ) : null}
@@ -107,7 +108,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
           />
         ) : (
           <View className="h-36 w-24 items-center justify-center rounded-[8px] border border-white/[0.2] bg-surface-6">
-            <FilmStripIcon size={32} color="#666" />
+            <FilmStripIcon size={32} color={colors.faintForeground} />
           </View>
         )}
       </View>
@@ -128,5 +129,5 @@ const PosterStyle = {
   height: 144,
   borderRadius: 8,
   borderWidth: 1,
-  borderColor: "rgba(255, 255, 255, 0.2)",
+  borderColor: withAlpha(colors.white, 0.2),
 };

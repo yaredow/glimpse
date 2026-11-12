@@ -71,7 +71,7 @@ export default function MovieDetail() {
 
   if (isPending) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-surface-2">
+      <View className="flex-1 items-center justify-center gap-4 bg-background">
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -79,8 +79,8 @@ export default function MovieDetail() {
 
   if (isError) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-surface-2">
-        <Text className="text-[16px] text-white">Couldn&apos;t load movie</Text>
+      <View className="flex-1 items-center justify-center gap-4 bg-background">
+        <Text className="text-[16px] text-foreground">Couldn&apos;t load movie</Text>
         <Pressable
           onPress={() => refetch()}
           accessibilityRole="button"
@@ -96,14 +96,14 @@ export default function MovieDetail() {
 
   if (!movie) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-surface-2">
-        <Text className="text-[16px] text-white">Movie not found</Text>
+      <View className="flex-1 items-center justify-center gap-4 bg-background">
+        <Text className="text-[16px] text-foreground">Movie not found</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-surface-2">
+    <View className="flex-1 bg-background">
       <Animated.View
         style={[
           {
@@ -119,7 +119,7 @@ export default function MovieDetail() {
             zIndex: 10,
             height: 90,
           },
-          { paddingTop: insets.top, backgroundColor: colors.surface2 },
+          { paddingTop: insets.top, backgroundColor: colors.background },
           headerAnimatedStyle,
         ]}
         pointerEvents="box-none"
@@ -148,12 +148,12 @@ export default function MovieDetail() {
       >
         <Pressable
           onPress={() => router.back()}
-          className="h-[38px] w-[38px] items-center justify-center rounded-full border border-white/[0.15] bg-black/55"
+          className="h-[38px] w-[38px] items-center justify-center rounded-full border border-hairline/15 bg-black/55"
           accessibilityRole="button"
           accessibilityLabel="Go back"
           hitSlop={6}
         >
-          <ArrowLeftIcon size={24} color="white" />
+          <ArrowLeftIcon size={24} color={colors.white} />
         </Pressable>
       </Animated.View>
 
@@ -195,7 +195,7 @@ export default function MovieDetail() {
                   <Text className="text-[12px] font-brandBold text-primary">
                     SYNOPSIS
                   </Text>
-                  <Text className="text-[14px] leading-5 text-zinc-100">
+                  <Text className="text-[14px] leading-5 text-foreground">
                     {movie.full_synopsis}
                   </Text>
                 </View>
@@ -205,7 +205,7 @@ export default function MovieDetail() {
                   <Text className="text-[12px] font-brandBold text-primary">
                     ORIGINAL TITLE
                   </Text>
-                  <Text className="text-[14px] leading-5 text-zinc-100">
+                  <Text className="text-[14px] leading-5 text-foreground">
                     {movie.original_title}
                   </Text>
                 </View>
@@ -215,7 +215,7 @@ export default function MovieDetail() {
                   <Text className="text-[12px] font-brandBold text-primary">
                     TAGLINE
                   </Text>
-                  <Text className="text-[14px] leading-5 text-zinc-100">
+                  <Text className="text-[14px] leading-5 text-foreground">
                     {movie.tagline}
                   </Text>
                 </View>
@@ -225,7 +225,7 @@ export default function MovieDetail() {
                   <Text className="text-[12px] font-brandBold text-primary">
                     LANGUAGES
                   </Text>
-                  <Text className="text-[14px] leading-5 text-zinc-100">
+                  <Text className="text-[14px] leading-5 text-foreground">
                     {movie.spoken_languages.join(", ")}
                   </Text>
                 </View>
@@ -236,7 +236,7 @@ export default function MovieDetail() {
                   <Text className="text-[12px] font-brandBold text-primary">
                     COUNTRIES
                   </Text>
-                  <Text className="text-[14px] leading-5 text-zinc-100">
+                  <Text className="text-[14px] leading-5 text-foreground">
                     {movie.production_countries.join(", ")}
                   </Text>
                 </View>
@@ -246,7 +246,7 @@ export default function MovieDetail() {
                   <Text className="text-[12px] font-brandBold text-primary">
                     COMMUNITY CONSENSUS
                   </Text>
-                  <Text className="text-[14px] leading-5 text-zinc-100">
+                  <Text className="text-[14px] leading-5 text-foreground">
                     {movie.vote_average.toFixed(1)} / 10 (
                     {movie.vote_count.toLocaleString()} registered ratings)
                   </Text>

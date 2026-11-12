@@ -21,6 +21,7 @@ import {
   AuthTextLink,
 } from "@/features/auth/components/auth-actions";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 export default function ResetPassword() {
   const { token: tokenParam, email } = useLocalSearchParams<{
@@ -79,18 +80,18 @@ export default function ResetPassword() {
               height: 80,
               borderRadius: 40,
               borderWidth: 1,
-              borderColor: "rgba(16, 185, 129, 0.3)",
-              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              borderColor: withAlpha(colors.success, 0.3),
+              backgroundColor: withAlpha(colors.success, 0.1),
               alignItems: "center",
               justifyContent: "center",
               marginTop: 8,
               marginBottom: 8,
-              boxShadow: "0px 8px 16.0px rgba(2, 44, 34, 0.4)",
+              boxShadow: `0px 8px 16.0px ${withAlpha(colors.successContainer, 0.4)}`,
             }}
           >
             <CheckCircleIcon size={40} color={colors.success} weight="fill" />
           </Animated.View>
-          <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
+          <Text className="text-subtle-foreground text-xs leading-5 text-center px-4">
             Sign in with your new password to get back to your nightly five.
           </Text>
           <AuthPrimaryButton

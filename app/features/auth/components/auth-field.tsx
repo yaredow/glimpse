@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 type InputRef = React.ComponentRef<typeof TextInput>;
 
@@ -120,18 +121,18 @@ export default function AuthField({
 
   const animatedInputStyle = useAnimatedStyle(() => {
     const defaultBorder = error
-      ? "rgba(239, 68, 68, 0.7)"
-      : "rgba(255, 255, 255, 0.08)";
+      ? withAlpha(colors.destructive, 0.7)
+      : withAlpha(colors.white, 0.08);
     const focusedBorder = error
-      ? "rgba(239, 68, 68, 1)"
-      : "rgba(229, 9, 20, 0.65)";
+      ? colors.destructive
+      : withAlpha(colors.primary, 0.65);
 
     const defaultBg = error
-      ? "rgba(59, 7, 10, 0.35)"
-      : "rgba(22, 22, 24, 0.65)";
+      ? withAlpha(colors.errorContainer, 0.35)
+      : withAlpha(colors.card, 0.65);
     const focusedBg = error
-      ? "rgba(59, 7, 10, 0.55)"
-      : "rgba(22, 22, 24, 0.95)";
+      ? withAlpha(colors.errorContainer, 0.55)
+      : withAlpha(colors.card, 0.95);
 
     const borderColor = interpolateColor(
       focusAnim.value,
@@ -148,7 +149,7 @@ export default function AuthField({
     const shadowColor = interpolateColor(
       focusAnim.value,
       [0, 1],
-      ["rgba(0, 0, 0, 0)", error ? "#EF4444" : "#E50914"],
+      ["rgba(0, 0, 0, 0)", error ? colors.destructive : colors.primary],
     );
 
     return {
@@ -165,7 +166,7 @@ export default function AuthField({
       return icon;
     }
 
-    const iconColor = focused ? "#FFFFFF" : "#71717A";
+    const iconColor = focused ? colors.white : colors.faintForeground;
     const iconSize = 20;
 
     switch (icon) {
@@ -189,7 +190,7 @@ export default function AuthField({
 
   return (
     <View className={cn("mb-4", className)}>
-      <Label className="mb-2 px-0.5 text-zinc-300 text-xs font-brandSemiBold tracking-wide">
+      <Label className="mb-2 px-0.5 text-foreground text-xs font-brandSemiBold tracking-wide">
         {label}
       </Label>
 
@@ -270,7 +271,7 @@ export default function AuthField({
       ) : null}
 
       {hint && !error ? (
-        <Text className="mt-1.5 px-1 text-[11px] leading-4 text-zinc-500">
+        <Text className="mt-1.5 px-1 text-[11px] leading-4 text-faint-foreground">
           {hint}
         </Text>
       ) : null}

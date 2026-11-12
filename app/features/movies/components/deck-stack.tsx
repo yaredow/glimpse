@@ -253,7 +253,7 @@ export default function DeckStack({
         style={{ width: cardWidth, marginBottom: 8 }}
       >
         <View className="rounded-[8px] border border-white/[0.08] bg-surface-5 px-3 py-[5px]">
-          <Text className="text-[10.5px] tracking-[1.1px] font-brandBold text-zinc-400">
+          <Text className="text-[10.5px] tracking-[1.1px] font-brandBold text-subtle-foreground">
             {isDeckCompleted
               ? "ALL REELS RESOLVED"
               : `REEL ${String(Math.min(activeIndex + 1, movies.length)).padStart(2, "0")} OF ${String(movies.length).padStart(2, "0")}`}
@@ -291,12 +291,12 @@ export default function DeckStack({
               </Text>
             </Pressable>
           ) : (
-            <View className="flex-row items-center gap-1.5 rounded-[8px] border border-white/[0.08] bg-surface-4 px-2.5 py-[5px] opacity-55">
+            <View className="flex-row items-center gap-1.5 rounded-[8px] border border-white/[0.08] bg-card px-2.5 py-[5px] opacity-55">
               <DiceFiveIcon
                 size={14}
                 color={colors.faintForeground}
               />
-              <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-zinc-500">
+              <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-faint-foreground">
                 Dealer&apos;s Pick Active
               </Text>
             </View>
@@ -310,7 +310,7 @@ export default function DeckStack({
       >
         {isDeckCompleted ? (
           <View
-            className="absolute top-0 items-center justify-center rounded-[24px] border border-white/[0.08] bg-surface-4 p-6"
+            className="absolute top-0 items-center justify-center rounded-[24px] border border-white/[0.08] bg-card p-6"
             style={{
               width: cardWidth,
               height: cardHeight,
@@ -325,7 +325,7 @@ export default function DeckStack({
             <Text className="mb-2 text-center text-[20px] font-brandBold text-white">
               {closedContent.title}
             </Text>
-            <Text className="px-2.5 text-center text-[14px] leading-5 font-brand text-zinc-400">
+            <Text className="px-2.5 text-center text-[14px] leading-5 font-brand text-subtle-foreground">
               {closedContent.subtitle}
             </Text>
             {onReshuffle && closedContent.canReshuffle && closedContent.buttonText ? (
@@ -456,7 +456,7 @@ export default function DeckStack({
                 size={18}
                 color={colors.faintForeground}
               />
-              <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+              <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                 Pass
               </Text>
             </Pressable>

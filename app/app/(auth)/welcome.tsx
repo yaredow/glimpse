@@ -47,7 +47,7 @@ export default function WelcomeScreen() {
               <Text className="mb-1.5 text-center text-[23px] leading-[29px] tracking-[-0.4px] font-brandBold text-white">
                 Escape the infinite scroll.
               </Text>
-              <Text className="max-w-[320px] text-center text-[13.5px] leading-5 text-zinc-400">
+              <Text className="max-w-[320px] text-center text-[13.5px] leading-5 text-subtle-foreground">
                 Five handpicked films every night, calibrated precisely to your
                 taste.
               </Text>
@@ -64,7 +64,7 @@ export default function WelcomeScreen() {
               />
 
               <View className="flex-row items-center justify-center gap-1.5">
-                <Text className="text-[13px] font-brand text-zinc-500">
+                <Text className="text-[13px] font-brand text-faint-foreground">
                   Already have an account?
                 </Text>
                 <AuthTextLink label="Sign in" href="/(auth)/login" />
@@ -81,7 +81,7 @@ export default function WelcomeScreen() {
                 justifyContent: "center",
               }}
             >
-              <Text className="text-center text-[9.5px] tracking-[1.2px] font-brandMedium text-zinc-600 uppercase">
+              <Text className="text-center text-[9.5px] tracking-[1.2px] font-brandMedium text-faint-foreground uppercase">
                 A QUIETER WAY TO CHOOSE WHAT TO WATCH.
               </Text>
             </Animated.View>

@@ -27,13 +27,13 @@ export default function CuratorPitchCard({ movie }: CuratorPitchCardProps) {
           CURATOR&apos;S TAKE
         </Text>
         <View className="rounded-[6px] bg-white/[0.06] px-2 py-0.5">
-          <Text className="text-[9px] tracking-[0.6px] font-brandSemiBold text-zinc-400">
+          <Text className="text-[9px] tracking-[0.6px] font-brandSemiBold text-subtle-foreground">
             TONIGHT&apos;S REEL
           </Text>
         </View>
       </View>
 
-      <Text className="text-[14px] leading-[21px] italic text-off-white">
+      <Text className="text-[14px] leading-[21px] italic text-foreground">
         &ldquo;{pitch}&rdquo;
       </Text>
 
@@ -43,7 +43,7 @@ export default function CuratorPitchCard({ movie }: CuratorPitchCardProps) {
             size={12}
             color={colors.subtleForeground}
           />
-          <Text className="flex-1 text-[12px] text-zinc-400">{rationale}</Text>
+          <Text className="flex-1 text-[12px] text-subtle-foreground">{rationale}</Text>
         </View>
       ) : null}
     </View>
