@@ -59,17 +59,6 @@
     --error-container: 356.5 78.8% 12.9%;
     --error-container-foreground: 0 93.5% 81.8%;
 
-    /* ---- Deprecated aliases (deleted in TL-5) ---- */
-    --surface-obsidian: 0 0% 7.1%;
-    --surface-charcoal: 0 0% 7.8%;
-    --surface-zinc-900: 0 0% 9.4%;
-    --surface-zinc-850: 0 0% 11.8%;
-    --surface-zinc-800: 0 0% 14.1%;
-    --surface-zinc-750: 0 0% 16.5%;
-    --surface-zinc-700: 0 0% 20.0%;
-    --surface-brand: 352.5 33.3% 9.4%;
-    --surface-danger: 353.3 39.1% 9%;
-
     --radius: 0.75rem;
   }
 }

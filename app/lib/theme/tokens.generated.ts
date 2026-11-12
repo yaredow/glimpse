@@ -42,15 +42,6 @@ export const colors = {
   successContainer: "#06281E",
   errorContainer: "#3B070A",
   errorContainerForeground: "#FCA5A5",
-  surfaceObsidian: "#121212",
-  surfaceCharcoal: "#141414",
-  surfaceZinc900: "#181818",
-  surfaceZinc850: "#1E1E1E",
-  surfaceZinc800: "#242424",
-  surfaceZinc750: "#2A2A2A",
-  surfaceZinc700: "#333333",
-  surfaceBrand: "#201012",
-  surfaceDanger: "#200E10",
 } as const;
 
 export type ColorToken = keyof typeof colors;

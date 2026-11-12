@@ -64,17 +64,6 @@ module.exports = {
         "success-container": "hsl(var(--success-container))",
         "error-container": "hsl(var(--error-container))",
         "error-container-foreground": "hsl(var(--error-container-foreground))",
-
-        /* Deprecated aliases (deleted in TL-5) */
-        "surface-obsidian": "hsl(var(--surface-obsidian))",
-        "surface-charcoal": "hsl(var(--surface-charcoal))",
-        "surface-zinc-900": "hsl(var(--surface-zinc-900))",
-        "surface-zinc-850": "hsl(var(--surface-zinc-850))",
-        "surface-zinc-800": "hsl(var(--surface-zinc-800))",
-        "surface-zinc-750": "hsl(var(--surface-zinc-750))",
-        "surface-zinc-700": "hsl(var(--surface-zinc-700))",
-        "surface-brand": "hsl(var(--surface-brand))",
-        "surface-danger": "hsl(var(--surface-danger))",
       },
       fontFamily: {
         brand: ["PlusJakartaSans_400Regular"],

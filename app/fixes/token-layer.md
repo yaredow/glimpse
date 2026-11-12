@@ -244,12 +244,12 @@ Rename the token fragment and keep prefix/opacity suffix:
 
 ### TL-5 · Contract: delete the legacy layer
 
-- [ ] Delete `lib/theme/palette.json`.
-- [ ] Delete `themeColors`, `palette`, `glimpseDarkTheme`, `AppThemeContext`, `useAppTheme`, `netflixTheme`.
-- [ ] Reduce `lib/theme/index.ts` to surviving exports only.
-- [ ] Delete `scripts/check-tokens.mjs`.
-- [ ] Remove deprecated aliases from `global.css` and `tailwind.config.js`.
-- [ ] **Do not delete** `themeFonts` / `typeClasses` / `fonts`; `typography.md` owns them.
+- [x] Delete `lib/theme/palette.json`.
+- [x] Delete `themeColors`, `palette`, `glimpseDarkTheme`, `AppThemeContext`, `useAppTheme`, `netflixTheme`.
+- [x] Reduce `lib/theme/index.ts` to surviving exports only.
+- [x] Delete `scripts/check-tokens.mjs`.
+- [x] Remove deprecated aliases from `global.css` and `tailwind.config.js`.
+- [x] **Do not delete** `themeFonts` / `typeClasses` / `fonts`; `typography.md` owns them.
 
 **Gate:** legacy-symbol grep is empty; `tsc`, `eslint`, `tokens:check`, `check-classnames` pass.
 
