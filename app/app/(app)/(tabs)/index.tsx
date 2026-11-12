@@ -1,9 +1,7 @@
 import { useCallback, useMemo, useState, type ComponentProps } from "react";
 import {
-  Pressable,
-  Text,
-  View,
-} from "react-native";
+  Pressable, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";

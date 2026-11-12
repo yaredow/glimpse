@@ -8,6 +8,7 @@ import {
   PlusJakartaSans_700Bold,
   PlusJakartaSans_800ExtraBold,
 } from "@expo-google-fonts/plus-jakarta-sans";
+import fontFamilies from "@/lib/theme/fonts.json";
 import { Stack, router, useSegments, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -33,11 +34,11 @@ export default function RootLayout() {
   const { isAuthenticated, isRestoring, hasAuthenticated, restoreToken } =
     useAuthStore();
   const [loaded, error] = useFonts({
-    PlusJakartaSans_400Regular,
-    PlusJakartaSans_500Medium,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
+    [fontFamilies.regular]: PlusJakartaSans_400Regular,
+    [fontFamilies.medium]: PlusJakartaSans_500Medium,
+    [fontFamilies.semiBold]: PlusJakartaSans_600SemiBold,
+    [fontFamilies.bold]: PlusJakartaSans_700Bold,
+    [fontFamilies.extraBold]: PlusJakartaSans_800ExtraBold,
   });
 
   useEffect(() => {

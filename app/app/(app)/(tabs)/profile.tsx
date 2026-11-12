@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
-  Text,
   View,
   Pressable,
 } from "react-native";
@@ -19,7 +18,7 @@ import {
 } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { Button } from "@/components/ui/button";
-import { Text as AppText } from "@/components/ui/text";
+import { Text } from "@/components/ui/text";
 import { useProfile } from "@/features/profile/hooks/use-profile";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
 import { useLogout } from "@/features/auth/hooks/mutations/use-logout";
@@ -310,9 +309,9 @@ export default function Profile() {
               {logoutPending ? (
                 <ActivityIndicator size="small" color={colors.white} />
               ) : null}
-              <AppText className="text-[13px] tracking-[0.8px] font-brandBold text-white">
+              <Text className="text-[13px] tracking-[0.8px] font-brandBold text-white">
                 SIGN OUT
-              </AppText>
+              </Text>
             </View>
           </Button>
         </View>

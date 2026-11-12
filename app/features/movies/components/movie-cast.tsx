@@ -1,4 +1,5 @@
-import { FlatList, Text, View } from "react-native";
+import { FlatList, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import PersonCard from "./person-card";
 import type { CastMember } from "../types/movies.type";
 

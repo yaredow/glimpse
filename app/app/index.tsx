@@ -1,4 +1,5 @@
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
+import { Text } from "@/components/ui/text";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
 import { colors } from "@/lib/theme/tokens.generated";

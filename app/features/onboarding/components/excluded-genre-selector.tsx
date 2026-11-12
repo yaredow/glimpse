@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { ScrollView, Text, View, Pressable } from "react-native";
+import { ScrollView, View, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
-import { typeClasses } from "@/lib/theme/typography";
 import { cn } from "@/lib/utils";
 import { XCircleIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
@@ -75,11 +75,10 @@ export default function ExcludedGenreSelector({
               />
               <Text
                 className={cn(
-                  typeClasses.default,
-                  "text-[14px] font-semibold",
+                  "text-[14px]",
                   isExcluded
-                    ? "text-red-300 font-bold line-through"
-                    : "text-zinc-300",
+                    ? "text-red-300 font-brandBold line-through"
+                    : "text-zinc-300 font-brandSemiBold",
                 )}
               >
                 {genre.name}
@@ -100,9 +99,7 @@ export default function ExcludedGenreSelector({
       {/* Floating Bottom Action Area */}
       <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
         <View className="items-center">
-          <Text
-            className={cn(typeClasses.bodySmall, "text-zinc-400 font-semibold")}
-          >
+          <Text className="font-brandSemiBold text-body-sm text-zinc-400">
             {selected.length > 0
               ? `${selected.length} ${
                   selected.length === 1 ? "genre" : "genres"

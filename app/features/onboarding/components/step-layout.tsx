@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
+import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { ArrowLeftIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
-import { typeClasses } from "@/lib/theme/typography";
 import { cn } from "@/lib/utils";
 import BrandLockup from "@/features/auth/components/brand-lockup";
 import { colors } from "@/lib/theme/tokens.generated";
@@ -70,12 +70,7 @@ export default function StepLayout({
           })}
         </View>
 
-        <Text
-          className={cn(
-            typeClasses.labelSmall,
-            "text-zinc-400 text-[12px] font-bold tracking-[1px] min-w-[28px] text-right",
-          )}
-        >
+        <Text className="font-brandBold text-[12px] leading-4 tracking-[1px] text-zinc-400 min-w-[28px] text-right">
           {step + 1}/{totalSteps}
         </Text>
       </View>
@@ -84,21 +79,11 @@ export default function StepLayout({
       <View className="mt-3 mb-5">
         <BrandLockup variant="compact" />
 
-        <Text
-          className={cn(
-            typeClasses.headlineMedium,
-            "text-[24px] leading-[30px] tracking-[-0.5px] text-white",
-          )}
-        >
+        <Text className="font-brandBold text-[24px] leading-[30px] tracking-[-0.5px] text-white">
           {title}
         </Text>
         {subtitle ? (
-          <Text
-            className={cn(
-              typeClasses.bodyMedium,
-              "mt-1.5 text-[15px] leading-[22px] text-zinc-400",
-            )}
-          >
+          <Text className="font-brand mt-1.5 text-[15px] leading-[22px] tracking-[0.25px] text-zinc-400">
             {subtitle}
           </Text>
         ) : null}

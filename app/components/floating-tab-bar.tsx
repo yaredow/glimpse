@@ -2,10 +2,10 @@ import {
   LayoutAnimation,
   Platform,
   Pressable,
-  Text,
   UIManager,
   View,
 } from "react-native";
+import { Text } from "@/components/ui/text";
 import type { BottomTabBarProps } from "expo-router/tabs";
 import * as Haptics from "expo-haptics";
 import {

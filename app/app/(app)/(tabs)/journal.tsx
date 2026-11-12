@@ -1,12 +1,7 @@
 import { useMemo, useState } from "react";
 import {
-  FlatList,
-  Pressable,
-  RefreshControl,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+  FlatList, Pressable, RefreshControl, View, useWindowDimensions } from "react-native";
+import { Text } from "@/components/ui/text";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";

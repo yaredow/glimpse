@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { StyleProp, Text, TextStyle, View, ViewStyle } from "react-native";
+import { StyleProp, TextStyle, View, ViewStyle } from "react-native";
+import { Text } from "@/components/ui/text";
 import { ApertureIcon } from "phosphor-react-native";
 import { colors } from "@/lib/theme/tokens.generated";
 

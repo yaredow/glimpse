@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const fontFamilies = require("./lib/theme/fonts.json");
+
 module.exports = {
   content: [
     "./app/**/*.{js,jsx,ts,tsx}",
@@ -66,11 +68,22 @@ module.exports = {
         "error-container-foreground": "hsl(var(--error-container-foreground))",
       },
       fontFamily: {
-        brand: ["PlusJakartaSans_400Regular"],
-        brandMedium: ["PlusJakartaSans_500Medium"],
-        brandSemiBold: ["PlusJakartaSans_600SemiBold"],
-        brandBold: ["PlusJakartaSans_700Bold"],
-        brandExtraBold: ["PlusJakartaSans_800ExtraBold"],
+        brand: [fontFamilies.regular],
+        brandMedium: [fontFamilies.medium],
+        brandSemiBold: [fontFamilies.semiBold],
+        brandBold: [fontFamilies.bold],
+        brandExtraBold: [fontFamilies.extraBold],
+      },
+      fontSize: {
+        "label-sm": ["11px", { lineHeight: "16px", letterSpacing: "0.5px" }],
+        label: ["14px", { lineHeight: "20px", letterSpacing: "0.1px" }],
+        "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.4px" }],
+        body: ["14px", { lineHeight: "20px", letterSpacing: "0.25px" }],
+        "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "0.5px" }],
+        title: ["16px", { lineHeight: "24px", letterSpacing: "0.15px" }],
+        "title-lg": ["22px", { lineHeight: "28px", letterSpacing: "0" }],
+        headline: ["28px", { lineHeight: "36px", letterSpacing: "0" }],
+        display: ["57px", { lineHeight: "64px", letterSpacing: "0" }],
       },
       borderRadius: {
         sm: "calc(var(--radius) - 4px)",

@@ -1,11 +1,7 @@
 import { useState, useMemo } from "react";
 import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
+  View, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { Text } from "@/components/ui/text";
 import {
   XIcon,
   StarIcon,

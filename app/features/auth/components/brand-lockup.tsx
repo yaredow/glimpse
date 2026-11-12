@@ -2,6 +2,7 @@ import { View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { ApertureIcon } from "phosphor-react-native";
 import { Text } from "@/components/ui/text";
+import fontFamilies from "@/lib/theme/fonts.json";
 import { colors } from "@/lib/theme/tokens.generated";
 
 interface BrandLockupProps {
@@ -65,7 +66,7 @@ export default function BrandLockup({
       <Animated.Text
         entering={stagger ? FadeIn.delay(450).duration(400) : undefined}
         style={{
-          fontFamily: "PlusJakartaSans_600SemiBold",
+          fontFamily: fontFamilies.semiBold,
           fontSize: 10,
           lineHeight: 14,
           letterSpacing: 2.8,

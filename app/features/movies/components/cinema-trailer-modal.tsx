@@ -1,12 +1,7 @@
 import { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+  ActivityIndicator, Modal, Pressable, View, useWindowDimensions } from "react-native";
+import { Text } from "@/components/ui/text";
 import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import * as Haptics from "expo-haptics";
