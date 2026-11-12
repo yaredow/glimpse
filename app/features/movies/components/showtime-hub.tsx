@@ -451,7 +451,8 @@ export default function ShowtimeHub({
           onPress={() => onOpenDetails(movie)}
           accessibilityRole="button"
           accessibilityLabel="View full film synopsis and cast"
-          className="mt-4 min-h-[44px] justify-center px-3 py-1.5"
+          hitSlop={8}
+          className="mt-1 min-h-[36px] justify-center px-3 py-0.5"
         >
           <Text className="text-[12px] text-faint-foreground underline">
             View full film synopsis &amp; cast &rarr;
