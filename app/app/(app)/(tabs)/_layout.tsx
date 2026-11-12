@@ -7,11 +7,6 @@ export default function TabsLayout() {
       tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          position: "absolute",
-          backgroundColor: "transparent",
-          borderTopWidth: 0,
-        },
       }}
     >
       <Tabs.Screen

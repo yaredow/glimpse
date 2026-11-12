@@ -19,10 +19,12 @@ function NativeOnlyAnimatedView(
   if (Platform.OS === 'web') {
     return <>{props.children as React.ReactNode}</>;
   } else {
-    if (props.as === "Pressable"){
-      return <AnimatedPressable {...props} />;
+    if (props.as === "Pressable") {
+      const { as: _as, ...rest } = props;
+      return <AnimatedPressable {...rest} />;
     }
-    return <Animated.View {...props} />;
+    const { as: _as, ...rest } = props;
+    return <Animated.View {...rest} />;
   }
 }
 

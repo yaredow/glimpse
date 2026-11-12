@@ -116,13 +116,13 @@ Targets are locked in `README.md` §1.1. This is the only phase allowed to chang
 
 ### VA-4 · Component and layout fixes
 
-- [ ] `components/ui/native-only-animated-view.tsx`: strip `as` before spreading props into `Animated.View` / `AnimatedPressable`.
-- [ ] `components/ui/dialog.tsx`: remove `max-w-[calc(100%-2rem)]`; callers set `w-[92%] max-w-[380px]`.
-- [ ] `app/(app)/(tabs)/_layout.tsx`: remove the dead `tabBarStyle` block.
-- [ ] `components/ui/button.tsx`: ensure the computed `disabled` value cannot be overridden by `{...props}` while `loading`.
-- [ ] Move `components/ui/glimpse-logo.tsx` to a brand location (`components/brand/glimpse-logo.tsx` or `features/brand/`) and update imports.
-- [ ] `components/floating-tab-bar.tsx`: replace `LayoutAnimation` + `UIManager` with Reanimated layout (`Layout` / `LinearTransition`) or remove the dead animation; verify on the New Architecture.
-- [ ] `lib/theme/toast-config.tsx`: finish the Phosphor migration.
+- [x] `components/ui/native-only-animated-view.tsx`: strip `as` before spreading props into `Animated.View` / `AnimatedPressable`.
+- [x] `components/ui/dialog.tsx`: remove `max-w-[calc(100%-2rem)]`; callers set `w-[92%] max-w-[380px]`.
+- [x] `app/(app)/(tabs)/_layout.tsx`: remove the dead `tabBarStyle` block.
+- [x] `components/ui/button.tsx`: ensure the computed `disabled` value cannot be overridden by `{...props}` while `loading`.
+- [x] Move `components/ui/glimpse-logo.tsx` to a brand location (`components/brand/glimpse-logo.tsx` or `features/brand/`) and update imports.
+- [x] `components/floating-tab-bar.tsx`: replace `LayoutAnimation` + `UIManager` with Reanimated layout (`Layout` / `LinearTransition`) or remove the dead animation; verify on the New Architecture.
+- [x] `lib/theme/toast-config.tsx`: finish the Phosphor migration.
 
 **Gate:** `tsc`, `eslint`, device smoke test; tab bar animation behaves.
 

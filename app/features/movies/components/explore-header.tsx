@@ -4,7 +4,7 @@ import { LightningIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { cn } from "@/lib/utils";
 import { colors } from "@/lib/theme/tokens.generated";
-import GlimpseLogo from "@/components/ui/glimpse-logo";
+import GlimpseLogo from "@/components/brand/glimpse-logo";
 
 interface ExploreHeaderProps {
   syncsRemaining?: number;

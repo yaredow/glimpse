@@ -160,11 +160,11 @@ function Button({
   return (
     <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
       <Pressable
-        className={cn((props.disabled || loading) && 'opacity-50', buttonVariants({ variant, size }), className)}
         role="button"
+        className={cn((props.disabled || loading) && 'opacity-50', buttonVariants({ variant, size }), className)}
+        {...props}
         disabled={props.disabled || Boolean(loading)}
         onPress={handlePress}
-        {...props}
       >
         {loading ? (
           <ActivityIndicator size="small" color={colors.primaryForeground} />

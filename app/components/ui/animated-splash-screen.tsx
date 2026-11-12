@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Animated, View } from "react-native";
 import { SplashScreen } from "expo-router";
-import GlimpseLogo from "./glimpse-logo";
+import GlimpseLogo from "@/components/brand/glimpse-logo";
 import { colors } from "@/lib/theme/tokens.generated";
 
 interface AnimatedSplashScreenProps {
