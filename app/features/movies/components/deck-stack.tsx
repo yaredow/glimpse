@@ -267,10 +267,10 @@ export default function DeckStack({
     <View className="w-full items-center justify-center">
       <View
         className={cn(
-          "flex-row items-center justify-between",
+          "mb-2 flex-row items-center justify-between",
           (isDeckCompleted || !onDealersChoice) && "justify-center",
         )}
-        style={{ width: cardWidth, marginBottom: 8 }}
+        style={{ width: cardWidth }}
       >
         <View className="rounded-sm border border-white/[0.08] bg-surface-5 px-3 py-1">
           <Text className="text-[10.5px] tracking-[1.1px] font-brandBold text-subtle-foreground">
@@ -463,8 +463,8 @@ export default function DeckStack({
 
       {activeMovie && !isDeckCompleted && !isCurrentCardResolved && !activeMovie.is_dealers_choice ? (
         <View
-          className="min-h-[46px] items-center justify-center"
-          style={{ width: cardWidth, marginTop: 12 }}
+          className="mt-3 min-h-[46px] items-center justify-center"
+          style={{ width: cardWidth }}
         >
           <View className="w-full flex-row items-center gap-2">
             {/* Pass */}

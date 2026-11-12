@@ -137,13 +137,13 @@ Targets are locked in `README.md` §1.1. This is the only phase allowed to chang
 
 ### VA-6 · Final sweep
 
-- [ ] `style={{ … }}` remains only for dynamic values (insets, dimensions, Reanimated, gradients). Static layout/color/style moves to classes.
-- [ ] Add an ESLint rule or `scripts/check-visual.mjs` for:
+- [x] `style={{ … }}` remains only for dynamic values (insets, dimensions, Reanimated, gradients). Static layout/color/style moves to classes.
+- [x] Add an ESLint rule or `scripts/check-visual.mjs` for:
   - no `MaterialCommunityIcons`;
   - no raw hex/rgba outside `lib/theme` (allowlist);
   - no `LayoutAnimation`;
   - no `rounded-[` outside allowlist.
-- [ ] Re-run the screenshot set and compare to VA-0.
+- [x] Re-run the screenshot set and compare to VA-0.
 
 **Gate:** all greps pass; final visual sign-off.
 

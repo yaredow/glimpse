@@ -16,7 +16,7 @@ export default function PersonCard({ name, character, profilePath }: PersonCardP
   const imageUri = tmdbImage(profilePath, "w185");
 
   return (
-    <View className="items-center" style={{ width: width * 0.22, marginRight: 12 }}>
+    <View className="mr-3 items-center" style={{ width: width * 0.22 }}>
       <View className="h-20 w-20 overflow-hidden rounded-full border border-primary">
         {imageUri && !imageError ? (
           <Image
@@ -28,10 +28,7 @@ export default function PersonCard({ name, character, profilePath }: PersonCardP
             onError={() => setImageError(true)}
           />
         ) : (
-          <View
-            className="items-center justify-center bg-surface-8"
-            style={{ width: "100%", height: "100%" }}
-          >
+          <View className="h-full w-full items-center justify-center bg-surface-8">
             <Text className="text-[24px] font-brandBold text-white">
               {name ? name.charAt(0).toUpperCase() : "?"}
             </Text>
