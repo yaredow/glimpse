@@ -4,6 +4,7 @@
  * Example: `withAlpha("#0C0C0E", 0.15)` -> `"rgba(12, 12, 14, 0.15)"`
  */
 export function withAlpha(hex: string, alpha: number): string {
+  "worklet";
   const clean = hex.replace("#", "");
   const r = parseInt(clean.slice(0, 2), 16);
   const g = parseInt(clean.slice(2, 4), 16);

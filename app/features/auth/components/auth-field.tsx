@@ -127,21 +127,21 @@ export default function AuthField({
     prevErrorRef.current = error;
   }, [error, shakeAnim, reduceMotion]);
 
+  const defaultBorder = error
+    ? withAlpha(colors.destructive, 0.7)
+    : withAlpha(colors.white, 0.08);
+  const focusedBorder = error
+    ? colors.destructive
+    : withAlpha(colors.primary, 0.65);
+
+  const defaultBg = error
+    ? withAlpha(colors.errorContainer, 0.35)
+    : withAlpha(colors.card, 0.65);
+  const focusedBg = error
+    ? withAlpha(colors.errorContainer, 0.55)
+    : withAlpha(colors.card, 0.95);
+
   const animatedInputStyle = useAnimatedStyle(() => {
-    const defaultBorder = error
-      ? withAlpha(colors.destructive, 0.7)
-      : withAlpha(colors.white, 0.08);
-    const focusedBorder = error
-      ? colors.destructive
-      : withAlpha(colors.primary, 0.65);
-
-    const defaultBg = error
-      ? withAlpha(colors.errorContainer, 0.35)
-      : withAlpha(colors.card, 0.65);
-    const focusedBg = error
-      ? withAlpha(colors.errorContainer, 0.55)
-      : withAlpha(colors.card, 0.95);
-
     const borderColor = interpolateColor(
       focusAnim.value,
       [0, 1],
