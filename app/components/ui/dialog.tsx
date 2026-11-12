@@ -78,18 +78,18 @@ function DialogContent({
       <FullWindowOverlay>
         <View
           style={StyleSheet.absoluteFill}
-          className="flex items-center justify-center p-4 z-50"
+          className="flex items-center justify-center p-2 sm:p-6 z-50"
           pointerEvents="box-none"
         >
           <DialogOverlay className={overlayClassName} />
           <NativeOnlyAnimatedView
             entering={FadeIn.delay(50).duration(200).reduceMotion(ReduceMotion.System)}
             exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
-            style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}
+            style={{ width: '100%', alignItems: 'center' }}
           >
             <DialogPrimitive.Content
               className={cn(
-                'z-50 bg-card border-white/[0.08] flex w-full max-w-[380px] flex-col gap-4 rounded-3xl border p-6 shadow-2xl',
+                'z-50 bg-card border-white/[0.08] flex w-full flex-col gap-4 rounded-3xl border p-6 shadow-2xl',
                 className
               )}
               {...props}>

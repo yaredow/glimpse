@@ -72,7 +72,7 @@ export default function EditPreferencesModal({
   return (
     <Dialog open={visible} onOpenChange={(next) => !next && onClose()}>
       <DialogContent
-        className="w-[92%] max-w-[420px] max-h-[85vh] gap-0 overflow-hidden rounded-3xl p-0"
+        className="w-full max-h-[88vh] gap-0 overflow-hidden rounded-3xl p-0"
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">Film Preferences</DialogTitle>
@@ -266,7 +266,7 @@ function EditPreferencesForm({
         </View>
       ) : (
         <ScrollView
-          className="max-h-[58vh]"
+          className="max-h-[64vh]"
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={true}
           bounces={true}
