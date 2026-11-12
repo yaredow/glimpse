@@ -71,19 +71,18 @@ export default function EditPreferencesModal({
 }: EditPreferencesModalProps) {
   return (
     <Dialog open={visible} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="w-[92%] max-w-[420px] gap-4 rounded-3xl p-5">
-        <DialogTitle className="text-center text-[18px] leading-7">
-          Film Preferences
-        </DialogTitle>
-        <ScrollView className="max-h-[70vh]">
-          {visible ? (
-            <EditPreferencesForm
-              key={visible ? "open" : "closed"}
-              currentPreferences={currentPreferences}
-              onClose={onClose}
-            />
-          ) : null}
-        </ScrollView>
+      <DialogContent
+        className="w-[92%] max-w-[420px] max-h-[85vh] gap-0 overflow-hidden rounded-3xl p-0"
+        showCloseButton={false}
+      >
+        <DialogTitle className="sr-only">Film Preferences</DialogTitle>
+        {visible ? (
+          <EditPreferencesForm
+            key={visible ? "open" : "closed"}
+            currentPreferences={currentPreferences}
+            onClose={onClose}
+          />
+        ) : null}
       </DialogContent>
     </Dialog>
   );
@@ -267,14 +266,16 @@ function EditPreferencesForm({
         </View>
       ) : (
         <ScrollView
-          className="max-h-[520px]"
+          className="max-h-[58vh]"
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={true}
+          bounces={true}
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingTop: 16,
             paddingBottom: 24,
             gap: 22,
           }}
-          showsVerticalScrollIndicator={false}
         >
           <View className="gap-2">
             <View className="flex-row items-center justify-between">

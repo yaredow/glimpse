@@ -6,6 +6,7 @@ import * as DialogPrimitive from '@rn-primitives/dialog';
 import * as React from 'react';
 import {
   Platform,
+  StyleSheet,
   View,
   type GestureResponderEvent,
   type ViewProps,
@@ -26,53 +27,37 @@ const FullWindowOverlay =
 
 function DialogOverlay({
   className,
-  children,
-  onPress,
   closeOnPress = true,
+  onPress,
   ...props
-}: Omit<React.ComponentProps<typeof DialogPrimitive.Overlay>, 'asChild'> & {
-  children?: React.ReactNode;
-  closeOnPress?: boolean;
-}) {
+}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   const { onOpenChange } = DialogPrimitive.useRootContext();
 
   function onOverlayPress(event: GestureResponderEvent) {
     onPress?.(event);
-    if (
-      closeOnPress &&
-      event.target === event.currentTarget &&
-      !event.defaultPrevented
-    ) {
+    if (closeOnPress && !event.defaultPrevented) {
       onOpenChange(false);
     }
   }
 
   return (
-    <FullWindowOverlay>
-      <DialogPrimitive.Overlay
-        className={cn(
-          'absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center bg-black/50 p-2',
-          Platform.select({
-            web: 'fixed cursor-default [&>*]:cursor-auto',
-          }),
-          className
-        )}
-        {...props}
-        closeOnPress={closeOnPress}
-        onPress={Platform.select({ web: onOverlayPress, native: onPress })}
-        asChild={Platform.OS !== 'web'}>
-        <NativeOnlyAnimatedView
-          entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}
-          exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
-          as="Pressable">
-          <NativeOnlyAnimatedView
-            entering={FadeIn.delay(50).reduceMotion(ReduceMotion.System)}
-            exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}>
-            <>{children}</>
-          </NativeOnlyAnimatedView>
-        </NativeOnlyAnimatedView>
-      </DialogPrimitive.Overlay>
-    </FullWindowOverlay>
+    <DialogPrimitive.Overlay
+      style={StyleSheet.absoluteFill}
+      className={cn(
+        Platform.select({
+          web: 'fixed cursor-default',
+        }),
+        className
+      )}
+      onPress={onOverlayPress}
+      closeOnPress={closeOnPress}
+      {...props}>
+      <NativeOnlyAnimatedView
+        entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}
+        exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0, 0, 0, 0.75)' }]}
+      />
+    </DialogPrimitive.Overlay>
   );
 }
 
@@ -90,35 +75,48 @@ function DialogContent({
 }) {
   return (
     <DialogPortal hostName={portalHost}>
-      <DialogOverlay className={overlayClassName}>
-        <DialogPrimitive.Content
-          className={cn(
-            'bg-card border-white/[0.08] z-50 mx-auto flex w-full flex-col gap-4 rounded-3xl border p-6 sm:max-w-[380px]',
-            className
-          )}
-          {...props}>
-          <>{children}</>
-          {showCloseButton ? (
-            <DialogPrimitive.Close
+      <FullWindowOverlay>
+        <View
+          style={StyleSheet.absoluteFill}
+          className="flex items-center justify-center p-4 z-50"
+          pointerEvents="box-none"
+        >
+          <DialogOverlay className={overlayClassName} />
+          <NativeOnlyAnimatedView
+            entering={FadeIn.delay(50).duration(200).reduceMotion(ReduceMotion.System)}
+            exiting={FadeOut.duration(150).reduceMotion(ReduceMotion.System)}
+            style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <DialogPrimitive.Content
               className={cn(
-                'absolute right-3 top-3 rounded-full bg-surface-5 p-1.5 opacity-80 active:opacity-100',
-                Platform.select({
-                  web: 'ring-offset-background focus:ring-ring data-[state=open]:bg-accent transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2',
-                })
+                'z-50 bg-card border-white/[0.08] flex w-full max-w-[380px] flex-col gap-4 rounded-3xl border p-6 shadow-2xl',
+                className
               )}
-              hitSlop={12}
-              accessibilityRole="button"
-              accessibilityLabel="Close">
-              <Icon
-                as={XIcon}
-                className={cn(
-                  'text-subtle-foreground web:pointer-events-none size-4 shrink-0'
-                )}
-              />
-            </DialogPrimitive.Close>
-          ) : null}
-        </DialogPrimitive.Content>
-      </DialogOverlay>
+              {...props}>
+              <>{children}</>
+              {showCloseButton ? (
+                <DialogPrimitive.Close
+                  className={cn(
+                    'absolute right-3.5 top-3.5 rounded-full bg-surface-5 p-1.5 opacity-80 active:opacity-100',
+                    Platform.select({
+                      web: 'ring-offset-background focus:ring-ring data-[state=open]:bg-accent transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2',
+                    })
+                  )}
+                  hitSlop={12}
+                  accessibilityRole="button"
+                  accessibilityLabel="Close">
+                  <Icon
+                    as={XIcon}
+                    className={cn(
+                      'text-subtle-foreground web:pointer-events-none size-4 shrink-0'
+                    )}
+                  />
+                </DialogPrimitive.Close>
+              ) : null}
+            </DialogPrimitive.Content>
+          </NativeOnlyAnimatedView>
+        </View>
+      </FullWindowOverlay>
     </DialogPortal>
   );
 }
