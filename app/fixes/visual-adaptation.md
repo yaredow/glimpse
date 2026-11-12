@@ -128,10 +128,10 @@ Targets are locked in `README.md` §1.1. This is the only phase allowed to chang
 
 ### VA-5 · A11y and reduced motion
 
-- [ ] Every `Pressable`/`Button` has `accessibilityRole`, `accessibilityLabel`, and `accessibilityState` where applicable.
-- [ ] Touch targets are at least 44×44 for tappable controls.
-- [ ] Add `useReducedMotion()` + `ReduceMotion.System` to every `withTiming`/`withSpring`/`entering`/`exiting` and gate infinite loops (marquee, pulse, shimmer).
-- [ ] Check web focus/keyboard where the app supports web.
+- [x] Every `Pressable`/`Button` has `accessibilityRole`, `accessibilityLabel`, and `accessibilityState` where applicable.
+- [x] Touch targets are at least 44×44 for tappable controls.
+- [x] Add `useReducedMotion()` + `ReduceMotion.System` to every `withTiming`/`withSpring`/`entering`/`exiting` and gate infinite loops (marquee, pulse, shimmer).
+- [x] Check web focus/keyboard where the app supports web.
 
 **Gate:** a11y checklist in the PR; reduced-motion device test (translation stops, opacity still changes).
 

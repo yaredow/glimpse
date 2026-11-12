@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View } from "react-native";
-import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeIn, ZoomIn, ReduceMotion } from "react-native-reanimated";
 import { useForm } from "@tanstack/react-form";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
@@ -67,7 +67,7 @@ export default function ResetPassword() {
     return (
       <AuthShell title="Password updated." subtitle="Your new password is ready.">
         <Animated.View
-          entering={FadeIn.duration(400)}
+          entering={FadeIn.duration(400).reduceMotion(ReduceMotion.System)}
           style={{
             alignItems: "center",
             gap: 16,
@@ -75,7 +75,7 @@ export default function ResetPassword() {
           }}
         >
           <Animated.View
-            entering={ZoomIn.duration(450).springify()}
+            entering={ZoomIn.duration(450).springify().reduceMotion(ReduceMotion.System)}
             style={{
               width: 80,
               height: 80,

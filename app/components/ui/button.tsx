@@ -161,6 +161,15 @@ function Button({
     <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
       <Pressable
         role="button"
+        accessibilityRole="button"
+        accessibilityState={{
+          disabled: Boolean(props.disabled || loading),
+          busy: Boolean(loading),
+        }}
+        accessibilityLabel={
+          props.accessibilityLabel ??
+          (typeof children === "string" ? children : undefined)
+        }
         className={cn((props.disabled || loading) && 'opacity-50', buttonVariants({ variant, size }), className)}
         {...props}
         disabled={props.disabled || Boolean(loading)}

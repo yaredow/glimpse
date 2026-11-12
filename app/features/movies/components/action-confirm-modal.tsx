@@ -214,6 +214,7 @@ export default function ActionConfirmModal({
                         accessibilityRole="radio"
                         accessibilityState={{ selected: isSelected }}
                         accessibilityLabel={mood.label}
+                        hitSlop={8}
                         className={cn(
                           "flex-row items-center rounded-2xl border px-3 py-1.5",
                           isSelected
@@ -253,6 +254,7 @@ export default function ActionConfirmModal({
               onPress={onCancel}
               className="min-h-[44px] justify-center px-4"
               accessibilityRole="button"
+              accessibilityLabel={config.cancelText}
             >
               <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                 {config.cancelText}
@@ -264,6 +266,7 @@ export default function ActionConfirmModal({
               }
               className="min-h-[44px] justify-center rounded-lg bg-primary px-4 active:opacity-90"
               accessibilityRole="button"
+              accessibilityLabel={config.confirmText}
             >
               <Text className="text-[13px] font-brandBold text-white">
                 {config.confirmText}

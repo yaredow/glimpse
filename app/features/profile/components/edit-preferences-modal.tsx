@@ -246,6 +246,8 @@ function EditPreferencesForm({
         <Pressable
           onPress={onClose}
           hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel="Close preferences"
           className="h-8 w-8 items-center justify-center rounded-full bg-surface-5"
         >
           <XIcon
@@ -293,6 +295,9 @@ function EditPreferencesForm({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setGenreTab("favorites");
                 }}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: genreTab === "favorites" }}
+                accessibilityLabel="Favorite genres"
                 className={cn(
                   "flex-1 flex-row items-center justify-center gap-1.5 rounded-md border border-transparent py-2",
                   genreTab === "favorites" &&
@@ -325,6 +330,9 @@ function EditPreferencesForm({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setGenreTab("excluded");
                 }}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: genreTab === "excluded" }}
+                accessibilityLabel="Excluded genres"
                 className={cn(
                   "flex-1 flex-row items-center justify-center gap-1.5 rounded-md border border-transparent py-2",
                   genreTab === "excluded" &&
@@ -368,6 +376,9 @@ function EditPreferencesForm({
                     <Pressable
                       key={genre.id}
                       onPress={() => toggleFavorite(genre.id)}
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: isSelected }}
+                      accessibilityLabel={genre.name}
                       className={cn(
                         "flex-row items-center gap-1.5 rounded-md border px-3 py-2",
                         isSelected
@@ -404,6 +415,9 @@ function EditPreferencesForm({
                     <Pressable
                       key={genre.id}
                       onPress={() => toggleExcluded(genre.id)}
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: isExcluded }}
+                      accessibilityLabel={genre.name}
                       className={cn(
                         "flex-row items-center gap-1.5 rounded-md border px-3 py-2",
                         isExcluded
@@ -459,6 +473,9 @@ function EditPreferencesForm({
                       setMinYear(era.min_year);
                       setMaxYear(era.max_year);
                     }}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    accessibilityLabel={era.label}
                     className={cn(
                       "flex-row items-center justify-between rounded-lg border px-4 py-3",
                       isSelected
@@ -511,6 +528,9 @@ function EditPreferencesForm({
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setMinRating(rating.value);
                     }}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    accessibilityLabel={rating.label}
                     className={cn(
                       "flex-1 items-center justify-center rounded-md border py-2.5",
                       isSelected
@@ -548,6 +568,9 @@ function EditPreferencesForm({
                   <Pressable
                     key={lang.code}
                     onPress={() => toggleLanguage(lang.code)}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: isSelected }}
+                    accessibilityLabel={lang.label}
                     className={cn(
                       "flex-row items-center gap-1.5 rounded-md border px-3 py-2",
                       isSelected

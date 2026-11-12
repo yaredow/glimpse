@@ -89,6 +89,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
               onPress={onTrailerPress}
               accessibilityRole="button"
               accessibilityLabel="Watch trailer"
+              hitSlop={10}
             >
               <PlayIcon size={14} color={colors.white} />
               <Text className="text-[11px] tracking-[0.6px] font-brandBold text-white">

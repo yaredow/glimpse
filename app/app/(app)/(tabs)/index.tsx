@@ -669,7 +669,7 @@ export default function TodayTab() {
                 <View className="w-full max-w-[320px] items-center justify-center gap-2">
                   <Pressable
                     onPress={handlePromptLockIn}
-                    className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 active:opacity-85"
+                    className="min-h-[44px] w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 active:opacity-85"
                     style={PILL_SHADOW}
                     accessibilityRole="button"
                     accessibilityLabel={`Lock in ${tonightPick.title}`}
@@ -707,7 +707,7 @@ export default function TodayTab() {
               ) : (
                 <Pressable
                   onPress={handleReturnToPick}
-                  className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-5 py-3 active:bg-surface-6 active:opacity-85"
+                  className="min-h-[44px] w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-5 py-3 active:bg-surface-6 active:opacity-85"
                   style={{ boxShadow: shadows.subtle }}
                   accessibilityRole="button"
                   accessibilityLabel={

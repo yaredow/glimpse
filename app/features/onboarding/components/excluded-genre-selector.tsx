@@ -61,7 +61,7 @@ export default function ExcludedGenreSelector({
               accessibilityState={{ checked: isExcluded }}
               onPress={() => toggle(genre.id)}
               className={cn(
-                "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
+                "min-h-[44px] flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
                 isExcluded
                   ? "border-destructive bg-danger-surface"
                   : "border-border bg-card",

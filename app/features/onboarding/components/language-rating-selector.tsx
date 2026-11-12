@@ -80,12 +80,12 @@ export default function LanguageRatingSelector({
               return (
                 <Pressable
                   key={lang.iso_639_1}
-              accessibilityRole="checkbox"
-              accessibilityLabel={lang.name}
-              accessibilityState={{ checked: isSelected }}
+                  accessibilityRole="checkbox"
+                  accessibilityLabel={lang.name}
+                  accessibilityState={{ checked: isSelected }}
                   onPress={() => toggleLanguage(lang.iso_639_1)}
                   className={cn(
-                    "flex-row items-center rounded-full border-[1.5px] px-3.5 py-2.5",
+                    "min-h-[44px] flex-row items-center rounded-full border-[1.5px] px-3.5 py-2.5",
                     isSelected
                       ? "border-primary bg-brand-surface"
                       : "border-border bg-card",
@@ -130,9 +130,9 @@ export default function LanguageRatingSelector({
               return (
                 <Pressable
                   key={preset.value}
-              accessibilityRole="radio"
-accessibilityLabel={"{preset.label}"}
-              accessibilityState={{ selected: isSelected }}
+                  accessibilityRole="radio"
+                  accessibilityLabel={preset.label}
+                  accessibilityState={{ selected: isSelected }}
                   onPress={() => selectRating(preset.value)}
                   className={cn(
                     "w-[48%] rounded-lg border-[1.5px] p-3.5",

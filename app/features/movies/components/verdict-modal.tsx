@@ -111,6 +111,7 @@ export default function VerdictModal({
               onPress={onCancel}
               className="min-h-[44px] justify-center px-4"
               accessibilityRole="button"
+              accessibilityLabel="Not yet, cancel verdict"
             >
               <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                 Not Yet
@@ -120,6 +121,7 @@ export default function VerdictModal({
               onPress={handleConfirm}
               className="min-h-[44px] justify-center rounded-lg bg-emerald-500 px-4 active:opacity-90"
               accessibilityRole="button"
+              accessibilityLabel="Log verdict to journal"
             >
               <Text className="text-[13px] font-brandBold text-white">
                 Log to Journal

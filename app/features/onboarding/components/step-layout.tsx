@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { View, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, ReduceMotion } from "react-native-reanimated";
 import { ArrowLeftIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { cn } from "@/lib/utils";
@@ -90,8 +90,8 @@ export default function StepLayout({
       </View>
 
       <Animated.View
-        entering={FadeIn.duration(280)}
-        exiting={FadeOut.duration(180)}
+        entering={FadeIn.duration(280).reduceMotion(ReduceMotion.System)}
+        exiting={FadeOut.duration(180).reduceMotion(ReduceMotion.System)}
         style={{ flex: 1 }}
       >
         {children}

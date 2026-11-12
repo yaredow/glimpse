@@ -171,6 +171,8 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   onPress={() =>
                     handleOpenLink(providers?.justwatch_link || searchLinks?.justwatch || "")
                   }
+                  accessibilityRole="button"
+                  accessibilityLabel={`Watch on ${prov.name}`}
                   className="flex-row items-center gap-3 rounded-2xl border border-white/[0.08] bg-surface-5 px-4 py-3 active:opacity-80"
                 >
                   {logoUri ? (
@@ -266,7 +268,9 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   <Pressable
                     onPress={() => handleShareMagnet(t)}
                     className="h-9 w-9 items-center justify-center rounded-md border border-white/[0.08] bg-surface-6 active:opacity-70"
+                    accessibilityRole="button"
                     accessibilityLabel="Copy or share magnet"
+                    hitSlop={8}
                   >
                     <ShareNetworkIcon
                       size={16}
@@ -277,6 +281,9 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   <Pressable
                     onPress={() => handleOpenMagnet(t)}
                     className="h-9 flex-row items-center gap-1.5 rounded-md bg-primary px-3 active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel="Download with magnet"
+                    hitSlop={8}
                   >
                     <MagnetIcon
                       size={15}
@@ -323,6 +330,8 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.google ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.google)}
+                accessibilityRole="button"
+                accessibilityLabel="Search on Google"
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <GoogleLogoIcon size={15} color={colors.white} />
@@ -335,6 +344,8 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.justwatch ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.justwatch)}
+                accessibilityRole="button"
+                accessibilityLabel="Search on JustWatch"
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <PlayCircleIcon size={15} color={colors.gold} />
@@ -347,6 +358,8 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.letterboxd ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.letterboxd)}
+                accessibilityRole="button"
+                accessibilityLabel="Search on Letterboxd"
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <FilmStripIcon size={15} color={colors.success} />
@@ -359,6 +372,8 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.imdb ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.imdb)}
+                accessibilityRole="button"
+                accessibilityLabel="Search on IMDb"
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <StarIcon size={15} color={colors.gold} />
@@ -371,6 +386,8 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.netflix ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.netflix)}
+                accessibilityRole="button"
+                accessibilityLabel="Search on Netflix"
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <MonitorPlayIcon size={15} color={colors.primary} />

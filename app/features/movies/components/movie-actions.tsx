@@ -172,6 +172,7 @@ export default function MovieActions({
             )}
             accessibilityRole="button"
             accessibilityLabel="Pass this film for today"
+            accessibilityState={{ disabled: !!loadingAction }}
           >
             {loadingAction === "skipped" ? (
               <ActivityIndicator size="small" color={colors.faintForeground} />
@@ -198,6 +199,7 @@ export default function MovieActions({
             )}
             accessibilityRole="button"
             accessibilityLabel="Mark film as already seen"
+            accessibilityState={{ disabled: !!loadingAction }}
           >
             {loadingAction === "seen_before" ? (
               <ActivityIndicator size="small" color={colors.white} />
@@ -229,6 +231,7 @@ export default function MovieActions({
             accessibilityLabel={
               isPick ? "Remove from tonight's pick" : "Pick film for tonight"
             }
+            accessibilityState={{ disabled: !!loadingAction }}
           >
             {loadingAction === "pick_tonight" ||
             loadingAction === "revealed" ? (

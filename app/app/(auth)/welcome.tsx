@@ -5,6 +5,7 @@ import Animated, {
   FadeIn,
   FadeInDown,
   FadeInUp,
+  ReduceMotion,
 } from "react-native-reanimated";
 import { Text } from "@/components/ui/text";
 import {
@@ -29,7 +30,7 @@ export default function WelcomeScreen() {
 
           <View className="w-full max-w-[420px] self-center px-6 pb-3">
             <Animated.View
-              entering={FadeInDown.delay(100).duration(500)}
+              entering={FadeInDown.delay(100).duration(500).reduceMotion(ReduceMotion.System)}
               style={{ alignItems: "center", marginBottom: 6 }}
             >
               <BrandLockup />
@@ -37,7 +38,7 @@ export default function WelcomeScreen() {
 
             {/* Value Proposition Headline & Copy */}
             <Animated.View
-              entering={FadeInDown.delay(220).duration(450)}
+              entering={FadeInDown.delay(220).duration(450).reduceMotion(ReduceMotion.System)}
               style={{
                 alignItems: "center",
                 paddingHorizontal: 8,
@@ -55,7 +56,7 @@ export default function WelcomeScreen() {
 
             {/* Actions: Get Started & Sign In */}
             <Animated.View
-              entering={FadeInUp.delay(350).duration(450)}
+              entering={FadeInUp.delay(350).duration(450).reduceMotion(ReduceMotion.System)}
               style={{ width: "100%", gap: 14, marginTop: 6 }}
             >
               <AuthPrimaryButton
@@ -73,7 +74,7 @@ export default function WelcomeScreen() {
 
             {/* Quiet Cinema Brand Mark */}
             <Animated.View
-              entering={FadeIn.delay(500).duration(400)}
+              entering={FadeIn.delay(500).duration(400).reduceMotion(ReduceMotion.System)}
               style={{
                 paddingTop: 18,
                 paddingBottom: 4,

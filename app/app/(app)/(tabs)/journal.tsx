@@ -330,7 +330,7 @@ export default function Journal() {
             accessibilityRole="button"
             accessibilityLabel="Explore today's batch"
             onPress={() => router.push("/(app)/(tabs)")}
-            className="rounded-lg border border-white/[0.08] bg-surface-6 px-4 py-2.5"
+            className="min-h-[44px] justify-center rounded-lg border border-white/[0.08] bg-surface-6 px-4 py-2.5"
           >
             <Text className="text-[13px] font-brandSemiBold text-white">
               Explore Today&apos;s Batch

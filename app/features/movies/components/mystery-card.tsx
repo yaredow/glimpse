@@ -66,6 +66,7 @@ export default function MysteryCard({
         className="flex-1"
         accessibilityRole="button"
         accessibilityLabel={`${movie.title}. Tap for details.`}
+        accessibilityState={{ disabled: !isInteractive }}
       >
         {/* Full-bleed poster image */}
         {posterSrc && !posterFailed ? (

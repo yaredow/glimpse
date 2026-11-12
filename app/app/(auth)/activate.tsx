@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View } from "react-native";
-import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeIn, ZoomIn, ReduceMotion } from "react-native-reanimated";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { CheckCircleIcon } from "phosphor-react-native";
@@ -56,11 +56,11 @@ export default function Activate() {
     return (
       <AuthShell title="You&apos;re in." subtitle="Your account is activated.">
         <Animated.View
-          entering={FadeIn.duration(400)}
+          entering={FadeIn.duration(400).reduceMotion(ReduceMotion.System)}
           style={{ alignItems: "center", gap: 16, width: "100%" }}
         >
           <Animated.View
-            entering={ZoomIn.duration(450).springify()}
+            entering={ZoomIn.duration(450).springify().reduceMotion(ReduceMotion.System)}
             style={{
               width: 80,
               height: 80,

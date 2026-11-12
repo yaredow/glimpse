@@ -69,6 +69,9 @@ function ReviewCard({ review }: { review: MovieReview }) {
         <Pressable
           onPress={() => setIsExpanded(!isExpanded)}
           className="mt-1.5 self-start"
+          accessibilityRole="button"
+          accessibilityLabel={isExpanded ? "Show less of this review" : "Read more of this review"}
+          hitSlop={10}
         >
           <Text className="text-[12px] font-brandBold text-primary">
             {isExpanded ? "Show less" : "Read more"}

@@ -62,6 +62,8 @@ export default function ExploreHeader({
           )}
           accessibilityRole="button"
           accessibilityLabel={`${syncsRemaining} syncs remaining. Tap to select mood and sync.`}
+          accessibilityState={{ disabled: isSyncing }}
+          hitSlop={8}
         >
           {isSyncing ? (
             <ActivityIndicator size={12} color={colors.primary} />

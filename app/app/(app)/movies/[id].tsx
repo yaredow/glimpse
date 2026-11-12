@@ -85,6 +85,7 @@ export default function MovieDetail() {
           onPress={() => refetch()}
           accessibilityRole="button"
           accessibilityLabel="Retry loading movie"
+          className="min-h-[44px] min-w-[44px] items-center justify-center px-4"
         >
           <Text className="text-[14px] font-brandBold text-primary">
             Tap to retry

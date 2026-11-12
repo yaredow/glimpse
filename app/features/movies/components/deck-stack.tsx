@@ -13,11 +13,13 @@ import {
 } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import Animated, {
-  useSharedValue,
-  withTiming,
+  ReduceMotion,
   useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
   withSequence,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { cn } from "@/lib/utils";
 import MysteryCard, { CardStamp } from "./mystery-card";
@@ -151,20 +153,21 @@ export default function DeckStack({
   const opacityVal = useSharedValue(1);
 
   const shuffleShift = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (isShuffling) {
+    if (isShuffling && !reduceMotion) {
       shuffleShift.value = withSequence(
-        withTiming(-1, { duration: 160 }),
-        withTiming(1, { duration: 180 }),
-        withTiming(-0.6, { duration: 160 }),
-        withTiming(0.4, { duration: 140 }),
-        withSpring(0, { damping: 14, stiffness: 120 }),
+        withTiming(-1, { duration: 160, reduceMotion: ReduceMotion.System }),
+        withTiming(1, { duration: 180, reduceMotion: ReduceMotion.System }),
+        withTiming(-0.6, { duration: 160, reduceMotion: ReduceMotion.System }),
+        withTiming(0.4, { duration: 140, reduceMotion: ReduceMotion.System }),
+        withSpring(0, { damping: 14, stiffness: 120, reduceMotion: ReduceMotion.System }),
       );
     } else {
-      shuffleShift.value = withSpring(0);
+      shuffleShift.value = withSpring(0, { reduceMotion: ReduceMotion.System });
     }
-  }, [isShuffling, shuffleShift]);
+  }, [isShuffling, shuffleShift, reduceMotion]);
 
   const topCardAnimStyle = useAnimatedStyle(() => ({
     transform: [
@@ -199,19 +202,35 @@ export default function DeckStack({
       const targetX = direction === "left" ? -SW * 1.15 : SW * 1.15;
       const targetRot = direction === "left" ? -14 : 14;
 
+      const animTargetX = reduceMotion ? 0 : targetX;
+      const animTargetRot = reduceMotion ? 0 : targetRot;
+
       /* eslint-disable react-hooks/immutability */
-      translateX.value = withTiming(targetX, { duration: 240 }, () => {
-        translateX.value = 0;
-        rotateDeg.value = 0;
-        opacityVal.value = 1;
-        onFinish();
-      });
-      rotateDeg.value = withTiming(targetRot, { duration: 240 });
-      opacityVal.value = withTiming(0, { duration: 200 });
+      if (animTargetX !== 0) {
+        translateX.value = withTiming(animTargetX, {
+          duration: 240,
+          reduceMotion: ReduceMotion.System,
+        });
+      }
+      if (animTargetRot !== 0) {
+        rotateDeg.value = withTiming(animTargetRot, {
+          duration: 240,
+          reduceMotion: ReduceMotion.System,
+        });
+      }
+      opacityVal.value = withTiming(
+        0,
+        { duration: 200, reduceMotion: ReduceMotion.System },
+        () => {
+          translateX.value = 0;
+          rotateDeg.value = 0;
+          opacityVal.value = 1;
+          onFinish();
+        },
+      );
       /* eslint-enable react-hooks/immutability */
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [SW, reduceMotion, opacityVal, rotateDeg, translateX],
   );
 
   const handlePass = useCallback(() => {
@@ -272,6 +291,8 @@ export default function DeckStack({
               )}
               accessibilityRole="button"
               accessibilityLabel="Let Glimpse choose tonight's movie"
+              accessibilityState={{ disabled: isDealersChoiceLoading || isShuffling }}
+              hitSlop={10}
             >
               {isDealersChoiceLoading || isShuffling ? (
                 <ActivityIndicator

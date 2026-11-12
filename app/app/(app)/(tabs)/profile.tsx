@@ -158,6 +158,7 @@ export default function Profile() {
               className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-1 active:opacity-70"
               accessibilityRole="button"
               accessibilityLabel="Edit film preferences"
+              hitSlop={10}
             >
               <PencilSimpleIcon
                 size={13}

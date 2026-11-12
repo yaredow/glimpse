@@ -16,7 +16,7 @@ export default function MovieDetailTabs({ activeTab, onTabPress, children }: Mov
           <Pressable
             key={tab}
             onPress={() => onTabPress(tab)}
-            className="flex-1 items-center py-3"
+            className="min-h-[44px] flex-1 items-center justify-center py-3"
             accessibilityRole="tab"
             accessibilityState={{ selected: activeTab === tab }}
             accessibilityLabel={tab}

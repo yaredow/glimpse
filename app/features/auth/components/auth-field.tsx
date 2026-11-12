@@ -7,8 +7,10 @@ import {
 } from "react";
 import { Pressable, TextInput, View } from "react-native";
 import Animated, {
+  ReduceMotion,
   interpolateColor,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSequence,
   withTiming,
@@ -97,27 +99,33 @@ export default function AuthField({
 
   const focusAnim = useSharedValue(0);
   const shakeAnim = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
   const prevErrorRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    focusAnim.value = withTiming(focused ? 1 : 0, { duration: 200 });
+    focusAnim.value = withTiming(focused ? 1 : 0, {
+      duration: 200,
+      reduceMotion: ReduceMotion.System,
+    });
   }, [focused, focusAnim]);
 
   useEffect(() => {
     if (error && error !== prevErrorRef.current) {
-      shakeAnim.value = withSequence(
-        withTiming(-5, { duration: 40 }),
-        withTiming(5, { duration: 40 }),
-        withTiming(-3, { duration: 40 }),
-        withTiming(3, { duration: 40 }),
-        withTiming(0, { duration: 40 }),
-      );
+      if (!reduceMotion) {
+        shakeAnim.value = withSequence(
+          withTiming(-5, { duration: 40, reduceMotion: ReduceMotion.System }),
+          withTiming(5, { duration: 40, reduceMotion: ReduceMotion.System }),
+          withTiming(-3, { duration: 40, reduceMotion: ReduceMotion.System }),
+          withTiming(3, { duration: 40, reduceMotion: ReduceMotion.System }),
+          withTiming(0, { duration: 40, reduceMotion: ReduceMotion.System }),
+        );
+      }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(
         () => {},
       );
     }
     prevErrorRef.current = error;
-  }, [error, shakeAnim]);
+  }, [error, shakeAnim, reduceMotion]);
 
   const animatedInputStyle = useAnimatedStyle(() => {
     const defaultBorder = error

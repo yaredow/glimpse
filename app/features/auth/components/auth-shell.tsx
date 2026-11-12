@@ -12,6 +12,7 @@ import Animated, {
   FadeIn,
   FadeInDown,
   FadeInUp,
+  ReduceMotion,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
@@ -56,13 +57,19 @@ export default function AuthShell({
     const showSub = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       () => {
-        keyboardProgress.value = withTiming(1, { duration: 250 });
+        keyboardProgress.value = withTiming(1, {
+          duration: 250,
+          reduceMotion: ReduceMotion.System,
+        });
       }
     );
     const hideSub = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
       () => {
-        keyboardProgress.value = withTiming(0, { duration: 250 });
+        keyboardProgress.value = withTiming(0, {
+          duration: 250,
+          reduceMotion: ReduceMotion.System,
+        });
       }
     );
 
@@ -160,7 +167,7 @@ export default function AuthShell({
             {/* Title & Subtitle */}
             <View className="mb-2 items-center">
               <Animated.Text
-                entering={FadeInDown.delay(100).duration(350).springify()}
+                entering={FadeInDown.delay(100).duration(350).springify().reduceMotion(ReduceMotion.System)}
                 style={{
                   fontFamily: fontFamilies.bold,
                   fontSize: 24,
@@ -174,7 +181,7 @@ export default function AuthShell({
               </Animated.Text>
               {subtitle ? (
                 <Animated.View
-                  entering={FadeIn.delay(200).duration(300)}
+                  entering={FadeIn.delay(200).duration(300).reduceMotion(ReduceMotion.System)}
                   style={{ marginTop: 6, alignItems: "center" }}
                 >
                   {typeof subtitle === "string" ? (
@@ -190,7 +197,7 @@ export default function AuthShell({
 
             {/* Form Fields & Children */}
             <Animated.View
-              entering={FadeInUp.delay(300).duration(400)}
+              entering={FadeInUp.delay(300).duration(400).reduceMotion(ReduceMotion.System)}
               style={{ marginTop: 16 }}
             >
               {children}

@@ -10,6 +10,7 @@ import Animated, {
   interpolate,
   Extrapolation,
   useReducedMotion,
+  ReduceMotion,
 } from "react-native-reanimated";
 
 export default function SkeletonLoader({ count }: { count: number }) {
@@ -29,7 +30,11 @@ export default function SkeletonLoader({ count }: { count: number }) {
       shimmer.value = 1;
       return;
     }
-    shimmer.value = withRepeat(withTiming(1, { duration: 1200 }), -1, true);
+    shimmer.value = withRepeat(
+      withTiming(1, { duration: 1200, reduceMotion: ReduceMotion.System }),
+      -1,
+      true,
+    );
   }, [shimmer, reduceMotion]);
 
   const shimmerStyle = useAnimatedStyle(() => {

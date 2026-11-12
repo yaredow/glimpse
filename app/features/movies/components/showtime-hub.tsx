@@ -327,6 +327,9 @@ export default function ShowtimeHub({
                       providers?.justwatch_link || searchLinks?.justwatch || "",
                     )
                   }
+                  accessibilityRole="button"
+                  accessibilityLabel={`Watch on ${prov.name}`}
+                  hitSlop={8}
                   className="rounded border border-white/[0.08] bg-white/[0.06] px-2 py-0.5"
                 >
                   <Text className="text-[11px] font-brandSemiBold text-foreground">
@@ -439,7 +442,9 @@ export default function ShowtimeHub({
 
         <Pressable
           onPress={() => onOpenDetails(movie)}
-          className="mt-4 px-3 py-1.5"
+          accessibilityRole="button"
+          accessibilityLabel="View full film synopsis and cast"
+          className="mt-4 min-h-[44px] justify-center px-3 py-1.5"
         >
           <Text className="text-[12px] text-faint-foreground underline">
             View full film synopsis &amp; cast &rarr;

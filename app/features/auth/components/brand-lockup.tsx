@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import Animated, { FadeIn, FadeInDown, ReduceMotion } from "react-native-reanimated";
 import { ApertureIcon } from "phosphor-react-native";
 import { Text } from "@/components/ui/text";
 import fontFamilies from "@/lib/theme/fonts.json";
@@ -34,7 +34,7 @@ export default function BrandLockup({
       {/* Animated components do not take className, so the emblem's layout and
           its red glow stay in a style object. */}
       <Animated.View
-        entering={stagger ? FadeIn.delay(100).duration(600) : undefined}
+        entering={stagger ? FadeIn.delay(100).duration(600).reduceMotion(ReduceMotion.System) : undefined}
         style={{
           width: 60,
           height: 60,
@@ -52,7 +52,7 @@ export default function BrandLockup({
       </Animated.View>
 
       <Animated.View
-        entering={stagger ? FadeInDown.delay(250).duration(500) : undefined}
+        entering={stagger ? FadeInDown.delay(250).duration(500).reduceMotion(ReduceMotion.System) : undefined}
         style={{
           flexDirection: "row",
           alignItems: "flex-end",
@@ -66,7 +66,7 @@ export default function BrandLockup({
       </Animated.View>
 
       <Animated.Text
-        entering={stagger ? FadeIn.delay(450).duration(400) : undefined}
+        entering={stagger ? FadeIn.delay(450).duration(400).reduceMotion(ReduceMotion.System) : undefined}
         style={{
           fontFamily: fontFamilies.semiBold,
           fontSize: 10,

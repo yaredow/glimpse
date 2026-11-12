@@ -57,7 +57,7 @@ export default function GenreSelector({
               accessibilityState={{ checked: isSelected }}
               onPress={() => toggle(genre.id)}
               className={cn(
-                "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
+                "min-h-[44px] flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
                 isSelected
                   ? "border-primary bg-brand-surface"
                   : "border-border bg-card",

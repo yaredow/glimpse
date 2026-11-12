@@ -80,7 +80,9 @@ export default function CinemaTrailerModal({
           <Pressable
             onPress={handleClose}
             className="h-10 w-10 items-center justify-center rounded-full bg-surface-5 active:opacity-70"
+            accessibilityRole="button"
             accessibilityLabel="Close trailer"
+            hitSlop={8}
           >
             <ArrowLeftIcon size={22} color={colors.white} />
           </Pressable>
@@ -107,7 +109,9 @@ export default function CinemaTrailerModal({
             <Pressable
               onPress={handleOpenYouTube}
               className="h-10 w-10 items-center justify-center rounded-full bg-surface-5 active:opacity-70"
+              accessibilityRole="button"
               accessibilityLabel="Open in YouTube"
+              hitSlop={8}
             >
               <YoutubeLogoIcon size={22} color="#FF0000" />
             </Pressable>
@@ -180,6 +184,8 @@ export default function CinemaTrailerModal({
                 </Text>
                 <Pressable
                   onPress={handleOpenYouTube}
+                  accessibilityRole="button"
+                  accessibilityLabel="Watch on YouTube"
                   className="flex-row items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 active:opacity-85"
                 >
                   <ArrowSquareOutIcon size={16} color={colors.white} />
@@ -199,6 +205,8 @@ export default function CinemaTrailerModal({
           {trailerKey && !playerError ? (
             <Pressable
               onPress={handleOpenYouTube}
+              accessibilityRole="button"
+              accessibilityLabel="Open in YouTube app"
               className="w-full max-w-[280px] flex-row items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-5 py-3 active:opacity-80"
             >
               <YoutubeLogoIcon size={20} color="#FF0000" />
