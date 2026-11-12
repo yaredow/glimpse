@@ -207,7 +207,7 @@ export default function ActionConfirmModal({
                           "flex-row items-center rounded-[16px] border px-3 py-[7px]",
                           isSelected
                             ? "border-white bg-white"
-                            : "border-white/[0.08] bg-surface-zinc-800",
+                            : "border-white/[0.08] bg-surface-6",
                         )}
                       >
                         <MaterialCommunityIcons
@@ -220,7 +220,7 @@ export default function ActionConfirmModal({
                           className={cn(
                             "text-[12.5px] font-brandSemiBold",
                             isSelected
-                              ? "text-surface-obsidian"
+                              ? "text-surface-1"
                               : "text-zinc-400",
                           )}
                         >

@@ -2,7 +2,7 @@ import {
   DarkTheme as NavigationDarkTheme,
   type Theme,
 } from "@react-navigation/native";
-import { themeColors } from "./colors";
+import { colors } from "./tokens.generated";
 import { themeFonts } from "./typography";
 
 export const glimpseNavigationTheme: Theme = {
@@ -10,12 +10,12 @@ export const glimpseNavigationTheme: Theme = {
   dark: true,
   colors: {
     ...NavigationDarkTheme.colors,
-    primary: themeColors.primary,
-    background: themeColors.background,
-    card: themeColors.surface,
-    text: themeColors.onSurface,
-    border: themeColors.outlineVariant,
-    notification: themeColors.primary,
+    primary: colors.primary,
+    background: colors.surface1,
+    card: colors.surface2,
+    text: colors.offWhite,
+    border: colors.border,
+    notification: colors.primary,
   },
   fonts: {
     ...NavigationDarkTheme.fonts,

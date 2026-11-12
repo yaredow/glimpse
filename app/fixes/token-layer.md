@@ -1,6 +1,6 @@
 # Token Layer Collapse
 
-**Status:** ready to implement — values locked in `README.md` §1.1
+**Status:** implemented — PR 2 awaiting merge
 **Owner:** unassigned
 **Depends on:** `dependency-lockfile-hygiene.md` DH-0…DH-3 (PR 1 merged)
 **Blocks:** `typography.md`; `visual-adaptation.md`; shares `tailwind.config.js` with `typography.md`
@@ -225,42 +225,44 @@ Rename the token fragment and keep prefix/opacity suffix:
 
 ### TL-3 · Migrate JS consumers
 
-- [ ] Replace `theme.colors.*` using the §4 map in the 14 files that call `useAppTheme()`.
-- [ ] Replace `palette.*` in the 35 consumer files.
-- [ ] Update `lib/theme/navigation.ts`, `lib/theme/toast-config.tsx`, `app/_layout.tsx`, `app/(app)/_layout.tsx` to read from `tokens.generated.ts`.
-- [ ] Remove `AppThemeContext.Provider` and `glimpseDarkTheme` from `app/_layout.tsx`.
-- [ ] Remove `const theme = useAppTheme()` and unused imports.
-- [ ] Use a mapping-driven script with `--dry-run` for the repetitive renames; review the diff.
+- [x] Replace `theme.colors.*` using the §4 map in the 14 files that call `useAppTheme()`.
+- [x] Replace `palette.*` in the 35 consumer files.
+- [x] Update `lib/theme/navigation.ts`, `lib/theme/toast-config.tsx`, `app/_layout.tsx`, `app/(app)/_layout.tsx` to read from `tokens.generated.ts`.
+- [x] Remove `AppThemeContext.Provider` and `glimpseDarkTheme` from `app/_layout.tsx`.
+- [x] Remove `const theme = useAppTheme()` and unused imports.
+- [x] Use a mapping-driven script with `--dry-run` for the repetitive renames; review the diff.
 
 **Gate:** no `useAppTheme`, `theme.colors`, or `palette.` outside `lib/theme`; `tsc`; screenshots identical.
 
 ### TL-4 · Migrate className consumers
 
-- [ ] Rename only the surface/brand/danger tokens from §4 in `.tsx` files.
-- [ ] Preserve prefixes and opacity suffixes (`bg-`, `text-`, `border-`, `/95`).
-- [ ] Do not touch `text-white`, `text-zinc-*`, or `border-white/[0.08]`; those are visual decisions.
+- [x] Rename only the surface/brand/danger tokens from §4 in `.tsx` files.
+- [x] Preserve prefixes and opacity suffixes (`bg-`, `text-`, `border-`, `/95`).
+- [x] Do not touch `text-white`, `text-zinc-*`, or `border-white/[0.08]`; those are visual decisions.
 
 **Gate:** `grep -rn "surface-zinc\|surface-obsidian\|surface-charcoal" app components features` is empty; ESLint; screenshots identical.
 
 ### TL-5 · Contract: delete the legacy layer
 
-- [ ] Delete `lib/theme/palette.json`.
-- [ ] Delete `themeColors`, `palette`, `glimpseDarkTheme`, `AppThemeContext`, `useAppTheme`, `netflixTheme`.
-- [ ] Reduce `lib/theme/index.ts` to surviving exports only.
-- [ ] Delete `scripts/check-tokens.mjs`.
-- [ ] Remove deprecated aliases from `global.css` and `tailwind.config.js`.
-- [ ] **Do not delete** `themeFonts` / `typeClasses` / `fonts`; `typography.md` owns them.
+- [x] Delete `lib/theme/palette.json`.
+- [x] Delete `themeColors`, `palette`, `glimpseDarkTheme`, `AppThemeContext`, `useAppTheme`, `netflixTheme`.
+- [x] Reduce `lib/theme/index.ts` to surviving exports only.
+- [x] Delete `scripts/check-tokens.mjs`.
+- [x] Remove deprecated aliases from `global.css` and `tailwind.config.js`.
+- [x] **Do not delete** `themeFonts` / `typeClasses` / `fonts`; `typography.md` owns them.
 
 **Gate:** legacy-symbol grep is empty; `tsc`, `eslint`, `tokens:check`, `check-classnames` pass.
 
 ### TL-6 · Enforce and document
 
-- [ ] Add `tokens:check` and `styles:check` to `.github/workflows/ci.yaml`.
-- [ ] Do not expand the global lint scope here; `dependency-lockfile-hygiene.md` DH-4 owns it.
-- [ ] Add `scripts/check-no-legacy-tokens.mjs` (or ESLint `no-restricted-imports`) forbidding:
-  `@/lib/theme/colors`, `palette.json`, `useAppTheme`, `themeColors`, `AppThemeContext`.
-- [ ] Convert `app.json` → `app.config.ts` (or add a check) so splash/adaptive-icon backgrounds use `colors.background`.
-- [ ] Link this file from `AGENT.md`.
+- [x] Add `styles:check` to `.github/workflows/ci.yaml` (it runs `tokens:check`, token coverage, the legacy guard, and the className check).
+- [x] Do not expand the global lint scope here; `dependency-lockfile-hygiene.md` DH-4 owns it.
+- [x] Add `scripts/check-no-legacy-tokens.mjs` and `scripts/check-token-coverage.mjs` forbidding
+  `@/lib/theme/colors`, `palette.json`, `useAppTheme`, `themeColors`, `AppThemeContext` and flagging
+  CSS/Tailwind colour drift.
+- [x] Convert `app.json` → `app.config.ts` so splash/adaptive-icon backgrounds use `colors.background`
+  (via the generated JSON mirror, since Expo's config loader cannot require the TS module).
+- [x] Link this file from `AGENT.md`.
 
 **Gate:** a deliberate CSS value change makes CI fail; revert.
 

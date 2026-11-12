@@ -15,7 +15,7 @@ import {
 } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { EraPreset } from "../types/onboarding.type";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface EraSelectorProps {
   eras: EraPreset[];
@@ -106,7 +106,7 @@ export default function EraSelector({
               className={cn(
                 "rounded-lg border-[1.5px] p-4",
                 isSelected
-                  ? "border-primary bg-surface-brand"
+                  ? "border-primary bg-brand-surface"
                   : "border-zinc-800 bg-zinc-900",
               )}
             >
@@ -119,14 +119,14 @@ export default function EraSelector({
                 >
                   <EraIcon
                     size={20}
-                    color={isSelected ? palette.cinemaRed : palette.zinc400}
+                    color={isSelected ? colors.primary : colors.subtleForeground}
                     weight="bold"
                   />
                 </View>
                 {isSelected && (
                   <CheckCircleIcon
                     size={18}
-                    color={palette.cinemaRed}
+                    color={colors.primary}
                     weight="fill"
                   />
                 )}

@@ -5,7 +5,7 @@ import { WarningCircleIcon } from "phosphor-react-native";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface AuthPrimaryButtonProps {
   label: string;
@@ -41,7 +41,7 @@ export function AuthPrimaryButton({
       accessibilityState={{ disabled: isDisabled, busy: loading }}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={palette.white} />
+        <ActivityIndicator size="small" color={colors.white} />
       ) : (
         <Text className="text-white font-brandBold text-[15px] tracking-wide">
           {label}
@@ -118,7 +118,7 @@ export function AuthErrorBanner({ message }: { message: string }) {
     >
       <WarningCircleIcon
         size={17}
-        color={palette.error}
+        color={colors.destructive}
         weight="fill"
         style={{ marginTop: 1 }}
       />

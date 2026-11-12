@@ -7,7 +7,7 @@ import { CheckIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { Genre } from "../types/onboarding.type";
 import { getGenreIcon } from "../utils/genre-meta";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface GenreSelectorProps {
   genres: Genre[];
@@ -59,13 +59,13 @@ export default function GenreSelector({
               className={cn(
                 "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
                 isSelected
-                  ? "border-primary bg-surface-brand"
+                  ? "border-primary bg-brand-surface"
                   : "border-zinc-800 bg-zinc-900",
               )}
             >
               <GenreIcon
                 size={16}
-                color={isSelected ? palette.white : palette.zinc400}
+                color={isSelected ? colors.white : colors.subtleForeground}
                 weight="bold"
                 style={{ marginRight: 8 }}
               />
@@ -81,7 +81,7 @@ export default function GenreSelector({
               {isSelected && (
                 <CheckIcon
                   size={16}
-                  color={palette.cinemaRed}
+                  color={colors.primary}
                   weight="bold"
                   style={{ marginLeft: 6 }}
                 />

@@ -24,7 +24,7 @@ import MovieDetailTabs from "@/features/movies/components/movie-detail-tabs";
 import DecisionVitalsStrip from "@/features/movies/components/decision-vitals-strip";
 import CuratorPitchCard from "@/features/movies/components/curator-pitch-card";
 import WhereToWatch from "@/features/movies/components/where-to-watch";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 const HEADER_THRESHOLD = 300;
 
@@ -74,15 +74,15 @@ export default function MovieDetail() {
 
   if (isPending) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-surface-charcoal">
-        <ActivityIndicator size="large" color={palette.cinemaRed} />
+      <View className="flex-1 items-center justify-center gap-4 bg-surface-2">
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-surface-charcoal">
+      <View className="flex-1 items-center justify-center gap-4 bg-surface-2">
         <Text className="text-[16px] text-white">Couldn&apos;t load movie</Text>
         <Pressable
           onPress={() => refetch()}
@@ -99,14 +99,14 @@ export default function MovieDetail() {
 
   if (!movie) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 bg-surface-charcoal">
+      <View className="flex-1 items-center justify-center gap-4 bg-surface-2">
         <Text className="text-[16px] text-white">Movie not found</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-surface-charcoal">
+    <View className="flex-1 bg-surface-2">
       <Animated.View
         style={[
           {
@@ -122,7 +122,7 @@ export default function MovieDetail() {
             zIndex: 10,
             height: 90,
           },
-          { paddingTop: insets.top, backgroundColor: palette.charcoal },
+          { paddingTop: insets.top, backgroundColor: colors.surface2 },
           headerAnimatedStyle,
         ]}
         pointerEvents="box-none"

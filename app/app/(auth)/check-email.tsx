@@ -17,7 +17,7 @@ import {
   AuthPrimaryButton,
   AuthTextLink,
 } from "@/features/auth/components/auth-actions";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 export default function CheckEmail() {
   const { email } = useLocalSearchParams<{ email?: string }>();
@@ -76,7 +76,7 @@ export default function CheckEmail() {
             animatedPulseStyle,
           ]}
         >
-          <EnvelopeSimpleIcon size={32} color={palette.cinemaRed} weight="fill" />
+          <EnvelopeSimpleIcon size={32} color={colors.primary} weight="fill" />
         </Animated.View>
 
         <Text className="text-zinc-400 text-xs leading-5 text-center px-4">

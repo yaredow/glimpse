@@ -8,7 +8,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMovieReviews } from "../hooks/query/use-movie-reviews";
 import type { MovieReview } from "../types/movies.type";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface MovieReviewsProps {
   movieId: number;
@@ -46,7 +46,7 @@ function ReviewCard({ review }: { review: MovieReview }) {
 
         {typeof review.rating === "number" && review.rating > 0 ? (
           <View className="flex-row items-center gap-[3px] rounded-[6px] bg-amber-500/[0.12] px-[7px] py-0.5">
-            <MaterialCommunityIcons name="star" size={12} color={palette.gold} />
+            <MaterialCommunityIcons name="star" size={12} color={colors.gold} />
             <Text className="text-[11px] font-brandBold text-amber-500">
               {review.rating.toFixed(1)}
             </Text>
@@ -82,7 +82,7 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
   if (isPending) {
     return (
       <View className="items-center gap-2 py-7">
-        <ActivityIndicator size="small" color={palette.cinemaRed} />
+        <ActivityIndicator size="small" color={colors.primary} />
         <Text className="text-[12px] text-zinc-500">
           Fetching community reviews...
         </Text>
@@ -96,7 +96,7 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
         <MaterialCommunityIcons
           name="alert-circle-outline"
           size={24}
-          color={palette.error}
+          color={colors.destructive}
         />
         <Text className="mt-1 text-[14px] font-brandBold text-zinc-300">
           Couldn&apos;t load reviews
@@ -126,7 +126,7 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
         <MaterialCommunityIcons
           name="comment-text-outline"
           size={24}
-          color={palette.zinc500}
+          color={colors.faintForeground}
         />
         <Text className="mt-1 text-[14px] font-brandBold text-zinc-300">
           No community reviews yet

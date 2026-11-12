@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Animated, View } from "react-native";
 import { SplashScreen } from "expo-router";
 import GlimpseLogo from "./glimpse-logo";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface AnimatedSplashScreenProps {
   isReady: boolean;
@@ -40,7 +40,7 @@ export default function AnimatedSplashScreen({ isReady }: AnimatedSplashScreenPr
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: palette.appBackground,
+          backgroundColor: colors.background,
           zIndex: 99999,
           alignItems: "center",
           justifyContent: "center",

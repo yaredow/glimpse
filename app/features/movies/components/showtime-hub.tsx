@@ -12,14 +12,13 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
-import { useAppTheme } from "@/lib/theme";
 import { tmdbImage } from "../constants/images";
 import { useGetMovie } from "../hooks/query/use-get-movie";
 import { useMovieSources } from "../hooks/query/use-movie-sources";
 import VerdictModal from "./verdict-modal";
 import CinemaTrailerModal from "./cinema-trailer-modal";
 import type { GridMovie, WatchProvider } from "../types/movies.type";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface ShowtimeHubProps {
   movie: GridMovie;
@@ -40,7 +39,6 @@ export default function ShowtimeHub({
   onLogWatched,
   onOpenDetails,
 }: ShowtimeHubProps) {
-  const theme = useAppTheme();
   const { width: SW } = useWindowDimensions();
   const HERO_H = Math.round(SW * 0.88);
   const { data: detailData } = useGetMovie(movie.movie_id);
@@ -226,7 +224,7 @@ export default function ShowtimeHub({
           colors={[
             "rgba(18, 18, 18, 0.15)",
             "rgba(18, 18, 18, 0.65)",
-            palette.obsidian,
+            colors.surface1,
           ]}
           locations={[0, 0.5, 1]}
           style={AbsoluteFill}
@@ -237,9 +235,9 @@ export default function ShowtimeHub({
             <MaterialCommunityIcons
               name="movie-open-star"
               size={13}
-              color={palette.obsidian}
+              color={colors.surface1}
             />
-            <Text className="text-[10px] tracking-[1px] font-brandBold text-surface-obsidian">
+            <Text className="text-[10px] tracking-[1px] font-brandBold text-surface-1">
               TONIGHT&apos;S FEATURE
             </Text>
           </View>
@@ -272,7 +270,7 @@ export default function ShowtimeHub({
             }}
           >
             <View className="h-[34px] w-[34px] items-center justify-center rounded-[17px] bg-black/25">
-              <MaterialCommunityIcons name="play" size={20} color={palette.white} />
+              <MaterialCommunityIcons name="play" size={20} color={colors.white} />
             </View>
             <View className="ml-3 flex-1">
               <Text className="text-[10px] tracking-[0.8px] font-brandBold text-white/[0.8]">
@@ -298,7 +296,7 @@ export default function ShowtimeHub({
               boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.35)",
             }}
           >
-            <MaterialCommunityIcons name="magnify" size={20} color={palette.white} />
+            <MaterialCommunityIcons name="magnify" size={20} color={colors.white} />
             <Text className="text-[13px] tracking-[0.6px] font-brandBold text-white">
               FIND WHERE TO WATCH
             </Text>
@@ -337,7 +335,7 @@ export default function ShowtimeHub({
           <MaterialCommunityIcons
             name="clock-outline"
             size={18}
-            color={palette.zinc400}
+            color={colors.subtleForeground}
           />
           <View className="flex-1">
             <Text className="text-[13px] font-brandBold text-white">
@@ -359,7 +357,7 @@ export default function ShowtimeHub({
             <MaterialCommunityIcons
               name="play-circle-outline"
               size={15}
-              color={palette.white}
+              color={colors.white}
             />
             <Text className="text-[10px] tracking-[0.6px] font-brandBold text-white">
               PRE-SHOW
@@ -375,7 +373,7 @@ export default function ShowtimeHub({
             <MaterialCommunityIcons
               name="star-box-multiple-outline"
               size={17}
-              color={theme.colors.gold}
+              color={colors.gold}
             />
             <Text className="text-[11px] tracking-[1px] font-brandBold text-amber-500">
               THE NIGHT&apos;S VERDICT
@@ -388,7 +386,7 @@ export default function ShowtimeHub({
                 <MaterialCommunityIcons
                   name="check-decagram"
                   size={22}
-                  color={theme.colors.success}
+                  color={colors.success}
                 />
                 <Text className="text-[15px] font-brandBold text-white">
                   Verdict Recorded
@@ -414,9 +412,9 @@ export default function ShowtimeHub({
                 <MaterialCommunityIcons
                   name="star-outline"
                   size={18}
-                  color={palette.obsidian}
+                  color={colors.surface1}
                 />
-                <Text className="text-[12px] tracking-[0.6px] font-brandExtraBold text-surface-obsidian">
+                <Text className="text-[12px] tracking-[0.6px] font-brandExtraBold text-surface-1">
                   FINISHED WATCHING? RATE IT
                 </Text>
               </Pressable>
@@ -428,7 +426,7 @@ export default function ShowtimeHub({
           <MaterialCommunityIcons
             name="timer-sand"
             size={14}
-            color={palette.zinc500}
+            color={colors.faintForeground}
           />
           <Text className="text-[12px] text-zinc-500">
             Next daily reel drops in {countdown}

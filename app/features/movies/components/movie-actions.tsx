@@ -8,11 +8,10 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
-import { useAppTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { useRecordInteraction } from "../hooks/mutations/use-record-interactions";
 import type { Movie, MovieInteractionAction } from "../types/movies.type";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface MovieActionsProps {
   movie: Movie;
@@ -29,7 +28,6 @@ export default function MovieActions({
   initialAction,
   onActionComplete,
 }: MovieActionsProps) {
-  const theme = useAppTheme();
   const [loadingAction, setLoadingAction] =
     useState<MovieInteractionAction | null>(null);
   const [currentAction, setCurrentAction] =
@@ -110,10 +108,10 @@ export default function MovieActions({
         : "check-decagram";
 
   const finalizedIconColor = isLocked
-    ? theme.colors.primary
+    ? colors.primary
     : isWatched
-      ? theme.colors.success
-      : theme.colors.textMuted;
+      ? colors.success
+      : colors.faintForeground;
 
   const finalizedTitle = isLocked
     ? "Locked In for Tonight"
@@ -138,10 +136,10 @@ export default function MovieActions({
           className={cn(
             "flex-row items-center gap-3 rounded-[14px] border px-4 py-3",
             isLocked
-              ? "border-primary bg-surface-zinc-900"
+              ? "border-primary bg-surface-4"
               : isWatched
-                ? "border-emerald-500 bg-surface-zinc-900"
-                : "border-white/[0.08] bg-surface-zinc-900",
+                ? "border-emerald-500 bg-surface-4"
+                : "border-white/[0.08] bg-surface-4",
           )}
         >
           <MaterialCommunityIcons
@@ -172,13 +170,13 @@ export default function MovieActions({
             accessibilityLabel="Pass this film for today"
           >
             {loadingAction === "skipped" ? (
-              <ActivityIndicator size="small" color={theme.colors.textMuted} />
+              <ActivityIndicator size="small" color={colors.faintForeground} />
             ) : (
               <>
                 <MaterialCommunityIcons
                   name="close"
                   size={17}
-                  color={theme.colors.textMuted}
+                  color={colors.faintForeground}
                 />
                 <Text className="text-[13px] font-brandSemiBold text-zinc-400">
                   Pass
@@ -199,13 +197,13 @@ export default function MovieActions({
             accessibilityLabel="Mark film as already seen"
           >
             {loadingAction === "seen_before" ? (
-              <ActivityIndicator size="small" color={theme.colors.textPrimary} />
+              <ActivityIndicator size="small" color={colors.white} />
             ) : (
               <>
                 <MaterialCommunityIcons
                   name="eye-outline"
                   size={17}
-                  color={theme.colors.textPrimary}
+                  color={colors.white}
                 />
                 <Text className="text-[13px] font-brandSemiBold text-white">
                   Seen
@@ -232,13 +230,13 @@ export default function MovieActions({
           >
             {loadingAction === "pick_tonight" ||
             loadingAction === "revealed" ? (
-              <ActivityIndicator size="small" color={palette.white} />
+              <ActivityIndicator size="small" color={colors.white} />
             ) : (
               <>
                 <MaterialCommunityIcons
                   name={isPick ? "check-circle" : "star"}
                   size={17}
-                  color={palette.white}
+                  color={colors.white}
                 />
                 <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
                   {isPick ? "Picked" : "Pick"}

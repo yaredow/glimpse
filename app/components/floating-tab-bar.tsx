@@ -14,7 +14,7 @@ import {
   UserIcon,
 } from "phosphor-react-native";
 import { cn } from "@/lib/utils";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 if (
   Platform.OS === "android" &&
@@ -63,7 +63,7 @@ export function FloatingTabBar({
       style={{ bottom: bottomInset }}
     >
       <View
-        className="flex-row items-center gap-1.5 rounded-[36px] border border-white/[0.08] bg-surface-obsidian/95 px-2 py-1.5"
+        className="flex-row items-center gap-1.5 rounded-[36px] border border-white/[0.08] bg-surface-1/95 px-2 py-1.5"
         style={{
           boxShadow: "0px 10px 20.0px rgba(0, 0, 0, 0.5)",
         }}
@@ -122,7 +122,7 @@ export function FloatingTabBar({
             >
               <Icon
                 size={20}
-                color={isFocused ? palette.cinemaRed : "#8E8E93"}
+                color={isFocused ? colors.primary : "#8E8E93"}
                 weight={isFocused ? "fill" : "regular"}
               />
               {isFocused ? (

@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useAppTheme } from "@/lib/theme";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface VerdictModalProps {
   visible: boolean;
@@ -23,7 +23,6 @@ export default function VerdictModal({
   onConfirm,
   onCancel,
 }: VerdictModalProps) {
-  const theme = useAppTheme();
   const [rating, setRating] = useState<number>(4);
   const [lastVisible, setLastVisible] = useState(visible);
 
@@ -56,7 +55,7 @@ export default function VerdictModal({
             <MaterialCommunityIcons
               name="check-circle"
               size={30}
-              color={theme.colors.success}
+              color={colors.success}
             />
           </View>
 
@@ -84,7 +83,7 @@ export default function VerdictModal({
                     name={isFilled ? "star" : "star-outline"}
                     size={36}
                     color={
-                      isFilled ? theme.colors.gold : "rgba(255, 255, 255, 0.2)"
+                      isFilled ? colors.gold : "rgba(255, 255, 255, 0.2)"
                     }
                   />
                 </Pressable>

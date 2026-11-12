@@ -7,7 +7,7 @@ import { XCircleIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { Genre } from "../types/onboarding.type";
 import { getGenreIcon } from "../utils/genre-meta";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface ExcludedGenreSelectorProps {
   genres: Genre[];
@@ -63,13 +63,13 @@ export default function ExcludedGenreSelector({
               className={cn(
                 "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
                 isExcluded
-                  ? "border-destructive bg-surface-danger"
+                  ? "border-destructive bg-danger-surface"
                   : "border-zinc-800 bg-zinc-900",
               )}
             >
               <GenreIcon
                 size={16}
-                color={isExcluded ? palette.onErrorContainer : palette.zinc400}
+                color={isExcluded ? colors.errorContainerForeground : colors.subtleForeground}
                 weight="bold"
                 style={{ marginRight: 8 }}
               />
@@ -87,7 +87,7 @@ export default function ExcludedGenreSelector({
               {isExcluded ? (
                 <XCircleIcon
                   size={16}
-                  color={palette.error}
+                  color={colors.destructive}
                   weight="fill"
                   style={{ marginLeft: 8 }}
                 />

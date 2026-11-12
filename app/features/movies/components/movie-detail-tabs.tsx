@@ -10,7 +10,7 @@ interface MovieDetailTabsProps {
 export default function MovieDetailTabs({ activeTab, onTabPress, children }: MovieDetailTabsProps) {
   return (
     <View>
-      <View className="flex-row bg-surface-zinc-900 px-4" accessibilityRole="tablist">
+      <View className="flex-row bg-surface-4 px-4" accessibilityRole="tablist">
         {DETAIL_TABS.map((tab) => (
           <Pressable
             key={tab}

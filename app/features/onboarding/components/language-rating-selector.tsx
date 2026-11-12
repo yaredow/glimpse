@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { CheckIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import type { Language } from "../types/onboarding.type";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface LanguageRatingSelectorProps {
   languages: Language[];
@@ -97,7 +97,7 @@ export default function LanguageRatingSelector({
                   className={cn(
                     "flex-row items-center rounded-[20px] border-[1.5px] px-3.5 py-2.5",
                     isSelected
-                      ? "border-primary bg-surface-brand"
+                      ? "border-primary bg-brand-surface"
                       : "border-zinc-800 bg-zinc-900",
                   )}
                 >
@@ -113,7 +113,7 @@ export default function LanguageRatingSelector({
                   {isSelected && (
                     <CheckIcon
                       size={14}
-                      color={palette.cinemaRed}
+                      color={colors.primary}
                       weight="bold"
                       style={{ marginLeft: 4 }}
                     />
@@ -156,7 +156,7 @@ accessibilityLabel={"{preset.label}"}
                   className={cn(
                     "w-[48%] rounded-lg border-[1.5px] p-3.5",
                     isSelected
-                      ? "border-primary bg-surface-brand"
+                      ? "border-primary bg-brand-surface"
                       : "border-zinc-800 bg-zinc-900",
                   )}
                 >

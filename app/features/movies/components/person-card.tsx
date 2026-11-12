@@ -28,7 +28,7 @@ export default function PersonCard({ name, character, profilePath }: PersonCardP
           />
         ) : (
           <View
-            className="items-center justify-center bg-surface-zinc-700"
+            className="items-center justify-center bg-surface-8"
             style={{ width: "100%", height: "100%" }}
           >
             <Text className="text-[24px] font-brandBold text-white">

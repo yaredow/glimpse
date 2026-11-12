@@ -1,12 +1,12 @@
 import { Stack } from "expo-router";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 export default function AuthLayout() {
   return (
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: palette.appBackground },
+        contentStyle: { backgroundColor: colors.background },
         animation: "fade",
       }}
     >

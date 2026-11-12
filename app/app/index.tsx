@@ -1,7 +1,7 @@
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-preferences";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 export default function Index() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -40,7 +40,7 @@ export default function Index() {
   if (isPending) {
     return (
       <View className="flex-1 items-center justify-center gap-2 px-8">
-        <ActivityIndicator size="small" color={palette.cinemaRed} />
+        <ActivityIndicator size="small" color={colors.primary} />
       </View>
     );
   }

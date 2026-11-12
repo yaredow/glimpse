@@ -2,7 +2,7 @@ import { View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { ApertureIcon } from "phosphor-react-native";
 import { Text } from "@/components/ui/text";
-import { palette } from "@/lib/theme/colors";
+import { colors } from "@/lib/theme/tokens.generated";
 
 interface BrandLockupProps {
   stagger?: boolean;
@@ -17,7 +17,7 @@ export default function BrandLockup({
     return (
       <View className="mb-3 flex-row items-center gap-2">
         <View className="h-7 w-7 items-center justify-center rounded-[9px] border border-primary/[0.35] bg-primary/[0.18]">
-          <ApertureIcon size={16} color={palette.cinemaRed} weight="fill" />
+          <ApertureIcon size={16} color={colors.primary} weight="fill" />
         </View>
         <Text className="font-brandExtraBold text-[13px] leading-4 tracking-[2.6px] text-white">
           GLIMPSE
@@ -45,7 +45,7 @@ export default function BrandLockup({
           boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.25)",
         }}
       >
-        <ApertureIcon size={32} color={palette.cinemaRed} weight="fill" />
+        <ApertureIcon size={32} color={colors.primary} weight="fill" />
       </Animated.View>
 
       <Animated.View

@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ToastConfig, ToastConfigParams } from "react-native-toast-message";
-import { themeColors } from "./colors";
+import { colors } from "./tokens.generated";
 
 interface CinemaToastProps {
   text1?: string;
@@ -27,7 +27,7 @@ const CinemaToast = ({
       accessibilityRole="button"
       accessibilityLabel={text1}
 
-      className="w-[92%] max-w-[420px] flex-row items-center gap-3 rounded-[14px] border border-l-4 border-white/[0.08] bg-surface-zinc-800 px-4 py-3"
+      className="w-[92%] max-w-[420px] flex-row items-center gap-3 rounded-[14px] border border-l-4 border-white/[0.08] bg-surface-6 px-4 py-3"
       style={{
         borderLeftColor: accentBorderColor,
         boxShadow: "0px 6px 10.0px rgba(0, 0, 0, 0.4)",
@@ -59,8 +59,8 @@ export const toastConfig: ToastConfig = {
       text2={text2}
       onPress={onPress}
       icon="check-circle"
-      iconColor={themeColors.success}
-      accentBorderColor={themeColors.success}
+      iconColor={colors.success}
+      accentBorderColor={colors.success}
     />
   ),
   error: ({ text1, text2, onPress }: ToastConfigParams<any>) => (
@@ -69,8 +69,8 @@ export const toastConfig: ToastConfig = {
       text2={text2}
       onPress={onPress}
       icon="alert-circle"
-      iconColor={themeColors.error}
-      accentBorderColor={themeColors.error}
+      iconColor={colors.destructive}
+      accentBorderColor={colors.destructive}
     />
   ),
   info: ({ text1, text2, onPress }: ToastConfigParams<any>) => (
@@ -79,8 +79,8 @@ export const toastConfig: ToastConfig = {
       text2={text2}
       onPress={onPress}
       icon="information"
-      iconColor={themeColors.primary}
-      accentBorderColor={themeColors.primary}
+      iconColor={colors.primary}
+      accentBorderColor={colors.primary}
     />
   ),
 };
