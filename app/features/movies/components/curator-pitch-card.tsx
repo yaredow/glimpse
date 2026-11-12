@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { CompassIcon, SparkleIcon } from "phosphor-react-native";
 import type { Movie } from "../types/movies.type";
 import { curatorNote, whyThisIsHere } from "../utils/deck";
 import { colors } from "@/lib/theme/tokens.generated";
@@ -18,8 +18,7 @@ export default function CuratorPitchCard({ movie }: CuratorPitchCardProps) {
     <View className="mx-4 mt-3.5 mb-2 rounded-[14px] border border-primary/[0.2] bg-primary/[0.04] p-4">
       <View className="mb-2.5 flex-row items-center gap-2">
         <View className="h-[22px] w-[22px] items-center justify-center rounded-[11px] bg-primary/[0.12]">
-          <MaterialCommunityIcons
-            name="compass-outline"
+          <CompassIcon
             size={14}
             color={colors.primary}
           />
@@ -40,8 +39,7 @@ export default function CuratorPitchCard({ movie }: CuratorPitchCardProps) {
 
       {rationale ? (
         <View className="mt-2.5 flex-row items-center gap-1.5 border-t border-white/[0.06] pt-2.5">
-          <MaterialCommunityIcons
-            name="star-four-points"
+          <SparkleIcon
             size={12}
             color={colors.subtleForeground}
           />

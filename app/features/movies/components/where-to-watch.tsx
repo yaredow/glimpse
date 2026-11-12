@@ -10,7 +10,19 @@ import { Text } from "@/components/ui/text";
 import * as Linking from "expo-linking";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  CloudSlashIcon,
+  FilmSlateIcon,
+  FilmStripIcon,
+  GoogleLogoIcon,
+  InfoIcon,
+  MagnetIcon,
+  MonitorPlayIcon,
+  PlayCircleIcon,
+  ShareNetworkIcon,
+  StarIcon,
+  TelevisionSimpleIcon,
+} from "phosphor-react-native";
 import Toast from "react-native-toast-message";
 import { cn } from "@/lib/utils";
 import { useMovieSources } from "../hooks/query/use-movie-sources";
@@ -127,8 +139,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
   return (
     <View className="mt-6 w-full px-5">
       <View className="mb-4 flex-row items-center gap-2">
-        <MaterialCommunityIcons
-          name="play-network-outline"
+        <TelevisionSimpleIcon
           size={18}
           color={colors.primary}
         />
@@ -171,8 +182,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                     />
                   ) : (
                     <View className="h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-surface-6">
-                      <MaterialCommunityIcons
-                        name="movie-outline"
+                      <FilmSlateIcon
                         size={20}
                         color={colors.faintForeground}
                       />
@@ -196,8 +206,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
         </View>
       ) : (
         <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-surface-4 px-3.5 py-3">
-          <MaterialCommunityIcons
-            name="information-outline"
+          <InfoIcon
             size={16}
             color={colors.faintForeground}
           />
@@ -259,8 +268,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                     className="h-9 w-9 items-center justify-center rounded-[10px] border border-white/[0.08] bg-surface-6 active:opacity-70"
                     accessibilityLabel="Copy or share magnet"
                   >
-                    <MaterialCommunityIcons
-                      name="share-variant-outline"
+                    <ShareNetworkIcon
                       size={16}
                       color={colors.white}
                     />
@@ -270,8 +278,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                     onPress={() => handleOpenMagnet(t)}
                     className="h-9 flex-row items-center gap-[5px] rounded-[10px] bg-primary px-3 active:opacity-85"
                   >
-                    <MaterialCommunityIcons
-                      name="magnet"
+                    <MagnetIcon
                       size={15}
                       color={colors.white}
                     />
@@ -285,8 +292,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
           </View>
         ) : (
           <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-surface-4 px-3.5 py-3">
-            <MaterialCommunityIcons
-              name="cloud-search-outline"
+            <CloudSlashIcon
               size={16}
               color={colors.faintForeground}
             />
@@ -319,7 +325,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.google)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="google" size={15} color={colors.white} />
+                <GoogleLogoIcon size={15} color={colors.white} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   Google
                 </Text>
@@ -331,7 +337,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.justwatch)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="play-box-outline" size={15} color={colors.gold} />
+                <PlayCircleIcon size={15} color={colors.gold} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   JustWatch
                 </Text>
@@ -343,7 +349,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.letterboxd)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="filmstrip" size={15} color={colors.success} />
+                <FilmStripIcon size={15} color={colors.success} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   Letterboxd
                 </Text>
@@ -355,7 +361,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.imdb)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="star-outline" size={15} color={colors.gold} />
+                <StarIcon size={15} color={colors.gold} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   IMDb
                 </Text>
@@ -367,7 +373,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 onPress={() => handleOpenLink(searchLinks.netflix)}
                 className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="netflix" size={15} color={colors.primary} />
+                <MonitorPlayIcon size={15} color={colors.primary} />
                 <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
                   Netflix
                 </Text>

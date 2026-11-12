@@ -2,7 +2,15 @@ import { useState } from "react";
 import {
   ActivityIndicator, Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  CheckCircleIcon,
+  EyeIcon,
+  PlayCircleIcon,
+  SealCheckIcon,
+  StarIcon,
+  XCircleIcon,
+  XIcon,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { cn } from "@/lib/utils";
@@ -96,13 +104,13 @@ export default function MovieActions({
     );
   };
 
-  const finalizedIcon = isLocked
-    ? "movie-play"
+  const FinalizedIcon = isLocked
+    ? PlayCircleIcon
     : isSeen
-      ? "eye-outline"
+      ? EyeIcon
       : isSkipped
-        ? "close-circle-outline"
-        : "check-decagram";
+        ? XCircleIcon
+        : SealCheckIcon;
 
   const finalizedIconColor = isLocked
     ? colors.primary
@@ -139,8 +147,7 @@ export default function MovieActions({
                 : "border-white/[0.08] bg-surface-4",
           )}
         >
-          <MaterialCommunityIcons
-            name={finalizedIcon}
+          <FinalizedIcon
             size={22}
             color={finalizedIconColor}
           />
@@ -170,8 +177,7 @@ export default function MovieActions({
               <ActivityIndicator size="small" color={colors.faintForeground} />
             ) : (
               <>
-                <MaterialCommunityIcons
-                  name="close"
+                <XIcon
                   size={17}
                   color={colors.faintForeground}
                 />
@@ -197,8 +203,7 @@ export default function MovieActions({
               <ActivityIndicator size="small" color={colors.white} />
             ) : (
               <>
-                <MaterialCommunityIcons
-                  name="eye-outline"
+                <EyeIcon
                   size={17}
                   color={colors.white}
                 />
@@ -230,11 +235,11 @@ export default function MovieActions({
               <ActivityIndicator size="small" color={colors.white} />
             ) : (
               <>
-                <MaterialCommunityIcons
-                  name={isPick ? "check-circle" : "star"}
-                  size={17}
-                  color={colors.white}
-                />
+                {isPick ? (
+                  <CheckCircleIcon size={17} color={colors.white} />
+                ) : (
+                  <StarIcon size={17} color={colors.white} />
+                )}
                 <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
                   {isPick ? "Picked" : "Pick"}
                 </Text>

@@ -1,7 +1,17 @@
 import React, { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ArrowsClockwiseIcon,
+  DiceFiveIcon,
+  FilmStripIcon,
+  HeadCircuitIcon,
+  PlayCircleIcon,
+  SkullIcon,
+  SmileyIcon,
+  TargetIcon,
+  type IconProps,
+} from "phosphor-react-native";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -23,7 +33,7 @@ export type SyncMood =
 export interface MoodOption {
   id: SyncMood;
   label: string;
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  Icon: React.ComponentType<IconProps>;
   description: string;
 }
 
@@ -31,37 +41,37 @@ export const MOOD_OPTIONS: MoodOption[] = [
   {
     id: "surprise",
     label: "Surprise Me",
-    icon: "dice-multiple-outline",
+    Icon: DiceFiveIcon,
     description: "fresh mystery picks across all genres tailored to your taste",
   },
   {
     id: "horror",
     label: "Horror",
-    icon: "skull-outline",
+    Icon: SkullIcon,
     description: "pure horror films — supernatural dread, slashers, and terrifying tension",
   },
   {
     id: "action_crime",
     label: "Action & Crime",
-    icon: "target",
+    Icon: TargetIcon,
     description: "high-stakes action features, intense heists, and crime thrillers",
   },
   {
     id: "psychological",
     label: "Psychological & Mystery",
-    icon: "head-cog-outline",
+    Icon: HeadCircuitIcon,
     description: "cerebral puzzles, investigative mysteries, and psychological tension",
   },
   {
     id: "comedy",
     label: "Comedy",
-    icon: "emoticon-happy-outline",
+    Icon: SmileyIcon,
     description: "laugh-out-loud comedies and sharp, witty cinema",
   },
   {
     id: "classics",
     label: "90s & Classics",
-    icon: "filmstrip",
+    Icon: FilmStripIcon,
     description: "retro classics and cinema landmarks released between 1975 and 1999",
   },
 ];
@@ -76,7 +86,7 @@ interface ActionConfirmModalProps {
 }
 
 interface ActionModalConfig {
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  Icon: React.ComponentType<IconProps>;
   iconColor: string;
   title: string;
   confirmText: string;
@@ -86,7 +96,7 @@ interface ActionModalConfig {
 
 const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
   locked_in: {
-    icon: "movie-play-outline",
+    Icon: PlayCircleIcon,
     iconColor: "#E50914",
     title: "Lock In Today's Movie?",
     confirmText: "Lock In Selection",
@@ -102,7 +112,7 @@ const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
     ),
   },
   sync: {
-    icon: "sync",
+    Icon: ArrowsClockwiseIcon,
     iconColor: "#E50914",
     title: "Sync a Fresh Batch?",
     confirmText: "Sync Fresh Reel",
@@ -157,8 +167,7 @@ export default function ActionConfirmModal({
             className="h-14 w-14 items-center justify-center rounded-[28px]"
             style={{ backgroundColor: `${config.iconColor}18` }}
           >
-            <MaterialCommunityIcons
-              name={config.icon}
+            <config.Icon
               size={28}
               color={config.iconColor}
             />
@@ -211,8 +220,7 @@ export default function ActionConfirmModal({
                             : "border-white/[0.08] bg-surface-6",
                         )}
                       >
-                        <MaterialCommunityIcons
-                          name={mood.icon}
+                        <mood.Icon
                           size={16}
                           color={isSelected ? "#121212" : "#A1A1AA"}
                           style={{ marginRight: 6 }}

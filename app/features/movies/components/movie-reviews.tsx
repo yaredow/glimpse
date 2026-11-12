@@ -5,7 +5,11 @@ import {
   View,
 } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ChatTextIcon,
+  StarIcon,
+  WarningCircleIcon,
+} from "phosphor-react-native";
 import { useMovieReviews } from "../hooks/query/use-movie-reviews";
 import type { MovieReview } from "../types/movies.type";
 import { colors } from "@/lib/theme/tokens.generated";
@@ -46,7 +50,7 @@ function ReviewCard({ review }: { review: MovieReview }) {
 
         {typeof review.rating === "number" && review.rating > 0 ? (
           <View className="flex-row items-center gap-[3px] rounded-[6px] bg-amber-500/[0.12] px-[7px] py-0.5">
-            <MaterialCommunityIcons name="star" size={12} color={colors.gold} />
+            <StarIcon size={12} color={colors.gold} />
             <Text className="text-[11px] font-brandBold text-amber-500">
               {review.rating.toFixed(1)}
             </Text>
@@ -93,8 +97,7 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
   if (isError && reviews.length === 0) {
     return (
       <View className="items-center justify-center gap-1.5 rounded-[12px] border border-white/[0.06] bg-white/[0.02] px-5 py-8">
-        <MaterialCommunityIcons
-          name="alert-circle-outline"
+        <WarningCircleIcon
           size={24}
           color={colors.destructive}
         />
@@ -123,8 +126,7 @@ export default function MovieReviews({ movieId }: MovieReviewsProps) {
   if (reviews.length === 0) {
     return (
       <View className="items-center justify-center gap-1.5 rounded-[12px] border border-white/[0.06] bg-white/[0.02] px-5 py-8">
-        <MaterialCommunityIcons
-          name="comment-text-outline"
+        <ChatTextIcon
           size={24}
           color={colors.faintForeground}
         />

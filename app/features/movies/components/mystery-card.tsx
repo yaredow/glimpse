@@ -3,7 +3,7 @@ import { Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FilmStripIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { tmdbImage } from "../constants/images";
 import type { GridMovie } from "../types/movies.type";
@@ -77,8 +77,7 @@ export default function MysteryCard({
           />
         ) : (
           <View className="absolute inset-0 items-center justify-center bg-surface-4 p-6">
-            <MaterialCommunityIcons
-              name="filmstrip"
+            <FilmStripIcon
               size={56}
               color={colors.faintForeground}
             />

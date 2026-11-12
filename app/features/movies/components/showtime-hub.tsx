@@ -8,7 +8,17 @@ import {
 import { Text } from "@/components/ui/text";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ArrowSquareOutIcon,
+  ClockIcon,
+  FilmSlateIcon,
+  HourglassIcon,
+  MagnifyingGlassIcon,
+  PlayCircleIcon,
+  PlayIcon,
+  SealCheckIcon,
+  StarIcon,
+} from "phosphor-react-native";
 import * as Linking from "expo-linking";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
@@ -232,8 +242,7 @@ export default function ShowtimeHub({
 
         <View className="px-5 pb-5">
           <View className="mb-2 self-start flex-row items-center gap-1.5 rounded-[7px] bg-amber-500 px-[9px] py-1">
-            <MaterialCommunityIcons
-              name="movie-open-star"
+            <FilmSlateIcon
               size={13}
               color={colors.surface1}
             />
@@ -270,7 +279,7 @@ export default function ShowtimeHub({
             }}
           >
             <View className="h-[34px] w-[34px] items-center justify-center rounded-[17px] bg-black/25">
-              <MaterialCommunityIcons name="play" size={20} color={colors.white} />
+              <PlayIcon size={20} color={colors.white} />
             </View>
             <View className="ml-3 flex-1">
               <Text className="text-[10px] tracking-[0.8px] font-brandBold text-white/[0.8]">
@@ -280,8 +289,7 @@ export default function ShowtimeHub({
                 {primaryProvider.name.toUpperCase()}
               </Text>
             </View>
-            <MaterialCommunityIcons
-              name="open-in-new"
+            <ArrowSquareOutIcon
               size={18}
               color="rgba(255, 255, 255, 0.7)"
             />
@@ -296,7 +304,7 @@ export default function ShowtimeHub({
               boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.35)",
             }}
           >
-            <MaterialCommunityIcons name="magnify" size={20} color={colors.white} />
+            <MagnifyingGlassIcon size={20} color={colors.white} />
             <Text className="text-[13px] tracking-[0.6px] font-brandBold text-white">
               FIND WHERE TO WATCH
             </Text>
@@ -332,8 +340,7 @@ export default function ShowtimeHub({
       {/* 3. SCHEDULE & PRE-SHOW BAR */}
       <View className="mx-4 mt-4 flex-row items-center justify-between rounded-[14px] border border-white/[0.07] bg-white/[0.03] px-3.5 py-3">
         <View className="flex-1 flex-row items-center gap-2.5">
-          <MaterialCommunityIcons
-            name="clock-outline"
+          <ClockIcon
             size={18}
             color={colors.subtleForeground}
           />
@@ -354,8 +361,7 @@ export default function ShowtimeHub({
             className="flex-row items-center gap-1 rounded-[8px] border border-white/[0.12] bg-white/[0.08] px-2.5 py-1.5 active:opacity-80"
             accessibilityLabel="Play pre-show trailer"
           >
-            <MaterialCommunityIcons
-              name="play-circle-outline"
+            <PlayCircleIcon
               size={15}
               color={colors.white}
             />
@@ -370,8 +376,7 @@ export default function ShowtimeHub({
       <View className="mt-4 items-center px-4">
         <View className="w-full rounded-[14px] border border-white/[0.08] bg-white/[0.03] p-4">
           <View className="mb-2 flex-row items-center gap-1.5">
-            <MaterialCommunityIcons
-              name="star-box-multiple-outline"
+            <StarIcon
               size={17}
               color={colors.gold}
             />
@@ -383,8 +388,7 @@ export default function ShowtimeHub({
           {movie.action === "watched" ? (
             <View className="py-1.5">
               <View className="mb-1 flex-row items-center gap-2">
-                <MaterialCommunityIcons
-                  name="check-decagram"
+                <SealCheckIcon
                   size={22}
                   color={colors.success}
                 />
@@ -409,8 +413,7 @@ export default function ShowtimeHub({
                   boxShadow: "0px 4px 8.0px rgba(245, 158, 11, 0.3)",
                 }}
               >
-                <MaterialCommunityIcons
-                  name="star-outline"
+                <StarIcon
                   size={18}
                   color={colors.surface1}
                 />
@@ -423,8 +426,7 @@ export default function ShowtimeHub({
         </View>
 
         <View className="mt-3.5 flex-row items-center gap-1.5">
-          <MaterialCommunityIcons
-            name="timer-sand"
+          <HourglassIcon
             size={14}
             color={colors.faintForeground}
           />

@@ -1,7 +1,12 @@
 import React from "react";
 import { Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  CheckCircleIcon,
+  InfoIcon,
+  WarningCircleIcon,
+  type IconProps,
+} from "phosphor-react-native";
 import type { ToastConfig, ToastConfigParams } from "react-native-toast-message";
 import { colors } from "./tokens.generated";
 
@@ -9,7 +14,7 @@ interface CinemaToastProps {
   text1?: string;
   text2?: string;
   onPress?: () => void;
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  icon: React.ComponentType<IconProps>;
   iconColor: string;
   accentBorderColor: string;
 }
@@ -18,7 +23,7 @@ const CinemaToast = ({
   text1,
   text2,
   onPress,
-  icon,
+  icon: Icon,
   iconColor,
   accentBorderColor,
 }: CinemaToastProps) => {
@@ -35,7 +40,7 @@ const CinemaToast = ({
       }}
     >
       <View className="items-center justify-center">
-        <MaterialCommunityIcons name={icon} size={22} color={iconColor} />
+        <Icon size={22} color={iconColor} />
       </View>
       <View className="flex-1">
         {text1 ? (
@@ -59,7 +64,7 @@ export const toastConfig: ToastConfig = {
       text1={text1}
       text2={text2}
       onPress={onPress}
-      icon="check-circle"
+      icon={CheckCircleIcon}
       iconColor={colors.success}
       accentBorderColor={colors.success}
     />
@@ -69,7 +74,7 @@ export const toastConfig: ToastConfig = {
       text1={text1}
       text2={text2}
       onPress={onPress}
-      icon="alert-circle"
+      icon={WarningCircleIcon}
       iconColor={colors.destructive}
       accentBorderColor={colors.destructive}
     />
@@ -79,7 +84,7 @@ export const toastConfig: ToastConfig = {
       text1={text1}
       text2={text2}
       onPress={onPress}
-      icon="information"
+      icon={InfoIcon}
       iconColor={colors.primary}
       accentBorderColor={colors.primary}
     />

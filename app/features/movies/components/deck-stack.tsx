@@ -2,7 +2,15 @@ import { useState, useCallback, useEffect } from "react";
 import {
   ActivityIndicator, Pressable, View, useWindowDimensions } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ArrowsClockwiseIcon,
+  CheckCircleIcon,
+  DiceFiveIcon,
+  EyeIcon,
+  FilmStripIcon,
+  StarIcon,
+  XIcon,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import Animated, {
   useSharedValue,
@@ -271,8 +279,7 @@ export default function DeckStack({
                   style={{ width: 14, height: 14 }}
                 />
               ) : (
-                <MaterialCommunityIcons
-                  name="dice-multiple"
+                <DiceFiveIcon
                   size={14}
                   color={colors.primary}
                 />
@@ -285,8 +292,7 @@ export default function DeckStack({
             </Pressable>
           ) : (
             <View className="flex-row items-center gap-1.5 rounded-[8px] border border-white/[0.08] bg-surface-4 px-2.5 py-[5px] opacity-55">
-              <MaterialCommunityIcons
-                name="dice-multiple"
+              <DiceFiveIcon
                 size={14}
                 color={colors.faintForeground}
               />
@@ -311,8 +317,7 @@ export default function DeckStack({
               boxShadow: "0px 12px 20.0px rgba(0, 0, 0, 0.5)",
             }}
           >
-            <MaterialCommunityIcons
-              name="filmstrip-off"
+            <FilmStripIcon
               size={48}
               color={colors.primary}
               style={{ marginBottom: 16 }}
@@ -330,8 +335,7 @@ export default function DeckStack({
                 accessibilityRole="button"
                 accessibilityLabel={closedContent.buttonText}
               >
-                <MaterialCommunityIcons
-                  name="sync"
+                <ArrowsClockwiseIcon
                   size={16}
                   color={colors.white}
                 />
@@ -448,8 +452,7 @@ export default function DeckStack({
               accessibilityRole="button"
               accessibilityLabel="Pass this film for today"
             >
-              <MaterialCommunityIcons
-                name="close"
+              <XIcon
                 size={18}
                 color={colors.faintForeground}
               />
@@ -465,8 +468,7 @@ export default function DeckStack({
               accessibilityRole="button"
               accessibilityLabel="Mark film as already seen"
             >
-              <MaterialCommunityIcons
-                name="eye-outline"
+              <EyeIcon
                 size={18}
                 color={colors.white}
               />
@@ -488,11 +490,11 @@ export default function DeckStack({
               accessibilityRole="button"
               accessibilityLabel="Pick film for tonight"
             >
-              <MaterialCommunityIcons
-                name={isPicked ? "check-circle" : "star"}
-                size={18}
-                color={colors.white}
-              />
+              {isPicked ? (
+                <CheckCircleIcon size={18} color={colors.white} />
+              ) : (
+                <StarIcon size={18} color={colors.white} />
+              )}
               <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
                 {isPicked ? "Picked" : "Pick"}
               </Text>

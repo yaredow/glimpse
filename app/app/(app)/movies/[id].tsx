@@ -9,7 +9,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ArrowLeftIcon } from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGetMovie } from "@/features/movies/hooks/query/use-get-movie";
 import type { MovieInteractionAction } from "@/features/movies/types/movies.type";
@@ -153,7 +153,7 @@ export default function MovieDetail() {
           accessibilityLabel="Go back"
           hitSlop={6}
         >
-          <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
+          <ArrowLeftIcon size={24} color="white" />
         </Pressable>
       </Animated.View>
 

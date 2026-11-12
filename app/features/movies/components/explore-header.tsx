@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LightningIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { cn } from "@/lib/utils";
 import { colors } from "@/lib/theme/tokens.generated";
@@ -66,8 +66,7 @@ export default function ExploreHeader({
           {isSyncing ? (
             <ActivityIndicator size={12} color={colors.primary} />
           ) : (
-            <MaterialCommunityIcons
-              name="lightning-bolt"
+            <LightningIcon
               size={14}
               color={
                 syncsRemaining > 0 ? colors.primary : colors.faintForeground

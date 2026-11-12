@@ -5,7 +5,13 @@ import { Text } from "@/components/ui/text";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  BookmarkIcon,
+  CheckIcon,
+  FilmSlateIcon,
+  FilmStripIcon,
+  StarIcon,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { cn } from "@/lib/utils";
 import { useGetHistory } from "@/features/movies/hooks/query/use-get-history";
@@ -111,8 +117,7 @@ export default function Journal() {
             className="w-full items-center justify-center bg-surface-5 p-1.5"
             style={{ height: cardHeight }}
           >
-            <MaterialCommunityIcons
-              name="filmstrip"
+            <FilmStripIcon
               size={28}
               color={colors.faintForeground}
             />
@@ -128,8 +133,7 @@ export default function Journal() {
         <View className="absolute left-1.5 right-1.5 top-1.5 flex-row justify-between">
           {item.vote_average > 0 ? (
             <View className="flex-row items-center gap-[3px] rounded-md bg-black/75 px-[5px] py-0.5">
-              <MaterialCommunityIcons
-                name="star"
+              <StarIcon
                 size={11}
                 color={colors.gold}
               />
@@ -145,11 +149,11 @@ export default function Journal() {
               item.action === "watched" ? "bg-emerald-500/85" : "bg-primary/85",
             )}
           >
-            <MaterialCommunityIcons
-              name={item.action === "watched" ? "check" : "bookmark"}
-              size={10}
-              color={colors.white}
-            />
+            {item.action === "watched" ? (
+              <CheckIcon size={10} color={colors.white} />
+            ) : (
+              <BookmarkIcon size={10} color={colors.white} />
+            )}
             <Text className="text-[9px] font-brandBold text-white">
               {formatDate(item.acted_at)}
             </Text>
@@ -165,8 +169,7 @@ export default function Journal() {
           </Text>
           {item.rating ? (
             <View className="mt-[3px] flex-row items-center gap-[3px]">
-              <MaterialCommunityIcons
-                name="star"
+              <StarIcon
                 size={9}
                 color={colors.gold}
               />
@@ -308,8 +311,7 @@ export default function Journal() {
           className="flex-1 items-center justify-center px-8"
           style={{ paddingBottom: Math.max(insets.bottom, 16) + 60 }}
         >
-          <MaterialCommunityIcons
-            name="movie-open-outline"
+          <FilmSlateIcon
             size={48}
             color={colors.faintForeground}
             style={{ marginBottom: 12 }}

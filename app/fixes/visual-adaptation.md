@@ -12,17 +12,17 @@
 
 | Area | Fact |
 |---|---|
-| Icons | 16 files still import `MaterialCommunityIcons` from `@expo/vector-icons`; 19 files use Phosphor |
-| Text colors | 107 `text-white`; plus `text-foreground`, `text-off-white`, `text-zinc-*` |
+| Icons | 17 files still import `MaterialCommunityIcons` from `@expo/vector-icons` (88 usages); 20 files use Phosphor |
+| Text colors | 107 `text-white`, 144 `text-zinc-*`, 7 `text-foreground`, 2 `text-off-white` |
 | Backgrounds | After token-layer: `bg-background` (#0C0C0E), `bg-surface-1` (#121212), `bg-surface-2` (#141414) coexist |
-| Gutters | `px-4` (profile), `px-5` (onboarding), `px-6` (auth) |
-| Inline styles | 66 `style={{ … }}` objects; many are legitimate (insets, Reanimated, gradients) |
-| Raw controls | 72 `<Pressable>` tags; `Button` is used in 7 places across 6 files |
-| Hardcoded colors | 15 hex + ~69 rgba outside `lib/theme` |
-| Radius | 10 raw `borderRadius` props; arbitrary `rounded-[Npx]` in several files |
-| Shadows | 15 `boxShadow`, 2 legacy shadow props |
-| Reduced motion | implemented in `check-email`, `forgot-password`, `tilted-marquee-hero`, `dialog`; missing elsewhere |
-| A11y | many raw `Pressable`s lack role/label/state; some touch targets < 44pt |
+| Gutters | `px-4` (34), `px-5` (12), `px-6` (7) |
+| Inline styles | 67 `style={{ … }}` objects; many are legitimate (insets, Reanimated, gradients) |
+| Raw controls | 73 `<Pressable>` tags; `Button` is used in 7 places across 6 files |
+| Hardcoded colors | 13 hex + 59 rgba lines outside `lib/theme`, across 19 files |
+| Radius | 10 raw `borderRadius` props; 86 arbitrary `rounded-[Npx]` |
+| Shadows | 16 `boxShadow`, 2 legacy shadow props |
+| Reduced motion | implemented in `check-email`, `forgot-password`, `tilted-marquee-hero`, `dialog`, `skeleton-loader`; missing elsewhere |
+| A11y | 49 `accessibilityRole` / 57 `accessibilityLabel`; many raw `Pressable`s lack state; some touch targets < 44pt |
 
 Known bugs:
 
@@ -33,6 +33,7 @@ Known bugs:
 - `components/ui/button.tsx` can let `{...props}` override the computed `disabled` value while loading.
 - `components/floating-tab-bar.tsx` uses `LayoutAnimation` + `UIManager.setLayoutAnimationEnabledExperimental` on the New Architecture; the intended animation does not play reliably.
 - `components/ui/glimpse-logo.tsx` is app brand code inside `components/ui` and still uses the old theme hook (token-layer removes the hook).
+- `features/movies/components/deck-stack.tsx` called JS state updates straight from a Reanimated `withTiming` completion callback, which crashes on the UI runtime when Pass / Seen / Pick is pressed. Fixed with `runOnJS` on this branch.
 
 ---
 
@@ -53,31 +54,31 @@ Known bugs:
 
 ### VA-0 · Baseline and rules
 
-- [ ] Capture the same screenshot set used in `token-layer.md` TL-0.
-- [ ] Screen gutter (locked): `px-4` = 16 px for app screens. Auth screens keep `px-6` for the hero shell only, documented in `auth-shell.tsx`.
-- [ ] Allowed literal list (locked):
+- [x] Capture the same screenshot set used in `token-layer.md` TL-0 (welcome, login, register, onboarding 1/2/4, Today, Journal, Profile). Movie detail, verdict modal, and check-email are still missing.
+- [x] Screen gutter (locked): `px-4` = 16 px for app screens. Auth screens keep `px-6` for the hero shell only, documented in `auth-shell.tsx`.
+- [x] Allowed literal list (locked):
   - YouTube brand red `#FF0000`;
   - pure black in shadows/overlays where no token applies;
   - everything else must be a token.
-- [ ] `text-white` (locked): allowed only for true-white emphasis such as the brand wordmark and primary-button labels; body and secondary text use the ramp.
+- [x] `text-white` (locked): allowed only for true-white emphasis such as the brand wordmark and primary-button labels; body and secondary text use the ramp.
 
 **Gate:** baseline screenshots stored; the three locked rules are respected in the PR.
 
 ### VA-1 · Icon family
 
-- [ ] Replace `MaterialCommunityIcons` with Phosphor in the 16 files:
+- [x] Replace `MaterialCommunityIcons` with Phosphor in the 16 files:
   - `app/(app)/(tabs)/index.tsx`, `journal.tsx`, `movies/[id].tsx`;
   - `features/movies/components/*` (action-confirm-modal, explore-header, movie-actions, verdict-modal, deck-stack, decision-vitals-strip, curator-pitch-card, movie-reviews, movie-header, mystery-card, cinema-trailer-modal, showtime-hub, where-to-watch);
   - `lib/theme/toast-config.tsx`.
-- [ ] Map each glyph by meaning (check the Phosphor export exists; do not guess):
+- [x] Map each glyph by meaning (check the Phosphor export exists; do not guess):
   `check-circle → CheckCircleIcon`, `alert-circle → WarningCircleIcon`,
   `information → InfoIcon`, `filmstrip → FilmStripIcon`, `wifi-off → WifiSlashIcon`,
   `youtube → YoutubeLogoIcon`, `movie-play-outline → PlayCircleIcon`,
   `arrow-right → ArrowRightIcon`, `arrow-u-left-top → ArrowUUpLeftIcon`,
   `calendar-blank → CalendarBlankIcon`, `user/account → UserIcon`,
   `lock → LockSimpleIcon`, `email → EnvelopeSimpleIcon`, `key → KeyIcon`.
-- [ ] Prefer `<Icon as={PhosphorIcon} className="text-…" />` so color follows the text token. Use `color={colors.*}` only when the API needs a string.
-- [ ] Remove `@expo/vector-icons` after the last use (coordinate with `dependency-lockfile-hygiene.md` DH-2).
+- [x] Prefer `<Icon as={PhosphorIcon} className="text-…" />` so color follows the text token. Use `color={colors.*}` only when the API needs a string.
+- [x] Remove `@expo/vector-icons` after the last use (coordinate with `dependency-lockfile-hygiene.md` DH-2).
 
 **Gate:** `grep -rn "@expo/vector-icons\|MaterialCommunityIcons" app components features lib` is empty; screenshots reviewed.
 

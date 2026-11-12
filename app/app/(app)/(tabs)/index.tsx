@@ -1,10 +1,18 @@
-import { useCallback, useMemo, useState, type ComponentProps } from "react";
+import { useCallback, useMemo, useState, type ComponentType } from "react";
 import {
   Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ArrowRightIcon,
+  ArrowUUpLeftIcon,
+  CheckCircleIcon,
+  FilmStripIcon,
+  PlayCircleIcon,
+  WifiSlashIcon,
+  type IconProps,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useGetTodaysGrid } from "@/features/movies/hooks/query/use-today-grid";
@@ -30,7 +38,7 @@ const PILL_SHADOW = {
 };
 
 interface GridStateCardProps {
-  icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
+  icon: ComponentType<IconProps>;
   title: string;
   subtitle: string;
   actionLabel?: string;
@@ -38,7 +46,7 @@ interface GridStateCardProps {
 }
 
 function GridStateCard({
-  icon,
+  icon: Icon,
   title,
   subtitle,
   actionLabel,
@@ -46,8 +54,7 @@ function GridStateCard({
 }: GridStateCardProps) {
   return (
     <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-surface-4 px-6 py-8">
-      <MaterialCommunityIcons
-        name={icon}
+      <Icon
         size={42}
         color={colors.primary}
         style={{ marginBottom: 4 }}
@@ -614,7 +621,7 @@ export default function TodayTab() {
         ) : isError ? (
           <View className="flex-1 items-center justify-center">
             <GridStateCard
-              icon="wifi-off"
+              icon={WifiSlashIcon}
               title="Couldn&apos;t load tonight&apos;s reel"
               subtitle="We couldn&apos;t reach the cinema. Check your connection and try again."
               actionLabel="Try again"
@@ -626,7 +633,7 @@ export default function TodayTab() {
         ) : movies.length === 0 ? (
           <View className="flex-1 items-center justify-center">
             <GridStateCard
-              icon="filmstrip-off"
+              icon={FilmStripIcon}
               title="Tonight&apos;s reel is empty"
               subtitle="No films were drawn for you yet. Pull a fresh batch to start choosing."
               actionLabel="Draw a fresh reel"
@@ -666,8 +673,7 @@ export default function TodayTab() {
                     accessibilityRole="button"
                     accessibilityLabel={`Lock in ${tonightPick.title}`}
                   >
-                    <MaterialCommunityIcons
-                      name="movie-play-outline"
+                    <PlayCircleIcon
                       size={17}
                       color={colors.white}
                     />
@@ -690,8 +696,7 @@ export default function TodayTab() {
                       <Text className="text-[13px] tracking-[0.2px] font-brandMedium text-zinc-400">
                         Browse other movies
                       </Text>
-                      <MaterialCommunityIcons
-                        name="arrow-right"
+                      <ArrowRightIcon
                         size={14}
                         color={colors.subtleForeground}
                       />
@@ -710,8 +715,7 @@ export default function TodayTab() {
                       : `Return to ${tonightPick.title}`
                   }
                 >
-                  <MaterialCommunityIcons
-                    name="arrow-u-left-top"
+                  <ArrowUUpLeftIcon
                     size={17}
                     color={colors.primary}
                   />
@@ -727,8 +731,7 @@ export default function TodayTab() {
               )
             ) : (
               <View className="flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-5 px-[18px] py-2.5">
-                <MaterialCommunityIcons
-                  name="check-circle"
+                <CheckCircleIcon
                   size={16}
                   color={colors.success}
                 />

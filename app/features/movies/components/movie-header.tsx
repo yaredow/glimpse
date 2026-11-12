@@ -2,7 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Image } from "expo-image";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FilmStripIcon, PlayIcon } from "phosphor-react-native";
 import { tmdbImage } from "../constants/images";
 import type { Movie } from "../types/movies.type";
 import { colors } from "@/lib/theme/tokens.generated";
@@ -89,7 +89,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
               accessibilityRole="button"
               accessibilityLabel="Watch trailer"
             >
-              <MaterialCommunityIcons name="play" size={14} color={colors.white} />
+              <PlayIcon size={14} color={colors.white} />
               <Text className="text-[11px] tracking-[0.6px] font-brandBold text-white">
                 TRAILER
               </Text>
@@ -107,7 +107,7 @@ export default function MovieHeader({ movie, onTrailerPress }: MovieHeaderProps)
           />
         ) : (
           <View className="h-36 w-24 items-center justify-center rounded-[8px] border border-white/[0.2] bg-surface-6">
-            <MaterialCommunityIcons name="filmstrip" size={32} color="#666" />
+            <FilmStripIcon size={32} color="#666" />
           </View>
         )}
       </View>

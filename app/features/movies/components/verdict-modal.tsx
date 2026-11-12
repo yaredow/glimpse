@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { CheckCircleIcon, StarIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import {
   Dialog,
@@ -53,8 +53,7 @@ export default function VerdictModal({
 
         <View className="items-center gap-4">
           <View className="h-14 w-14 items-center justify-center rounded-[28px] bg-emerald-500/[0.15]">
-            <MaterialCommunityIcons
-              name="check-circle"
+            <CheckCircleIcon
               size={30}
               color={colors.success}
             />
@@ -80,9 +79,9 @@ export default function VerdictModal({
                   accessibilityState={{ selected: isFilled }}
                   accessibilityLabel={`Rate ${star} of 5 stars`}
                 >
-                  <MaterialCommunityIcons
-                    name={isFilled ? "star" : "star-outline"}
+                  <StarIcon
                     size={36}
+                    weight={isFilled ? "fill" : "regular"}
                     color={
                       isFilled ? colors.gold : "rgba(255, 255, 255, 0.2)"
                     }
