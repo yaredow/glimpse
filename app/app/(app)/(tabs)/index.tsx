@@ -592,13 +592,13 @@ export default function TodayTab() {
 
   if (!isPending && isShowtimeMode && tonightPick) {
     return (
-      <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+      <View className="flex-1 bg-background">
         <ShowtimeHub
           movie={tonightPick}
           onLogWatched={handleLogWatched}
           onOpenDetails={(m) => handleViewMovie(m, true)}
         />
-      </SafeAreaView>
+      </View>
     );
   }
 

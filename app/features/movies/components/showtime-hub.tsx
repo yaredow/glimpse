@@ -5,6 +5,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -51,8 +52,9 @@ export default function ShowtimeHub({
   onLogWatched,
   onOpenDetails,
 }: ShowtimeHubProps) {
+  const insets = useSafeAreaInsets();
   const { width: SW } = useWindowDimensions();
-  const HERO_H = Math.round(SW * 0.88);
+  const HERO_H = Math.round(SW * 0.88) + insets.top;
   const { data: detailData } = useGetMovie(movie.movie_id);
   const movieDetails = detailData?.movie;
 
@@ -212,7 +214,9 @@ export default function ShowtimeHub({
 
   return (
     <ScrollView
-      contentContainerStyle={{ paddingBottom: 60 }}
+      contentContainerStyle={{
+        paddingBottom: Math.max(insets.bottom, 16) + 84,
+      }}
       showsVerticalScrollIndicator={false}
     >
       {/* 1. CINEMA HERO */}
@@ -234,11 +238,12 @@ export default function ShowtimeHub({
 
         <LinearGradient
           colors={[
-            withAlpha(colors.background, 0.15),
+            withAlpha(colors.background, 0.45),
+            withAlpha(colors.background, 0.05),
             withAlpha(colors.background, 0.65),
             colors.background,
           ]}
-          locations={[0, 0.5, 1]}
+          locations={[0, 0.25, 0.7, 1]}
           style={AbsoluteFill}
         />
 
