@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { recordInteraction } from "../../services/movie.service";
 import { moviesKeys } from "../../constants/movies.keys";
+import { isJournalAction } from "../../utils/deck";
 import type { GridMovie } from "../../types/movies.type";
 
 type TodayGrid = { grid: GridMovie[] };
@@ -26,6 +27,9 @@ export const useRecordInteraction = () => {
             : previous,
       );
       queryClient.invalidateQueries({ queryKey: moviesKeys.todayGrid() });
+      if (isJournalAction(variables.action)) {
+        queryClient.invalidateQueries({ queryKey: moviesKeys.historyRoot() });
+      }
     },
   });
 };

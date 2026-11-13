@@ -16,6 +16,7 @@ import * as Haptics from "expo-haptics";
 import { cn } from "@/lib/utils";
 import { useGetHistory } from "@/features/movies/hooks/query/use-get-history";
 import type { HistoryMovie } from "@/features/movies/types/movies.type";
+import { isWatchedEntry } from "@/features/movies/utils/deck";
 import { colors } from "@/lib/theme/tokens.generated";
 
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342";
@@ -37,15 +38,19 @@ export default function Journal() {
 
   const filteredHistory = useMemo(() => {
     if (activeFilter === "all") return allHistory;
+    if (activeFilter === "watched") {
+      return allHistory.filter((item) => isWatchedEntry(item.action));
+    }
     return allHistory.filter(
       (item) =>
-        item.action === activeFilter ||
-        (activeFilter === "pick_tonight" && item.action === "watchlist_add"),
+        item.action === "pick_tonight" || item.action === "watchlist_add",
     );
   }, [allHistory, activeFilter]);
 
   const stats = useMemo(() => {
-    const watchedCount = allHistory.filter((i) => i.action === "watched").length;
+    const watchedCount = allHistory.filter((i) =>
+      isWatchedEntry(i.action),
+    ).length;
     const picksCount = allHistory.filter(
       (i) => i.action === "pick_tonight" || i.action === "watchlist_add",
     ).length;
@@ -92,6 +97,7 @@ export default function Journal() {
   };
 
   const renderItem = ({ item }: { item: HistoryMovie }) => {
+    const isWatched = isWatchedEntry(item.action);
     const posterUri = item.poster_path
       ? item.poster_path.startsWith("http")
         ? item.poster_path
@@ -147,10 +153,10 @@ export default function Journal() {
           <View
             className={cn(
               "flex-row items-center gap-1 rounded-md px-1.5 py-0.5",
-              item.action === "watched" ? "bg-emerald-500/85" : "bg-primary/85",
+              isWatched ? "bg-emerald-500/85" : "bg-primary/85",
             )}
           >
-            {item.action === "watched" ? (
+            {isWatched ? (
               <CheckIcon size={10} color={colors.white} />
             ) : (
               <BookmarkIcon size={10} color={colors.white} />

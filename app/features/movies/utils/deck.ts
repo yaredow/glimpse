@@ -16,6 +16,24 @@ export function isResolvedAction(
   );
 }
 
+/** A "seen before" entry is a watched entry in the Journal. */
+export function isWatchedEntry(
+  action?: MovieInteractionAction | string | null,
+) {
+  return action === "watched" || action === "seen_before";
+}
+
+/** Actions that can add or change a Journal entry. */
+export function isJournalAction(
+  action?: MovieInteractionAction | string | null,
+) {
+  return (
+    isWatchedEntry(action) ||
+    action === "watchlist_add" ||
+    action === "pick_tonight"
+  );
+}
+
 export function curatorNote(movie: { vague_description?: string }) {
   const note = movie.vague_description?.trim();
   if (note) return note;

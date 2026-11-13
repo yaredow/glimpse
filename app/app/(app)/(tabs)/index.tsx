@@ -20,7 +20,7 @@ import { useRecordInteraction } from "@/features/movies/hooks/mutations/use-reco
 import { useSyncGrid } from "@/features/movies/hooks/mutations/use-sync-grid";
 import { useDealersChoice } from "@/features/movies/hooks/mutations/use-dealers-choice";
 import { useProfile } from "@/features/profile/hooks/use-profile";
-import type { GridMovie } from "@/features/movies/types/movies.type";
+import type { GridMovie, ScreenRect } from "@/features/movies/types/movies.type";
 import ExploreHeader from "@/features/movies/components/explore-header";
 import DeckStack from "@/features/movies/components/deck-stack";
 import SkeletonLoader from "@/features/movies/components/skeleton-loader";
@@ -30,6 +30,7 @@ import ActionConfirmModal, {
 } from "@/features/movies/components/action-confirm-modal";
 import ShowtimeHub from "@/features/movies/components/showtime-hub";
 import { isResolvedAction } from "@/features/movies/utils/deck";
+import { flyToJournal } from "@/features/movies/store/journal-flight.store";
 import { deriveProgramTheme } from "@/features/movies/utils/program";
 import { colors } from "@/lib/theme/tokens.generated";
 import { shadows } from "@/lib/theme/shadows";
@@ -376,7 +377,7 @@ export default function TodayTab() {
   );
 
   const handleSeen = useCallback(
-    (movie: GridMovie) => {
+    (movie: GridMovie, origin?: ScreenRect) => {
       if (!movie.grid_session_id) return;
       recordInteraction.mutate(
         {
@@ -388,10 +389,11 @@ export default function TodayTab() {
         {
           onSuccess: () => {
             Toast.show({
-              type: "info",
-              text1: "Marked as Seen",
-              text2: `"${movie.title}" is resolved.`,
+              type: "success",
+              text1: "Added to Journal",
+              text2: `"${movie.title}" is logged as already seen.`,
             });
+            if (origin) flyToJournal(origin);
           },
           onError: (err) => {
             Toast.show({

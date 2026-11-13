@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import {
   Pressable,
   View,
@@ -5,6 +6,11 @@ import {
 import Animated, {
   LinearTransition,
   ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { Text } from "@/components/ui/text";
 import type { BottomTabBarProps } from "expo-router/tabs";
@@ -17,6 +23,10 @@ import {
 import { cn } from "@/lib/utils";
 import { colors } from "@/lib/theme/tokens.generated";
 import { shadows } from "@/lib/theme/shadows";
+import {
+  journalTabAnchor,
+  useJournalFlightStore,
+} from "@/features/movies/store/journal-flight.store";
 
 interface TabItemConfig {
   label: string;
@@ -41,6 +51,51 @@ const TAB_CONFIGS: Record<string, TabItemConfig> = {
     Icon: UserIcon,
   },
 };
+
+function JournalTabIcon({ focused }: { focused: boolean }) {
+  const arrivals = useJournalFlightStore((state) => state.arrivals);
+  const lastArrivals = useRef(arrivals);
+  const scale = useSharedValue(1);
+
+  useEffect(() => {
+    if (arrivals === lastArrivals.current) return;
+    lastArrivals.current = arrivals;
+    scale.value = withSequence(
+      withTiming(1.3, { duration: 130, reduceMotion: ReduceMotion.System }),
+      withSpring(1, {
+        damping: 12,
+        stiffness: 220,
+        reduceMotion: ReduceMotion.System,
+      }),
+    );
+  }, [arrivals, scale]);
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View style={pulseStyle}>
+      <View
+        ref={(node) => {
+          journalTabAnchor.current = node;
+          return () => {
+            if (journalTabAnchor.current === node) {
+              journalTabAnchor.current = null;
+            }
+          };
+        }}
+        collapsable={false}
+      >
+        <BookmarkSimpleIcon
+          size={20}
+          color={focused ? colors.primary : colors.mutedForeground}
+          weight={focused ? "fill" : "regular"}
+        />
+      </View>
+    </Animated.View>
+  );
+}
 
 export function FloatingTabBar({
   state,
@@ -116,11 +171,15 @@ export function FloatingTabBar({
                     : "min-w-[44px] border border-transparent px-4 py-2.5",
                 )}
               >
-                <Icon
-                  size={20}
-                  color={isFocused ? colors.primary : colors.mutedForeground}
-                  weight={isFocused ? "fill" : "regular"}
-                />
+                {route.name === "journal" ? (
+                  <JournalTabIcon focused={isFocused} />
+                ) : (
+                  <Icon
+                    size={20}
+                    color={isFocused ? colors.primary : colors.mutedForeground}
+                    weight={isFocused ? "fill" : "regular"}
+                  />
+                )}
                 {isFocused ? (
                   <Text
                     className="text-[12.5px] tracking-[0.4px] font-brandBold text-white"

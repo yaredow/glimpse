@@ -14,7 +14,7 @@ run/api:
 ## db/psql: connect to the database with psql
 .PHONY: db/psql
 db/psql:
-	psql "${DB_DSN}"
+	psql "${DATABASE_URL}"
 
 ## db/migration/new: create a new SQL migration file (e.g. make db/migration/new name=add_users)
 .PHONY: db/migration/new
@@ -26,20 +26,20 @@ db/migration/new:
 .PHONY: db/migration/up
 db/migration/up:
 	@echo "Running up migrations..."
-	migrate -path ./migrations -database ${DB_DSN} up
+	migrate -path ./migrations -database ${DATABASE_URL} up
 
 ## db/migration/down: roll back the most recent migration
 .PHONY: db/migration/down
 db/migration/down:
 	@echo "Running down migrations..."
-	migrate -path ./migrations -database ${DB_DSN} down 1
+	migrate -path ./migrations -database ${DATABASE_URL} down 1
 
 ## demo/reset: clear nightly state for a demo user (e.g. make demo/reset email=demo@example.com)
 .PHONY: demo/reset
 demo/reset:
 	@test -n "${email}" || (echo "usage: make demo/reset email=demo@example.com" && exit 1)
 	@echo "Resetting demo state for ${email}..."
-	psql "${DB_DSN}" -v ON_ERROR_STOP=1 -v email="${email}" -f ./scripts/reset_demo_state.sql
+	psql "${DATABASE_URL}" -v ON_ERROR_STOP=1 -v email="${email}" -f ./scripts/reset_demo_state.sql
 
 ## tidy: format code and tidy/verify Go modules
 .PHONY: tidy

@@ -33,6 +33,13 @@ export interface Movie {
   is_watched?: boolean;
 }
 
+export interface ScreenRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export type MovieInteractionAction =
   | "revealed"
   | "watched"
@@ -84,7 +91,7 @@ export interface DealersChoiceResponse {
 
 export interface HistoryMovie {
   movie_id: number;
-  action: "watched" | "watchlist_add" | string;
+  action: "watched" | "seen_before" | "watchlist_add" | "pick_tonight" | string;
   acted_at: string;
   rating?: number | null;
   title: string;

@@ -43,7 +43,7 @@ export default function MovieActions({
     currentAction === "pick_tonight" || currentAction === "watchlist_add";
   const isSeen = currentAction === "seen_before";
   const isSkipped = currentAction === "skipped";
-  const isWatched = currentAction === "watched" || movie.is_watched;
+  const isWatched = currentAction === "watched" || isSeen || movie.is_watched;
   const isLocked = currentAction === "locked_in";
   const isFinalized = isLocked || isSeen || isSkipped || isWatched;
 
@@ -78,9 +78,9 @@ export default function MovieActions({
             });
           } else if (action === "seen_before") {
             Toast.show({
-              type: "info",
-              text1: "Marked as Seen",
-              text2: "This card is resolved.",
+              type: "success",
+              text1: "Added to Journal",
+              text2: `"${movie.title}" is logged as already seen.`,
             });
             onActionComplete?.();
           } else if (action === "skipped") {
@@ -129,7 +129,7 @@ export default function MovieActions({
   const finalizedSubtitle = isLocked
     ? "Tonight's feature is set."
     : isSeen
-      ? "This card is resolved."
+      ? "Saved to your Journal."
       : isSkipped
         ? "This card is resolved."
         : "Saved to your Journal.";

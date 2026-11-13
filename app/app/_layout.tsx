@@ -24,6 +24,7 @@ import { useGetPreferences } from "@/features/onboarding/hooks/queries/use-get-p
 import { useOnboardingStore } from "@/features/onboarding/store/onboarding.store";
 import { useFinishOnboarding } from "@/features/onboarding/hooks/mutations/use-finish-onboarding";
 import AnimatedSplashScreen from "@/components/ui/animated-splash-screen";
+import { JournalFlightOverlay } from "@/features/movies/components/journal-flight-overlay";
 import { colors } from "@/lib/theme/tokens.generated";
 
 SplashScreen.preventAutoHideAsync();
@@ -63,6 +64,7 @@ export default function RootLayout() {
               hasSeenWelcome={hasSeenWelcome}
             />
           ) : null}
+          <JournalFlightOverlay />
           <AnimatedSplashScreen isReady={isReady} />
           <Toast config={toastConfig} />
           <PortalHost />

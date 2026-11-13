@@ -2,6 +2,7 @@ package postgres_test
 
 import (
 	"context"
+	"regexp"
 	"testing"
 	"time"
 
@@ -162,7 +163,11 @@ func TestInteractionRepository_GetHistory(t *testing.T) {
 		&director, cast, &trailer,
 	)
 
-	mock.ExpectQuery(`WITH ranked_history AS`).
+	// The history feed must include seen_before so the Journal reflects the
+	// "already seen" action as a watched entry.
+	mock.ExpectQuery(regexp.QuoteMeta(
+		"AND ui.action IN ('watched', 'seen_before', 'watchlist_add', 'pick_tonight')",
+	)).
 		WithArgs(int64(1), "watched").
 		WillReturnRows(rows)
 

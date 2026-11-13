@@ -1,6 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
-  ActivityIndicator, Pressable, View, useWindowDimensions } from "react-native";
+  ActivityIndicator,
+  Pressable,
+  View,
+  useWindowDimensions,
+  type PressableInstance,
+} from "react-native";
 import { Text } from "@/components/ui/text";
 import {
   ArrowsClockwiseIcon,
@@ -24,7 +29,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { cn } from "@/lib/utils";
 import MysteryCard, { CardStamp } from "./mystery-card";
-import type { GridMovie } from "../types/movies.type";
+import type { GridMovie, ScreenRect } from "../types/movies.type";
 import { isResolvedAction } from "../utils/deck";
 import { colors } from "@/lib/theme/tokens.generated";
 import { shadows } from "@/lib/theme/shadows";
@@ -37,7 +42,7 @@ interface DeckStackProps {
   syncsRemaining?: number;
   onReveal?: (movie: GridMovie) => void;
   onPickTonight: (movie: GridMovie) => void;
-  onSeen: (movie: GridMovie) => void;
+  onSeen: (movie: GridMovie, origin?: ScreenRect) => void;
   onSkip: (movie: GridMovie) => void;
   onViewDetails: (movie: GridMovie) => void;
   onReshuffle?: () => void;
@@ -131,6 +136,8 @@ export default function DeckStack({
   const cardHeight = targetHeight;
 
   const [activeStamp, setActiveStamp] = useState<CardStamp>(null);
+  const seenButtonRef = useRef<PressableInstance>(null);
+  const seenOriginRef = useRef<ScreenRect | undefined>(undefined);
 
   const isDeckCompleted =
     movies.length > 0 &&
@@ -254,9 +261,16 @@ export default function DeckStack({
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setActiveStamp("SEEN");
 
+    seenOriginRef.current = undefined;
+    seenButtonRef.current?.measureInWindow((x, y, width, height) => {
+      if (width > 0 && height > 0) {
+        seenOriginRef.current = { x, y, width, height };
+      }
+    });
+
     animateCardExit("right", () => {
       setActiveStamp(null);
-      onSeen(activeMovie);
+      onSeen(activeMovie, seenOriginRef.current);
       onActiveIndexChange(activeIndex + 1);
     });
   }, [activeMovie, animateCardExit, onSeen, onActiveIndexChange, activeIndex]);
@@ -489,6 +503,8 @@ export default function DeckStack({
 
             {/* Seen */}
             <Pressable
+              ref={seenButtonRef}
+              collapsable={false}
               onPress={handleSeen}
               className="min-h-[46px] flex-1 flex-row items-center justify-center gap-1.5 rounded-lg border border-white/[0.08] bg-surface-5 py-3 active:opacity-75"
               accessibilityRole="button"
