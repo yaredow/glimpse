@@ -143,7 +143,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
           size={18}
           color={colors.primary}
         />
-        <Text className="text-[18px] tracking-[-0.3px] font-brandBold text-white">
+        <Text className="text-[18px] tracking-[-0.3px] font-brandBold text-foreground">
           Where to Watch
         </Text>
       </View>
@@ -192,7 +192,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   )}
                   <View className="justify-center">
                     <Text
-                      className="text-[13.5px] tracking-[0.1px] font-brandSemiBold text-white"
+                      className="text-[13.5px] tracking-[0.1px] font-brandSemiBold text-foreground"
                       numberOfLines={1}
                     >
                       {prov.name}
@@ -335,7 +335,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <GoogleLogoIcon size={15} color={colors.white} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   Google
                 </Text>
               </Pressable>
@@ -349,7 +349,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <PlayCircleIcon size={15} color={colors.gold} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   JustWatch
                 </Text>
               </Pressable>
@@ -363,7 +363,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <FilmStripIcon size={15} color={colors.success} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   Letterboxd
                 </Text>
               </Pressable>
@@ -377,7 +377,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <StarIcon size={15} color={colors.gold} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   IMDb
                 </Text>
               </Pressable>
@@ -391,7 +391,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
                 <MonitorPlayIcon size={15} color={colors.primary} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   Netflix
                 </Text>
               </Pressable>

@@ -43,7 +43,29 @@ const FORBIDDEN_PATTERNS = [
     pattern: /\btext-error-container\b(?!-foreground)/,
     message: "uses text-error-container instead of text-error-container-foreground",
   },
+  {
+    pattern: /\btext-zinc-\d+\b/,
+    message: "uses legacy text-zinc-* instead of the foreground ramp",
+  },
+  {
+    pattern: /\btext-off-white\b/,
+    message: "uses retired text-off-white instead of the foreground ramp",
+  },
+  {
+    pattern: /\btext-muted-foreground\b/,
+    message: "uses retired text-muted-foreground instead of text-subtle-foreground",
+  },
 ];
+
+// Arbitrary spacing is allowed only for documented one-offs that do not map
+// cleanly to the 4px Tailwind scale. Everything else must use the scale.
+const ALLOWED_ARBITRARY_SPACING = new Set([
+  "components/ui/text.tsx:px-[0.3rem]",
+  "components/ui/text.tsx:py-[0.2rem]",
+  "features/auth/components/brand-lockup.tsx:ml-[3px]",
+]);
+
+const SPACING_PATTERN = /\b(?:gap|space-[xy]|[pm][trblxy]?)-\[[^\]]+\]/g;
 
 function* lines(file) {
   const source = fs.readFileSync(file, "utf8");
@@ -83,7 +105,17 @@ for (const dir of ROOTS) {
         }
       }
 
-      // 2. Color checks outside lib/theme and generated/test files
+      // 2. Arbitrary spacing outside the documented exception list
+      for (const match of line.matchAll(SPACING_PATTERN)) {
+        const key = `${relativePath}:${match[0]}`;
+        if (!ALLOWED_ARBITRARY_SPACING.has(key)) {
+          failures.push(
+            `${relativePath}:${number} arbitrary spacing "${match[0]}" is not in the documented exception list\n    ${line.trim()}`,
+          );
+        }
+      }
+
+      // 3. Color checks outside lib/theme and generated/test files
       if (!isThemeFile && !isTestOrGen) {
         // Strip URLs, comments, and strings that aren't colors
         const trimmed = line.trim();
@@ -122,5 +154,5 @@ if (failures.length > 0) {
 }
 
 console.log(
-  "Visual adaptation checks passed (no vector-icons, no rogue hex/rgba, no LayoutAnimation, no arbitrary rounded).",
+  "Visual adaptation checks passed (no vector-icons, no rogue hex/rgba, no LayoutAnimation, no arbitrary rounded, text ramp enforced, no undocumented arbitrary spacing).",
 );

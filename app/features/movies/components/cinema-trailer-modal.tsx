@@ -175,7 +175,7 @@ export default function CinemaTrailerModal({
             {playerError ? (
               <View className="absolute inset-0 items-center justify-center gap-2 bg-background px-6">
                 <YoutubeLogoIcon size={44} color="#FF0000" />
-                <Text className="mt-1 text-[16px] font-brandBold text-white">
+                <Text className="mt-1 text-[16px] font-brandBold text-foreground">
                   Studio Restricted Playback
                 </Text>
                 <Text className="mb-1.5 text-center text-[13px] leading-[18px] font-brand text-subtle-foreground">
@@ -210,7 +210,7 @@ export default function CinemaTrailerModal({
               className="w-full max-w-[280px] flex-row items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-5 py-3 active:opacity-80"
             >
               <YoutubeLogoIcon size={20} color="#FF0000" />
-              <Text className="text-[13px] font-brandSemiBold text-white">
+              <Text className="text-[13px] font-brandSemiBold text-foreground">
                 Open in YouTube App
               </Text>
               <ArrowUpRightIcon

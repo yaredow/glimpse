@@ -310,7 +310,7 @@ export default function DeckStack({
                   color={colors.primary}
                 />
               )}
-              <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-white">
+              <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-foreground">
                 {isDealersChoiceLoading || isShuffling
                   ? "Shuffling..."
                   : "Dealer's Choice"}
@@ -348,7 +348,7 @@ export default function DeckStack({
               color={colors.primary}
               style={{ marginBottom: 16 }}
             />
-            <Text className="mb-2 text-center text-[20px] font-brandBold text-white">
+            <Text className="mb-2 text-center text-[20px] font-brandBold text-foreground">
               {closedContent.title}
             </Text>
             <Text className="px-2.5 text-center text-[14px] leading-5 font-brand text-subtle-foreground">
@@ -363,9 +363,9 @@ export default function DeckStack({
               >
                 <ArrowsClockwiseIcon
                   size={16}
-                  color={colors.white}
+                  color={colors.foreground}
                 />
-                <Text className="text-[13px] font-brandSemiBold text-white">
+                <Text className="text-[13px] font-brandSemiBold text-foreground">
                   {closedContent.buttonText}
                 </Text>
               </Pressable>
@@ -496,9 +496,9 @@ export default function DeckStack({
             >
               <EyeIcon
                 size={18}
-                color={colors.white}
+                color={colors.foreground}
               />
-              <Text className="text-[13px] font-brandSemiBold text-white">
+              <Text className="text-[13px] font-brandSemiBold text-foreground">
                 Seen
               </Text>
             </Pressable>
@@ -517,9 +517,9 @@ export default function DeckStack({
               accessibilityLabel="Pick film for tonight"
             >
               {isPicked ? (
-                <CheckCircleIcon size={18} color={colors.white} />
+                <CheckCircleIcon size={18} color={colors.white} weight="fill" />
               ) : (
-                <StarIcon size={18} color={colors.white} />
+                <StarIcon size={18} color={colors.white} weight="fill" />
               )}
               <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
                 {isPicked ? "Picked" : "Pick"}

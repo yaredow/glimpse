@@ -313,8 +313,8 @@ export default function ShowtimeHub({
               boxShadow: shadows.glow,
             }}
           >
-            <MagnifyingGlassIcon size={20} color={colors.white} />
-            <Text className="text-[13px] tracking-[0.6px] font-brandBold text-white">
+            <MagnifyingGlassIcon size={20} color={colors.foreground} />
+            <Text className="text-[13px] tracking-[0.6px] font-brandBold text-foreground">
               FIND WHERE TO WATCH
             </Text>
           </Pressable>
@@ -357,7 +357,7 @@ export default function ShowtimeHub({
             color={colors.subtleForeground}
           />
           <View className="flex-1">
-            <Text className="text-[13px] font-brandBold text-white">
+            <Text className="text-[13px] font-brandBold text-foreground">
               {runtimeFormatted ? `${runtimeFormatted}` : "Runtime TBA"}
               {estimatedEndTime ? ` · Finishes ~${estimatedEndTime}` : ""}
             </Text>
@@ -375,9 +375,9 @@ export default function ShowtimeHub({
           >
             <PlayCircleIcon
               size={15}
-              color={colors.white}
+              color={colors.foreground}
             />
-            <Text className="text-[10px] tracking-[0.6px] font-brandBold text-white">
+            <Text className="text-[10px] tracking-[0.6px] font-brandBold text-foreground">
               PRE-SHOW
             </Text>
           </Pressable>
@@ -403,8 +403,9 @@ export default function ShowtimeHub({
                 <SealCheckIcon
                   size={22}
                   color={colors.success}
+                  weight="fill"
                 />
-                <Text className="text-[15px] font-brandBold text-white">
+                <Text className="text-[15px] font-brandBold text-foreground">
                   Verdict Recorded
                 </Text>
               </View>

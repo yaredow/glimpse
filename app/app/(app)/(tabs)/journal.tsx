@@ -136,6 +136,7 @@ export default function Journal() {
               <StarIcon
                 size={11}
                 color={colors.gold}
+                weight="fill"
               />
               <Text className="text-[9px] font-brandBold text-white">
                 {item.vote_average.toFixed(1)}
@@ -162,7 +163,7 @@ export default function Journal() {
 
         <View className="px-1.5 py-1.5">
           <Text
-            className="text-[11px] font-brandSemiBold text-white"
+            className="text-[11px] font-brandSemiBold text-foreground"
             numberOfLines={1}
           >
             {item.title}
@@ -172,6 +173,7 @@ export default function Journal() {
               <StarIcon
                 size={9}
                 color={colors.gold}
+                weight="fill"
               />
               <Text className="text-[9px] font-brandBold text-amber-500">
                 {item.rating}/5
@@ -187,7 +189,7 @@ export default function Journal() {
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <View className="px-4 pb-3 pt-2">
         <View className="flex-row items-baseline gap-1">
-          <Text className="text-[22px] tracking-[2px] font-brandExtraBold text-white">
+          <Text className="text-[22px] tracking-[2px] font-brandExtraBold text-foreground">
             JOURNAL
           </Text>
           <View className="mb-0.5 h-[5px] w-[5px] rounded-full bg-primary" />
@@ -218,7 +220,7 @@ export default function Journal() {
 
         <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-5 px-2 py-2.5">
           <Text
-            className="text-[17px] font-brandBold text-white"
+            className="text-[17px] font-brandBold text-foreground"
             numberOfLines={1}
           >
             {stats.topGenre}
@@ -316,7 +318,7 @@ export default function Journal() {
             color={colors.faintForeground}
             style={{ marginBottom: 12 }}
           />
-          <Text className="mb-1.5 text-center text-[17px] font-brandBold text-white">
+          <Text className="mb-1.5 text-center text-[17px] font-brandBold text-foreground">
             {activeFilter === "watched"
               ? "No watched films yet"
               : activeFilter === "pick_tonight"
@@ -332,7 +334,7 @@ export default function Journal() {
             onPress={() => router.push("/(app)/(tabs)")}
             className="min-h-[44px] justify-center rounded-lg border border-white/[0.08] bg-surface-6 px-4 py-2.5"
           >
-            <Text className="text-[13px] font-brandSemiBold text-white">
+            <Text className="text-[13px] font-brandSemiBold text-foreground">
               Explore Today&apos;s Batch
             </Text>
           </Pressable>

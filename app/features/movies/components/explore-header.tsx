@@ -78,7 +78,7 @@ export default function ExploreHeader({
           <Text
             className={cn(
               "text-[11px] tracking-[0.6px] font-brandBold",
-              syncsRemaining > 0 ? "text-white" : "text-faint-foreground",
+              syncsRemaining > 0 ? "text-foreground" : "text-faint-foreground",
             )}
           >
             {isSyncing

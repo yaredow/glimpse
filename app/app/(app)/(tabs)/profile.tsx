@@ -91,7 +91,7 @@ export default function Profile() {
         {/* Header / Avatar */}
         <View className="items-center py-2.5">
           <View className="mb-2.5 h-16 w-16 items-center justify-center rounded-full border-[1.5px] border-primary/40 bg-surface-5">
-            <Text className="text-[22px] tracking-[0.5px] font-brandBold text-white">
+            <Text className="text-[22px] tracking-[0.5px] font-brandBold text-foreground">
               {user ? getInitials(user.name) : "?"}
             </Text>
           </View>
@@ -100,7 +100,7 @@ export default function Profile() {
             <View className="mt-1 h-[22px] w-[140px] rounded bg-surface-5" />
           ) : (
             <>
-              <Text className="text-[20px] leading-[26px] tracking-[-0.3px] font-brandBold text-white">
+              <Text className="text-[20px] leading-[26px] tracking-[-0.3px] font-brandBold text-foreground">
                 {user?.name}
               </Text>
               <Text className="mt-0.5 text-[13px] leading-[18px] font-brand text-subtle-foreground">
@@ -128,7 +128,7 @@ export default function Profile() {
             color={colors.gold}
             weight="fill"
           />
-          <Text className="text-[12.5px] font-brandSemiBold text-white">
+          <Text className="text-[12.5px] font-brandSemiBold text-foreground">
             {syncsRemaining} of 3 syncs available
           </Text>
           <Text className="text-[12px] font-brand text-faint-foreground">·</Text>
@@ -146,7 +146,7 @@ export default function Profile() {
                 color={colors.primary}
                 weight="bold"
               />
-              <Text className="text-[15px] tracking-[0.2px] font-brandBold text-white">
+              <Text className="text-[15px] tracking-[0.2px] font-brandBold text-foreground">
                 Film Preferences
               </Text>
             </View>
@@ -231,7 +231,7 @@ export default function Profile() {
                   <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-faint-foreground">
                     ERA
                   </Text>
-                  <Text className="text-[12.5px] font-brandSemiBold text-white">
+                  <Text className="text-[12.5px] font-brandSemiBold text-foreground">
                     {pref.min_year <= 1888 && pref.max_year >= 2025
                       ? "All Time"
                       : `${pref.min_year} – ${pref.max_year}`}
@@ -249,7 +249,7 @@ export default function Profile() {
                         color={colors.gold}
                         weight="fill"
                       />
-                      <Text className="text-[12.5px] font-brandSemiBold text-white">
+                      <Text className="text-[12.5px] font-brandSemiBold text-foreground">
                         {pref.min_rating.toFixed(1)}+ / 10
                       </Text>
                     </View>
@@ -261,7 +261,7 @@ export default function Profile() {
                     <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-faint-foreground">
                       LANGUAGES
                     </Text>
-                    <Text className="text-[12.5px] font-brandSemiBold text-white">
+                    <Text className="text-[12.5px] font-brandSemiBold text-foreground">
                       {pref.languages.map((l) => l.toUpperCase()).join(", ")}
                     </Text>
                   </View>
@@ -273,7 +273,7 @@ export default function Profile() {
 
         {/* Account Details */}
         <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-card p-4">
-          <Text className="text-[15px] tracking-[0.2px] font-brandBold text-white">
+          <Text className="text-[15px] tracking-[0.2px] font-brandBold text-foreground">
             Account
           </Text>
 

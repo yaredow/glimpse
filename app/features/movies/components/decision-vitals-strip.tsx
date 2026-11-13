@@ -44,7 +44,7 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
             TIME
           </Text>
         </View>
-        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
+        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-foreground" numberOfLines={1}>
           {runtimeFormatted}
         </Text>
         <Text className="mt-0.5 text-[11px] text-subtle-foreground" numberOfLines={1}>
@@ -62,7 +62,7 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
             RATING
           </Text>
         </View>
-        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
+        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-foreground" numberOfLines={1}>
           {score}
         </Text>
         <Text className="mt-0.5 text-[11px] text-subtle-foreground" numberOfLines={1}>
@@ -80,7 +80,7 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
             AUDIO
           </Text>
         </View>
-        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
+        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-foreground" numberOfLines={1}>
           {language}
         </Text>
         <Text className="mt-0.5 text-[11px] text-subtle-foreground" numberOfLines={1}>

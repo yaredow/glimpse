@@ -126,7 +126,7 @@ export default function MovieDetail() {
         pointerEvents="box-none"
       >
         <Text
-          className="flex-1 text-center text-[18px] font-brandBold text-white"
+          className="flex-1 text-center text-[18px] font-brandBold text-foreground"
           numberOfLines={1}
         >
           {movie.title}

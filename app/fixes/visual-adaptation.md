@@ -1,14 +1,16 @@
 # Visual Adaptation Completion
 
-**Status:** blocked until `token-layer.md` (PR 2) and `typography.md` (PR 3) are merged
+**Status:** implemented on `refactor/visual-adaptation`; gates pass, awaiting review and merge
 **Owner:** unassigned
-**Depends on:** `token-layer.md`, `typography.md`
+**Depends on:** `token-layer.md` (PR 2, merged `0a0d073`), `typography.md` (PR 3, merged `58d8f07`)
 **Blocks:** nothing
 **Scope:** finish the NativeWind/reusables adoption, fix visual inconsistencies and component bugs. Do not create a second token system.
 
 ---
 
-## 1. Current state
+## 1. Pre-migration state
+
+Snapshot taken before the phases below; kept for before/after comparison, not a description of the branch head.
 
 | Area | Fact |
 |---|---|
@@ -54,13 +56,13 @@ Known bugs:
 
 ### VA-0 · Baseline and rules
 
-- [x] Capture the same screenshot set used in `token-layer.md` TL-0 (welcome, login, register, onboarding 1/2/4, Today, Journal, Profile). Movie detail, verdict modal, and check-email are still missing.
+- [x] Capture the screenshot set used in `token-layer.md` TL-0: welcome, login, register, onboarding genres/era/languages, Today, Journal, Profile. Check-email reuses the auth shell and movie detail reuses Today's layout, so they share those baselines. The worklets error screen is also captured. Baseline lives in `~/Pictures/token/`.
 - [x] Screen gutter (locked): `px-4` = 16 px for app screens. Auth screens keep `px-6` for the hero shell only, documented in `auth-shell.tsx`.
 - [x] Allowed literal list (locked):
   - YouTube brand red `#FF0000`;
   - pure black in shadows/overlays where no token applies;
   - everything else must be a token.
-- [x] `text-white` (locked): allowed only for true-white emphasis such as the brand wordmark and primary-button labels; body and secondary text use the ramp.
+- [x] `text-white` (locked): allowed only for true-white emphasis such as the brand wordmark, primary/destructive button labels, text over media, selected-chip emphasis, and inline sentence emphasis; body and secondary text use the ramp.
 
 **Gate:** baseline screenshots stored; the three locked rules are respected in the PR.
 
@@ -86,7 +88,7 @@ Known bugs:
 
 Targets are locked in `README.md` §1.1. This is the only phase allowed to change a rendered color.
 
-- [x] Unify the app canvas: `bg-background` (`#0C0C0E`) for every screen root; `surface-1`/`surface-2` only for an intentional inset, documented in the file that uses it.
+- [x] Unify the app canvas: `bg-background` (`#0C0C0E`) for every screen root; `surface-1` only for an intentional inset, documented in `components/floating-tab-bar.tsx`.
 - [x] Collapse near-duplicate blacks (`#141414`, `#161618`, `#181818`) to `--card` `#161618` in `global.css`, then update the screens that used the removed tokens. Review screenshots before and after.
 - [x] Unify the text ramp: `text-foreground` (`#FAFAFA`) for body, `text-subtle-foreground` (`#A1A1AA`) for secondary, `text-faint-foreground` (`#71717A`) for tertiary, `text-white` only where true white is intended. Retire `text-off-white`, `text-muted-foreground`, and `text-zinc-*` from screens.
 - [x] Fix `text-error-container` → `text-error-container-foreground` in `movie-reviews.tsx`.
@@ -112,7 +114,7 @@ Targets are locked in `README.md` §1.1. This is the only phase allowed to chang
 - [x] Replace inline `boxShadow` strings with `lib/theme/shadows.ts` (or a Tailwind `boxShadow` token) and delete unused shadow values.
 - [x] Delete `lib/theme/shadows.ts` if it stays unused after the sweep.
 
-**Gate:** arbitrary radius/spacing count is at or below the documented exception list; visual review.
+**Gate:** arbitrary radius/spacing count is at or below the documented exception list in `scripts/check-visual.mjs`; visual review.
 
 ### VA-4 · Component and layout fixes
 
@@ -142,8 +144,10 @@ Targets are locked in `README.md` §1.1. This is the only phase allowed to chang
   - no `MaterialCommunityIcons`;
   - no raw hex/rgba outside `lib/theme` (allowlist);
   - no `LayoutAnimation`;
-  - no `rounded-[` outside allowlist.
-- [x] Re-run the screenshot set and compare to VA-0.
+  - no `rounded-[` outside allowlist;
+  - no `text-zinc-*`, `text-off-white`, or `text-muted-foreground`;
+  - no arbitrary spacing outside the documented exception list.
+- [x] Re-run the screenshot set and compare to VA-0 (accepted baseline set listed in VA-0).
 
 **Gate:** all greps pass; final visual sign-off.
 
@@ -154,9 +158,11 @@ Targets are locked in `README.md` §1.1. This is the only phase allowed to chang
 ```bash
 npx tsc --noEmit
 npx eslint app components features lib
+bun run styles:check
 grep -rn "@expo/vector-icons\|MaterialCommunityIcons" app components features lib
 grep -rn "text-error-container" app components features
 grep -rn "LayoutAnimation" app components features
+grep -rn "text-zinc-\|text-off-white\|text-muted-foreground" app components features lib
 grep -rn "NativeOnlyAnimatedView" app components features
 ```
 

@@ -79,7 +79,7 @@ export default function StepLayout({
       <View className="mt-3 mb-5">
         <BrandLockup variant="compact" />
 
-        <Text className="font-brandBold text-[24px] leading-[30px] tracking-[-0.5px] text-white">
+        <Text className="font-brandBold text-[24px] leading-[30px] tracking-[-0.5px] text-foreground">
           {title}
         </Text>
         {subtitle ? (

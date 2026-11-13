@@ -57,6 +57,7 @@ export default function VerdictModal({
             <CheckCircleIcon
               size={30}
               color={colors.success}
+              weight="fill"
             />
           </View>
 
@@ -92,7 +93,7 @@ export default function VerdictModal({
             })}
           </View>
 
-          <Text className="text-[13px] font-brandSemiBold text-white">
+          <Text className="text-[13px] font-brandSemiBold text-foreground">
             {rating === 5
               ? "Masterpiece 🏆"
               : rating === 4

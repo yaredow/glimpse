@@ -29,13 +29,13 @@ export default function PersonCard({ name, character, profilePath }: PersonCardP
           />
         ) : (
           <View className="h-full w-full items-center justify-center bg-surface-8">
-            <Text className="text-[24px] font-brandBold text-white">
+            <Text className="text-[24px] font-brandBold text-foreground">
               {name ? name.charAt(0).toUpperCase() : "?"}
             </Text>
           </View>
         )}
       </View>
-      <Text className="mt-2 text-center text-[12px] font-brandBold text-white" numberOfLines={1}>{name}</Text>
+      <Text className="mt-2 text-center text-[12px] font-brandBold text-foreground" numberOfLines={1}>{name}</Text>
       <Text className="text-center text-[10px] text-primary" numberOfLines={1}>{character}</Text>
     </View>
   );

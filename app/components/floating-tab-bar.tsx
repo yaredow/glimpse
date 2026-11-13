@@ -57,6 +57,8 @@ export function FloatingTabBar({
       className="absolute left-0 right-0 z-[999] items-center justify-center"
       style={{ bottom: bottomInset }}
     >
+      {/* Intentional inset: surface-1 keeps the floating bar a step above the
+          background canvas while the 95% alpha lets content show through. */}
       <View
         className="flex-row items-center gap-1.5 rounded-full border border-white/[0.08] bg-surface-1/95 px-2 py-1.5"
         style={{

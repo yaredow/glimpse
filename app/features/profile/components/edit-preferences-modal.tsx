@@ -234,7 +234,7 @@ function EditPreferencesForm({
     <>
       <View className="flex-row items-center justify-between border-b border-white/[0.06] px-5 py-3.5">
         <View>
-          <Text className="text-[20px] tracking-[-0.3px] font-brandBold text-white">
+          <Text className="text-[20px] tracking-[-0.3px] font-brandBold text-foreground">
             Film Preferences
           </Text>
           <Text className="mt-0.5 text-[12.5px] font-brand text-subtle-foreground">
@@ -279,7 +279,7 @@ function EditPreferencesForm({
         >
           <View className="gap-2">
             <View className="flex-row items-center justify-between">
-              <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
+              <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-foreground">
                 Genre Filters
               </Text>
               <Text className="text-[12px] font-brandSemiBold text-faint-foreground">
@@ -454,7 +454,7 @@ function EditPreferencesForm({
           </View>
 
           <View className="gap-2">
-            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
+            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-foreground">
               Release Era
             </Text>
             <Text className="mb-1 text-[12px] leading-4 font-brand text-subtle-foreground">
@@ -490,7 +490,7 @@ function EditPreferencesForm({
                           "text-[13.5px]",
                           isSelected
                             ? "font-brandSemiBold text-white"
-                            : "font-brand text-white",
+                            : "font-brand text-foreground",
                         )}
                       >
                         {era.label}
@@ -513,7 +513,7 @@ function EditPreferencesForm({
           </View>
 
           <View className="gap-2">
-            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
+            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-foreground">
               Minimum Rating
             </Text>
             <Text className="mb-1 text-[12px] leading-4 font-brand text-subtle-foreground">
@@ -556,7 +556,7 @@ function EditPreferencesForm({
           </View>
 
           <View className="gap-2">
-            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
+            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-foreground">
               Languages
             </Text>
             <Text className="mb-1 text-[12px] leading-4 font-brand text-subtle-foreground">

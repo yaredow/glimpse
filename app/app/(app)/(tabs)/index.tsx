@@ -60,7 +60,7 @@ function GridStateCard({
         color={colors.primary}
         style={{ marginBottom: 4 }}
       />
-      <Text className="text-center text-[15px] font-brandBold text-white">
+      <Text className="text-center text-[15px] font-brandBold text-foreground">
         {title}
       </Text>
       <Text className="text-center text-[13px] leading-[19px] font-brand text-subtle-foreground">
@@ -73,7 +73,7 @@ function GridStateCard({
           accessibilityRole="button"
           accessibilityLabel={actionLabel}
         >
-          <Text className="text-[13px] font-brandSemiBold text-white">
+          <Text className="text-[13px] font-brandSemiBold text-foreground">
             {actionLabel}
           </Text>
         </Pressable>
@@ -721,7 +721,7 @@ export default function TodayTab() {
                     color={colors.primary}
                   />
                   <Text
-                    className="text-[12px] tracking-[0.8px] font-brandBold text-white"
+                    className="text-[12px] tracking-[0.8px] font-brandBold text-foreground"
                     numberOfLines={1}
                   >
                     {tonightPick.is_dealers_choice
@@ -735,8 +735,9 @@ export default function TodayTab() {
                 <CheckCircleIcon
                   size={16}
                   color={colors.success}
+                  weight="fill"
                 />
-                <Text className="text-[13px] tracking-[0.2px] font-brandSemiBold text-white">
+                <Text className="text-[13px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   Locked in for tonight
                 </Text>
               </View>

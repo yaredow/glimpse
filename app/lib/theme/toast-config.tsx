@@ -18,6 +18,7 @@ interface CinemaToastProps {
   icon: React.ComponentType<IconProps>;
   iconColor: string;
   accentBorderColor: string;
+  iconWeight?: "regular" | "fill" | "bold";
 }
 
 const CinemaToast = ({
@@ -27,13 +28,13 @@ const CinemaToast = ({
   icon: Icon,
   iconColor,
   accentBorderColor,
+  iconWeight = "regular",
 }: CinemaToastProps) => {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={text1}
-
       className="w-[92%] max-w-[420px] flex-row items-center gap-3 rounded-xl border border-l-4 border-white/[0.08] bg-surface-6 px-4 py-3"
       style={{
         borderLeftColor: accentBorderColor,
@@ -41,7 +42,7 @@ const CinemaToast = ({
       }}
     >
       <View className="items-center justify-center">
-        <Icon size={22} color={iconColor} />
+        <Icon size={22} color={iconColor} weight={iconWeight} />
       </View>
       <View className="flex-1">
         {text1 ? (
@@ -67,6 +68,7 @@ export const toastConfig: ToastConfig = {
       onPress={onPress}
       icon={CheckCircleIcon}
       iconColor={colors.success}
+      iconWeight="fill"
       accentBorderColor={colors.success}
     />
   ),
@@ -77,6 +79,7 @@ export const toastConfig: ToastConfig = {
       onPress={onPress}
       icon={WarningCircleIcon}
       iconColor={colors.destructive}
+      iconWeight="fill"
       accentBorderColor={colors.destructive}
     />
   ),
@@ -87,6 +90,7 @@ export const toastConfig: ToastConfig = {
       onPress={onPress}
       icon={InfoIcon}
       iconColor={colors.primary}
+      iconWeight="fill"
       accentBorderColor={colors.primary}
     />
   ),

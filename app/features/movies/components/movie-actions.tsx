@@ -150,9 +150,10 @@ export default function MovieActions({
           <FinalizedIcon
             size={22}
             color={finalizedIconColor}
+            weight={isSeen || isSkipped ? "regular" : "fill"}
           />
           <View className="flex-1">
-            <Text className="text-[13.5px] font-brandBold text-white">
+            <Text className="text-[13.5px] font-brandBold text-foreground">
               {finalizedTitle}
             </Text>
             <Text className="mt-0.5 text-[12px] leading-4 text-subtle-foreground">
@@ -207,9 +208,9 @@ export default function MovieActions({
               <>
                 <EyeIcon
                   size={17}
-                  color={colors.white}
+                  color={colors.foreground}
                 />
-                <Text className="text-[13px] font-brandSemiBold text-white">
+                <Text className="text-[13px] font-brandSemiBold text-foreground">
                   Seen
                 </Text>
               </>
@@ -239,9 +240,9 @@ export default function MovieActions({
             ) : (
               <>
                 {isPick ? (
-                  <CheckCircleIcon size={17} color={colors.white} />
+                  <CheckCircleIcon size={17} color={colors.white} weight="fill" />
                 ) : (
-                  <StarIcon size={17} color={colors.white} />
+                  <StarIcon size={17} color={colors.white} weight="fill" />
                 )}
                 <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
                   {isPick ? "Picked" : "Pick"}

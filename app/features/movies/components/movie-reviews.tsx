@@ -39,7 +39,7 @@ function ReviewCard({ review }: { review: MovieReview }) {
             </Text>
           </View>
           <View className="flex-1">
-            <Text className="text-[13px] font-brandBold text-white" numberOfLines={1}>
+            <Text className="text-[13px] font-brandBold text-foreground" numberOfLines={1}>
               {review.author}
             </Text>
             {dateFormatted ? (
@@ -50,7 +50,7 @@ function ReviewCard({ review }: { review: MovieReview }) {
 
         {typeof review.rating === "number" && review.rating > 0 ? (
           <View className="flex-row items-center gap-1 rounded bg-amber-500/[0.12] px-2 py-0.5">
-            <StarIcon size={12} color={colors.gold} />
+            <StarIcon size={12} color={colors.gold} weight="fill" />
             <Text className="text-[11px] font-brandBold text-amber-500">
               {review.rating.toFixed(1)}
             </Text>

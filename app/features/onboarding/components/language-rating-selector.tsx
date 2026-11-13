@@ -67,7 +67,7 @@ export default function LanguageRatingSelector({
       >
         {/* Section 1: Preferred Languages */}
         <View className="gap-2">
-          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-white">
+          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-foreground">
             Movie Languages
           </Text>
           <Text className="mb-1.5 text-[13px] text-faint-foreground font-brand">
@@ -117,7 +117,7 @@ export default function LanguageRatingSelector({
 
         {/* Section 2: Minimum Quality Standard */}
         <View className="gap-2">
-          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-white">
+          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-foreground">
             Minimum Quality
           </Text>
           <Text className="mb-1.5 text-[13px] text-faint-foreground font-brand">

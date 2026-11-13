@@ -243,7 +243,7 @@ export default function AuthField({
           accessibilityLabel={accessibilityLabel ?? label}
           autoFocus={autoFocus}
           passwordRules={passwordRules}
-          className="h-full flex-1 border-0 bg-transparent px-0 py-0 text-[15px] text-white shadow-none font-brandMedium"
+          className="h-full flex-1 border-0 bg-transparent px-0 py-0 text-[15px] text-foreground shadow-none font-brandMedium"
         />
 
         {secure ? (
