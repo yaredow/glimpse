@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { StyleProp, TextStyle, View, ViewStyle } from "react-native";
 import { Text } from "@/components/ui/text";
-import { ApertureIcon } from "phosphor-react-native";
+import GlimpseMark from "./glimpse-mark";
 import { colors } from "@/lib/theme/tokens.generated";
 
 interface GlimpseLogoProps {
@@ -106,17 +106,17 @@ export default function GlimpseLogo({
               markStyle,
             ]}
           >
-            <ApertureIcon
+            <GlimpseMark
               size={metrics.iconSize}
-              color={accentColor}
-              weight="fill"
+              color={colors.white}
+              dotColor={accentColor}
             />
           </View>
         ) : null}
 
         {showWordmark ? (
           <View className="justify-center">
-            <View className="flex-row items-center gap-1">
+            <View className="flex-row items-baseline">
               <Text
                 className="font-brandExtraBold"
                 style={[
@@ -125,6 +125,7 @@ export default function GlimpseLogo({
                     letterSpacing: metrics.letterSpacing,
                     color: colors.white,
                     includeFontPadding: false,
+                    marginRight: -Math.max(1, Math.round(metrics.letterSpacing * 0.45)),
                   },
                   textStyle,
                 ]}
@@ -132,12 +133,12 @@ export default function GlimpseLogo({
                 GLIMPSE
               </Text>
               <View
-                className="self-end"
                 style={{
                   width: metrics.dotSize,
                   height: metrics.dotSize,
                   borderRadius: metrics.dotSize / 2,
-                  marginBottom: metrics.dotMarginBottom,
+                  marginBottom: 1,
+                  marginLeft: 3,
                   backgroundColor: accentColor,
                 }}
               />

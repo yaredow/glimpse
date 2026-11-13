@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import Animated, { FadeIn, FadeInDown, ReduceMotion } from "react-native-reanimated";
-import { ApertureIcon } from "phosphor-react-native";
+import GlimpseMark from "@/components/brand/glimpse-mark";
 import { Text } from "@/components/ui/text";
 import fontFamilies from "@/lib/theme/fonts.json";
 import { colors } from "@/lib/theme/tokens.generated";
@@ -20,11 +20,20 @@ export default function BrandLockup({
     return (
       <View className="mb-3 flex-row items-center gap-2">
         <View className="h-7 w-7 items-center justify-center rounded-md border border-primary/[0.35] bg-primary/[0.18]">
-          <ApertureIcon size={16} color={colors.primary} weight="fill" />
+          <GlimpseMark size={17} />
         </View>
-        <Text className="font-brandExtraBold text-[13px] leading-4 tracking-[2.6px] text-white">
-          GLIMPSE
-        </Text>
+        <View className="flex-row items-baseline">
+          <Text
+            className="font-brandExtraBold text-[13px] leading-4 tracking-[2.6px] text-white"
+            style={{ marginRight: -1.5 }}
+          >
+            GLIMPSE
+          </Text>
+          <View
+            className="h-1 w-1 rounded-full bg-primary"
+            style={{ marginBottom: 0.5, marginLeft: 2 }}
+          />
+        </View>
       </View>
     );
   }
@@ -48,21 +57,27 @@ export default function BrandLockup({
           boxShadow: shadows.glow,
         }}
       >
-        <ApertureIcon size={32} color={colors.primary} weight="fill" />
+        <GlimpseMark size={38} />
       </Animated.View>
 
       <Animated.View
         entering={stagger ? FadeInDown.delay(250).duration(500).reduceMotion(ReduceMotion.System) : undefined}
         style={{
           flexDirection: "row",
-          alignItems: "flex-end",
+          alignItems: "baseline",
           justifyContent: "center",
         }}
       >
-        <Text className="font-brandExtraBold text-[24px] leading-7 tracking-[5px] text-white">
+        <Text
+          className="font-brandExtraBold text-[24px] leading-7 tracking-[5px] text-white"
+          style={{ marginRight: -3 }}
+        >
           GLIMPSE
         </Text>
-        <View className="mb-1.5 ml-[3px] h-[7px] w-[7px] rounded-full bg-primary" />
+        <View
+          className="h-1.5 w-1.5 rounded-full bg-primary"
+          style={{ marginBottom: 1, marginLeft: 3 }}
+        />
       </Animated.View>
 
       <Animated.Text
