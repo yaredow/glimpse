@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   FlatList, Pressable, RefreshControl, View, useWindowDimensions } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import {
   BookmarkIcon,
   CheckIcon,
@@ -30,6 +30,12 @@ export default function Journal() {
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
   const { data, isPending, refetch, isRefetching } = useGetHistory();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   const cardWidth = (SCREEN_WIDTH - PADDING * 2 - COLUMN_GAP * 2) / 3;
   const cardHeight = cardWidth * 1.5;
@@ -107,6 +113,7 @@ export default function Journal() {
     return (
       <Pressable
         onPress={() => handleMoviePress(item)}
+        style={{ width: cardWidth }}
         className="overflow-hidden rounded-md border border-white/[0.08] bg-card active:opacity-80"
         accessibilityRole="button"
         accessibilityLabel={item.title}

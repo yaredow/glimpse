@@ -28,7 +28,10 @@ export const useRecordInteraction = () => {
       );
       queryClient.invalidateQueries({ queryKey: moviesKeys.todayGrid() });
       if (isJournalAction(variables.action)) {
-        queryClient.invalidateQueries({ queryKey: moviesKeys.historyRoot() });
+        queryClient.invalidateQueries({
+          queryKey: moviesKeys.historyRoot(),
+          refetchType: "all",
+        });
       }
     },
   });
