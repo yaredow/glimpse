@@ -15,10 +15,10 @@ export default function Index() {
   if (isError) {
     return (
       <View className="flex-1 items-center justify-center gap-2 px-8">
-        <Text className="text-center text-[16px] font-brandBold text-white">
+        <Text className="text-center text-[16px] font-brandBold text-foreground">
           Couldn&apos;t load your profile
         </Text>
-        <Text className="text-center text-[13px] leading-[19px] text-zinc-500">
+        <Text className="text-center text-[13px] leading-[19px] text-faint-foreground">
           We couldn&apos;t check your film preferences. Check your connection and
           try again.
         </Text>

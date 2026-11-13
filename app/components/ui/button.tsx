@@ -1,5 +1,6 @@
 import { Text as AppText, TextClassContext } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
+import { colors } from '@/lib/theme/tokens.generated';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Platform, Pressable, ActivityIndicator } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -159,14 +160,23 @@ function Button({
   return (
     <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
       <Pressable
-        className={cn((props.disabled || loading) && 'opacity-50', buttonVariants({ variant, size }), className)}
         role="button"
+        accessibilityRole="button"
+        accessibilityState={{
+          disabled: Boolean(props.disabled || loading),
+          busy: Boolean(loading),
+        }}
+        accessibilityLabel={
+          props.accessibilityLabel ??
+          (typeof children === "string" ? children : undefined)
+        }
+        className={cn((props.disabled || loading) && 'opacity-50', buttonVariants({ variant, size }), className)}
+        {...props}
         disabled={props.disabled || Boolean(loading)}
         onPress={handlePress}
-        {...props}
       >
         {loading ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
+          <ActivityIndicator size="small" color={colors.primaryForeground} />
         ) : isPlainTextContent(children) ? (
           <AppText style={textColor ? { color: textColor } : undefined}>
             {children as React.ReactNode}

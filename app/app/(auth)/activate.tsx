@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View } from "react-native";
-import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeIn, ZoomIn, ReduceMotion } from "react-native-reanimated";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { CheckCircleIcon } from "phosphor-react-native";
@@ -15,6 +15,8 @@ import {
   AuthTextLink,
 } from "@/features/auth/components/auth-actions";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 export default function Activate() {
   const { token: tokenParam, email } = useLocalSearchParams<{
@@ -54,28 +56,28 @@ export default function Activate() {
     return (
       <AuthShell title="You&apos;re in." subtitle="Your account is activated.">
         <Animated.View
-          entering={FadeIn.duration(400)}
+          entering={FadeIn.duration(400).reduceMotion(ReduceMotion.System)}
           style={{ alignItems: "center", gap: 16, width: "100%" }}
         >
           <Animated.View
-            entering={ZoomIn.duration(450).springify()}
+            entering={ZoomIn.duration(450).springify().reduceMotion(ReduceMotion.System)}
             style={{
               width: 80,
               height: 80,
               borderRadius: 40,
               borderWidth: 1,
-              borderColor: "rgba(16, 185, 129, 0.3)",
-              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              borderColor: withAlpha(colors.success, 0.3),
+              backgroundColor: withAlpha(colors.success, 0.1),
               alignItems: "center",
               justifyContent: "center",
               marginTop: 8,
               marginBottom: 8,
-              boxShadow: "0px 8px 16.0px rgba(2, 44, 34, 0.4)",
+              boxShadow: shadows.successGlow,
             }}
           >
             <CheckCircleIcon size={40} color={colors.success} weight="fill" />
           </Animated.View>
-          <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
+          <Text className="text-subtle-foreground text-xs leading-5 text-center px-4">
             Sign in to start your nightly five.
           </Text>
           <AuthPrimaryButton
@@ -130,7 +132,7 @@ export default function Activate() {
       />
 
       <View className="items-center gap-2.5 mt-8 pt-5 border-t border-white/[0.08]">
-        <Text className="text-zinc-500 text-[11px] text-center">
+        <Text className="text-faint-foreground text-[11px] text-center">
           Didn&apos;t get the email? Check your spam folder.
         </Text>
         <AuthTextLink

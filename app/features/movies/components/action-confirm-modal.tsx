@@ -1,8 +1,19 @@
 import React, { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ArrowsClockwiseIcon,
+  DiceFiveIcon,
+  FilmStripIcon,
+  HeadCircuitIcon,
+  PlayCircleIcon,
+  SkullIcon,
+  SmileyIcon,
+  TargetIcon,
+  type IconProps,
+} from "phosphor-react-native";
 import { cn } from "@/lib/utils";
+import { colors } from "@/lib/theme/tokens.generated";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +34,7 @@ export type SyncMood =
 export interface MoodOption {
   id: SyncMood;
   label: string;
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  Icon: React.ComponentType<IconProps>;
   description: string;
 }
 
@@ -31,37 +42,37 @@ export const MOOD_OPTIONS: MoodOption[] = [
   {
     id: "surprise",
     label: "Surprise Me",
-    icon: "dice-multiple-outline",
+    Icon: DiceFiveIcon,
     description: "fresh mystery picks across all genres tailored to your taste",
   },
   {
     id: "horror",
     label: "Horror",
-    icon: "skull-outline",
+    Icon: SkullIcon,
     description: "pure horror films — supernatural dread, slashers, and terrifying tension",
   },
   {
     id: "action_crime",
     label: "Action & Crime",
-    icon: "target",
+    Icon: TargetIcon,
     description: "high-stakes action features, intense heists, and crime thrillers",
   },
   {
     id: "psychological",
     label: "Psychological & Mystery",
-    icon: "head-cog-outline",
+    Icon: HeadCircuitIcon,
     description: "cerebral puzzles, investigative mysteries, and psychological tension",
   },
   {
     id: "comedy",
     label: "Comedy",
-    icon: "emoticon-happy-outline",
+    Icon: SmileyIcon,
     description: "laugh-out-loud comedies and sharp, witty cinema",
   },
   {
     id: "classics",
     label: "90s & Classics",
-    icon: "filmstrip",
+    Icon: FilmStripIcon,
     description: "retro classics and cinema landmarks released between 1975 and 1999",
   },
 ];
@@ -76,7 +87,7 @@ interface ActionConfirmModalProps {
 }
 
 interface ActionModalConfig {
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  Icon: React.ComponentType<IconProps>;
   iconColor: string;
   title: string;
   confirmText: string;
@@ -86,13 +97,13 @@ interface ActionModalConfig {
 
 const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
   locked_in: {
-    icon: "movie-play-outline",
-    iconColor: "#E50914",
+    Icon: PlayCircleIcon,
+    iconColor: colors.primary,
     title: "Lock In Today's Movie?",
     confirmText: "Lock In Selection",
     cancelText: "Not Yet",
     renderDescription: (title) => (
-      <Text className="text-center text-[14px] leading-[22px] font-brand text-zinc-400">
+      <Text className="text-center text-[14px] leading-[22px] font-brand text-subtle-foreground">
         <Text className="font-brandSemiBold text-white">
           &ldquo;{title}&rdquo;
         </Text>{" "}
@@ -102,15 +113,15 @@ const ACTION_CONFIGS: Record<ConfirmableAction, ActionModalConfig> = {
     ),
   },
   sync: {
-    icon: "sync",
-    iconColor: "#E50914",
+    Icon: ArrowsClockwiseIcon,
+    iconColor: colors.primary,
     title: "Sync a Fresh Batch?",
     confirmText: "Sync Fresh Reel",
     cancelText: "Keep Current",
     renderDescription: (_title, syncs = 3) => {
       const remainingAfter = Math.max(0, syncs - 1);
       return (
-        <Text className="text-center text-[14px] leading-[22px] font-brand text-zinc-400">
+        <Text className="text-center text-[14px] leading-[22px] font-brand text-subtle-foreground">
           This will draw 5 fresh mystery picks tailored to your mood. You will
           have{" "}
           <Text className="font-brandSemiBold text-white">
@@ -147,18 +158,17 @@ export default function ActionConfirmModal({
 
   return (
     <Dialog open={visible} onOpenChange={(next) => !next && onCancel()}>
-      <DialogContent className="w-[92%] max-w-[380px] gap-4 rounded-[24px] p-5">
+      <DialogContent className="w-[92%] max-w-[380px] gap-4 rounded-3xl p-5">
         <DialogTitle className="text-center text-[18px] leading-7">
           {config.title}
         </DialogTitle>
 
         <View className="items-center gap-3">
           <View
-            className="h-14 w-14 items-center justify-center rounded-[28px]"
+            className="h-14 w-14 items-center justify-center rounded-full"
             style={{ backgroundColor: `${config.iconColor}18` }}
           >
-            <MaterialCommunityIcons
-              name={config.icon}
+            <config.Icon
               size={28}
               color={config.iconColor}
             />
@@ -172,7 +182,7 @@ export default function ActionConfirmModal({
                   MOOD_OPTIONS[0];
 
                 return (
-                  <Text className="text-center text-[14px] leading-[22px] font-brand text-zinc-400">
+                  <Text className="text-center text-[14px] leading-[22px] font-brand text-subtle-foreground">
                     Draw 5 fresh mystery picks:{" "}
                     <Text className="font-brandSemiBold text-white">
                       {activeMood.description}
@@ -183,7 +193,7 @@ export default function ActionConfirmModal({
               })()}
 
               <View className="w-full">
-                <Text className="mb-2 text-[11px] tracking-[1.2px] font-brandBold text-zinc-500 uppercase">
+                <Text className="mb-2 text-[11px] tracking-[1.2px] font-brandBold text-faint-foreground uppercase">
                   CHOOSE A VIBE
                 </Text>
                 <ScrollView
@@ -204,17 +214,17 @@ export default function ActionConfirmModal({
                         accessibilityRole="radio"
                         accessibilityState={{ selected: isSelected }}
                         accessibilityLabel={mood.label}
+                        hitSlop={8}
                         className={cn(
-                          "flex-row items-center rounded-[16px] border px-3 py-[7px]",
+                          "flex-row items-center rounded-2xl border px-3 py-1.5",
                           isSelected
                             ? "border-white bg-white"
                             : "border-white/[0.08] bg-surface-6",
                         )}
                       >
-                        <MaterialCommunityIcons
-                          name={mood.icon}
+                        <mood.Icon
                           size={16}
-                          color={isSelected ? "#121212" : "#A1A1AA"}
+                          color={isSelected ? colors.surface1 : colors.subtleForeground}
                           style={{ marginRight: 6 }}
                         />
                         <Text
@@ -222,7 +232,7 @@ export default function ActionConfirmModal({
                             "text-[12.5px] font-brandSemiBold",
                             isSelected
                               ? "text-surface-1"
-                              : "text-zinc-400",
+                              : "text-subtle-foreground",
                           )}
                         >
                           {mood.label}
@@ -244,8 +254,9 @@ export default function ActionConfirmModal({
               onPress={onCancel}
               className="min-h-[44px] justify-center px-4"
               accessibilityRole="button"
+              accessibilityLabel={config.cancelText}
             >
-              <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+              <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                 {config.cancelText}
               </Text>
             </Pressable>
@@ -253,8 +264,9 @@ export default function ActionConfirmModal({
               onPress={() =>
                 onConfirm(action === "sync" ? selectedMood : undefined)
               }
-              className="min-h-[44px] justify-center rounded-[12px] bg-primary px-4 active:opacity-90"
+              className="min-h-[44px] justify-center rounded-lg bg-primary px-4 active:opacity-90"
               accessibilityRole="button"
+              accessibilityLabel={config.confirmText}
             >
               <Text className="text-[13px] font-brandBold text-white">
                 {config.confirmText}

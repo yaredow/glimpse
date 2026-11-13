@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { View, Pressable } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut, ReduceMotion } from "react-native-reanimated";
 import { ArrowLeftIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,7 @@ export default function StepLayout({
 
   return (
     <SafeAreaView
-      className="flex-1 bg-background px-5"
+      className="flex-1 bg-background px-4"
       edges={["top", "bottom"]}
     >
       {/* Top Navigation & Segmented Progress Bar */}
@@ -48,7 +48,7 @@ export default function StepLayout({
               hitSlop={12}
               className="rounded-sm p-1"
             >
-              <ArrowLeftIcon size={22} color={colors.offWhite} weight="bold" />
+              <ArrowLeftIcon size={22} color={colors.foreground} weight="bold" />
             </Pressable>
           ) : (
             <View className="w-6" />
@@ -62,7 +62,7 @@ export default function StepLayout({
               <View
                 key={i}
                 className={cn(
-                  "h-1 flex-1 rounded-[2px]",
+                  "h-1 flex-1 rounded-full",
                   isActive ? "bg-primary" : "bg-surface-8",
                 )}
               />
@@ -70,7 +70,7 @@ export default function StepLayout({
           })}
         </View>
 
-        <Text className="font-brandBold text-[12px] leading-4 tracking-[1px] text-zinc-400 min-w-[28px] text-right">
+        <Text className="font-brandBold text-[12px] leading-4 tracking-[1px] text-subtle-foreground min-w-[28px] text-right">
           {step + 1}/{totalSteps}
         </Text>
       </View>
@@ -79,19 +79,19 @@ export default function StepLayout({
       <View className="mt-3 mb-5">
         <BrandLockup variant="compact" />
 
-        <Text className="font-brandBold text-[24px] leading-[30px] tracking-[-0.5px] text-white">
+        <Text className="font-brandBold text-[24px] leading-[30px] tracking-[-0.5px] text-foreground">
           {title}
         </Text>
         {subtitle ? (
-          <Text className="font-brand mt-1.5 text-[15px] leading-[22px] tracking-[0.25px] text-zinc-400">
+          <Text className="font-brand mt-1.5 text-[15px] leading-[22px] tracking-[0.25px] text-subtle-foreground">
             {subtitle}
           </Text>
         ) : null}
       </View>
 
       <Animated.View
-        entering={FadeIn.duration(280)}
-        exiting={FadeOut.duration(180)}
+        entering={FadeIn.duration(280).reduceMotion(ReduceMotion.System)}
+        exiting={FadeOut.duration(180).reduceMotion(ReduceMotion.System)}
         style={{ flex: 1 }}
       >
         {children}

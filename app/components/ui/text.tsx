@@ -30,10 +30,10 @@ const textVariants = cva(
         code: cn(
           'bg-muted relative rounded px-[0.3rem] py-[0.2rem] text-body-sm font-brandSemiBold'
         ),
-        lead: 'text-body-lg text-muted-foreground',
+        lead: 'text-body-lg text-subtle-foreground',
         large: 'text-body-lg font-brandSemiBold',
         small: 'text-body-sm font-brandMedium',
-        muted: 'text-body-sm text-muted-foreground',
+        muted: 'text-body-sm text-subtle-foreground',
       },
     },
     defaultVariants: {

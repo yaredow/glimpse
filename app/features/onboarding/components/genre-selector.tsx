@@ -57,10 +57,10 @@ export default function GenreSelector({
               accessibilityState={{ checked: isSelected }}
               onPress={() => toggle(genre.id)}
               className={cn(
-                "flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
+                "min-h-[44px] flex-row items-center rounded-3xl border-[1.5px] px-4 py-3",
                 isSelected
                   ? "border-primary bg-brand-surface"
-                  : "border-zinc-800 bg-zinc-900",
+                  : "border-border bg-card",
               )}
             >
               <GenreIcon
@@ -74,7 +74,7 @@ export default function GenreSelector({
                   "text-[14px] tracking-[0.2px]",
                   isSelected
                     ? "text-white font-brandBold"
-                    : "text-zinc-300 font-brandSemiBold",
+                    : "text-foreground font-brandSemiBold",
                 )}
               >
                 {genre.name}
@@ -92,9 +92,9 @@ export default function GenreSelector({
         })}
       </ScrollView>
 
-      <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
+      <View className="mt-auto gap-3 border-t border-hairline/10 pt-4">
         <View className="items-center">
-          <Text className="font-brandSemiBold text-body-sm text-zinc-400">
+          <Text className="font-brandSemiBold text-body-sm text-subtle-foreground">
             {selected.length >= minSelection
               ? `${selected.length} genres selected`
               : `Select at least ${remaining} more`}

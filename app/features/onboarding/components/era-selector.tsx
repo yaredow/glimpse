@@ -107,14 +107,14 @@ export default function EraSelector({
                 "rounded-lg border-[1.5px] p-4",
                 isSelected
                   ? "border-primary bg-brand-surface"
-                  : "border-zinc-800 bg-zinc-900",
+                  : "border-border bg-card",
               )}
             >
               <View className="mb-2 flex-row items-center justify-between">
                 <View
                   className={cn(
                     "h-9 w-9 items-center justify-center rounded-sm",
-                    isSelected ? "bg-primary/15" : "bg-zinc-800",
+                    isSelected ? "bg-primary/15" : "bg-secondary",
                   )}
                 >
                   <EraIcon
@@ -135,7 +135,7 @@ export default function EraSelector({
               <Text
                 className={cn(
                   "mb-1 text-[16px] font-brandBold",
-                  isSelected ? "text-white" : "text-zinc-100",
+                  isSelected ? "text-white" : "text-foreground",
                 )}
               >
                 {title}
@@ -143,7 +143,7 @@ export default function EraSelector({
               <Text
                 className={cn(
                   "text-[13px] font-brandMedium",
-                  isSelected ? "text-red-300" : "text-zinc-500",
+                  isSelected ? "text-red-300" : "text-faint-foreground",
                 )}
               >
                 {era.min_year === 1888
@@ -156,9 +156,9 @@ export default function EraSelector({
       </ScrollView>
 
       {/* Floating Bottom Bar */}
-      <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
+      <View className="mt-auto gap-3 border-t border-hairline/10 pt-4">
         <View className="items-center">
-          <Text className="font-brandSemiBold text-body-sm text-zinc-400">
+          <Text className="font-brandSemiBold text-body-sm text-subtle-foreground">
             {selected
               ? isAllTime
                 ? "All time"

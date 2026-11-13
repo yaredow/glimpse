@@ -6,7 +6,13 @@ import { Image } from "expo-image";
 import * as Linking from "expo-linking";
 import * as Haptics from "expo-haptics";
 import YoutubeIframe from "react-native-youtube-iframe";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ArrowLeftIcon,
+  ArrowSquareOutIcon,
+  ArrowUpRightIcon,
+  PlayCircleIcon,
+  YoutubeLogoIcon,
+} from "phosphor-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tmdbImage } from "../constants/images";
 import { colors } from "@/lib/theme/tokens.generated";
@@ -74,9 +80,11 @@ export default function CinemaTrailerModal({
           <Pressable
             onPress={handleClose}
             className="h-10 w-10 items-center justify-center rounded-full bg-surface-5 active:opacity-70"
+            accessibilityRole="button"
             accessibilityLabel="Close trailer"
+            hitSlop={8}
           >
-            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.white} />
+            <ArrowLeftIcon size={22} color={colors.white} />
           </Pressable>
 
           <View className="mx-3 flex-1 items-center">
@@ -86,9 +94,8 @@ export default function CinemaTrailerModal({
             >
               {movieTitle}
             </Text>
-            <View className="mt-[3px] flex-row items-center gap-1">
-              <MaterialCommunityIcons
-                name="movie-play-outline"
+            <View className="mt-1 flex-row items-center gap-1">
+              <PlayCircleIcon
                 size={12}
                 color={colors.gold}
               />
@@ -102,9 +109,11 @@ export default function CinemaTrailerModal({
             <Pressable
               onPress={handleOpenYouTube}
               className="h-10 w-10 items-center justify-center rounded-full bg-surface-5 active:opacity-70"
+              accessibilityRole="button"
               accessibilityLabel="Open in YouTube"
+              hitSlop={8}
             >
-              <MaterialCommunityIcons name="youtube" size={22} color="#FF0000" />
+              <YoutubeLogoIcon size={22} color="#FF0000" />
             </Pressable>
           ) : (
             <View className="h-10 w-10" />
@@ -112,7 +121,7 @@ export default function CinemaTrailerModal({
         </View>
 
         <View className="relative w-full items-center justify-center">
-          <View className="absolute h-full w-[90%] rounded-[30px] bg-primary/[0.08] blur-[40px]" />
+          <View className="absolute h-full w-[90%] rounded-full bg-primary/[0.08] blur-[40px]" />
 
           <View
             className="w-full items-center justify-center overflow-hidden bg-black"
@@ -128,7 +137,7 @@ export default function CinemaTrailerModal({
                 />
                 <View className="absolute inset-0 items-center justify-center gap-2.5 bg-background/[0.75]">
                   <ActivityIndicator size="small" color={colors.primary} />
-                  <Text className="text-[12px] tracking-[0.2px] font-brandMedium text-zinc-300">
+                  <Text className="text-[12px] tracking-[0.2px] font-brandMedium text-foreground">
                     Connecting cinema reel...
                   </Text>
                 </View>
@@ -164,20 +173,22 @@ export default function CinemaTrailerModal({
             ) : null}
 
             {playerError ? (
-              <View className="absolute inset-0 items-center justify-center gap-2 bg-surface-2 px-6">
-                <MaterialCommunityIcons name="youtube" size={44} color="#FF0000" />
-                <Text className="mt-1 text-[16px] font-brandBold text-white">
+              <View className="absolute inset-0 items-center justify-center gap-2 bg-background px-6">
+                <YoutubeLogoIcon size={44} color="#FF0000" />
+                <Text className="mt-1 text-[16px] font-brandBold text-foreground">
                   Studio Restricted Playback
                 </Text>
-                <Text className="mb-1.5 text-center text-[13px] leading-[18px] font-brand text-zinc-400">
+                <Text className="mb-1.5 text-center text-[13px] leading-[18px] font-brand text-subtle-foreground">
                   This distributor restricts embedded mobile playback. You can
                   view the full trailer directly in YouTube.
                 </Text>
                 <Pressable
                   onPress={handleOpenYouTube}
-                  className="flex-row items-center gap-1.5 rounded-[20px] bg-primary px-4 py-2.5 active:opacity-85"
+                  accessibilityRole="button"
+                  accessibilityLabel="Watch on YouTube"
+                  className="flex-row items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 active:opacity-85"
                 >
-                  <MaterialCommunityIcons name="open-in-new" size={16} color={colors.white} />
+                  <ArrowSquareOutIcon size={16} color={colors.white} />
                   <Text className="text-[12px] tracking-[0.4px] font-brandBold text-white">
                     WATCH ON YOUTUBE
                   </Text>
@@ -188,20 +199,21 @@ export default function CinemaTrailerModal({
         </View>
 
         <View
-          className="items-center px-5"
+          className="items-center px-4"
           style={{ paddingBottom: insets.bottom + 20 }}
         >
           {trailerKey && !playerError ? (
             <Pressable
               onPress={handleOpenYouTube}
-              className="w-full max-w-[280px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-5 px-5 py-3 active:opacity-80"
+              accessibilityRole="button"
+              accessibilityLabel="Open in YouTube app"
+              className="w-full max-w-[280px] flex-row items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-5 py-3 active:opacity-80"
             >
-              <MaterialCommunityIcons name="youtube" size={20} color="#FF0000" />
-              <Text className="text-[13px] font-brandSemiBold text-white">
+              <YoutubeLogoIcon size={20} color="#FF0000" />
+              <Text className="text-[13px] font-brandSemiBold text-foreground">
                 Open in YouTube App
               </Text>
-              <MaterialCommunityIcons
-                name="arrow-top-right"
+              <ArrowUpRightIcon
                 size={16}
                 color={colors.subtleForeground}
               />

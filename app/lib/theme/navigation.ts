@@ -11,9 +11,9 @@ export const glimpseNavigationTheme: Theme = {
   colors: {
     ...NavigationDarkTheme.colors,
     primary: colors.primary,
-    background: colors.surface1,
-    card: colors.surface2,
-    text: colors.offWhite,
+    background: colors.background,
+    card: colors.card,
+    text: colors.foreground,
     border: colors.border,
     notification: colors.primary,
   },

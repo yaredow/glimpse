@@ -1,10 +1,18 @@
-import { useCallback, useMemo, useState, type ComponentProps } from "react";
+import { useCallback, useMemo, useState, type ComponentType } from "react";
 import {
   Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ArrowRightIcon,
+  ArrowUUpLeftIcon,
+  CheckCircleIcon,
+  FilmStripIcon,
+  PlayCircleIcon,
+  WifiSlashIcon,
+  type IconProps,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { useGetTodaysGrid } from "@/features/movies/hooks/query/use-today-grid";
@@ -24,13 +32,14 @@ import ShowtimeHub from "@/features/movies/components/showtime-hub";
 import { isResolvedAction } from "@/features/movies/utils/deck";
 import { deriveProgramTheme } from "@/features/movies/utils/program";
 import { colors } from "@/lib/theme/tokens.generated";
+import { shadows } from "@/lib/theme/shadows";
 
 const PILL_SHADOW = {
-  boxShadow: "0px 4px 8.0px rgba(0, 0, 0, 0.3)",
+  boxShadow: shadows.raised,
 };
 
 interface GridStateCardProps {
-  icon: ComponentProps<typeof MaterialCommunityIcons>["name"];
+  icon: ComponentType<IconProps>;
   title: string;
   subtitle: string;
   actionLabel?: string;
@@ -38,34 +47,33 @@ interface GridStateCardProps {
 }
 
 function GridStateCard({
-  icon,
+  icon: Icon,
   title,
   subtitle,
   actionLabel,
   onAction,
 }: GridStateCardProps) {
   return (
-    <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-surface-4 px-6 py-8">
-      <MaterialCommunityIcons
-        name={icon}
+    <View className="w-full max-w-[320px] items-center justify-center gap-2 rounded-2xl border border-white/[0.08] bg-card px-6 py-8">
+      <Icon
         size={42}
         color={colors.primary}
         style={{ marginBottom: 4 }}
       />
-      <Text className="text-center text-[15px] font-brandBold text-white">
+      <Text className="text-center text-[15px] font-brandBold text-foreground">
         {title}
       </Text>
-      <Text className="text-center text-[13px] leading-[19px] font-brand text-zinc-400">
+      <Text className="text-center text-[13px] leading-[19px] font-brand text-subtle-foreground">
         {subtitle}
       </Text>
       {actionLabel && onAction ? (
         <Pressable
           onPress={onAction}
-          className="mt-3 min-h-[44px] justify-center rounded-[22px] border border-white/[0.08] bg-surface-5 px-5 active:opacity-80"
+          className="mt-3 min-h-[44px] justify-center rounded-full border border-white/[0.08] bg-surface-5 px-5 active:opacity-80"
           accessibilityRole="button"
           accessibilityLabel={actionLabel}
         >
-          <Text className="text-[13px] font-brandSemiBold text-white">
+          <Text className="text-[13px] font-brandSemiBold text-foreground">
             {actionLabel}
           </Text>
         </Pressable>
@@ -584,18 +592,18 @@ export default function TodayTab() {
 
   if (!isPending && isShowtimeMode && tonightPick) {
     return (
-      <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
+      <View className="flex-1 bg-background">
         <ShowtimeHub
           movie={tonightPick}
           onLogWatched={handleLogWatched}
           onOpenDetails={(m) => handleViewMovie(m, true)}
         />
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <ExploreHeader
         syncsRemaining={syncsRemaining}
         onSyncPress={handlePromptSync}
@@ -614,7 +622,7 @@ export default function TodayTab() {
         ) : isError ? (
           <View className="flex-1 items-center justify-center">
             <GridStateCard
-              icon="wifi-off"
+              icon={WifiSlashIcon}
               title="Couldn&apos;t load tonight&apos;s reel"
               subtitle="We couldn&apos;t reach the cinema. Check your connection and try again."
               actionLabel="Try again"
@@ -626,7 +634,7 @@ export default function TodayTab() {
         ) : movies.length === 0 ? (
           <View className="flex-1 items-center justify-center">
             <GridStateCard
-              icon="filmstrip-off"
+              icon={FilmStripIcon}
               title="Tonight&apos;s reel is empty"
               subtitle="No films were drawn for you yet. Pull a fresh batch to start choosing."
               actionLabel="Draw a fresh reel"
@@ -661,13 +669,12 @@ export default function TodayTab() {
                 <View className="w-full max-w-[320px] items-center justify-center gap-2">
                   <Pressable
                     onPress={handlePromptLockIn}
-                    className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] bg-primary px-[22px] py-3 active:opacity-85"
+                    className="min-h-[44px] w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 active:opacity-85"
                     style={PILL_SHADOW}
                     accessibilityRole="button"
                     accessibilityLabel={`Lock in ${tonightPick.title}`}
                   >
-                    <MaterialCommunityIcons
-                      name="movie-play-outline"
+                    <PlayCircleIcon
                       size={17}
                       color={colors.white}
                     />
@@ -687,11 +694,10 @@ export default function TodayTab() {
                       accessibilityLabel="Browse other movies in this batch"
                       hitSlop={{ top: 8, bottom: 8, left: 16, right: 16 }}
                     >
-                      <Text className="text-[13px] tracking-[0.2px] font-brandMedium text-zinc-400">
+                      <Text className="text-[13px] tracking-[0.2px] font-brandMedium text-subtle-foreground">
                         Browse other movies
                       </Text>
-                      <MaterialCommunityIcons
-                        name="arrow-right"
+                      <ArrowRightIcon
                         size={14}
                         color={colors.subtleForeground}
                       />
@@ -701,8 +707,8 @@ export default function TodayTab() {
               ) : (
                 <Pressable
                   onPress={handleReturnToPick}
-                  className="w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-[24px] border border-white/[0.08] bg-surface-5 px-[22px] py-3 active:bg-surface-6 active:opacity-85"
-                  style={{ boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)" }}
+                  className="min-h-[44px] w-full max-w-[320px] flex-row items-center justify-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-5 py-3 active:bg-surface-6 active:opacity-85"
+                  style={{ boxShadow: shadows.subtle }}
                   accessibilityRole="button"
                   accessibilityLabel={
                     tonightPick.is_dealers_choice
@@ -710,13 +716,12 @@ export default function TodayTab() {
                       : `Return to ${tonightPick.title}`
                   }
                 >
-                  <MaterialCommunityIcons
-                    name="arrow-u-left-top"
+                  <ArrowUUpLeftIcon
                     size={17}
                     color={colors.primary}
                   />
                   <Text
-                    className="text-[12px] tracking-[0.8px] font-brandBold text-white"
+                    className="text-[12px] tracking-[0.8px] font-brandBold text-foreground"
                     numberOfLines={1}
                   >
                     {tonightPick.is_dealers_choice
@@ -726,13 +731,13 @@ export default function TodayTab() {
                 </Pressable>
               )
             ) : (
-              <View className="flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-5 px-[18px] py-2.5">
-                <MaterialCommunityIcons
-                  name="check-circle"
+              <View className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5">
+                <CheckCircleIcon
                   size={16}
                   color={colors.success}
+                  weight="fill"
                 />
-                <Text className="text-[13px] tracking-[0.2px] font-brandSemiBold text-white">
+                <Text className="text-[13px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   Locked in for tonight
                 </Text>
               </View>

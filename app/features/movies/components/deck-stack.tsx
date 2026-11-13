@@ -2,20 +2,32 @@ import { useState, useCallback, useEffect } from "react";
 import {
   ActivityIndicator, Pressable, View, useWindowDimensions } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ArrowsClockwiseIcon,
+  CheckCircleIcon,
+  DiceFiveIcon,
+  EyeIcon,
+  FilmStripIcon,
+  StarIcon,
+  XIcon,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import Animated, {
-  useSharedValue,
-  withTiming,
+  ReduceMotion,
+  runOnJS,
   useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
   withSequence,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { cn } from "@/lib/utils";
 import MysteryCard, { CardStamp } from "./mystery-card";
 import type { GridMovie } from "../types/movies.type";
 import { isResolvedAction } from "../utils/deck";
 import { colors } from "@/lib/theme/tokens.generated";
+import { shadows } from "@/lib/theme/shadows";
 
 interface DeckStackProps {
   movies: GridMovie[];
@@ -142,20 +154,21 @@ export default function DeckStack({
   const opacityVal = useSharedValue(1);
 
   const shuffleShift = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (isShuffling) {
+    if (isShuffling && !reduceMotion) {
       shuffleShift.value = withSequence(
-        withTiming(-1, { duration: 160 }),
-        withTiming(1, { duration: 180 }),
-        withTiming(-0.6, { duration: 160 }),
-        withTiming(0.4, { duration: 140 }),
-        withSpring(0, { damping: 14, stiffness: 120 }),
+        withTiming(-1, { duration: 160, reduceMotion: ReduceMotion.System }),
+        withTiming(1, { duration: 180, reduceMotion: ReduceMotion.System }),
+        withTiming(-0.6, { duration: 160, reduceMotion: ReduceMotion.System }),
+        withTiming(0.4, { duration: 140, reduceMotion: ReduceMotion.System }),
+        withSpring(0, { damping: 14, stiffness: 120, reduceMotion: ReduceMotion.System }),
       );
     } else {
-      shuffleShift.value = withSpring(0);
+      shuffleShift.value = withSpring(0, { reduceMotion: ReduceMotion.System });
     }
-  }, [isShuffling, shuffleShift]);
+  }, [isShuffling, shuffleShift, reduceMotion]);
 
   const topCardAnimStyle = useAnimatedStyle(() => ({
     transform: [
@@ -190,19 +203,38 @@ export default function DeckStack({
       const targetX = direction === "left" ? -SW * 1.15 : SW * 1.15;
       const targetRot = direction === "left" ? -14 : 14;
 
+      const animTargetX = reduceMotion ? 0 : targetX;
+      const animTargetRot = reduceMotion ? 0 : targetRot;
+
       /* eslint-disable react-hooks/immutability */
-      translateX.value = withTiming(targetX, { duration: 240 }, () => {
-        translateX.value = 0;
-        rotateDeg.value = 0;
-        opacityVal.value = 1;
-        onFinish();
-      });
-      rotateDeg.value = withTiming(targetRot, { duration: 240 });
-      opacityVal.value = withTiming(0, { duration: 200 });
+      if (animTargetX !== 0) {
+        translateX.value = withTiming(animTargetX, {
+          duration: 240,
+          reduceMotion: ReduceMotion.System,
+        });
+      }
+      if (animTargetRot !== 0) {
+        rotateDeg.value = withTiming(animTargetRot, {
+          duration: 240,
+          reduceMotion: ReduceMotion.System,
+        });
+      }
+      opacityVal.value = withTiming(
+        0,
+        { duration: 200, reduceMotion: ReduceMotion.System },
+        (finished) => {
+          "worklet";
+          translateX.value = 0;
+          rotateDeg.value = 0;
+          opacityVal.value = 1;
+          if (finished) {
+            runOnJS(onFinish)();
+          }
+        },
+      );
       /* eslint-enable react-hooks/immutability */
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [SW, reduceMotion, opacityVal, rotateDeg, translateX],
   );
 
   const handlePass = useCallback(() => {
@@ -239,13 +271,13 @@ export default function DeckStack({
     <View className="w-full items-center justify-center">
       <View
         className={cn(
-          "flex-row items-center justify-between",
+          "mb-2 flex-row items-center justify-between",
           (isDeckCompleted || !onDealersChoice) && "justify-center",
         )}
-        style={{ width: cardWidth, marginBottom: 8 }}
+        style={{ width: cardWidth }}
       >
-        <View className="rounded-[8px] border border-white/[0.08] bg-surface-5 px-3 py-[5px]">
-          <Text className="text-[10.5px] tracking-[1.1px] font-brandBold text-zinc-400">
+        <View className="rounded-sm border border-white/[0.08] bg-surface-5 px-3 py-1">
+          <Text className="text-[10.5px] tracking-[1.1px] font-brandBold text-subtle-foreground">
             {isDeckCompleted
               ? "ALL REELS RESOLVED"
               : `REEL ${String(Math.min(activeIndex + 1, movies.length)).padStart(2, "0")} OF ${String(movies.length).padStart(2, "0")}`}
@@ -258,11 +290,13 @@ export default function DeckStack({
               onPress={onDealersChoice}
               disabled={isDealersChoiceLoading || isShuffling}
               className={cn(
-                "flex-row items-center gap-1.5 rounded-[8px] border border-white/[0.08] bg-surface-5 px-2.5 py-[5px] active:bg-surface-6 active:opacity-75",
+                "flex-row items-center gap-1.5 rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-1 active:bg-surface-6 active:opacity-75",
                 (isDealersChoiceLoading || isShuffling) && "opacity-60",
               )}
               accessibilityRole="button"
               accessibilityLabel="Let Glimpse choose tonight's movie"
+              accessibilityState={{ disabled: isDealersChoiceLoading || isShuffling }}
+              hitSlop={10}
             >
               {isDealersChoiceLoading || isShuffling ? (
                 <ActivityIndicator
@@ -271,26 +305,24 @@ export default function DeckStack({
                   style={{ width: 14, height: 14 }}
                 />
               ) : (
-                <MaterialCommunityIcons
-                  name="dice-multiple"
+                <DiceFiveIcon
                   size={14}
                   color={colors.primary}
                 />
               )}
-              <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-white">
+              <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-foreground">
                 {isDealersChoiceLoading || isShuffling
                   ? "Shuffling..."
                   : "Dealer's Choice"}
               </Text>
             </Pressable>
           ) : (
-            <View className="flex-row items-center gap-1.5 rounded-[8px] border border-white/[0.08] bg-surface-4 px-2.5 py-[5px] opacity-55">
-              <MaterialCommunityIcons
-                name="dice-multiple"
+            <View className="flex-row items-center gap-1.5 rounded-sm border border-white/[0.08] bg-card px-2.5 py-1 opacity-55">
+              <DiceFiveIcon
                 size={14}
                 color={colors.faintForeground}
               />
-              <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-zinc-500">
+              <Text className="text-[10.5px] tracking-[0.4px] font-brandSemiBold text-faint-foreground">
                 Dealer&apos;s Pick Active
               </Text>
             </View>
@@ -304,38 +336,36 @@ export default function DeckStack({
       >
         {isDeckCompleted ? (
           <View
-            className="absolute top-0 items-center justify-center rounded-[24px] border border-white/[0.08] bg-surface-4 p-6"
+            className="absolute top-0 items-center justify-center rounded-3xl border border-white/[0.08] bg-card p-6"
             style={{
               width: cardWidth,
               height: cardHeight,
-              boxShadow: "0px 12px 20.0px rgba(0, 0, 0, 0.5)",
+              boxShadow: shadows.deck,
             }}
           >
-            <MaterialCommunityIcons
-              name="filmstrip-off"
+            <FilmStripIcon
               size={48}
               color={colors.primary}
               style={{ marginBottom: 16 }}
             />
-            <Text className="mb-2 text-center text-[20px] font-brandBold text-white">
+            <Text className="mb-2 text-center text-[20px] font-brandBold text-foreground">
               {closedContent.title}
             </Text>
-            <Text className="px-2.5 text-center text-[14px] leading-5 font-brand text-zinc-400">
+            <Text className="px-2.5 text-center text-[14px] leading-5 font-brand text-subtle-foreground">
               {closedContent.subtitle}
             </Text>
             {onReshuffle && closedContent.canReshuffle && closedContent.buttonText ? (
               <Pressable
                 onPress={onReshuffle}
-                className="mt-[22px] flex-row items-center gap-2 rounded-[20px] border border-white/[0.08] bg-surface-5 px-[18px] py-3 active:opacity-80"
+                className="mt-5 flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-3 active:opacity-80"
                 accessibilityRole="button"
                 accessibilityLabel={closedContent.buttonText}
               >
-                <MaterialCommunityIcons
-                  name="sync"
+                <ArrowsClockwiseIcon
                   size={16}
-                  color={colors.white}
+                  color={colors.foreground}
                 />
-                <Text className="text-[13px] font-brandSemiBold text-white">
+                <Text className="text-[13px] font-brandSemiBold text-foreground">
                   {closedContent.buttonText}
                 </Text>
               </Pressable>
@@ -437,8 +467,8 @@ export default function DeckStack({
 
       {activeMovie && !isDeckCompleted && !isCurrentCardResolved && !activeMovie.is_dealers_choice ? (
         <View
-          className="min-h-[46px] items-center justify-center"
-          style={{ width: cardWidth, marginTop: 12 }}
+          className="mt-3 min-h-[46px] items-center justify-center"
+          style={{ width: cardWidth }}
         >
           <View className="w-full flex-row items-center gap-2">
             {/* Pass */}
@@ -448,12 +478,11 @@ export default function DeckStack({
               accessibilityRole="button"
               accessibilityLabel="Pass this film for today"
             >
-              <MaterialCommunityIcons
-                name="close"
+              <XIcon
                 size={18}
                 color={colors.faintForeground}
               />
-              <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+              <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                 Pass
               </Text>
             </Pressable>
@@ -465,12 +494,11 @@ export default function DeckStack({
               accessibilityRole="button"
               accessibilityLabel="Mark film as already seen"
             >
-              <MaterialCommunityIcons
-                name="eye-outline"
+              <EyeIcon
                 size={18}
-                color={colors.white}
+                color={colors.foreground}
               />
-              <Text className="text-[13px] font-brandSemiBold text-white">
+              <Text className="text-[13px] font-brandSemiBold text-foreground">
                 Seen
               </Text>
             </Pressable>
@@ -483,16 +511,16 @@ export default function DeckStack({
                 isPicked ? "bg-primary-hover" : "bg-primary",
               )}
               style={{
-                boxShadow: "0px 3px 5.0px rgba(0, 0, 0, 0.3)",
+                boxShadow: shadows.subtle,
               }}
               accessibilityRole="button"
               accessibilityLabel="Pick film for tonight"
             >
-              <MaterialCommunityIcons
-                name={isPicked ? "check-circle" : "star"}
-                size={18}
-                color={colors.white}
-              />
+              {isPicked ? (
+                <CheckCircleIcon size={18} color={colors.white} weight="fill" />
+              ) : (
+                <StarIcon size={18} color={colors.white} weight="fill" />
+              )}
               <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
                 {isPicked ? "Picked" : "Pick"}
               </Text>

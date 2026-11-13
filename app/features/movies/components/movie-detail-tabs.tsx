@@ -11,12 +11,12 @@ interface MovieDetailTabsProps {
 export default function MovieDetailTabs({ activeTab, onTabPress, children }: MovieDetailTabsProps) {
   return (
     <View>
-      <View className="flex-row bg-surface-4 px-4" accessibilityRole="tablist">
+      <View className="flex-row bg-card px-4" accessibilityRole="tablist">
         {DETAIL_TABS.map((tab) => (
           <Pressable
             key={tab}
             onPress={() => onTabPress(tab)}
-            className="flex-1 items-center py-3"
+            className="min-h-[44px] flex-1 items-center justify-center py-3"
             accessibilityRole="tab"
             accessibilityState={{ selected: activeTab === tab }}
             accessibilityLabel={tab}
@@ -25,13 +25,13 @@ export default function MovieDetailTabs({ activeTab, onTabPress, children }: Mov
               className={
                 activeTab === tab
                   ? "text-[13px] font-brandSemiBold text-white"
-                  : "text-[13px] font-brandSemiBold text-zinc-400"
+                  : "text-[13px] font-brandSemiBold text-subtle-foreground"
               }
             >
               {tab}
             </Text>
             {activeTab === tab ? (
-              <View className="mt-1 h-[3px] w-full rounded-[2px] bg-primary" />
+              <View className="mt-1 h-[3px] w-full rounded-full bg-primary" />
             ) : null}
           </Pressable>
         ))}

@@ -5,7 +5,13 @@ import { Text } from "@/components/ui/text";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  BookmarkIcon,
+  CheckIcon,
+  FilmSlateIcon,
+  FilmStripIcon,
+  StarIcon,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { cn } from "@/lib/utils";
 import { useGetHistory } from "@/features/movies/hooks/query/use-get-history";
@@ -95,7 +101,7 @@ export default function Journal() {
     return (
       <Pressable
         onPress={() => handleMoviePress(item)}
-        className="overflow-hidden rounded-md border border-white/[0.08] bg-surface-4 active:opacity-80"
+        className="overflow-hidden rounded-md border border-white/[0.08] bg-card active:opacity-80"
         accessibilityRole="button"
         accessibilityLabel={item.title}
       >
@@ -111,13 +117,12 @@ export default function Journal() {
             className="w-full items-center justify-center bg-surface-5 p-1.5"
             style={{ height: cardHeight }}
           >
-            <MaterialCommunityIcons
-              name="filmstrip"
+            <FilmStripIcon
               size={28}
               color={colors.faintForeground}
             />
             <Text
-              className="mt-1 text-center text-[10px] font-brandSemiBold text-zinc-400"
+              className="mt-1 text-center text-[10px] font-brandSemiBold text-subtle-foreground"
               numberOfLines={2}
             >
               {item.title}
@@ -127,11 +132,11 @@ export default function Journal() {
 
         <View className="absolute left-1.5 right-1.5 top-1.5 flex-row justify-between">
           {item.vote_average > 0 ? (
-            <View className="flex-row items-center gap-[3px] rounded-md bg-black/75 px-[5px] py-0.5">
-              <MaterialCommunityIcons
-                name="star"
+            <View className="flex-row items-center gap-1 rounded-md bg-black/75 px-1.5 py-0.5">
+              <StarIcon
                 size={11}
                 color={colors.gold}
+                weight="fill"
               />
               <Text className="text-[9px] font-brandBold text-white">
                 {item.vote_average.toFixed(1)}
@@ -141,15 +146,15 @@ export default function Journal() {
 
           <View
             className={cn(
-              "flex-row items-center gap-[3px] rounded-md px-[5px] py-0.5",
+              "flex-row items-center gap-1 rounded-md px-1.5 py-0.5",
               item.action === "watched" ? "bg-emerald-500/85" : "bg-primary/85",
             )}
           >
-            <MaterialCommunityIcons
-              name={item.action === "watched" ? "check" : "bookmark"}
-              size={10}
-              color={colors.white}
-            />
+            {item.action === "watched" ? (
+              <CheckIcon size={10} color={colors.white} />
+            ) : (
+              <BookmarkIcon size={10} color={colors.white} />
+            )}
             <Text className="text-[9px] font-brandBold text-white">
               {formatDate(item.acted_at)}
             </Text>
@@ -158,17 +163,17 @@ export default function Journal() {
 
         <View className="px-1.5 py-1.5">
           <Text
-            className="text-[11px] font-brandSemiBold text-white"
+            className="text-[11px] font-brandSemiBold text-foreground"
             numberOfLines={1}
           >
             {item.title}
           </Text>
           {item.rating ? (
-            <View className="mt-[3px] flex-row items-center gap-[3px]">
-              <MaterialCommunityIcons
-                name="star"
+            <View className="mt-1 flex-row items-center gap-1">
+              <StarIcon
                 size={9}
                 color={colors.gold}
+                weight="fill"
               />
               <Text className="text-[9px] font-brandBold text-amber-500">
                 {item.rating}/5
@@ -181,15 +186,15 @@ export default function Journal() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <View className="px-4 pb-3 pt-2">
-        <View className="flex-row items-baseline gap-[3px]">
-          <Text className="text-[22px] tracking-[2px] font-brandExtraBold text-white">
+        <View className="flex-row items-baseline gap-1">
+          <Text className="text-[22px] tracking-[2px] font-brandExtraBold text-foreground">
             JOURNAL
           </Text>
           <View className="mb-0.5 h-[5px] w-[5px] rounded-full bg-primary" />
         </View>
-        <Text className="mt-0.5 text-[12px] font-brand text-zinc-400">
+        <Text className="mt-0.5 text-[12px] font-brand text-subtle-foreground">
           Your lifetime cinema archive and history
         </Text>
       </View>
@@ -199,7 +204,7 @@ export default function Journal() {
           <Text className="text-[17px] font-brandBold text-primary">
             {stats.watchedCount}
           </Text>
-          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-zinc-400">
+          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-subtle-foreground">
             Watched
           </Text>
         </View>
@@ -208,19 +213,19 @@ export default function Journal() {
           <Text className="text-[17px] font-brandBold text-amber-500">
             {stats.picksCount}
           </Text>
-          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-zinc-400">
+          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-subtle-foreground">
             Picks
           </Text>
         </View>
 
         <View className="flex-1 items-center rounded-lg border border-white/[0.08] bg-surface-5 px-2 py-2.5">
           <Text
-            className="text-[17px] font-brandBold text-white"
+            className="text-[17px] font-brandBold text-foreground"
             numberOfLines={1}
           >
             {stats.topGenre}
           </Text>
-          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-zinc-400">
+          <Text className="mt-0.5 text-[10px] uppercase tracking-[0.5px] font-brandSemiBold text-subtle-foreground">
             Top Vibe
           </Text>
         </View>
@@ -233,7 +238,7 @@ export default function Journal() {
           accessibilityLabel={`All, ${allHistory.length} entries`}
           onPress={() => handleTabPress("all")}
           className={cn(
-            "rounded-[18px] px-3.5 py-1.5",
+            "rounded-full px-3.5 py-1.5",
             activeFilter === "all"
               ? "bg-white"
               : "border border-white/[0.08] bg-surface-5",
@@ -242,7 +247,7 @@ export default function Journal() {
           <Text
             className={cn(
               "text-[12px] font-brandSemiBold",
-              activeFilter === "all" ? "text-surface-1" : "text-zinc-400",
+              activeFilter === "all" ? "text-surface-1" : "text-subtle-foreground",
             )}
           >
             All ({allHistory.length})
@@ -255,7 +260,7 @@ export default function Journal() {
           accessibilityLabel={`Watched, ${stats.watchedCount} entries`}
           onPress={() => handleTabPress("watched")}
           className={cn(
-            "rounded-[18px] px-3.5 py-1.5",
+            "rounded-full px-3.5 py-1.5",
             activeFilter === "watched"
               ? "bg-white"
               : "border border-white/[0.08] bg-surface-5",
@@ -264,7 +269,7 @@ export default function Journal() {
           <Text
             className={cn(
               "text-[12px] font-brandSemiBold",
-              activeFilter === "watched" ? "text-surface-1" : "text-zinc-400",
+              activeFilter === "watched" ? "text-surface-1" : "text-subtle-foreground",
             )}
           >
             Watched ({stats.watchedCount})
@@ -277,7 +282,7 @@ export default function Journal() {
           accessibilityLabel={`Picks, ${stats.picksCount} entries`}
           onPress={() => handleTabPress("pick_tonight")}
           className={cn(
-            "rounded-[18px] px-3.5 py-1.5",
+            "rounded-full px-3.5 py-1.5",
             activeFilter === "pick_tonight"
               ? "bg-white"
               : "border border-white/[0.08] bg-surface-5",
@@ -286,7 +291,7 @@ export default function Journal() {
           <Text
             className={cn(
               "text-[12px] font-brandSemiBold",
-              activeFilter === "pick_tonight" ? "text-surface-1" : "text-zinc-400",
+              activeFilter === "pick_tonight" ? "text-surface-1" : "text-subtle-foreground",
             )}
           >
             Picks ({stats.picksCount})
@@ -299,7 +304,7 @@ export default function Journal() {
           className="flex-1 items-center justify-center px-8"
           style={{ paddingBottom: Math.max(insets.bottom, 16) + 60 }}
         >
-          <Text className="text-[14px] font-brand text-zinc-400">
+          <Text className="text-[14px] font-brand text-subtle-foreground">
             Loading cinema archive...
           </Text>
         </View>
@@ -308,29 +313,28 @@ export default function Journal() {
           className="flex-1 items-center justify-center px-8"
           style={{ paddingBottom: Math.max(insets.bottom, 16) + 60 }}
         >
-          <MaterialCommunityIcons
-            name="movie-open-outline"
+          <FilmSlateIcon
             size={48}
             color={colors.faintForeground}
             style={{ marginBottom: 12 }}
           />
-          <Text className="mb-1.5 text-center text-[17px] font-brandBold text-white">
+          <Text className="mb-1.5 text-center text-[17px] font-brandBold text-foreground">
             {activeFilter === "watched"
               ? "No watched films yet"
               : activeFilter === "pick_tonight"
               ? "No picks saved yet"
               : "Your journal is empty"}
           </Text>
-          <Text className="mb-5 text-center text-[13px] leading-[19px] font-brand text-zinc-500">
+          <Text className="mb-5 text-center text-[13px] leading-[19px] font-brand text-faint-foreground">
             Movies you mark as watched or select as your daily pick will be collected here.
           </Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Explore today's batch"
             onPress={() => router.push("/(app)/(tabs)")}
-            className="rounded-lg border border-white/[0.08] bg-surface-6 px-[18px] py-2.5"
+            className="min-h-[44px] justify-center rounded-lg border border-white/[0.08] bg-surface-6 px-4 py-2.5"
           >
-            <Text className="text-[13px] font-brandSemiBold text-white">
+            <Text className="text-[13px] font-brandSemiBold text-foreground">
               Explore Today&apos;s Batch
             </Text>
           </Pressable>

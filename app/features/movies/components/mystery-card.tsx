@@ -3,12 +3,14 @@ import { Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FilmStripIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { tmdbImage } from "../constants/images";
 import type { GridMovie } from "../types/movies.type";
 import { curatorNote, structuredClues } from "../utils/deck";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 export type CardStamp = "PASSED" | "SEEN" | null;
 
@@ -53,9 +55,9 @@ export default function MysteryCard({
 
   return (
     <View
-      className="h-full w-full overflow-hidden rounded-[24px] border border-white/[0.1] bg-card"
+      className="h-full w-full overflow-hidden rounded-3xl border border-white/[0.1] bg-card"
       style={{
-        boxShadow: "0px 12px 20.0px rgba(0, 0, 0, 0.5)",
+        boxShadow: shadows.deck,
       }}
     >
       <Pressable
@@ -64,6 +66,7 @@ export default function MysteryCard({
         className="flex-1"
         accessibilityRole="button"
         accessibilityLabel={`${movie.title}. Tap for details.`}
+        accessibilityState={{ disabled: !isInteractive }}
       >
         {/* Full-bleed poster image */}
         {posterSrc && !posterFailed ? (
@@ -76,9 +79,8 @@ export default function MysteryCard({
             onError={() => setPosterFailed(true)}
           />
         ) : (
-          <View className="absolute inset-0 items-center justify-center bg-surface-4 p-6">
-            <MaterialCommunityIcons
-              name="filmstrip"
+          <View className="absolute inset-0 items-center justify-center bg-card p-6">
+            <FilmStripIcon
               size={56}
               color={colors.faintForeground}
             />
@@ -102,7 +104,7 @@ export default function MysteryCard({
             pointerEvents="none"
           >
             <View
-              className="absolute top-[18px] left-[-28px] h-[22px] w-[114px] items-center justify-center bg-white"
+              className="absolute top-4 left-[-28px] h-[22px] w-[114px] items-center justify-center bg-white"
               style={{ transform: [{ rotate: "-45deg" }] }}
             >
               <Text className="text-center text-[9.5px] tracking-[1.2px] font-brandBold text-surface-1">
@@ -116,9 +118,9 @@ export default function MysteryCard({
         <LinearGradient
           colors={[
             "transparent",
-            "rgba(10, 10, 14, 0.45)",
-            "rgba(10, 10, 14, 0.92)",
-            "#0a0a0c",
+            withAlpha(colors.background, 0.45),
+            withAlpha(colors.background, 0.92),
+            colors.background,
           ]}
           locations={[0, 0.25, 0.65, 1]}
           style={ScrimStyle}
@@ -129,7 +131,7 @@ export default function MysteryCard({
               {clues.slice(0, 2).map((clue) => (
                 <View
                   key={clue}
-                  className="rounded-[7px] border border-white/[0.18] bg-black/[0.65] px-2 py-[3.5px]"
+                  className="rounded border border-white/[0.18] bg-black/[0.65] px-2 py-1"
                 >
                   <Text className="text-[10px] tracking-[0.3px] font-brandSemiBold text-white">
                     {clue}

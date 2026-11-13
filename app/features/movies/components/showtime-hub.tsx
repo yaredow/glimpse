@@ -5,10 +5,21 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/text";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ArrowSquareOutIcon,
+  ClockIcon,
+  FilmSlateIcon,
+  HourglassIcon,
+  MagnifyingGlassIcon,
+  PlayCircleIcon,
+  PlayIcon,
+  SealCheckIcon,
+  StarIcon,
+} from "phosphor-react-native";
 import * as Linking from "expo-linking";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
@@ -19,6 +30,8 @@ import VerdictModal from "./verdict-modal";
 import CinemaTrailerModal from "./cinema-trailer-modal";
 import type { GridMovie, WatchProvider } from "../types/movies.type";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 interface ShowtimeHubProps {
   movie: GridMovie;
@@ -39,8 +52,9 @@ export default function ShowtimeHub({
   onLogWatched,
   onOpenDetails,
 }: ShowtimeHubProps) {
+  const insets = useSafeAreaInsets();
   const { width: SW } = useWindowDimensions();
-  const HERO_H = Math.round(SW * 0.88);
+  const HERO_H = Math.round(SW * 0.88) + insets.top;
   const { data: detailData } = useGetMovie(movie.movie_id);
   const movieDetails = detailData?.movie;
 
@@ -200,7 +214,9 @@ export default function ShowtimeHub({
 
   return (
     <ScrollView
-      contentContainerStyle={{ paddingBottom: 60 }}
+      contentContainerStyle={{
+        paddingBottom: Math.max(insets.bottom, 16) + 84,
+      }}
       showsVerticalScrollIndicator={false}
     >
       {/* 1. CINEMA HERO */}
@@ -217,23 +233,23 @@ export default function ShowtimeHub({
             cachePolicy="memory-disk"
           />
         ) : (
-          <View style={[AbsoluteFill, { backgroundColor: "#1c1c1f" }]} />
+          <View style={[AbsoluteFill, { backgroundColor: colors.card }]} />
         )}
 
         <LinearGradient
           colors={[
-            "rgba(18, 18, 18, 0.15)",
-            "rgba(18, 18, 18, 0.65)",
-            colors.surface1,
+            withAlpha(colors.background, 0.45),
+            withAlpha(colors.background, 0.05),
+            withAlpha(colors.background, 0.65),
+            colors.background,
           ]}
-          locations={[0, 0.5, 1]}
+          locations={[0, 0.25, 0.7, 1]}
           style={AbsoluteFill}
         />
 
-        <View className="px-5 pb-5">
-          <View className="mb-2 self-start flex-row items-center gap-1.5 rounded-[7px] bg-amber-500 px-[9px] py-1">
-            <MaterialCommunityIcons
-              name="movie-open-star"
+        <View className="px-4 pb-5">
+          <View className="mb-2 self-start flex-row items-center gap-1.5 rounded-md bg-gold px-2 py-1">
+            <FilmSlateIcon
               size={13}
               color={colors.surface1}
             />
@@ -252,7 +268,7 @@ export default function ShowtimeHub({
             </Text>
           ) : null}
           {movieDetails?.director ? (
-            <Text className="mt-[3px] text-[12px] font-brandMedium text-zinc-400">
+            <Text className="mt-1 text-[12px] font-brandMedium text-subtle-foreground">
               Directed by {movieDetails.director}
             </Text>
           ) : null}
@@ -263,14 +279,15 @@ export default function ShowtimeHub({
       <View className="mt-4 px-4">
         {primaryProvider ? (
           <Pressable
+            key="primary-provider"
             onPress={handleOpenPrimaryProvider}
-            className="flex-row items-center justify-between rounded-[14px] bg-primary px-[18px] py-3.5 active:opacity-90 active:scale-[0.99]"
+            className="flex-row items-center justify-between rounded-xl bg-primary px-4 py-3.5 active:opacity-90"
             style={{
-              boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.35)",
+              boxShadow: shadows.glow,
             }}
           >
-            <View className="h-[34px] w-[34px] items-center justify-center rounded-[17px] bg-black/25">
-              <MaterialCommunityIcons name="play" size={20} color={colors.white} />
+            <View className="h-[34px] w-[34px] items-center justify-center rounded-full bg-black/25">
+              <PlayIcon size={20} color={colors.white} />
             </View>
             <View className="ml-3 flex-1">
               <Text className="text-[10px] tracking-[0.8px] font-brandBold text-white/[0.8]">
@@ -280,24 +297,24 @@ export default function ShowtimeHub({
                 {primaryProvider.name.toUpperCase()}
               </Text>
             </View>
-            <MaterialCommunityIcons
-              name="open-in-new"
+            <ArrowSquareOutIcon
               size={18}
-              color="rgba(255, 255, 255, 0.7)"
+              color={withAlpha(colors.white, 0.7)}
             />
           </Pressable>
         ) : (
           <Pressable
+            key="find-where-to-watch"
             onPress={() =>
               handleOpenLink(searchLinks?.justwatch || searchLinks?.google || "")
             }
-            className="flex-row items-center justify-center gap-2 rounded-[14px] border border-white/[0.15] bg-white/[0.08] px-[18px] py-3.5 active:opacity-90"
+            className="flex-row items-center justify-center gap-2 rounded-xl border border-white/[0.15] bg-white/[0.08] px-4 py-3.5 active:opacity-90"
             style={{
-              boxShadow: "0px 4px 10.0px rgba(229, 9, 20, 0.35)",
+              boxShadow: shadows.glow,
             }}
           >
-            <MaterialCommunityIcons name="magnify" size={20} color={colors.white} />
-            <Text className="text-[13px] tracking-[0.6px] font-brandBold text-white">
+            <MagnifyingGlassIcon size={20} color={colors.foreground} />
+            <Text className="text-[13px] tracking-[0.6px] font-brandBold text-foreground">
               FIND WHERE TO WATCH
             </Text>
           </Pressable>
@@ -305,7 +322,7 @@ export default function ShowtimeHub({
 
         {otherProviders.length > 0 ? (
           <View className="mt-2.5 flex-row items-center gap-2 px-1">
-            <Text className="text-[11px] font-brandMedium text-zinc-500">
+            <Text className="text-[11px] font-brandMedium text-faint-foreground">
               Also on:
             </Text>
             <View className="flex-row flex-wrap items-center gap-1.5">
@@ -317,9 +334,12 @@ export default function ShowtimeHub({
                       providers?.justwatch_link || searchLinks?.justwatch || "",
                     )
                   }
-                  className="rounded-[6px] border border-white/[0.08] bg-white/[0.06] px-2 py-[3px]"
+                  accessibilityRole="button"
+                  accessibilityLabel={`Watch on ${prov.name}`}
+                  hitSlop={8}
+                  className="rounded border border-white/[0.08] bg-white/[0.06] px-2 py-0.5"
                 >
-                  <Text className="text-[11px] font-brandSemiBold text-zinc-300">
+                  <Text className="text-[11px] font-brandSemiBold text-foreground">
                     {prov.name}
                   </Text>
                 </Pressable>
@@ -330,19 +350,18 @@ export default function ShowtimeHub({
       </View>
 
       {/* 3. SCHEDULE & PRE-SHOW BAR */}
-      <View className="mx-4 mt-4 flex-row items-center justify-between rounded-[14px] border border-white/[0.07] bg-white/[0.03] px-3.5 py-3">
+      <View className="mx-4 mt-4 flex-row items-center justify-between rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 py-3">
         <View className="flex-1 flex-row items-center gap-2.5">
-          <MaterialCommunityIcons
-            name="clock-outline"
+          <ClockIcon
             size={18}
             color={colors.subtleForeground}
           />
           <View className="flex-1">
-            <Text className="text-[13px] font-brandBold text-white">
+            <Text className="text-[13px] font-brandBold text-foreground">
               {runtimeFormatted ? `${runtimeFormatted}` : "Runtime TBA"}
               {estimatedEndTime ? ` · Finishes ~${estimatedEndTime}` : ""}
             </Text>
-            <Text className="mt-px text-[11px] text-zinc-500">
+            <Text className="mt-px text-[11px] text-faint-foreground">
               Tonight&apos;s Feature Schedule
             </Text>
           </View>
@@ -351,15 +370,14 @@ export default function ShowtimeHub({
         {trailerKey ? (
           <Pressable
             onPress={handleOpenTrailer}
-            className="flex-row items-center gap-1 rounded-[8px] border border-white/[0.12] bg-white/[0.08] px-2.5 py-1.5 active:opacity-80"
+            className="flex-row items-center gap-1 rounded-sm border border-white/[0.12] bg-white/[0.08] px-2.5 py-1.5 active:opacity-80"
             accessibilityLabel="Play pre-show trailer"
           >
-            <MaterialCommunityIcons
-              name="play-circle-outline"
+            <PlayCircleIcon
               size={15}
-              color={colors.white}
+              color={colors.foreground}
             />
-            <Text className="text-[10px] tracking-[0.6px] font-brandBold text-white">
+            <Text className="text-[10px] tracking-[0.6px] font-brandBold text-foreground">
               PRE-SHOW
             </Text>
           </Pressable>
@@ -368,10 +386,9 @@ export default function ShowtimeHub({
 
       {/* 4. POST-SHOW RITUAL & VERDICT */}
       <View className="mt-4 items-center px-4">
-        <View className="w-full rounded-[14px] border border-white/[0.08] bg-white/[0.03] p-4">
+        <View className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
           <View className="mb-2 flex-row items-center gap-1.5">
-            <MaterialCommunityIcons
-              name="star-box-multiple-outline"
+            <StarIcon
               size={17}
               color={colors.gold}
             />
@@ -383,34 +400,33 @@ export default function ShowtimeHub({
           {movie.action === "watched" ? (
             <View className="py-1.5">
               <View className="mb-1 flex-row items-center gap-2">
-                <MaterialCommunityIcons
-                  name="check-decagram"
+                <SealCheckIcon
                   size={22}
                   color={colors.success}
+                  weight="fill"
                 />
-                <Text className="text-[15px] font-brandBold text-white">
+                <Text className="text-[15px] font-brandBold text-foreground">
                   Verdict Recorded
                 </Text>
               </View>
-              <Text className="text-[12px] leading-[17px] text-zinc-500">
+              <Text className="text-[12px] leading-[17px] text-faint-foreground">
                 Saved to your Journal and added to your Taste DNA.
               </Text>
             </View>
           ) : (
             <>
-              <Text className="mb-3.5 text-[13px] leading-[19px] text-zinc-400">
+              <Text className="mb-3.5 text-[13px] leading-[19px] text-subtle-foreground">
                 When the credits roll, rate tonight&apos;s feature to close the
                 session and calibrate tomorrow&apos;s reel.
               </Text>
               <Pressable
                 onPress={() => setShowVerdictModal(true)}
-                className="h-[46px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-amber-500 active:opacity-90 active:scale-[0.99]"
+                className="h-[46px] w-full flex-row items-center justify-center gap-2 rounded-lg bg-gold active:opacity-90"
                 style={{
-                  boxShadow: "0px 4px 8.0px rgba(245, 158, 11, 0.3)",
+                  boxShadow: shadows.goldGlow,
                 }}
               >
-                <MaterialCommunityIcons
-                  name="star-outline"
+                <StarIcon
                   size={18}
                   color={colors.surface1}
                 />
@@ -423,21 +439,23 @@ export default function ShowtimeHub({
         </View>
 
         <View className="mt-3.5 flex-row items-center gap-1.5">
-          <MaterialCommunityIcons
-            name="timer-sand"
+          <HourglassIcon
             size={14}
             color={colors.faintForeground}
           />
-          <Text className="text-[12px] text-zinc-500">
+          <Text className="text-[12px] text-faint-foreground">
             Next daily reel drops in {countdown}
           </Text>
         </View>
 
         <Pressable
           onPress={() => onOpenDetails(movie)}
-          className="mt-[18px] px-3 py-1.5"
+          accessibilityRole="button"
+          accessibilityLabel="View full film synopsis and cast"
+          hitSlop={8}
+          className="mt-1 min-h-[36px] justify-center px-3 py-0.5"
         >
-          <Text className="text-[12px] text-zinc-500 underline">
+          <Text className="text-[12px] text-faint-foreground underline">
             View full film synopsis &amp; cast &rarr;
           </Text>
         </Pressable>

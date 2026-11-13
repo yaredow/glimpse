@@ -71,19 +71,18 @@ export default function EditPreferencesModal({
 }: EditPreferencesModalProps) {
   return (
     <Dialog open={visible} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="w-[92%] max-w-[420px] gap-4 rounded-[24px] p-5">
-        <DialogTitle className="text-center text-[18px] leading-7">
-          Film Preferences
-        </DialogTitle>
-        <ScrollView className="max-h-[70vh]">
-          {visible ? (
-            <EditPreferencesForm
-              key={visible ? "open" : "closed"}
-              currentPreferences={currentPreferences}
-              onClose={onClose}
-            />
-          ) : null}
-        </ScrollView>
+      <DialogContent
+        className="w-full max-h-[88vh] gap-0 overflow-hidden rounded-3xl p-0"
+        showCloseButton={false}
+      >
+        <DialogTitle className="sr-only">Film Preferences</DialogTitle>
+        {visible ? (
+          <EditPreferencesForm
+            key={visible ? "open" : "closed"}
+            currentPreferences={currentPreferences}
+            onClose={onClose}
+          />
+        ) : null}
       </DialogContent>
     </Dialog>
   );
@@ -235,10 +234,10 @@ function EditPreferencesForm({
     <>
       <View className="flex-row items-center justify-between border-b border-white/[0.06] px-5 py-3.5">
         <View>
-          <Text className="text-[20px] tracking-[-0.3px] font-brandBold text-white">
+          <Text className="text-[20px] tracking-[-0.3px] font-brandBold text-foreground">
             Film Preferences
           </Text>
-          <Text className="mt-0.5 text-[12.5px] font-brand text-zinc-400">
+          <Text className="mt-0.5 text-[12.5px] font-brand text-subtle-foreground">
             Tune your recommendation engine
           </Text>
         </View>
@@ -246,6 +245,8 @@ function EditPreferencesForm({
         <Pressable
           onPress={onClose}
           hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel="Close preferences"
           className="h-8 w-8 items-center justify-center rounded-full bg-surface-5"
         >
           <XIcon
@@ -257,29 +258,31 @@ function EditPreferencesForm({
       </View>
 
       {dataLoading ? (
-        <View className="items-center justify-center gap-3 py-[60px]">
+        <View className="items-center justify-center gap-3 py-16">
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text className="text-[13px] font-brand text-zinc-500">
+          <Text className="text-[13px] font-brand text-faint-foreground">
             Loading preferences...
           </Text>
         </View>
       ) : (
         <ScrollView
-          className="max-h-[520px]"
+          className="max-h-[64vh]"
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={true}
+          bounces={true}
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingTop: 16,
             paddingBottom: 24,
             gap: 22,
           }}
-          showsVerticalScrollIndicator={false}
         >
           <View className="gap-2">
             <View className="flex-row items-center justify-between">
-              <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
+              <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-foreground">
                 Genre Filters
               </Text>
-              <Text className="text-[12px] font-brandSemiBold text-zinc-500">
+              <Text className="text-[12px] font-brandSemiBold text-faint-foreground">
                 {genreTab === "favorites"
                   ? `${favorites.length} selected`
                   : `${excluded.length} excluded`}
@@ -287,14 +290,17 @@ function EditPreferencesForm({
             </View>
 
             {/* Segmented Tab Switcher */}
-            <View className="my-1 flex-row gap-1 rounded-[12px] border border-white/[0.08] bg-surface-5 p-[3px]">
+            <View className="my-1 flex-row gap-1 rounded-lg border border-white/[0.08] bg-surface-5 p-1">
               <Pressable
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setGenreTab("favorites");
                 }}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: genreTab === "favorites" }}
+                accessibilityLabel="Favorite genres"
                 className={cn(
-                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-[9px] border border-transparent py-[9px]",
+                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-md border border-transparent py-2",
                   genreTab === "favorites" &&
                     "border-primary/45 bg-primary/[0.18]",
                 )}
@@ -313,7 +319,7 @@ function EditPreferencesForm({
                     "text-[12.5px]",
                     genreTab === "favorites"
                       ? "font-brandSemiBold text-white"
-                      : "font-brand text-zinc-400",
+                      : "font-brand text-subtle-foreground",
                   )}
                 >
                   Favorite ({favorites.length})
@@ -325,8 +331,11 @@ function EditPreferencesForm({
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setGenreTab("excluded");
                 }}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: genreTab === "excluded" }}
+                accessibilityLabel="Excluded genres"
                 className={cn(
-                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-[9px] border border-transparent py-[9px]",
+                  "flex-1 flex-row items-center justify-center gap-1.5 rounded-md border border-transparent py-2",
                   genreTab === "excluded" &&
                     "border-destructive/40 bg-destructive/[0.15]",
                 )}
@@ -345,7 +354,7 @@ function EditPreferencesForm({
                     "text-[12.5px]",
                     genreTab === "excluded"
                       ? "font-brandSemiBold text-white"
-                      : "font-brand text-zinc-400",
+                      : "font-brand text-subtle-foreground",
                   )}
                 >
                   Excluded ({excluded.length})
@@ -353,7 +362,7 @@ function EditPreferencesForm({
               </Pressable>
             </View>
 
-            <Text className="mb-1 text-[12px] leading-4 font-brand text-zinc-400">
+            <Text className="mb-1 text-[12px] leading-4 font-brand text-subtle-foreground">
               {genreTab === "favorites"
                 ? "Select the genres you want prioritized in your nightly curation."
                 : "Films tagged with these genres will never be suggested in your reel."}
@@ -368,8 +377,11 @@ function EditPreferencesForm({
                     <Pressable
                       key={genre.id}
                       onPress={() => toggleFavorite(genre.id)}
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: isSelected }}
+                      accessibilityLabel={genre.name}
                       className={cn(
-                        "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
+                        "flex-row items-center gap-1.5 rounded-md border px-3 py-2",
                         isSelected
                           ? "border-[1.5px] border-primary bg-primary/[0.16]"
                           : "border border-white/[0.08] bg-surface-5",
@@ -381,8 +393,8 @@ function EditPreferencesForm({
                           isSelected
                             ? "font-brandSemiBold text-white"
                             : isExcluded
-                              ? "font-brand text-zinc-500"
-                              : "font-brand text-zinc-400",
+                              ? "font-brand text-faint-foreground"
+                              : "font-brand text-subtle-foreground",
                         )}
                       >
                         {genre.name}
@@ -404,8 +416,11 @@ function EditPreferencesForm({
                     <Pressable
                       key={genre.id}
                       onPress={() => toggleExcluded(genre.id)}
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: isExcluded }}
+                      accessibilityLabel={genre.name}
                       className={cn(
-                        "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
+                        "flex-row items-center gap-1.5 rounded-md border px-3 py-2",
                         isExcluded
                           ? "border-[1.5px] border-destructive/40 bg-destructive/[0.12]"
                           : "border border-white/[0.08] bg-surface-5",
@@ -417,8 +432,8 @@ function EditPreferencesForm({
                           isExcluded
                             ? "font-brand text-destructive line-through"
                             : isFav
-                              ? "font-brand text-zinc-500"
-                              : "font-brand text-zinc-400",
+                              ? "font-brand text-faint-foreground"
+                              : "font-brand text-subtle-foreground",
                         )}
                       >
                         {genre.name}
@@ -439,10 +454,10 @@ function EditPreferencesForm({
           </View>
 
           <View className="gap-2">
-            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
+            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-foreground">
               Release Era
             </Text>
-            <Text className="mb-1 text-[12px] leading-4 font-brand text-zinc-400">
+            <Text className="mb-1 text-[12px] leading-4 font-brand text-subtle-foreground">
               Focus your reel on specific cinematic eras.
             </Text>
             <View className="gap-2">
@@ -459,8 +474,11 @@ function EditPreferencesForm({
                       setMinYear(era.min_year);
                       setMaxYear(era.max_year);
                     }}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    accessibilityLabel={era.label}
                     className={cn(
-                      "flex-row items-center justify-between rounded-[12px] border px-4 py-3",
+                      "flex-row items-center justify-between rounded-lg border px-4 py-3",
                       isSelected
                         ? "border-[1.5px] border-primary bg-primary/[0.12]"
                         : "border border-white/[0.08] bg-surface-5",
@@ -472,12 +490,12 @@ function EditPreferencesForm({
                           "text-[13.5px]",
                           isSelected
                             ? "font-brandSemiBold text-white"
-                            : "font-brand text-white",
+                            : "font-brand text-foreground",
                         )}
                       >
                         {era.label}
                       </Text>
-                      <Text className="mt-0.5 text-[11px] font-brand text-zinc-500">
+                      <Text className="mt-0.5 text-[11px] font-brand text-faint-foreground">
                         {desc}
                       </Text>
                     </View>
@@ -495,10 +513,10 @@ function EditPreferencesForm({
           </View>
 
           <View className="gap-2">
-            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
+            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-foreground">
               Minimum Rating
             </Text>
-            <Text className="mb-1 text-[12px] leading-4 font-brand text-zinc-400">
+            <Text className="mb-1 text-[12px] leading-4 font-brand text-subtle-foreground">
               Set a quality threshold based on community and critic ratings.
             </Text>
             <View className="flex-row gap-2">
@@ -511,8 +529,11 @@ function EditPreferencesForm({
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                       setMinRating(rating.value);
                     }}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected }}
+                    accessibilityLabel={rating.label}
                     className={cn(
-                      "flex-1 items-center justify-center rounded-[10px] border py-[11px]",
+                      "flex-1 items-center justify-center rounded-md border py-2.5",
                       isSelected
                         ? "border-[1.5px] border-amber-500 bg-amber-500/[0.15]"
                         : "border border-white/[0.08] bg-surface-5",
@@ -523,7 +544,7 @@ function EditPreferencesForm({
                         "text-[12.5px]",
                         isSelected
                           ? "font-brandSemiBold text-white"
-                          : "font-brand text-zinc-400",
+                          : "font-brand text-subtle-foreground",
                       )}
                     >
                       {rating.label}
@@ -535,10 +556,10 @@ function EditPreferencesForm({
           </View>
 
           <View className="gap-2">
-            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-white">
+            <Text className="text-[14px] tracking-[0.2px] font-brandSemiBold text-foreground">
               Languages
             </Text>
-            <Text className="mb-1 text-[12px] leading-4 font-brand text-zinc-400">
+            <Text className="mb-1 text-[12px] leading-4 font-brand text-subtle-foreground">
               Select the original languages you prefer to watch.
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -548,8 +569,11 @@ function EditPreferencesForm({
                   <Pressable
                     key={lang.code}
                     onPress={() => toggleLanguage(lang.code)}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: isSelected }}
+                    accessibilityLabel={lang.label}
                     className={cn(
-                      "flex-row items-center gap-[5px] rounded-[10px] border px-[13px] py-[9px]",
+                      "flex-row items-center gap-1.5 rounded-md border px-3 py-2",
                       isSelected
                         ? "border-[1.5px] border-primary bg-primary/[0.16]"
                         : "border border-white/[0.08] bg-surface-5",
@@ -560,7 +584,7 @@ function EditPreferencesForm({
                         "text-[12.5px]",
                         isSelected
                           ? "font-brandSemiBold text-white"
-                          : "font-brand text-zinc-400",
+                          : "font-brand text-subtle-foreground",
                       )}
                     >
                       {lang.label}
@@ -581,12 +605,12 @@ function EditPreferencesForm({
         </ScrollView>
       )}
 
-      <View className="border-t border-white/[0.08] bg-surface-4 px-5 pt-3 pb-2">
+      <View className="border-t border-white/[0.08] bg-card px-5 pt-3 pb-2">
         <Pressable
           onPress={handleSave}
           disabled={isPending || dataLoading}
           className={cn(
-            "h-[50px] items-center justify-center rounded-[12px] bg-primary active:opacity-90",
+            "h-[50px] items-center justify-center rounded-lg bg-primary active:opacity-90",
             (isPending || dataLoading) && "opacity-60",
           )}
           accessibilityRole="button"

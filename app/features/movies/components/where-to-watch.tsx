@@ -10,7 +10,19 @@ import { Text } from "@/components/ui/text";
 import * as Linking from "expo-linking";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  CloudSlashIcon,
+  FilmSlateIcon,
+  FilmStripIcon,
+  GoogleLogoIcon,
+  InfoIcon,
+  MagnetIcon,
+  MonitorPlayIcon,
+  PlayCircleIcon,
+  ShareNetworkIcon,
+  StarIcon,
+  TelevisionSimpleIcon,
+} from "phosphor-react-native";
 import Toast from "react-native-toast-message";
 import { cn } from "@/lib/utils";
 import { useMovieSources } from "../hooks/query/use-movie-sources";
@@ -107,7 +119,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
     return (
       <View className="items-center gap-2.5 py-7">
         <ActivityIndicator size="small" color={colors.primary} />
-        <Text className="text-[13px] font-brand text-zinc-500">
+        <Text className="text-[13px] font-brand text-faint-foreground">
           Checking streaming availability...
         </Text>
       </View>
@@ -117,7 +129,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
   if (isError || !sources) {
     return (
       <View className="items-center py-4">
-        <Text className="text-[13px] font-brand text-zinc-500">
+        <Text className="text-[13px] font-brand text-faint-foreground">
           Sources currently unavailable. Use universal search below.
         </Text>
       </View>
@@ -125,21 +137,20 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
   }
 
   return (
-    <View className="mt-6 w-full px-5">
+    <View className="mt-6 w-full px-4">
       <View className="mb-4 flex-row items-center gap-2">
-        <MaterialCommunityIcons
-          name="play-network-outline"
+        <TelevisionSimpleIcon
           size={18}
           color={colors.primary}
         />
-        <Text className="text-[18px] tracking-[-0.3px] font-brandBold text-white">
+        <Text className="text-[18px] tracking-[-0.3px] font-brandBold text-foreground">
           Where to Watch
         </Text>
       </View>
 
       {cleanProviders.length > 0 ? (
         <View className="mb-6">
-          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-zinc-400">
+          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-subtle-foreground">
             {providerLabel}
           </Text>
           <ScrollView
@@ -160,6 +171,8 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   onPress={() =>
                     handleOpenLink(providers?.justwatch_link || searchLinks?.justwatch || "")
                   }
+                  accessibilityRole="button"
+                  accessibilityLabel={`Watch on ${prov.name}`}
                   className="flex-row items-center gap-3 rounded-2xl border border-white/[0.08] bg-surface-5 px-4 py-3 active:opacity-80"
                 >
                   {logoUri ? (
@@ -170,9 +183,8 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                       transition={200}
                     />
                   ) : (
-                    <View className="h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-surface-6">
-                      <MaterialCommunityIcons
-                        name="movie-outline"
+                    <View className="h-[38px] w-[38px] items-center justify-center rounded-md bg-surface-6">
+                      <FilmSlateIcon
                         size={20}
                         color={colors.faintForeground}
                       />
@@ -180,12 +192,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                   )}
                   <View className="justify-center">
                     <Text
-                      className="text-[13.5px] tracking-[0.1px] font-brandSemiBold text-white"
+                      className="text-[13.5px] tracking-[0.1px] font-brandSemiBold text-foreground"
                       numberOfLines={1}
                     >
                       {prov.name}
                     </Text>
-                    <Text className="mt-0.5 text-[11px] tracking-[0.2px] font-brandMedium text-zinc-400">
+                    <Text className="mt-0.5 text-[11px] tracking-[0.2px] font-brandMedium text-subtle-foreground">
                       {providerLabel === "STREAMING NOW" ? "Stream" : "Rent"}
                     </Text>
                   </View>
@@ -195,13 +207,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
           </ScrollView>
         </View>
       ) : (
-        <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-surface-4 px-3.5 py-3">
-          <MaterialCommunityIcons
-            name="information-outline"
+        <View className="flex-row items-center gap-2.5 rounded-xl border border-white/[0.08] bg-card px-3.5 py-3">
+          <InfoIcon
             size={16}
             color={colors.faintForeground}
           />
-          <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-zinc-500">
+          <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-faint-foreground">
             Not currently available on major subscription platforms. Try the search links below.
           </Text>
         </View>
@@ -210,12 +221,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
       {SHOW_TORRENTS ? (
       <View className="mb-6">
         <View className="mb-3 flex-row items-center justify-between">
-          <Text className="text-[11px] tracking-[1.2px] font-brandBold text-zinc-400">
+          <Text className="text-[11px] tracking-[1.2px] font-brandBold text-subtle-foreground">
             TORRENTS & MAGNETS
           </Text>
           {torrents.length > 0 ? (
-            <View className="flex-row items-center gap-[5px] rounded-[10px] bg-emerald-500/[0.12] px-2 py-[3px]">
-              <View className="h-1.5 w-1.5 rounded-[3px] bg-emerald-500" />
+            <View className="flex-row items-center gap-1 rounded-md bg-emerald-500/[0.12] px-2 py-0.5">
+              <View className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               <Text className="text-[10px] tracking-[0.3px] font-brandSemiBold text-emerald-500">
                 YTS Verified
               </Text>
@@ -228,13 +239,13 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {torrents.map((t, idx) => (
               <View
                 key={`${t.quality}-${t.type}-${idx}`}
-                className="flex-row items-center justify-between rounded-[14px] border border-white/[0.08] bg-surface-5 px-3.5 py-3"
+                className="flex-row items-center justify-between rounded-xl border border-white/[0.08] bg-surface-5 px-3.5 py-3"
               >
                 <View className="flex-1">
                   <View className="flex-row items-center gap-2">
                     <View
                       className={cn(
-                        "rounded-[6px] px-[7px] py-0.5",
+                        "rounded px-2 py-0.5",
                         t.quality.includes("2160") || t.quality.includes("4K")
                           ? "bg-amber-500"
                           : "bg-white/[0.15]",
@@ -244,11 +255,11 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                         {t.quality.toUpperCase()}
                       </Text>
                     </View>
-                    <Text className="text-[12px] tracking-[0.5px] font-brandSemiBold text-zinc-400">
+                    <Text className="text-[12px] tracking-[0.5px] font-brandSemiBold text-subtle-foreground">
                       {t.type.toUpperCase()}
                     </Text>
                   </View>
-                  <Text className="mt-1 text-[12px] font-brand text-zinc-500">
+                  <Text className="mt-1 text-[12px] font-brand text-faint-foreground">
                     {t.size} · {t.seeds} seeds
                   </Text>
                 </View>
@@ -256,11 +267,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
                 <View className="flex-row items-center gap-2">
                   <Pressable
                     onPress={() => handleShareMagnet(t)}
-                    className="h-9 w-9 items-center justify-center rounded-[10px] border border-white/[0.08] bg-surface-6 active:opacity-70"
+                    className="h-9 w-9 items-center justify-center rounded-md border border-white/[0.08] bg-surface-6 active:opacity-70"
+                    accessibilityRole="button"
                     accessibilityLabel="Copy or share magnet"
+                    hitSlop={8}
                   >
-                    <MaterialCommunityIcons
-                      name="share-variant-outline"
+                    <ShareNetworkIcon
                       size={16}
                       color={colors.white}
                     />
@@ -268,10 +280,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
 
                   <Pressable
                     onPress={() => handleOpenMagnet(t)}
-                    className="h-9 flex-row items-center gap-[5px] rounded-[10px] bg-primary px-3 active:opacity-85"
+                    className="h-9 flex-row items-center gap-1.5 rounded-md bg-primary px-3 active:opacity-85"
+                    accessibilityRole="button"
+                    accessibilityLabel="Download with magnet"
+                    hitSlop={8}
                   >
-                    <MaterialCommunityIcons
-                      name="magnet"
+                    <MagnetIcon
                       size={15}
                       color={colors.white}
                     />
@@ -284,13 +298,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             ))}
           </View>
         ) : (
-          <View className="flex-row items-center gap-2.5 rounded-[14px] border border-white/[0.08] bg-surface-4 px-3.5 py-3">
-            <MaterialCommunityIcons
-              name="cloud-search-outline"
+          <View className="flex-row items-center gap-2.5 rounded-xl border border-white/[0.08] bg-card px-3.5 py-3">
+            <CloudSlashIcon
               size={16}
               color={colors.faintForeground}
             />
-            <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-zinc-500">
+            <Text className="flex-1 text-[12.5px] leading-[18px] font-brand text-faint-foreground">
               No direct torrent releases indexed. Use universal web search below.
             </Text>
           </View>
@@ -300,7 +313,7 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
 
       {searchLinks ? (
         <View className="mb-6">
-          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-zinc-400">
+          <Text className="mb-3 text-[11px] tracking-[1.2px] font-brandBold text-subtle-foreground">
             UNIVERSAL SEARCH
           </Text>
           <ScrollView
@@ -317,10 +330,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.google ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.google)}
-                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
+                accessibilityRole="button"
+                accessibilityLabel="Search on Google"
+                className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="google" size={15} color={colors.white} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <GoogleLogoIcon size={15} color={colors.white} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   Google
                 </Text>
               </Pressable>
@@ -329,10 +344,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.justwatch ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.justwatch)}
-                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
+                accessibilityRole="button"
+                accessibilityLabel="Search on JustWatch"
+                className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="play-box-outline" size={15} color={colors.gold} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <PlayCircleIcon size={15} color={colors.gold} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   JustWatch
                 </Text>
               </Pressable>
@@ -341,10 +358,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.letterboxd ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.letterboxd)}
-                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
+                accessibilityRole="button"
+                accessibilityLabel="Search on Letterboxd"
+                className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="filmstrip" size={15} color={colors.success} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <FilmStripIcon size={15} color={colors.success} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   Letterboxd
                 </Text>
               </Pressable>
@@ -353,10 +372,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.imdb ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.imdb)}
-                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
+                accessibilityRole="button"
+                accessibilityLabel="Search on IMDb"
+                className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="star-outline" size={15} color={colors.gold} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <StarIcon size={15} color={colors.gold} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   IMDb
                 </Text>
               </Pressable>
@@ -365,10 +386,12 @@ export default function WhereToWatch({ movieId, movieTitle }: WhereToWatchProps)
             {searchLinks.netflix ? (
               <Pressable
                 onPress={() => handleOpenLink(searchLinks.netflix)}
-                className="flex-row items-center gap-2 rounded-[22px] border border-white/[0.08] bg-surface-5 px-[15px] py-2.5 active:opacity-75"
+                accessibilityRole="button"
+                accessibilityLabel="Search on Netflix"
+                className="flex-row items-center gap-2 rounded-full border border-white/[0.08] bg-surface-5 px-4 py-2.5 active:opacity-75"
               >
-                <MaterialCommunityIcons name="netflix" size={15} color={colors.primary} />
-                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-white">
+                <MonitorPlayIcon size={15} color={colors.primary} />
+                <Text className="text-[12.5px] tracking-[0.2px] font-brandSemiBold text-foreground">
                   Netflix
                 </Text>
               </Pressable>

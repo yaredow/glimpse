@@ -31,8 +31,13 @@ void SystemUI.setBackgroundColorAsync(colors.background);
 
 export default function RootLayout() {
   useOnlineManager();
-  const { isAuthenticated, isRestoring, hasAuthenticated, restoreToken } =
-    useAuthStore();
+  const {
+    isAuthenticated,
+    isRestoring,
+    hasAuthenticated,
+    hasSeenWelcome,
+    restoreToken,
+  } = useAuthStore();
   const [loaded, error] = useFonts({
     [fontFamilies.regular]: PlusJakartaSans_400Regular,
     [fontFamilies.medium]: PlusJakartaSans_500Medium,
@@ -55,6 +60,7 @@ export default function RootLayout() {
             <RootNavigator
               isAuthenticated={isAuthenticated}
               hasAuthenticated={hasAuthenticated}
+              hasSeenWelcome={hasSeenWelcome}
             />
           ) : null}
           <AnimatedSplashScreen isReady={isReady} />
@@ -69,9 +75,11 @@ export default function RootLayout() {
 function RootNavigator({
   isAuthenticated,
   hasAuthenticated,
+  hasSeenWelcome,
 }: {
   isAuthenticated: boolean;
   hasAuthenticated: boolean;
+  hasSeenWelcome: boolean;
 }) {
   const segments = useSegments();
   const currentGroup = segments[0];
@@ -120,7 +128,7 @@ function RootNavigator({
     if (!isAuthenticated) {
       if (currentGroup === "(auth)" || currentGroup === "(onboarding)") return;
       router.replace(
-        hasAuthenticated ? "/(auth)/login" : "/(auth)/welcome",
+        hasSeenWelcome || hasAuthenticated ? "/(auth)/login" : "/(auth)/welcome",
       );
       return;
     }
@@ -142,6 +150,7 @@ function RootNavigator({
     currentGroup,
     isAuthenticated,
     hasAuthenticated,
+    hasSeenWelcome,
     isPreferenceFetched,
     isPreferencesError,
     isOnboarded,

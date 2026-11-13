@@ -67,10 +67,10 @@ export default function LanguageRatingSelector({
       >
         {/* Section 1: Preferred Languages */}
         <View className="gap-2">
-          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-white">
+          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-foreground">
             Movie Languages
           </Text>
-          <Text className="mb-1.5 text-[13px] text-zinc-500 font-brand">
+          <Text className="mb-1.5 text-[13px] text-faint-foreground font-brand">
             Select the audio languages you enjoy watching
           </Text>
 
@@ -80,15 +80,15 @@ export default function LanguageRatingSelector({
               return (
                 <Pressable
                   key={lang.iso_639_1}
-              accessibilityRole="checkbox"
-              accessibilityLabel={lang.name}
-              accessibilityState={{ checked: isSelected }}
+                  accessibilityRole="checkbox"
+                  accessibilityLabel={lang.name}
+                  accessibilityState={{ checked: isSelected }}
                   onPress={() => toggleLanguage(lang.iso_639_1)}
                   className={cn(
-                    "flex-row items-center rounded-[20px] border-[1.5px] px-3.5 py-2.5",
+                    "min-h-[44px] flex-row items-center rounded-full border-[1.5px] px-3.5 py-2.5",
                     isSelected
                       ? "border-primary bg-brand-surface"
-                      : "border-zinc-800 bg-zinc-900",
+                      : "border-border bg-card",
                   )}
                 >
                   <Text
@@ -96,7 +96,7 @@ export default function LanguageRatingSelector({
                       "text-[13px]",
                       isSelected
                         ? "text-white font-brandBold"
-                        : "text-zinc-300 font-brandSemiBold",
+                        : "text-foreground font-brandSemiBold",
                     )}
                   >
                     {lang.english_name}
@@ -117,10 +117,10 @@ export default function LanguageRatingSelector({
 
         {/* Section 2: Minimum Quality Standard */}
         <View className="gap-2">
-          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-white">
+          <Text className="text-[16px] font-brandExtraBold tracking-[-0.3px] text-foreground">
             Minimum Quality
           </Text>
-          <Text className="mb-1.5 text-[13px] text-zinc-500 font-brand">
+          <Text className="mb-1.5 text-[13px] text-faint-foreground font-brand">
             Filter out low-rated films on IMDb
           </Text>
 
@@ -130,21 +130,21 @@ export default function LanguageRatingSelector({
               return (
                 <Pressable
                   key={preset.value}
-              accessibilityRole="radio"
-accessibilityLabel={"{preset.label}"}
-              accessibilityState={{ selected: isSelected }}
+                  accessibilityRole="radio"
+                  accessibilityLabel={preset.label}
+                  accessibilityState={{ selected: isSelected }}
                   onPress={() => selectRating(preset.value)}
                   className={cn(
                     "w-[48%] rounded-lg border-[1.5px] p-3.5",
                     isSelected
                       ? "border-primary bg-brand-surface"
-                      : "border-zinc-800 bg-zinc-900",
+                      : "border-border bg-card",
                   )}
                 >
                   <Text
                     className={cn(
                       "mb-1 text-[15px] font-brandExtraBold",
-                      isSelected ? "text-white" : "text-zinc-100",
+                      isSelected ? "text-white" : "text-foreground",
                     )}
                   >
                     {preset.label}
@@ -152,7 +152,7 @@ accessibilityLabel={"{preset.label}"}
                   <Text
                     className={cn(
                       "text-[12px] font-brand",
-                      isSelected ? "text-red-300" : "text-zinc-500",
+                      isSelected ? "text-red-300" : "text-faint-foreground",
                     )}
                   >
                     {preset.desc}
@@ -165,9 +165,9 @@ accessibilityLabel={"{preset.label}"}
       </ScrollView>
 
       {/* Floating Bottom Bar */}
-      <View className="mt-auto gap-3 border-t border-zinc-800 pt-4">
+      <View className="mt-auto gap-3 border-t border-hairline/10 pt-4">
         <View className="items-center">
-          <Text className="font-brandSemiBold text-body-sm text-zinc-400">
+          <Text className="font-brandSemiBold text-body-sm text-subtle-foreground">
             {`${selectedLangs.length} ${
               selectedLangs.length === 1 ? "language" : "languages"
             } · ${rating > 0 ? `${rating.toFixed(1)}+ rating` : "Any rating"}`}

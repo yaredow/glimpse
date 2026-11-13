@@ -2,7 +2,15 @@ import { useState } from "react";
 import {
   ActivityIndicator, Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  CheckCircleIcon,
+  EyeIcon,
+  PlayCircleIcon,
+  SealCheckIcon,
+  StarIcon,
+  XCircleIcon,
+  XIcon,
+} from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { cn } from "@/lib/utils";
@@ -96,13 +104,13 @@ export default function MovieActions({
     );
   };
 
-  const finalizedIcon = isLocked
-    ? "movie-play"
+  const FinalizedIcon = isLocked
+    ? PlayCircleIcon
     : isSeen
-      ? "eye-outline"
+      ? EyeIcon
       : isSkipped
-        ? "close-circle-outline"
-        : "check-decagram";
+        ? XCircleIcon
+        : SealCheckIcon;
 
   const finalizedIconColor = isLocked
     ? colors.primary
@@ -131,24 +139,24 @@ export default function MovieActions({
       {isFinalized ? (
         <View
           className={cn(
-            "flex-row items-center gap-3 rounded-[14px] border px-4 py-3",
+            "flex-row items-center gap-3 rounded-xl border px-4 py-3",
             isLocked
-              ? "border-primary bg-surface-4"
+              ? "border-primary bg-card"
               : isWatched
-                ? "border-emerald-500 bg-surface-4"
-                : "border-white/[0.08] bg-surface-4",
+                ? "border-emerald-500 bg-card"
+                : "border-white/[0.08] bg-card",
           )}
         >
-          <MaterialCommunityIcons
-            name={finalizedIcon}
+          <FinalizedIcon
             size={22}
             color={finalizedIconColor}
+            weight={isSeen || isSkipped ? "regular" : "fill"}
           />
           <View className="flex-1">
-            <Text className="text-[13.5px] font-brandBold text-white">
+            <Text className="text-[13.5px] font-brandBold text-foreground">
               {finalizedTitle}
             </Text>
-            <Text className="mt-0.5 text-[12px] leading-4 text-zinc-400">
+            <Text className="mt-0.5 text-[12px] leading-4 text-subtle-foreground">
               {finalizedSubtitle}
             </Text>
           </View>
@@ -165,17 +173,17 @@ export default function MovieActions({
             )}
             accessibilityRole="button"
             accessibilityLabel="Pass this film for today"
+            accessibilityState={{ disabled: !!loadingAction }}
           >
             {loadingAction === "skipped" ? (
               <ActivityIndicator size="small" color={colors.faintForeground} />
             ) : (
               <>
-                <MaterialCommunityIcons
-                  name="close"
+                <XIcon
                   size={17}
                   color={colors.faintForeground}
                 />
-                <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+                <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                   Pass
                 </Text>
               </>
@@ -192,17 +200,17 @@ export default function MovieActions({
             )}
             accessibilityRole="button"
             accessibilityLabel="Mark film as already seen"
+            accessibilityState={{ disabled: !!loadingAction }}
           >
             {loadingAction === "seen_before" ? (
               <ActivityIndicator size="small" color={colors.white} />
             ) : (
               <>
-                <MaterialCommunityIcons
-                  name="eye-outline"
+                <EyeIcon
                   size={17}
-                  color={colors.white}
+                  color={colors.foreground}
                 />
-                <Text className="text-[13px] font-brandSemiBold text-white">
+                <Text className="text-[13px] font-brandSemiBold text-foreground">
                   Seen
                 </Text>
               </>
@@ -214,7 +222,7 @@ export default function MovieActions({
             onPress={() => handleAction(isPick ? "revealed" : "pick_tonight")}
             disabled={!!loadingAction}
             className={cn(
-              "h-11 flex-[1.4] flex-row items-center justify-center gap-1.5 rounded-lg active:opacity-90 active:scale-[0.99]",
+              "h-11 flex-[1.4] flex-row items-center justify-center gap-1.5 rounded-lg active:opacity-90",
               isPick ? "bg-primary-hover" : "bg-primary",
               (loadingAction === "pick_tonight" ||
                 loadingAction === "revealed") &&
@@ -224,17 +232,18 @@ export default function MovieActions({
             accessibilityLabel={
               isPick ? "Remove from tonight's pick" : "Pick film for tonight"
             }
+            accessibilityState={{ disabled: !!loadingAction }}
           >
             {loadingAction === "pick_tonight" ||
             loadingAction === "revealed" ? (
               <ActivityIndicator size="small" color={colors.white} />
             ) : (
               <>
-                <MaterialCommunityIcons
-                  name={isPick ? "check-circle" : "star"}
-                  size={17}
-                  color={colors.white}
-                />
+                {isPick ? (
+                  <CheckCircleIcon size={17} color={colors.white} weight="fill" />
+                ) : (
+                  <StarIcon size={17} color={colors.white} weight="fill" />
+                )}
                 <Text className="text-[13px] tracking-[0.4px] font-brandBold text-white">
                   {isPick ? "Picked" : "Pick"}
                 </Text>

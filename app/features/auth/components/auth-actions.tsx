@@ -76,6 +76,7 @@ export function AuthTextLink({
       }}
       hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
       accessibilityRole="link"
+      accessibilityLabel={label}
       className={cn(
         "py-2 px-1.5",
         align === "flex-end" && "self-end",
@@ -88,7 +89,7 @@ export function AuthTextLink({
         <Text
           className={cn(
             "font-brandSemiBold text-xs tracking-wide",
-            tone === "primary" ? "text-primary" : "text-zinc-400",
+            tone === "primary" ? "text-primary" : "text-subtle-foreground",
             pressed && "opacity-50"
           )}
         >

@@ -18,6 +18,8 @@ import {
   AuthTextLink,
 } from "@/features/auth/components/auth-actions";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 export default function CheckEmail() {
   const { email } = useLocalSearchParams<{ email?: string }>();
@@ -48,7 +50,7 @@ export default function CheckEmail() {
       title="Check your inbox."
       subtitle={
         email ? (
-          <Text className="text-zinc-400 text-sm text-center leading-relaxed">
+          <Text className="text-subtle-foreground text-sm text-center leading-relaxed">
             We sent an activation link to{"\n"}
             <Text className="text-white font-brandSemiBold">{email}</Text>
           </Text>
@@ -65,13 +67,13 @@ export default function CheckEmail() {
               height: 64,
               borderRadius: 32,
               borderWidth: 1,
-              borderColor: "rgba(229, 9, 20, 0.3)",
-              backgroundColor: "rgba(229, 9, 20, 0.1)",
+              borderColor: withAlpha(colors.primary, 0.3),
+              backgroundColor: withAlpha(colors.primary, 0.1),
               alignItems: "center",
               justifyContent: "center",
               marginTop: 4,
               marginBottom: 8,
-              boxShadow: "0px 8px 16.0px rgba(69, 10, 10, 0.4)",
+              boxShadow: shadows.errorGlow,
             },
             animatedPulseStyle,
           ]}
@@ -79,7 +81,7 @@ export default function CheckEmail() {
           <EnvelopeSimpleIcon size={32} color={colors.primary} weight="fill" />
         </Animated.View>
 
-        <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
+        <Text className="text-subtle-foreground text-xs leading-5 text-center px-4">
           Open the link on this device to activate your account. If nothing
           arrives, check your spam folder.
         </Text>

@@ -2,6 +2,7 @@ import { View, type StyleProp, type ViewStyle } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 const MOVIE_BACKDROPS = [
   require("@/assets/images/auth/backdrop-1.jpg"),
@@ -37,9 +38,9 @@ export function AuthBackdrop({ style, blurRadius = 6 }: AuthBackdropProps) {
 
       <LinearGradient
         colors={[
-          "rgba(12, 12, 14, 0.15)",
-          "rgba(12, 12, 14, 0.45)",
-          "rgba(12, 12, 14, 0.85)",
+          withAlpha(colors.background, 0.15),
+          withAlpha(colors.background, 0.45),
+          withAlpha(colors.background, 0.85),
           colors.background,
         ]}
         locations={[0, 0.35, 0.75, 1]}

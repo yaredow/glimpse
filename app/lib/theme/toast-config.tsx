@@ -1,50 +1,57 @@
 import React from "react";
 import { Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  CheckCircleIcon,
+  InfoIcon,
+  WarningCircleIcon,
+  type IconProps,
+} from "phosphor-react-native";
 import type { ToastConfig, ToastConfigParams } from "react-native-toast-message";
 import { colors } from "./tokens.generated";
+import { shadows } from "./shadows";
 
 interface CinemaToastProps {
   text1?: string;
   text2?: string;
   onPress?: () => void;
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  icon: React.ComponentType<IconProps>;
   iconColor: string;
   accentBorderColor: string;
+  iconWeight?: "regular" | "fill" | "bold";
 }
 
 const CinemaToast = ({
   text1,
   text2,
   onPress,
-  icon,
+  icon: Icon,
   iconColor,
   accentBorderColor,
+  iconWeight = "regular",
 }: CinemaToastProps) => {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={text1}
-
-      className="w-[92%] max-w-[420px] flex-row items-center gap-3 rounded-[14px] border border-l-4 border-white/[0.08] bg-surface-6 px-4 py-3"
+      className="w-[92%] max-w-[420px] flex-row items-center gap-3 rounded-xl border border-l-4 border-white/[0.08] bg-surface-6 px-4 py-3"
       style={{
         borderLeftColor: accentBorderColor,
-        boxShadow: "0px 6px 10.0px rgba(0, 0, 0, 0.4)",
+        boxShadow: shadows.raised,
       }}
     >
       <View className="items-center justify-center">
-        <MaterialCommunityIcons name={icon} size={22} color={iconColor} />
+        <Icon size={22} color={iconColor} weight={iconWeight} />
       </View>
       <View className="flex-1">
         {text1 ? (
-          <Text className="text-[14px] tracking-[0.1px] font-brandSemiBold text-off-white" numberOfLines={2}>
+          <Text className="text-[14px] tracking-[0.1px] font-brandSemiBold text-foreground" numberOfLines={2}>
             {text1}
           </Text>
         ) : null}
         {text2 ? (
-          <Text className="mt-0.5 text-[13px] leading-[18px] font-brand text-zinc-400" numberOfLines={3}>
+          <Text className="mt-0.5 text-[13px] leading-[18px] font-brand text-subtle-foreground" numberOfLines={3}>
             {text2}
           </Text>
         ) : null}
@@ -59,8 +66,9 @@ export const toastConfig: ToastConfig = {
       text1={text1}
       text2={text2}
       onPress={onPress}
-      icon="check-circle"
+      icon={CheckCircleIcon}
       iconColor={colors.success}
+      iconWeight="fill"
       accentBorderColor={colors.success}
     />
   ),
@@ -69,8 +77,9 @@ export const toastConfig: ToastConfig = {
       text1={text1}
       text2={text2}
       onPress={onPress}
-      icon="alert-circle"
+      icon={WarningCircleIcon}
       iconColor={colors.destructive}
+      iconWeight="fill"
       accentBorderColor={colors.destructive}
     />
   ),
@@ -79,8 +88,9 @@ export const toastConfig: ToastConfig = {
       text1={text1}
       text2={text2}
       onPress={onPress}
-      icon="information"
+      icon={InfoIcon}
       iconColor={colors.primary}
+      iconWeight="fill"
       accentBorderColor={colors.primary}
     />
   ),

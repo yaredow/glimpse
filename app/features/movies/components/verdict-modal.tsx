@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { CheckCircleIcon, StarIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
 
 interface VerdictModalProps {
   visible: boolean;
@@ -46,21 +47,21 @@ export default function VerdictModal({
 
   return (
     <Dialog open={visible} onOpenChange={(next) => !next && onCancel()}>
-      <DialogContent className="w-[92%] max-w-[380px] gap-4 rounded-[24px] p-5">
+      <DialogContent className="w-[92%] max-w-[380px] gap-4 rounded-3xl p-5">
         <DialogTitle className="text-center text-[18px] leading-7">
           Movie Finished?
         </DialogTitle>
 
         <View className="items-center gap-4">
-          <View className="h-14 w-14 items-center justify-center rounded-[28px] bg-emerald-500/[0.15]">
-            <MaterialCommunityIcons
-              name="check-circle"
+          <View className="h-14 w-14 items-center justify-center rounded-full bg-emerald-500/[0.15]">
+            <CheckCircleIcon
               size={30}
               color={colors.success}
+              weight="fill"
             />
           </View>
 
-          <Text className="text-center text-[14px] leading-[21px] font-brand text-zinc-400">
+          <Text className="text-center text-[14px] leading-[21px] font-brand text-subtle-foreground">
             Log your verdict for{" "}
             <Text className="font-brandSemiBold text-white">
               &ldquo;{movieTitle}&rdquo;
@@ -80,11 +81,11 @@ export default function VerdictModal({
                   accessibilityState={{ selected: isFilled }}
                   accessibilityLabel={`Rate ${star} of 5 stars`}
                 >
-                  <MaterialCommunityIcons
-                    name={isFilled ? "star" : "star-outline"}
+                  <StarIcon
                     size={36}
+                    weight={isFilled ? "fill" : "regular"}
                     color={
-                      isFilled ? colors.gold : "rgba(255, 255, 255, 0.2)"
+                      isFilled ? colors.gold : withAlpha(colors.white, 0.2)
                     }
                   />
                 </Pressable>
@@ -92,7 +93,7 @@ export default function VerdictModal({
             })}
           </View>
 
-          <Text className="text-[13px] font-brandSemiBold text-white">
+          <Text className="text-[13px] font-brandSemiBold text-foreground">
             {rating === 5
               ? "Masterpiece 🏆"
               : rating === 4
@@ -111,15 +112,17 @@ export default function VerdictModal({
               onPress={onCancel}
               className="min-h-[44px] justify-center px-4"
               accessibilityRole="button"
+              accessibilityLabel="Not yet, cancel verdict"
             >
-              <Text className="text-[13px] font-brandSemiBold text-zinc-400">
+              <Text className="text-[13px] font-brandSemiBold text-subtle-foreground">
                 Not Yet
               </Text>
             </Pressable>
             <Pressable
               onPress={handleConfirm}
-              className="min-h-[44px] justify-center rounded-[12px] bg-emerald-500 px-4 active:opacity-90"
+              className="min-h-[44px] justify-center rounded-lg bg-emerald-500 px-4 active:opacity-90"
               accessibilityRole="button"
+              accessibilityLabel="Log verdict to journal"
             >
               <Text className="text-[13px] font-brandBold text-white">
                 Log to Journal

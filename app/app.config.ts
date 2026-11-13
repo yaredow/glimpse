@@ -3,7 +3,7 @@ import * as tokens from "./lib/theme/tokens.generated.json";
 
 const config: ExpoConfig = {
   name: "GLIMPSE",
-  slug: "glimpse-app",
+  slug: "glimpse",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
@@ -54,6 +54,11 @@ const config: ExpoConfig = {
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
+  },
+  extra: {
+    eas: {
+      projectId: "43e0cd62-08df-4b37-8926-fd69bb4fe38b",
+    },
   },
 };
 

@@ -1,10 +1,10 @@
 import { ActivityIndicator, Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LightningIcon } from "phosphor-react-native";
 import * as Haptics from "expo-haptics";
 import { cn } from "@/lib/utils";
 import { colors } from "@/lib/theme/tokens.generated";
-import GlimpseLogo from "@/components/ui/glimpse-logo";
+import GlimpseLogo from "@/components/brand/glimpse-logo";
 
 interface ExploreHeaderProps {
   syncsRemaining?: number;
@@ -34,11 +34,11 @@ export default function ExploreHeader({
     .toUpperCase();
 
   return (
-    <View className="flex-row items-center justify-between bg-transparent px-5 pt-2 pb-3.5">
+    <View className="flex-row items-center justify-between bg-transparent px-4 pt-2 pb-3.5">
       <View className="flex-1 justify-center mr-3">
         <GlimpseLogo size="medium" showMark={false} />
         <Text
-          className="mt-1 text-[10.5px] tracking-[1.2px] font-brandSemiBold text-zinc-400"
+          className="mt-1 text-[10.5px] tracking-[1.2px] font-brandSemiBold text-subtle-foreground"
           numberOfLines={1}
           ellipsizeMode="tail"
         >
@@ -57,17 +57,18 @@ export default function ExploreHeader({
           onPress={handleSyncPress}
           disabled={isSyncing}
           className={cn(
-            "flex-row items-center gap-[5px] rounded-[18px] border border-white/[0.08] bg-surface-5 px-3 py-[7px] active:opacity-75",
+            "flex-row items-center gap-1.5 rounded-full border border-white/[0.08] bg-surface-5 px-3 py-1.5 active:opacity-75",
             isSyncing && "opacity-75",
           )}
           accessibilityRole="button"
           accessibilityLabel={`${syncsRemaining} syncs remaining. Tap to select mood and sync.`}
+          accessibilityState={{ disabled: isSyncing }}
+          hitSlop={8}
         >
           {isSyncing ? (
             <ActivityIndicator size={12} color={colors.primary} />
           ) : (
-            <MaterialCommunityIcons
-              name="lightning-bolt"
+            <LightningIcon
               size={14}
               color={
                 syncsRemaining > 0 ? colors.primary : colors.faintForeground
@@ -77,7 +78,7 @@ export default function ExploreHeader({
           <Text
             className={cn(
               "text-[11px] tracking-[0.6px] font-brandBold",
-              syncsRemaining > 0 ? "text-white" : "text-zinc-500",
+              syncsRemaining > 0 ? "text-foreground" : "text-faint-foreground",
             )}
           >
             {isSyncing

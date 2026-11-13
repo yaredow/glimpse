@@ -1,7 +1,11 @@
 import React from "react";
 import { View } from "react-native";
 import { Text } from "@/components/ui/text";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  ClockIcon,
+  StarIcon,
+  TranslateIcon,
+} from "phosphor-react-native";
 import type { Movie } from "../types/movies.type";
 import {
   formatEndTime,
@@ -35,15 +39,15 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       {/* 1. Schedule & Runtime */}
       <View className="flex-1 items-center justify-center px-1">
         <View className="mb-1 flex-row items-center gap-1">
-          <MaterialCommunityIcons name="clock-outline" size={13} color={colors.faintForeground} />
-          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
+          <ClockIcon size={13} color={colors.faintForeground} />
+          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-faint-foreground uppercase">
             TIME
           </Text>
         </View>
-        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
+        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-foreground" numberOfLines={1}>
           {runtimeFormatted}
         </Text>
-        <Text className="mt-0.5 text-[11px] text-zinc-400" numberOfLines={1}>
+        <Text className="mt-0.5 text-[11px] text-subtle-foreground" numberOfLines={1}>
           {endTime ?? "Tonight's feature"}
         </Text>
       </View>
@@ -53,15 +57,15 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       {/* 2. Rating & Consensus */}
       <View className="flex-1 items-center justify-center px-1">
         <View className="mb-1 flex-row items-center gap-1">
-          <MaterialCommunityIcons name="star-outline" size={13} color={colors.faintForeground} />
-          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
+          <StarIcon size={13} color={colors.faintForeground} />
+          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-faint-foreground uppercase">
             RATING
           </Text>
         </View>
-        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
+        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-foreground" numberOfLines={1}>
           {score}
         </Text>
-        <Text className="mt-0.5 text-[11px] text-zinc-400" numberOfLines={1}>
+        <Text className="mt-0.5 text-[11px] text-subtle-foreground" numberOfLines={1}>
           {scoreBand}
         </Text>
       </View>
@@ -71,15 +75,15 @@ export default function DecisionVitalsStrip({ movie }: DecisionVitalsStripProps)
       {/* 3. Language & Audio */}
       <View className="flex-1 items-center justify-center px-1">
         <View className="mb-1 flex-row items-center gap-1">
-          <MaterialCommunityIcons name="translate" size={13} color={colors.faintForeground} />
-          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-zinc-500 uppercase">
+          <TranslateIcon size={13} color={colors.faintForeground} />
+          <Text className="text-[10px] tracking-[0.8px] font-brandSemiBold text-faint-foreground uppercase">
             AUDIO
           </Text>
         </View>
-        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-white" numberOfLines={1}>
+        <Text className="text-[14px] tracking-[-0.2px] font-brandBold text-foreground" numberOfLines={1}>
           {language}
         </Text>
-        <Text className="mt-0.5 text-[11px] text-zinc-400" numberOfLines={1}>
+        <Text className="mt-0.5 text-[11px] text-subtle-foreground" numberOfLines={1}>
           {audioSubtext}
         </Text>
       </View>

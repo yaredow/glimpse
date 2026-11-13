@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View } from "react-native";
-import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeIn, ZoomIn, ReduceMotion } from "react-native-reanimated";
 import { useForm } from "@tanstack/react-form";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Haptics from "expo-haptics";
@@ -21,6 +21,8 @@ import {
   AuthTextLink,
 } from "@/features/auth/components/auth-actions";
 import { colors } from "@/lib/theme/tokens.generated";
+import { withAlpha } from "@/lib/theme/color";
+import { shadows } from "@/lib/theme/shadows";
 
 export default function ResetPassword() {
   const { token: tokenParam, email } = useLocalSearchParams<{
@@ -65,7 +67,7 @@ export default function ResetPassword() {
     return (
       <AuthShell title="Password updated." subtitle="Your new password is ready.">
         <Animated.View
-          entering={FadeIn.duration(400)}
+          entering={FadeIn.duration(400).reduceMotion(ReduceMotion.System)}
           style={{
             alignItems: "center",
             gap: 16,
@@ -73,24 +75,24 @@ export default function ResetPassword() {
           }}
         >
           <Animated.View
-            entering={ZoomIn.duration(450).springify()}
+            entering={ZoomIn.duration(450).springify().reduceMotion(ReduceMotion.System)}
             style={{
               width: 80,
               height: 80,
               borderRadius: 40,
               borderWidth: 1,
-              borderColor: "rgba(16, 185, 129, 0.3)",
-              backgroundColor: "rgba(16, 185, 129, 0.1)",
+              borderColor: withAlpha(colors.success, 0.3),
+              backgroundColor: withAlpha(colors.success, 0.1),
               alignItems: "center",
               justifyContent: "center",
               marginTop: 8,
               marginBottom: 8,
-              boxShadow: "0px 8px 16.0px rgba(2, 44, 34, 0.4)",
+              boxShadow: shadows.successGlow,
             }}
           >
             <CheckCircleIcon size={40} color={colors.success} weight="fill" />
           </Animated.View>
-          <Text className="text-zinc-400 text-xs leading-5 text-center px-4">
+          <Text className="text-subtle-foreground text-xs leading-5 text-center px-4">
             Sign in with your new password to get back to your nightly five.
           </Text>
           <AuthPrimaryButton

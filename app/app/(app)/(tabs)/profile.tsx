@@ -80,7 +80,7 @@ export default function Profile() {
   const syncsRemaining = user?.syncs_remaining ?? 3;
 
   return (
-    <SafeAreaView className="flex-1 bg-surface-1" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <ScrollView
         contentContainerClassName="flex-grow gap-3.5 px-4 pt-3"
         contentContainerStyle={{
@@ -91,28 +91,28 @@ export default function Profile() {
         {/* Header / Avatar */}
         <View className="items-center py-2.5">
           <View className="mb-2.5 h-16 w-16 items-center justify-center rounded-full border-[1.5px] border-primary/40 bg-surface-5">
-            <Text className="text-[22px] tracking-[0.5px] font-brandBold text-white">
+            <Text className="text-[22px] tracking-[0.5px] font-brandBold text-foreground">
               {user ? getInitials(user.name) : "?"}
             </Text>
           </View>
 
           {profileLoading ? (
-            <View className="mt-1 h-[22px] w-[140px] rounded-[6px] bg-surface-5" />
+            <View className="mt-1 h-[22px] w-[140px] rounded bg-surface-5" />
           ) : (
             <>
-              <Text className="text-[20px] leading-[26px] tracking-[-0.3px] font-brandBold text-white">
+              <Text className="text-[20px] leading-[26px] tracking-[-0.3px] font-brandBold text-foreground">
                 {user?.name}
               </Text>
-              <Text className="mt-0.5 text-[13px] leading-[18px] font-brand text-zinc-400">
+              <Text className="mt-0.5 text-[13px] leading-[18px] font-brand text-subtle-foreground">
                 {user?.email}
               </Text>
               {user?.created_at ? (
-                <View className="mt-2 flex-row items-center gap-[5px] rounded-[20px] border border-white/[0.08] bg-surface-4 px-2.5 py-1">
+                <View className="mt-2 flex-row items-center gap-1 rounded-full border border-white/[0.08] bg-card px-2.5 py-1">
                   <CalendarBlankIcon
                     size={12}
                     color={colors.faintForeground}
                   />
-                  <Text className="text-[11px] font-brand text-zinc-500">
+                  <Text className="text-[11px] font-brand text-faint-foreground">
                     Member since {formatDate(user.created_at)}
                   </Text>
                 </View>
@@ -122,23 +122,23 @@ export default function Profile() {
         </View>
 
         {/* Compact Daily Sync Allowance */}
-        <View className="flex-row items-center justify-center gap-[7px] rounded-lg border border-white/[0.08] bg-surface-4 px-3.5 py-[9px]">
+        <View className="flex-row items-center justify-center gap-2 rounded-lg border border-white/[0.08] bg-card px-3.5 py-2">
           <LightningIcon
             size={14}
             color={colors.gold}
             weight="fill"
           />
-          <Text className="text-[12.5px] font-brandSemiBold text-white">
+          <Text className="text-[12.5px] font-brandSemiBold text-foreground">
             {syncsRemaining} of 3 syncs available
           </Text>
-          <Text className="text-[12px] font-brand text-zinc-500">·</Text>
-          <Text className="text-[12px] font-brand text-zinc-500">
+          <Text className="text-[12px] font-brand text-faint-foreground">·</Text>
+          <Text className="text-[12px] font-brand text-faint-foreground">
             Resets at midnight
           </Text>
         </View>
 
         {/* Film Preferences Card */}
-        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-surface-4 p-4">
+        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-card p-4">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <SlidersHorizontalIcon
@@ -146,7 +146,7 @@ export default function Profile() {
                 color={colors.primary}
                 weight="bold"
               />
-              <Text className="text-[15px] tracking-[0.2px] font-brandBold text-white">
+              <Text className="text-[15px] tracking-[0.2px] font-brandBold text-foreground">
                 Film Preferences
               </Text>
             </View>
@@ -155,40 +155,41 @@ export default function Profile() {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setIsEditModalOpen(true);
               }}
-              className="flex-row items-center gap-[5px] rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-[5px] active:opacity-70"
+              className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-1 active:opacity-70"
               accessibilityRole="button"
               accessibilityLabel="Edit film preferences"
+              hitSlop={10}
             >
               <PencilSimpleIcon
                 size={13}
                 color={colors.subtleForeground}
               />
-              <Text className="text-[12px] font-brandSemiBold text-zinc-400">
+              <Text className="text-[12px] font-brandSemiBold text-subtle-foreground">
                 Edit
               </Text>
             </Pressable>
           </View>
 
           {prefLoading ? (
-            <Text className="py-1.5 text-[13px] font-brand text-zinc-500">
+            <Text className="py-1.5 text-[13px] font-brand text-faint-foreground">
               Loading preferences...
             </Text>
           ) : !pref ? (
-            <Text className="py-1.5 text-[13px] font-brand text-zinc-500">
+            <Text className="py-1.5 text-[13px] font-brand text-faint-foreground">
               No preferences set yet.
             </Text>
           ) : (
             <View className="gap-3.5">
               {pref.favorite_genres.length > 0 && (
                 <View className="gap-2">
-                  <Text className="text-[10.5px] tracking-[1.2px] font-brandSemiBold text-zinc-500">
+                  <Text className="text-[10.5px] tracking-[1.2px] font-brandSemiBold text-faint-foreground">
                     FAVORITE GENRES
                   </Text>
-                  <View className="flex-row flex-wrap gap-[7px]">
+                  <View className="flex-row flex-wrap gap-1.5">
                     {pref.favorite_genres.map((id) => (
                       <View
                         key={id}
-                        className="rounded-sm border border-primary/35 bg-primary/[0.12] px-[11px] py-[5px]"
+                        className="rounded-sm border border-primary/35 bg-primary/[0.12] px-3 py-1"
                       >
                         <Text className="text-[12px] font-brandSemiBold text-white">
                           {genreName(id)}
@@ -201,21 +202,21 @@ export default function Profile() {
 
               {pref.excluded_genres.length > 0 && (
                 <View className="gap-2">
-                  <Text className="text-[10.5px] tracking-[1.2px] font-brandSemiBold text-zinc-500">
+                  <Text className="text-[10.5px] tracking-[1.2px] font-brandSemiBold text-faint-foreground">
                     EXCLUDED GENRES
                   </Text>
-                  <View className="flex-row flex-wrap gap-[7px]">
+                  <View className="flex-row flex-wrap gap-1.5">
                     {pref.excluded_genres.map((id) => (
                       <View
                         key={id}
-                        className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-[5px]"
+                        className="flex-row items-center gap-1 rounded-sm border border-white/[0.08] bg-surface-5 px-2.5 py-1"
                       >
                         <XIcon
                           size={11}
                           color={colors.faintForeground}
                           weight="bold"
                         />
-                        <Text className="text-[12px] font-brand text-zinc-400">
+                        <Text className="text-[12px] font-brand text-subtle-foreground">
                           {genreName(id)}
                         </Text>
                       </View>
@@ -225,12 +226,12 @@ export default function Profile() {
               )}
 
               {/* Filter Metadata Row */}
-              <View className="flex-row flex-wrap items-start gap-[18px] border-t border-t-white/[0.06] pt-3">
-                <View className="gap-[3px]">
-                  <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-zinc-500">
+              <View className="flex-row flex-wrap items-start gap-4 border-t border-t-white/[0.06] pt-3">
+                <View className="gap-1">
+                  <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-faint-foreground">
                     ERA
                   </Text>
-                  <Text className="text-[12.5px] font-brandSemiBold text-white">
+                  <Text className="text-[12.5px] font-brandSemiBold text-foreground">
                     {pref.min_year <= 1888 && pref.max_year >= 2025
                       ? "All Time"
                       : `${pref.min_year} – ${pref.max_year}`}
@@ -238,8 +239,8 @@ export default function Profile() {
                 </View>
 
                 {pref.min_rating > 0 && (
-                  <View className="gap-[3px]">
-                    <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-zinc-500">
+                  <View className="gap-1">
+                    <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-faint-foreground">
                       MIN RATING
                     </Text>
                     <View className="flex-row items-center gap-1">
@@ -248,7 +249,7 @@ export default function Profile() {
                         color={colors.gold}
                         weight="fill"
                       />
-                      <Text className="text-[12.5px] font-brandSemiBold text-white">
+                      <Text className="text-[12.5px] font-brandSemiBold text-foreground">
                         {pref.min_rating.toFixed(1)}+ / 10
                       </Text>
                     </View>
@@ -256,11 +257,11 @@ export default function Profile() {
                 )}
 
                 {pref.languages.length > 0 && (
-                  <View className="gap-[3px]">
-                    <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-zinc-500">
+                  <View className="gap-1">
+                    <Text className="text-[10px] tracking-[1px] font-brandSemiBold text-faint-foreground">
                       LANGUAGES
                     </Text>
-                    <Text className="text-[12.5px] font-brandSemiBold text-white">
+                    <Text className="text-[12.5px] font-brandSemiBold text-foreground">
                       {pref.languages.map((l) => l.toUpperCase()).join(", ")}
                     </Text>
                   </View>
@@ -271,8 +272,8 @@ export default function Profile() {
         </View>
 
         {/* Account Details */}
-        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-surface-4 p-4">
-          <Text className="text-[15px] tracking-[0.2px] font-brandBold text-white">
+        <View className="gap-3.5 rounded-2xl border border-white/[0.08] bg-card p-4">
+          <Text className="text-[15px] tracking-[0.2px] font-brandBold text-foreground">
             Account
           </Text>
 
@@ -281,7 +282,7 @@ export default function Profile() {
               size={16}
               color={colors.faintForeground}
             />
-            <Text className="text-[13px] font-brand text-zinc-400">
+            <Text className="text-[13px] font-brand text-subtle-foreground">
               {user?.email}
             </Text>
           </View>
@@ -291,12 +292,12 @@ export default function Profile() {
               size={16}
               color={colors.faintForeground}
             />
-            <Text className="text-[13px] font-brand text-zinc-500">
+            <Text className="text-[13px] font-brand text-faint-foreground">
               Glimpse Cinema v1.0.0
             </Text>
           </View>
 
-          <View className="h-px bg-white/[0.08]" />
+          <View className="h-px bg-hairline/10" />
 
           <Button
             variant="primary"

@@ -1,10 +1,11 @@
 import {
-  LayoutAnimation,
-  Platform,
   Pressable,
-  UIManager,
   View,
 } from "react-native";
+import Animated, {
+  LinearTransition,
+  ReduceMotion,
+} from "react-native-reanimated";
 import { Text } from "@/components/ui/text";
 import type { BottomTabBarProps } from "expo-router/tabs";
 import * as Haptics from "expo-haptics";
@@ -15,13 +16,7 @@ import {
 } from "phosphor-react-native";
 import { cn } from "@/lib/utils";
 import { colors } from "@/lib/theme/tokens.generated";
-
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+import { shadows } from "@/lib/theme/shadows";
 
 interface TabItemConfig {
   label: string;
@@ -62,10 +57,12 @@ export function FloatingTabBar({
       className="absolute left-0 right-0 z-[999] items-center justify-center"
       style={{ bottom: bottomInset }}
     >
+      {/* Intentional inset: surface-1 keeps the floating bar a step above the
+          background canvas while the 95% alpha lets content show through. */}
       <View
-        className="flex-row items-center gap-1.5 rounded-[36px] border border-white/[0.08] bg-surface-1/95 px-2 py-1.5"
+        className="flex-row items-center gap-1.5 rounded-full border border-white/[0.08] bg-surface-1/95 px-2 py-1.5"
         style={{
-          boxShadow: "0px 10px 20.0px rgba(0, 0, 0, 0.5)",
+          boxShadow: shadows.deck,
         }}
       >
         {state.routes.map((route, index) => {
@@ -80,12 +77,6 @@ export function FloatingTabBar({
 
           const handlePress = () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-            if (!isFocused) {
-              LayoutAnimation.configureNext(
-                LayoutAnimation.Presets.easeInEaseOut,
-              );
-            }
 
             const event = emitter.emit({
               type: "tabPress",
@@ -106,34 +97,40 @@ export function FloatingTabBar({
           };
 
           return (
-            <Pressable
+            <Animated.View
               key={route.key}
-              onPress={handlePress}
-              onLongPress={handleLongPress}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: isFocused }}
-              accessibilityLabel={label}
-              className={cn(
-                "min-h-[44px] flex-row items-center justify-center rounded-[24px] active:opacity-70",
-                isFocused
-                  ? "gap-2 border border-primary/35 bg-primary/[0.16] px-4 py-2.5"
-                  : "min-w-[44px] border border-transparent px-[18px] py-2.5",
+              layout={LinearTransition.duration(200).reduceMotion(
+                ReduceMotion.System,
               )}
             >
-              <Icon
-                size={20}
-                color={isFocused ? colors.primary : "#8E8E93"}
-                weight={isFocused ? "fill" : "regular"}
-              />
-              {isFocused ? (
-                <Text
-                  className="text-[12.5px] tracking-[0.4px] font-brandBold text-white"
-                  numberOfLines={1}
-                >
-                  {label}
-                </Text>
-              ) : null}
-            </Pressable>
+              <Pressable
+                onPress={handlePress}
+                onLongPress={handleLongPress}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: isFocused }}
+                accessibilityLabel={label}
+                className={cn(
+                  "min-h-[44px] flex-row items-center justify-center rounded-full active:opacity-70",
+                  isFocused
+                    ? "gap-2 border border-primary/35 bg-primary/[0.16] px-4 py-2.5"
+                    : "min-w-[44px] border border-transparent px-4 py-2.5",
+                )}
+              >
+                <Icon
+                  size={20}
+                  color={isFocused ? colors.primary : colors.mutedForeground}
+                  weight={isFocused ? "fill" : "regular"}
+                />
+                {isFocused ? (
+                  <Text
+                    className="text-[12.5px] tracking-[0.4px] font-brandBold text-white"
+                    numberOfLines={1}
+                  >
+                    {label}
+                  </Text>
+                ) : null}
+              </Pressable>
+            </Animated.View>
           );
         })}
       </View>
