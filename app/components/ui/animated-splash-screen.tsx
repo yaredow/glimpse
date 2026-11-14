@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Animated, View } from "react-native";
+import { Animated } from "react-native";
+import { Image } from "expo-image";
 import { SplashScreen } from "expo-router";
-import GlimpseLogo from "@/components/brand/glimpse-logo";
 import { colors } from "@/lib/theme/tokens.generated";
 
 interface AnimatedSplashScreenProps {
@@ -48,13 +48,11 @@ export default function AnimatedSplashScreen({ isReady }: AnimatedSplashScreenPr
         { opacity },
       ]}
     >
-      <View className="items-center justify-center">
-        <GlimpseLogo
-          size="large"
-          tagline="CINEMA DISCOVERY"
-          style={{ alignItems: "center" }}
-        />
-      </View>
+      <Image
+        source={require("@/assets/images/splash-icon.png")}
+        style={{ width: 220, height: 220 }}
+        contentFit="contain"
+      />
     </Animated.View>
   );
 }
